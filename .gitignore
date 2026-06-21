@@ -1,0 +1,14 @@
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.env.local
+coverage
+.DS_Store
+*.log
+supabase/.temp
+supabase/.seed-chunks
+supabase/seed-chunk*.sql
+supabase/seed-part*.sql
+supabase/seed-query.json

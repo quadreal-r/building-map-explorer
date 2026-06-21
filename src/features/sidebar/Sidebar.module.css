@@ -1,0 +1,35 @@
+.sidebarCollapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden;
+}
+
+.pullTab {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  background: var(--surface, #1f5aa8);
+  border: 1px solid var(--border, #2e6ec0);
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+  color: var(--text-muted, #90b8e0);
+  font-size: 11px;
+  padding: 8px 6px;
+  cursor: pointer;
+}
+
+.collapseBtn {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  background: var(--surface2, #143d78);
+  border: 1px solid var(--border, #2e6ec0);
+  border-radius: 4px;
+  color: var(--text-muted, #90b8e0);
+  font-size: 11px;
+  padding: 3px 7px;
+  cursor: pointer;
+  z-index: 2;
+}

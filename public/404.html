@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Building Map Explorer</title>
+    <script>
+      // GitHub Pages SPA fallback: redirect unknown paths to the app entry.
+      ;(function () {
+        var redirect = sessionStorage.getItem('spa-redirect')
+        if (redirect) {
+          sessionStorage.removeItem('spa-redirect')
+          history.replaceState(null, '', redirect)
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <script>
+      sessionStorage.setItem(
+        'spa-redirect',
+        location.pathname + location.search + location.hash,
+      )
+      location.replace('/building-map-explorer/')
+    </script>
+  </body>
+</html>

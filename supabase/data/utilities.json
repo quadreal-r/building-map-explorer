@@ -1,0 +1,1801 @@
+[
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6200 Kenway Dr.",
+    "lat": 43.6358803,
+    "lng": -79.6757798
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "2300 Bristol Cir",
+    "lat": 43.515796,
+    "lng": -79.6768958
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "2320 Bristol Cir",
+    "lat": 43.5159695,
+    "lng": -79.6776937
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "2880 Brighton Rd",
+    "lat": 43.5148285,
+    "lng": -79.6786651
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "2910 Brighton Rd",
+    "lat": 43.5156461,
+    "lng": -79.6777634
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "4181 Sladeview Cres",
+    "lat": 43.5311065,
+    "lng": -79.7180094
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "4161 Sladeview Cres",
+    "lat": 43.5299753,
+    "lng": -79.7186858
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3165 Unity Dr",
+    "lat": 43.5374438,
+    "lng": -79.7095676
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3135 Unity Dr",
+    "lat": 43.5375139,
+    "lng": -79.7093904
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3105 Unity Dr",
+    "lat": 43.5390338,
+    "lng": -79.7090475
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3105 Unity Dr",
+    "lat": 43.5385972,
+    "lng": -79.7086361
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3150 Ridgeway Dr.",
+    "lat": 43.5173821,
+    "lng": -79.6927604
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "4085 Sladeview Cres",
+    "lat": 43.527688,
+    "lng": -79.717256
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3170 Ridgeway Dr",
+    "lat": 43.517407,
+    "lng": -79.6940928
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3375 Laird Rd",
+    "lat": 43.5163326,
+    "lng": -79.6932495
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "4120 Sladeview Cres",
+    "lat": 43.5291644,
+    "lng": -79.7172862
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "4141 Sladeview Cres",
+    "lat": 43.5289604,
+    "lng": -79.7177492
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3176 Ridgeway Dr",
+    "lat": 43.5167301,
+    "lng": -79.6943967
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3190 Ridgeway Dr",
+    "lat": 43.5171005,
+    "lng": -79.6961741
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3425 Laird Rd",
+    "lat": 43.5161811,
+    "lng": -79.6932974
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3495 Laird Rd",
+    "lat": 43.5167538,
+    "lng": -79.6966523
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "55 Interchange",
+    "lat": 43.7899904,
+    "lng": -79.5265148
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1645 Bonhill Rd",
+    "lat": 43.6659217,
+    "lng": -79.6538625
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1695 Bonhill Rd",
+    "lat": 43.6672046,
+    "lng": -79.6518403
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3180 Ridgeway Dr",
+    "lat": 43.5175283,
+    "lng": -79.6952888
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3184 Ridgeway Dr",
+    "lat": 43.5173524,
+    "lng": -79.6954005
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "3345 Laird Rd",
+    "lat": 43.5167689,
+    "lng": -79.692681
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6300 Kenway",
+    "lat": 43.6355496,
+    "lng": -79.6782767
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6150 Kennedy (West) B",
+    "lat": 43.637803,
+    "lng": -79.6728993
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6150 Kennedy (East) A",
+    "lat": 43.6377836,
+    "lng": -79.6726019
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6175 Kenway Dr",
+    "lat": 43.6364954,
+    "lng": -79.6754665
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6160 Kenway",
+    "lat": 43.6358599,
+    "lng": -79.6741571
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6901 Creditview Rd",
+    "lat": 43.6137093,
+    "lng": -79.7395346
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6911 Creditview Rd",
+    "lat": 43.6133817,
+    "lng": -79.7403466
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6950 Creditview Rd",
+    "lat": 43.6117714,
+    "lng": -79.7404111
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6955 Creditview Rd",
+    "lat": 43.6153765,
+    "lng": -79.7412375
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6975 Creditview Rd",
+    "lat": 43.6143905,
+    "lng": -79.742414
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "150 Courtneypark Dr W",
+    "lat": 43.6334921,
+    "lng": -79.6976895
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1680 Courtneypark",
+    "lat": 43.6659864,
+    "lng": -79.654123
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1700 Courtneypark Dr",
+    "lat": 43.667693,
+    "lng": -79.6526436
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1800 Courtneypark Dr E",
+    "lat": 43.6691971,
+    "lng": -79.650945
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1880&1870 Courtneypark Dr E",
+    "lat": 43.671113,
+    "lng": -79.6489225
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1745 Bonhill Road",
+    "lat": 43.6679693,
+    "lng": -79.6508764
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "101 Exchange Ave",
+    "lat": 43.7866048,
+    "lng": -79.5329581
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "7311 Kimbel St",
+    "lat": 43.7031003,
+    "lng": -79.6578395
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1775 Bonhill Rd",
+    "lat": 43.6686245,
+    "lng": -79.6500619
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1495 Bonhill Rd",
+    "lat": 43.6622499,
+    "lng": -79.6542589
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1535 Meyerside Dr",
+    "lat": 43.6617694,
+    "lng": -79.6535131
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1633-1655 Meyerside",
+    "lat": 43.6640515,
+    "lng": -79.6506777
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1675-1705 Meyerside",
+    "lat": 43.664962,
+    "lng": -79.6498164
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1715 Meyerside",
+    "lat": 43.6649683,
+    "lng": -79.6492133
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1745 Meyerside",
+    "lat": 43.6659017,
+    "lng": -79.6481446
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1775 Meyerside Dr",
+    "lat": 43.6661306,
+    "lng": -79.6478456
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1795 Meyerside Dr",
+    "lat": 43.6667779,
+    "lng": -79.6471479
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1815 Meyerside Dr",
+    "lat": 43.6670675,
+    "lng": -79.6468055
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1835 Meyerside Dr",
+    "lat": 43.6677116,
+    "lng": -79.6460989
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1865 Meyerside Dr",
+    "lat": 43.6682588,
+    "lng": -79.645475
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1885 Meyerside Dr - 6350 Netherhart Dr",
+    "lat": 43.6685844,
+    "lng": -79.645194
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1555 Bonhill Rd",
+    "lat": 43.6629073,
+    "lng": -79.6556244
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6325 Dixie Rd",
+    "lat": 43.6626469,
+    "lng": -79.6560054
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "45 Mural",
+    "lat": 43.8605581,
+    "lng": -79.3840194
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "Interior Access\r\n6820 Creditview Rd",
+    "lat": 43.6132792,
+    "lng": -79.7353355
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "Interior Access\r\n6980 Creditview Rd",
+    "lat": 43.6123605,
+    "lng": -79.7424253
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "6990 Creditview Rd",
+    "lat": 43.6125074,
+    "lng": -79.744709
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "Interior Access\r\n441 Courtneypark Dr E",
+    "lat": 43.6465621,
+    "lng": -79.6859965
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "Interior Access\r\n326 Superior Blvd",
+    "lat": 43.6479704,
+    "lng": -79.6909146
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "Interior Access\r\n320 Superior Blvd",
+    "lat": 43.647323,
+    "lng": -79.6919033
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "Interior Access\r\n6100 Kenway Dr",
+    "lat": 43.6369054,
+    "lng": -79.6720205
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "Interior Access\r\n6270 Kenway Dr",
+    "lat": 43.6347137,
+    "lng": -79.6767882
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "S",
+    "desc": "1750 Courtneypark",
+    "lat": 43.668472,
+    "lng": -79.6517399
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "S",
+    "desc": "151 Courtneypark Dr",
+    "lat": 43.634624,
+    "lng": -79.6978951
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "S",
+    "desc": "6774 Financial Dr",
+    "lat": 43.6088653,
+    "lng": -79.7416575
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "1577 Meyerside-1500 Bonhill",
+    "lat": 43.6626958,
+    "lng": -79.6521793
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "60 Birmingham",
+    "lat": 43.6049522,
+    "lng": -79.5005612
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "175 New Toronto",
+    "lat": 43.6076536,
+    "lng": -79.5006504
+  },
+  {
+    "type": "Sprinkler Rooms",
+    "name": "Sprinkler Room",
+    "desc": "160 Dwight St",
+    "lat": 43.6062782,
+    "lng": -79.5001061
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "7030 Royal Bank Dr\r\n(interior access?)",
+    "lat": 43.6086232,
+    "lng": -79.7491216
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "7311 Kimbel St.",
+    "lat": 43.7034934,
+    "lng": -79.6582208
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6915 Dixie Rd",
+    "lat": 43.6747714,
+    "lng": -79.670912
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1650 Derry Rd/6950 Menkes Dr",
+    "lat": 43.6787716,
+    "lng": -79.6689117
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1590 South Gateway Rd",
+    "lat": 43.6344016,
+    "lng": -79.611196
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "175 New Toronto St",
+    "lat": 43.6075572,
+    "lng": -79.5006202
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "160 Dwight St",
+    "lat": 43.6063538,
+    "lng": -79.5001517
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6175 Kenway Dr",
+    "lat": 43.636534,
+    "lng": -79.6754962
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "60 Birmingham St",
+    "lat": 43.6057023,
+    "lng": -79.4998468
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6300 Kenway Dr",
+    "lat": 43.6355324,
+    "lng": -79.6782512
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6270 Kenway Dr",
+    "lat": 43.6354199,
+    "lng": -79.6764994
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6150 Kennedy Rd(West)B",
+    "lat": 43.6378341,
+    "lng": -79.6729387
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6150 Kennedy Rd(East) A",
+    "lat": 43.6377983,
+    "lng": -79.672623
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6200 Kenway Dr",
+    "lat": 43.6358575,
+    "lng": -79.6757962
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6160 Kenway Dr",
+    "lat": 43.6366461,
+    "lng": -79.6729744
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6100 Kenway Dr",
+    "lat": 43.637337,
+    "lng": -79.67118
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "2880 Brighton Rd",
+    "lat": 43.5148567,
+    "lng": -79.6786389
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "2910 Brighton Rd",
+    "lat": 43.5156421,
+    "lng": -79.6777981
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "2320 Bristol Cir",
+    "lat": 43.5159782,
+    "lng": -79.6777236
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "2300 Bristol Cir",
+    "lat": 43.515814,
+    "lng": -79.6769345
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6950 Creditview Rd",
+    "lat": 43.6117778,
+    "lng": -79.7403737
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6990 Creditview Rd",
+    "lat": 43.6125407,
+    "lng": -79.7446898
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6975 Creditview Rd",
+    "lat": 43.6143684,
+    "lng": -79.7424393
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "Interior Access\r\n6980 Creditview Rd",
+    "lat": 43.6126229,
+    "lng": -79.7429736
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6955 Creditview Rd",
+    "lat": 43.6153859,
+    "lng": -79.7411955
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6911 Creditview Rd",
+    "lat": 43.613411,
+    "lng": -79.7403561
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6901 Creditview Rd",
+    "lat": 43.6133899,
+    "lng": -79.738634
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "Interior Access\r\n6820 Creditview Rd",
+    "lat": 43.6131796,
+    "lng": -79.7352906
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6774 Financial Dr",
+    "lat": 43.6088554,
+    "lng": -79.7422306
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "Interior Access\r\n441 Courtneypark Dr E",
+    "lat": 43.6465891,
+    "lng": -79.6859646
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "Interior Access\r\n326 Superior Blvd",
+    "lat": 43.6476037,
+    "lng": -79.6913268
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "Interior Access\r\n320 Superior Blvd",
+    "lat": 43.6474825,
+    "lng": -79.6917282
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "151 Courtneypark Dr W",
+    "lat": 43.6342011,
+    "lng": -79.6983783
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "150 Courtneypark Dr W",
+    "lat": 43.6336291,
+    "lng": -79.6975536
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical & Sprinkler Room",
+    "desc": "40 Westbridge Dr.",
+    "lat": 43.5561955,
+    "lng": -79.8511241
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "20 Westbridge Dr.",
+    "lat": 43.556397,
+    "lng": -79.8539168
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "3170 Ridgeway Dr",
+    "lat": 43.5174465,
+    "lng": -79.6940806
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "3150 Ridgeway Dr",
+    "lat": 43.517399,
+    "lng": -79.6927449
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "3184 Ridgeway Dr",
+    "lat": 43.5173456,
+    "lng": -79.6953479
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "3180 Ridgeway Dr",
+    "lat": 43.5175328,
+    "lng": -79.6952555
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "3176 Ridgeway Drive",
+    "lat": 43.5167213,
+    "lng": -79.6944005
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "3190 Ridgeway Drive",
+    "lat": 43.5170943,
+    "lng": -79.6961532
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "3345 Laird Rd",
+    "lat": 43.5167879,
+    "lng": -79.6927143
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "3375 Laird Rd",
+    "lat": 43.5163451,
+    "lng": -79.693267
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "3425 Laird Rd",
+    "lat": 43.5161909,
+    "lng": -79.6933144
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "3495 Laird Rd",
+    "lat": 43.5167461,
+    "lng": -79.6966629
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "4120 Sladeview Crescent",
+    "lat": 43.5291599,
+    "lng": -79.7172552
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "4181 Sladeview Crescent",
+    "lat": 43.5312317,
+    "lng": -79.7178752
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "4161 Sladeview Crescent",
+    "lat": 43.530756,
+    "lng": -79.7185372
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "4141 Sladeview Crescent",
+    "lat": 43.5289809,
+    "lng": -79.7177383
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "4085 Sladeview Crescent",
+    "lat": 43.5276382,
+    "lng": -79.7171796
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "3165 Unity Drive",
+    "lat": 43.5375361,
+    "lng": -79.7096295
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "3135 Unity Dr",
+    "lat": 43.537593,
+    "lng": -79.7094473
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "ELectrical Room",
+    "desc": "3105 Unity Drive",
+    "lat": 43.5384927,
+    "lng": -79.7084711
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "7540 Jane St",
+    "lat": 43.7899528,
+    "lng": -79.5253272
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "101 Exchange Ave",
+    "lat": 43.7865928,
+    "lng": -79.5329012
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "250-256 Sparks Ave",
+    "lat": 43.8083438,
+    "lng": -79.3411738
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "200-206 Sparks Ave",
+    "lat": 43.8082991,
+    "lng": -79.3420428
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "130-146 Sparks Ave",
+    "lat": 43.8083291,
+    "lng": -79.343141
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "9225 Leslie St",
+    "lat": 43.8613138,
+    "lng": -79.3855127
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical & Sprinkler Room",
+    "desc": "100 Leek Crescent",
+    "lat": 43.8612962,
+    "lng": -79.3827498
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical & Sprinkler Room",
+    "desc": "85 Leek Crescent",
+    "lat": 43.861022,
+    "lng": -79.3797392
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical & Sprinkler Room",
+    "desc": "56 Leek Crescent",
+    "lat": 43.8612268,
+    "lng": -79.3766154
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "50 Leek Crescent",
+    "lat": 43.8622025,
+    "lng": -79.3760471
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "45 Mural St",
+    "lat": 43.8607269,
+    "lng": -79.3839179
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical & Sprinkler Room",
+    "desc": "35 Leek Crescent",
+    "lat": 43.8626012,
+    "lng": -79.3778587
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "25 Leek Crescent",
+    "lat": 43.8623469,
+    "lng": -79.3789666
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6325 Dixie Rd",
+    "lat": 43.6623402,
+    "lng": -79.6555705
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1600 Courtneypark Dr E",
+    "lat": 43.6646338,
+    "lng": -79.6545503
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1555 Bonhill Rd",
+    "lat": 43.6625756,
+    "lng": -79.6552016
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1550 Courtneypark Dr E\r\nElec. R Interior Access",
+    "lat": 43.6645916,
+    "lng": -79.6560855
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1865 Meyerside Dr",
+    "lat": 43.668569,
+    "lng": -79.6459768
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1835 Meyerside Dr",
+    "lat": 43.6680129,
+    "lng": -79.6466045
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1815 Meyerside Dr",
+    "lat": 43.6673463,
+    "lng": -79.6473255
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1795 Meyerside Dr",
+    "lat": 43.6670859,
+    "lng": -79.6476667
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1775 Meyerside Dr.",
+    "lat": 43.6664617,
+    "lng": -79.6484625
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1745 Meyerside Dr",
+    "lat": 43.6659359,
+    "lng": -79.6482423
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1715 Meyerside Rd",
+    "lat": 43.66507,
+    "lng": -79.6492619
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1675-1705 Meyerside Rd",
+    "lat": 43.6650168,
+    "lng": -79.6498776
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1633-1655 Meyerside Rd\r\n1500 Bonhill Rd\r\n1577 Meyerside Dr",
+    "lat": 43.6640964,
+    "lng": -79.6507616
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1535 Meyerside Dr",
+    "lat": 43.6613473,
+    "lng": -79.6540447
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1495 Bonhill Rd",
+    "lat": 43.6615412,
+    "lng": -79.6544409
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1870-1880 Courtneypark Dr.",
+    "lat": 43.6711134,
+    "lng": -79.648933
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room (?)",
+    "desc": "1850 Derry Rd E( actual location unclear)",
+    "lat": 43.6816235,
+    "lng": -79.6652525
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Elec.R Interior Accessed",
+    "desc": "1840 Courtneypark Dr E",
+    "lat": 43.6697017,
+    "lng": -79.6494854
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Elec.R Interior Accessed",
+    "desc": "1820 Courtneypark Dr E",
+    "lat": 43.6691228,
+    "lng": -79.6503555
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1800 Courtneypark Dr E",
+    "lat": 43.6692094,
+    "lng": -79.6509718
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1775 Bonhill Rd",
+    "lat": 43.6686345,
+    "lng": -79.6500674
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1750 Courtneypark Dr E",
+    "lat": 43.6684958,
+    "lng": -79.6517788
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1745 Bonhill Rd",
+    "lat": 43.6679787,
+    "lng": -79.6508956
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1700 Courtneypark Dr E",
+    "lat": 43.6677119,
+    "lng": -79.6526677
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1695 Bonhill Rd",
+    "lat": 43.6671912,
+    "lng": -79.6518217
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1680 Courtneypark Dr E",
+    "lat": 43.6659695,
+    "lng": -79.6541028
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1645 Bonhill Rd",
+    "lat": 43.6659114,
+    "lng": -79.6538401
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "55 Interchange",
+    "lat": 43.7900357,
+    "lng": -79.5265355
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1885 Meyerside Dr - 6350 Netherhart Dr",
+    "lat": 43.6688304,
+    "lng": -79.6456272
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "151 Courtneypark Dr W",
+    "lat": 43.6341975,
+    "lng": -79.6983828
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "6774 Financial Dr",
+    "lat": 43.6088776,
+    "lng": -79.7422424
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Electrical Room",
+    "desc": "1577 Meyerside-1500 Bonhill",
+    "lat": 43.663282,
+    "lng": -79.6520134
+  },
+  {
+    "type": "Electrical Rooms",
+    "name": "Internet connection",
+    "desc": "Internet Connection from 4120 Ridgeway to 3135 Unity",
+    "lat": 43.5291911,
+    "lng": -79.7173153
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3150 Ridgeway #1",
+    "desc": "3150 Ridgeway",
+    "lat": 43.517387,
+    "lng": -79.692578
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3170 Ridgeway",
+    "desc": "3170 Ridgeway Dr",
+    "lat": 43.5173941,
+    "lng": -79.6942306
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3190 Ridgeway #1",
+    "desc": "3190 Ridgeway Dr",
+    "lat": 43.5175877,
+    "lng": -79.69611
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3190 Ridgeway #2",
+    "desc": "3190 Ridgeway Dr",
+    "lat": 43.5165553,
+    "lng": -79.695479
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3190 Ridgeway #3",
+    "desc": "3190 Ridgeway Dr",
+    "lat": 43.5174549,
+    "lng": -79.6956208
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3176 Ridgeway",
+    "desc": "3176 Ridgeway Dr",
+    "lat": 43.5167699,
+    "lng": -79.6947484
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3345 Laird",
+    "desc": "3345 Laird Rd",
+    "lat": 43.5173589,
+    "lng": -79.6925139
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3375 Laird",
+    "desc": "3375 Laird Rd",
+    "lat": 43.5159626,
+    "lng": -79.6925074
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3425 Laird #1",
+    "desc": "3425 Laird Rd",
+    "lat": 43.5158015,
+    "lng": -79.6927047
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3425 Laird #2",
+    "desc": "3425 Laird Rd",
+    "lat": 43.5164402,
+    "lng": -79.6936187
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "4141 Sladeview",
+    "desc": "4141 Sladeview Crescent",
+    "lat": 43.5290349,
+    "lng": -79.7191711
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "4120 Ridgeway #1",
+    "desc": "4120 Ridgeway Drive",
+    "lat": 43.5298925,
+    "lng": -79.7165241
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "4120 Ridgeway #2",
+    "desc": "4120 Ridgeway Drive",
+    "lat": 43.5289831,
+    "lng": -79.7174237
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "4161 Sladeview",
+    "desc": "4161 Sladeview Crescent",
+    "lat": 43.5300344,
+    "lng": -79.7182642
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "4181 Sladeview",
+    "desc": "4181 Sladeview Crescent",
+    "lat": 43.5306094,
+    "lng": -79.7171909
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3105 Unity #1",
+    "desc": "3105 Unity Drive",
+    "lat": 43.5378295,
+    "lng": -79.7084122
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3105 Unity #2",
+    "desc": "3105 Unity Drive",
+    "lat": 43.5388239,
+    "lng": -79.7094817
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3135 Unity",
+    "desc": "3135 Unity Drive",
+    "lat": 43.537843,
+    "lng": -79.7097088
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1745 Meyerside Drive #2 (location approx.)",
+    "desc": "1745 Meyerside Drive",
+    "lat": 43.6663936,
+    "lng": -79.648776
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1745 Meyerside",
+    "desc": "1745 Meyerside Drive",
+    "lat": 43.6660556,
+    "lng": -79.6498202
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1850 Derry",
+    "desc": "1850 Derry Rd",
+    "lat": 43.682254,
+    "lng": -79.6659248
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "7311 Kimbel #2 (location approx.)",
+    "desc": "7311 Kimbel",
+    "lat": 43.7029266,
+    "lng": -79.6568396
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "7311 Kimbel",
+    "desc": "7311 Kimbel",
+    "lat": 43.7029423,
+    "lng": -79.6580739
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6100 Kenway #1",
+    "desc": "6100 Kenway Dr",
+    "lat": 43.6368919,
+    "lng": -79.6723731
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6160 Kenway #1",
+    "desc": "6160 Kenway Dr",
+    "lat": 43.6360665,
+    "lng": -79.674479
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6175 Kenway Dr",
+    "desc": "6175 Kenway Drive",
+    "lat": 43.6364257,
+    "lng": -79.6748779
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1680 Courtneypark #1",
+    "desc": "1680 Courtneypark Dr E",
+    "lat": 43.665833,
+    "lng": -79.6543077
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1680 Courtneypark #2",
+    "desc": "1680 Courtneypark Dr E",
+    "lat": 43.6665653,
+    "lng": -79.654516
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1680 Courtneypark #3",
+    "desc": "1680 Courtneypark Dr E",
+    "lat": 43.6672071,
+    "lng": -79.6538059
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1700 Courtneypark Dr E #2 (location approx.)",
+    "desc": "1700 Courtneypark Dr E",
+    "lat": 43.6668667,
+    "lng": -79.6528928
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1700 Courtneypark",
+    "desc": "1700 Courtneypark Dr E",
+    "lat": 43.6678103,
+    "lng": -79.6530474
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1800 Courtneypark",
+    "desc": "1800 Courtneypark Dr E",
+    "lat": 43.6692649,
+    "lng": -79.6514234
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1700 Courtneypark Dr E #3 (location approx.)",
+    "desc": "1700 Courtneypark Dr E",
+    "lat": 43.6674374,
+    "lng": -79.6521362
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1800 Courtneypark Dr E #2 (location approx.)",
+    "desc": "1800 Courtneypark Dr E",
+    "lat": 43.6682482,
+    "lng": -79.651249
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1800 Courtneypark Dr E #3 (location approx.)",
+    "desc": "1800 Courtneypark Dr E",
+    "lat": 43.6689334,
+    "lng": -79.6504176
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1800 Courtneypark Dr E #4 (location approx.)",
+    "desc": "1800 Courtneypark Dr E",
+    "lat": 43.6700145,
+    "lng": -79.6505142
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "320 Superior #1",
+    "desc": "320 Superior Blvd",
+    "lat": 43.6471917,
+    "lng": -79.6924721
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "320 Superior #2",
+    "desc": "320 Superior Blvd",
+    "lat": 43.6467568,
+    "lng": -79.6920392
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "326 Superior (Aprox. Location)",
+    "desc": "326 Superior Blvd",
+    "lat": 43.6478224,
+    "lng": -79.6918041
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6774 Financial Dr",
+    "desc": "6774 Financial Dr",
+    "lat": 43.6092888,
+    "lng": -79.7425316
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6911 Creditview #1",
+    "desc": "6911 Creditview Rd",
+    "lat": 43.6128031,
+    "lng": -79.7403534
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6911 Creditview #2",
+    "desc": "6911 Creditview Rd",
+    "lat": 43.6127499,
+    "lng": -79.7415098
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6911 Creditview #3",
+    "desc": "6911 Creditview Rd",
+    "lat": 43.613082,
+    "lng": -79.7425946
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6901 Creditview #1",
+    "desc": "6901 Creditview Rd",
+    "lat": 43.613411,
+    "lng": -79.7380057
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6901 Creditview #2",
+    "desc": "6901 Creditview Rd",
+    "lat": 43.6134701,
+    "lng": -79.7396928
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6955 Creditview #1",
+    "desc": "6955 Creditview Rd",
+    "lat": 43.6159792,
+    "lng": -79.7425637
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6955 Creditview #2",
+    "desc": "6955 Creditview Rd",
+    "lat": 43.6150873,
+    "lng": -79.7411397
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6975 Creditview #1",
+    "desc": "6975 Creditview Rd",
+    "lat": 43.6146389,
+    "lng": -79.741654
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6975 Creditview #2",
+    "desc": "6975 Creditview Rd",
+    "lat": 43.613613,
+    "lng": -79.7435866
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6270 Kenway #1(Aprox. Location)",
+    "desc": "6270 Kenway Dr",
+    "lat": 43.63499,
+    "lng": -79.6780082
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6270 Kenway #2(Aprox. Location)",
+    "desc": "6270 Kenway Dr",
+    "lat": 43.6343192,
+    "lng": -79.6768163
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6100 Kenway #2(Aprox. Location)",
+    "desc": "6100 Kenway Drive",
+    "lat": 43.6360823,
+    "lng": -79.6716918
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6160 Kenway #2(Aprox. Location)",
+    "desc": "6160 Kenway Drive",
+    "lat": 43.6358776,
+    "lng": -79.6720222
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "3150 Ridgeway #2",
+    "desc": "3150 Ridgeway #2",
+    "lat": 43.5166485,
+    "lng": -79.6935301
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6950 Creditview #1(Aprox. Location)",
+    "desc": "6950 Creditview Road",
+    "lat": 43.611713,
+    "lng": -79.7394754
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6950 Creditview #2(Not Accurate)",
+    "desc": "6950 Creditview Road",
+    "lat": 43.6113489,
+    "lng": -79.7415786
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6990 Creditview #1(Aprox. Location)",
+    "desc": "6990 Creditview Road",
+    "lat": 43.6128766,
+    "lng": -79.7434452
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6990 Creditview #2(Aprox. Location)",
+    "desc": "6990 Creditview Road",
+    "lat": 43.6135812,
+    "lng": -79.7446423
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6990 Creditview #3(Aprox. Location)",
+    "desc": "6990 Creditview Road",
+    "lat": 43.6120398,
+    "lng": -79.7442743
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6990 Creditview #4(Aprox. Location)",
+    "desc": "6990 Creditview Road",
+    "lat": 43.6122706,
+    "lng": -79.7466165
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "150 Courtneypark #1(Aprox. Location)",
+    "desc": "150 Courtneypark Drive",
+    "lat": 43.6342149,
+    "lng": -79.6965573
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "150 Courtneypark #2(Aprox. Location)",
+    "desc": "150 Courtneypark Drive",
+    "lat": 43.6333002,
+    "lng": -79.695112
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "150 Courteypark #3(Aprox. Location)",
+    "desc": "150 Courtneypark Drive",
+    "lat": 43.6326838,
+    "lng": -79.6941595
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "150 Courtneypark #4(Aprox. Location)",
+    "desc": "150 Courtneypark Drive",
+    "lat": 43.63198,
+    "lng": -79.6930647
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "6150 Kennedy A&B(Aprox. Location)",
+    "desc": "6150 Kennedy Road (East & West)",
+    "lat": 43.637774,
+    "lng": -79.6727004
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1577 Meyerside-1500 Bonhill (Aprox. Location)",
+    "desc": "1577 Meyerside-1500 Bonhill",
+    "lat": 43.663078,
+    "lng": -79.6532952
+  },
+  {
+    "type": "Fire Hydrants",
+    "name": "1633-1655 Meyerside (Aprox. Location)",
+    "desc": "1633-1655 Meyerside Drive",
+    "lat": 43.6642879,
+    "lng": -79.6516139
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 1 Natural Gas meter and Shut-Off",
+    "lat": 43.5389841,
+    "lng": -79.7094083
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 2 Natural Gas meter and Shut-Off",
+    "lat": 43.5390863,
+    "lng": -79.7094044
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 3 & 4 Natural Gas meter and Shut-Off",
+    "lat": 43.5391623,
+    "lng": -79.7093793
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 5 & 6 Natural Gas meter and Shut-Off",
+    "lat": 43.5392401,
+    "lng": -79.7093491
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 11 Natural Gas meter and Shut-Off",
+    "lat": 43.5391815,
+    "lng": -79.7091123
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 13 & 14 Natural Gas meter and Shut-Off",
+    "lat": 43.5390216,
+    "lng": -79.7090597
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 15 & 16 Natural Gas meter and Shut-Off",
+    "lat": 43.5388931,
+    "lng": -79.7090451
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 17 & 18 Natural Gas meter and Shut-Off",
+    "lat": 43.5387903,
+    "lng": -79.7088876
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 19 Natural Gas meter and Shut-Off",
+    "lat": 43.5386787,
+    "lng": -79.708711
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 20 Natural Gas meter and Shut-Off",
+    "lat": 43.5386351,
+    "lng": -79.708646
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 21 Natural Gas meter and Shut-Off",
+    "lat": 43.5385599,
+    "lng": -79.7085669
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 25 Natural Gas meter and Shut-Off",
+    "lat": 43.5382613,
+    "lng": -79.7083315
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 26 Natural Gas meter and Shut-Off",
+    "lat": 43.5382038,
+    "lng": -79.7082351
+  },
+  {
+    "type": "Natural Gas Shut-Off",
+    "name": "Gas Shut-Off",
+    "desc": "Unit 26 Natural Gas meter and Shut-Off",
+    "lat": 43.5382038,
+    "lng": -79.7082351
+  }
+]

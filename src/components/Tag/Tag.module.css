@@ -1,0 +1,68 @@
+.tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'DM Mono', monospace;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.default {
+  background: rgba(127, 212, 176, 0.1);
+  color: var(--sqft-color, #7fffcf);
+  border: 1px solid rgba(127, 212, 176, 0.2);
+}
+
+.sqft {
+  background: rgba(127, 212, 176, 0.1);
+  color: var(--sqft-color, #7fffcf);
+  border: 1px solid rgba(127, 212, 176, 0.2);
+}
+
+.rtu {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.tenant {
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.sold {
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+.pm {
+  background: rgba(125, 184, 255, 0.1);
+  color: var(--accent, #7db8ff);
+  border: 1px solid rgba(125, 184, 255, 0.2);
+}
+
+.gps-bad {
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+.ml {
+  background: rgba(167, 139, 250, 0.1);
+  color: #a78bfa;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.old-rtu {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.vacant {
+  background: rgba(251, 146, 60, 0.1);
+  color: #fb923c;
+  border: 1px solid rgba(251, 146, 60, 0.2);
+}

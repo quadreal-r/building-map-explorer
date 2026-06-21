@@ -1,0 +1,70 @@
+.chip {
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border, #2e6ec0);
+  background: var(--surface2, #143d78);
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text-muted, #90b8e0);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--accent, #7db8ff);
+  color: var(--text-primary, #ffffff);
+}
+
+.chip:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.active {
+  border-color: var(--accent, #7db8ff);
+  color: var(--accent, #7db8ff);
+  background: rgba(107, 143, 255, 0.12);
+}
+
+.dq-gps.active {
+  border-color: #f87171;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.dq-rtu.active {
+  border-color: #fbbf24;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.dq-vacant.active {
+  border-color: #fb923c;
+  color: #fb923c;
+  background: rgba(251, 146, 60, 0.12);
+}
+
+.dq-ml.active {
+  border-color: #a78bfa;
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.12);
+}
+
+.adv-yes {
+  border-color: #34d399;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.1);
+}
+
+.adv-no {
+  border-color: #f87171;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.adv-any {
+  border-color: var(--accent, #7db8ff);
+  color: var(--accent, #7db8ff);
+  background: rgba(107, 143, 255, 0.12);
+}
