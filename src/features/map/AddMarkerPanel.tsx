@@ -45,21 +45,29 @@ export interface AddMarkerPanelProps {
   defaultLng?: number
 }
 
-export function AddMarkerPanel({
-  open,
+interface AddMarkerFormProps {
+  onClose: () => void
+  portfolio: PortfolioData
+  map: google.maps.Map | null
+  onAdded: (patch: PortfolioData) => void
+  defaultLat: number
+  defaultLng: number
+}
+
+function AddMarkerForm({
   onClose,
   portfolio,
   map,
   onAdded,
-  defaultLat = 43.65,
-  defaultLng = -79.62,
-}: AddMarkerPanelProps) {
+  defaultLat,
+  defaultLng,
+}: AddMarkerFormProps) {
   const [category, setCategory] = useState<MarkerCategory>('rtu')
   const [buildingAddress, setBuildingAddress] = useState(portfolio.buildings[0]?.address ?? '')
   const [name, setName] = useState(DEFAULT_NAMES.rtu)
   const [description, setDescription] = useState('')
-  const [lat, setLat] = useState('')
-  const [lng, setLng] = useState('')
+  const [lat, setLat] = useState(defaultLat ? String(defaultLat) : '')
+  const [lng, setLng] = useState(defaultLng ? String(defaultLng) : '')
   const [pickMode, setPickMode] = useState(false)
   const [shapeIdx, setShapeIdx] = useState(getMarkerShapeIndex())
   const [scale, setScale] = useState(getMarkerScale())
@@ -68,17 +76,7 @@ export function AddMarkerPanel({
   const needsBuilding = category === 'rtu'
 
   useEffect(() => {
-    if (!open) return
-    setLat(defaultLat ? String(defaultLat) : '')
-    setLng(defaultLng ? String(defaultLng) : '')
-    setError(null)
-    setPickMode(false)
-    setShapeIdx(getMarkerShapeIndex())
-    setScale(getMarkerScale())
-  }, [open, defaultLat, defaultLng])
-
-  useEffect(() => {
-    if (!open || !map || !pickMode) return
+    if (!map || !pickMode) return
     map.setOptions({ draggableCursor: 'crosshair' })
     const listener = map.addListener('click', (e: google.maps.MapMouseEvent) => {
       const pos = e.latLng
@@ -91,7 +89,7 @@ export function AddMarkerPanel({
       google.maps.event.removeListener(listener)
       map.setOptions({ draggableCursor: '' })
     }
-  }, [open, map, pickMode])
+  }, [map, pickMode])
 
   const handleCategoryChange = (next: MarkerCategory) => {
     setCategory(next)
@@ -152,81 +150,103 @@ export function AddMarkerPanel({
 
     showToastSuccess('✓ Marker added — save to HTML to keep it.')
     onClose()
-    setName('')
-    setDescription('')
-    setLat('')
-    setLng('')
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Add map marker" width={320}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12, opacity: pickMode ? 0.75 : 1 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12, opacity: pickMode ? 0.75 : 1 }}>
+      <label>
+        Category
+        <select value={category} onChange={(e) => handleCategoryChange(e.target.value as MarkerCategory)} style={{ width: '100%', marginTop: 4 }}>
+          {CATEGORY_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      </label>
+      {needsBuilding ? (
         <label>
-          Category
-          <select value={category} onChange={(e) => handleCategoryChange(e.target.value as MarkerCategory)} style={{ width: '100%', marginTop: 4 }}>
-            {CATEGORY_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+          Building
+          <select value={buildingAddress} onChange={(e) => setBuildingAddress(e.target.value)} style={{ width: '100%', marginTop: 4 }}>
+            {portfolio.buildings.map((b) => (
+              <option key={b.address} value={b.address}>{b.address}</option>
             ))}
           </select>
         </label>
-        {needsBuilding ? (
-          <label>
-            Building
-            <select value={buildingAddress} onChange={(e) => setBuildingAddress(e.target.value)} style={{ width: '100%', marginTop: 4 }}>
-              {portfolio.buildings.map((b) => (
-                <option key={b.address} value={b.address}>{b.address}</option>
-              ))}
-            </select>
-          </label>
-        ) : null}
-        <label>
-          Name
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={{ width: '100%', marginTop: 4 }} />
-        </label>
-        <label>
-          Description
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} style={{ width: '100%', marginTop: 4, resize: 'vertical' }} />
-        </label>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <label style={{ flex: 1 }}>Lat<input type="text" value={lat} onChange={(e) => setLat(e.target.value)} style={{ width: '100%', marginTop: 4 }} /></label>
-          <label style={{ flex: 1 }}>Lng<input type="text" value={lng} onChange={(e) => setLng(e.target.value)} style={{ width: '100%', marginTop: 4 }} /></label>
-        </div>
-        <button type="button" className={`btn-action${pickMode ? ' primary' : ''}`} onClick={() => setPickMode(true)} disabled={!map}>
-          {pickMode ? '🎯 Click anywhere on the map…' : '📍 Click on Map to Place'}
-        </button>
-        <div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase' }}>Marker shape</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-            {MARKER_SHAPES.map((s, i) => (
-              <button
-                key={s.label}
-                type="button"
-                onClick={() => setShapeIdx(i)}
-                style={{
-                  padding: '4px 9px',
-                  borderRadius: 5,
-                  fontSize: 11,
-                  cursor: 'pointer',
-                  border: `2px solid ${i === shapeIdx ? 'var(--accent)' : 'var(--border)'}`,
-                  background: i === shapeIdx ? 'rgba(125,184,255,.12)' : 'var(--surface)',
-                  color: 'var(--text-primary)',
-                }}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <label>
-          Size ({scale})
-          <input type="range" min={4} max={20} value={scale} onChange={(e) => setScale(Number(e.target.value))} style={{ width: '100%' }} />
-        </label>
-        {error ? <p style={{ color: '#f87171', fontSize: 11 }}>{error}</p> : null}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button type="button" className="btn-action" onClick={onClose}>Cancel</button>
-          <button type="button" className="btn-action primary" onClick={handleSave}>Add marker</button>
+      ) : null}
+      <label>
+        Name
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={{ width: '100%', marginTop: 4 }} />
+      </label>
+      <label>
+        Description
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} style={{ width: '100%', marginTop: 4, resize: 'vertical' }} />
+      </label>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <label style={{ flex: 1 }}>Lat<input type="text" value={lat} onChange={(e) => setLat(e.target.value)} style={{ width: '100%', marginTop: 4 }} /></label>
+        <label style={{ flex: 1 }}>Lng<input type="text" value={lng} onChange={(e) => setLng(e.target.value)} style={{ width: '100%', marginTop: 4 }} /></label>
+      </div>
+      <button type="button" className={`btn-action${pickMode ? ' primary' : ''}`} onClick={() => setPickMode(true)} disabled={!map}>
+        {pickMode ? '🎯 Click anywhere on the map…' : '📍 Click on Map to Place'}
+      </button>
+      <div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase' }}>Marker shape</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+          {MARKER_SHAPES.map((s, i) => (
+            <button
+              key={s.label}
+              type="button"
+              onClick={() => setShapeIdx(i)}
+              style={{
+                padding: '4px 9px',
+                borderRadius: 5,
+                fontSize: 11,
+                cursor: 'pointer',
+                border: `2px solid ${i === shapeIdx ? 'var(--accent)' : 'var(--border)'}`,
+                background: i === shapeIdx ? 'rgba(125,184,255,.12)' : 'var(--surface)',
+                color: 'var(--text-primary)',
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
         </div>
       </div>
+      <label>
+        Size ({scale})
+        <input type="range" min={4} max={20} value={scale} onChange={(e) => setScale(Number(e.target.value))} style={{ width: '100%' }} />
+      </label>
+      {error ? <p style={{ color: '#f87171', fontSize: 11 }}>{error}</p> : null}
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        <button type="button" className="btn-action" onClick={onClose}>Cancel</button>
+        <button type="button" className="btn-action primary" onClick={handleSave}>Add marker</button>
+      </div>
+    </div>
+  )
+}
+
+export function AddMarkerPanel({
+  open,
+  onClose,
+  portfolio,
+  map,
+  onAdded,
+  defaultLat = 43.65,
+  defaultLng = -79.62,
+}: AddMarkerPanelProps) {
+  const formKey = `${defaultLat},${defaultLng}`
+
+  return (
+    <Modal open={open} onClose={onClose} title="Add map marker" width={320}>
+      {open ? (
+        <AddMarkerForm
+          key={formKey}
+          onClose={onClose}
+          portfolio={portfolio}
+          map={map}
+          onAdded={onAdded}
+          defaultLat={defaultLat}
+          defaultLng={defaultLng}
+        />
+      ) : null}
     </Modal>
   )
 }

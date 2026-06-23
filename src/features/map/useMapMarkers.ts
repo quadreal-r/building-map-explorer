@@ -79,10 +79,16 @@ export function useMapMarkers({
     onDetailMoved,
     onDeleteDetail,
   })
-  callbacksRef.current = { onSelectBuilding, onBuildingMoved, onDetailMoved, onDeleteDetail }
 
   const layersRef = useRef(layers)
-  layersRef.current = layers
+
+  useEffect(() => {
+    callbacksRef.current = { onSelectBuilding, onBuildingMoved, onDetailMoved, onDeleteDetail }
+  }, [onSelectBuilding, onBuildingMoved, onDetailMoved, onDeleteDetail])
+
+  useEffect(() => {
+    layersRef.current = layers
+  }, [layers])
 
   const resetBuildingIcons = useCallback(() => {
     for (const entry of buildingMarkersRef.current) {

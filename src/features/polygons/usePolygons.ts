@@ -42,7 +42,34 @@ export function usePolygons({
   const editingRef = useRef<{ poly: google.maps.Polygon; data: Polygon } | null>(null)
   const movingRef = useRef<{ poly: google.maps.Polygon; data: Polygon } | null>(null)
   const callbacksRef = useRef({ onPolygonUpdated, onPolygonDeleted })
-  callbacksRef.current = { onPolygonUpdated, onPolygonDeleted }
+
+  const syncPaths = useCallback((poly: google.maps.Polygon, data: Polygon) => {
+    const path = poly.getPath()
+    const paths: Polygon['paths'] = []
+    for (let i = 0; i < path.getLength(); i++) {
+      const pt = path.getAt(i)
+      paths.push({ lat: pt.lat(), lng: pt.lng() })
+    }
+    const updated = { ...data, paths }
+    callbacksRef.current.onPolygonUpdated?.(updated)
+  }, [])
+
+  const stopEdit = useCallback(() => {
+    const entry = editingRef.current
+    if (!entry) return
+    entry.poly.setEditable(false)
+    syncPaths(entry.poly, entry.data)
+    editingRef.current = null
+  }, [syncPaths])
+
+  const stopMove = useCallback(() => {
+    const entry = movingRef.current
+    if (!entry) return
+    entry.poly.setDraggable(false)
+    entry.poly.setOptions({ fillOpacity: 0.02 })
+    syncPaths(entry.poly, entry.data)
+    movingRef.current = null
+  }, [syncPaths])
 
   const openPopup = useCallback(
     (poly: google.maps.Polygon, data: Polygon, latLng?: google.maps.LatLng) => {
@@ -109,39 +136,18 @@ export function usePolygons({
         })
       })
     },
-    [map],
+    [map, stopEdit, stopMove],
   )
 
   const openPopupRef = useRef(openPopup)
-  openPopupRef.current = openPopup
 
-  function stopEdit() {
-    const entry = editingRef.current
-    if (!entry) return
-    entry.poly.setEditable(false)
-    syncPaths(entry.poly, entry.data)
-    editingRef.current = null
-  }
+  useEffect(() => {
+    callbacksRef.current = { onPolygonUpdated, onPolygonDeleted }
+  }, [onPolygonUpdated, onPolygonDeleted])
 
-  function stopMove() {
-    const entry = movingRef.current
-    if (!entry) return
-    entry.poly.setDraggable(false)
-    entry.poly.setOptions({ fillOpacity: 0.02 })
-    syncPaths(entry.poly, entry.data)
-    movingRef.current = null
-  }
-
-  function syncPaths(poly: google.maps.Polygon, data: Polygon) {
-    const path = poly.getPath()
-    const paths: Polygon['paths'] = []
-    for (let i = 0; i < path.getLength(); i++) {
-      const pt = path.getAt(i)
-      paths.push({ lat: pt.lat(), lng: pt.lng() })
-    }
-    const updated = { ...data, paths }
-    callbacksRef.current.onPolygonUpdated?.(updated)
-  }
+  useEffect(() => {
+    openPopupRef.current = openPopup
+  }, [openPopup])
 
   useEffect(() => {
     if (!map) return

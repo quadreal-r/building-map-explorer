@@ -81,7 +81,7 @@ describe('mapInfoWindow', () => {
     expect(text).not.toContain('\nRTU\n')
     expect(text).toContain('Building    85 Leek Crescent')
     expect(text).toContain('System      Roof Top Units')
-    expect(text.match(/Building    85 Leek Crescent/g)?.length).toBe(1)
+    expect(text.match(/Building {4}85 Leek Crescent/g)?.length).toBe(1)
   })
 
   it('builds detail plain text for simple RTU rows', () => {

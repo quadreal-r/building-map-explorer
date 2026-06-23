@@ -129,8 +129,9 @@ export function buildBuildingInfoPlainText(building: Building): string {
 export function buildDetailInfoPlainText(
   layerKey: LayerKey,
   data: Rtu | Tenant | Utility,
-  _options?: { buildingAddress?: string },
+  options?: { buildingAddress?: string },
 ): string {
+  void options
   const name = data.name ?? ''
   const lines: string[] = [name]
 

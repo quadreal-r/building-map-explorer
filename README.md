@@ -22,7 +22,7 @@ cp .env.example .env.local   # add your keys
 npm run dev
 ```
 
-Open http://localhost:5173/building-map-explorer/
+Open http://localhost:5173/ after `npm run dev`.
 
 Without env vars the app loads bundled JSON from `supabase/data/` (read-only static mode).
 

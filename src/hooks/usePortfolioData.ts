@@ -22,6 +22,21 @@ export type { PortfolioData } from '@/types/domain'
 
 const STORAGE_KEY = 'bme-portfolio'
 
+export function isValidStoredPortfolio(data: unknown): data is PortfolioData {
+  if (!data || typeof data !== 'object') return false
+  const portfolio = data as PortfolioData
+  if (!Array.isArray(portfolio.buildings)) return false
+  if (!Array.isArray(portfolio.utilities)) return false
+  if (!Array.isArray(portfolio.polygons)) return false
+  if (portfolio.buildings.length === 0) return false
+  return portfolio.buildings.every(
+    (building) =>
+      typeof building.address === 'string' &&
+      typeof building.lat === 'number' &&
+      typeof building.lng === 'number',
+  )
+}
+
 function loadStaticPortfolio(): PortfolioData {
   return {
     buildings: (staticBuildings as LegacyBuildingJson[]).map(normalizeLegacyBuilding),
@@ -34,8 +49,11 @@ function loadStoredPortfolio(): PortfolioData | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
-    const parsed = JSON.parse(raw) as PortfolioData
-    if (!parsed.buildings?.length) return null
+    const parsed: unknown = JSON.parse(raw)
+    if (!isValidStoredPortfolio(parsed)) {
+      localStorage.removeItem(STORAGE_KEY)
+      return null
+    }
     return parsed
   } catch {
     return null

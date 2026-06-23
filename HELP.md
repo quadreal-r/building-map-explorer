@@ -3,8 +3,13 @@
 ## To run the project
 
 - In the top bar of cursor, select view -> terminal
-- Type and enter "npm run dev", the project will then be running locally on your machine at "http://localhost:5173/building-map-explorer/"
+- Type and enter "npm run dev", the project will then be running locally on your machine at "http://localhost:5173/"
 - Enter that url in the browser to access your site
+- If the page is blank or won't load:
+  - Make sure the dev server is still running in the terminal (no errors)
+  - Run `npm install` if you just pulled new code
+  - Copy `.env.example` to `.env.local` and add your Google Maps API key
+  - In the browser, open DevTools → Application → Local Storage and delete `bme-portfolio` if data looks corrupted, then refresh
 - Changes to the code will automatically be reflected onto the site, no need to restart the website, you can simply refresh the page
 
 

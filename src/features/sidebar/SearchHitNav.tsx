@@ -8,15 +8,8 @@ export interface SearchHitNavProps {
   polygons: Polygon[]
 }
 
-/** Prev/next navigation when search matches RTU markers, tenant polygons, or buildings. */
-export function SearchHitNav({ buildings, polygons }: SearchHitNavProps) {
-  const search = useFilterStore((s) => s.search).trim()
+function SearchHitNavInner({ hits }: { hits: SearchHit[] }) {
   const [index, setIndex] = useState(0)
-
-  const hits = useMemo(
-    (): SearchHit[] => collectSearchHits(buildings, polygons, search),
-    [buildings, polygons, search],
-  )
 
   const openHit = useCallback((target: SearchHit, i: number) => {
     setIndex(i)
@@ -24,13 +17,12 @@ export function SearchHitNav({ buildings, polygons }: SearchHitNavProps) {
   }, [])
 
   useEffect(() => {
-    setIndex(0)
     if (hits.length >= 1) {
-      openHit(hits[0]!, 0)
+      openSearchHit(hits[0]!)
     }
-  }, [search, hits, openHit])
+  }, [hits])
 
-  if (!hits.length) return null
+  if (hits.length <= 1) return null
 
   const safeIndex = Math.min(index, hits.length - 1)
   const hit = hits[safeIndex]!
@@ -39,8 +31,6 @@ export function SearchHitNav({ buildings, polygons }: SearchHitNavProps) {
     const next = ((i % hits.length) + hits.length) % hits.length
     openHit(hits[next]!, next)
   }
-
-  if (hits.length <= 1) return null
 
   return (
     <div
@@ -67,4 +57,18 @@ export function SearchHitNav({ buildings, polygons }: SearchHitNavProps) {
       </button>
     </div>
   )
+}
+
+/** Prev/next navigation when search matches RTU markers, tenant polygons, or buildings. */
+export function SearchHitNav({ buildings, polygons }: SearchHitNavProps) {
+  const search = useFilterStore((s) => s.search).trim()
+
+  const hits = useMemo(
+    (): SearchHit[] => collectSearchHits(buildings, polygons, search),
+    [buildings, polygons, search],
+  )
+
+  if (!hits.length) return null
+
+  return <SearchHitNavInner key={search} hits={hits} />
 }

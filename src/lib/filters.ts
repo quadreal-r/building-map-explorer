@@ -125,7 +125,7 @@ export function autoFillFilterDropdowns(
   filters: Pick<FilterState, 'search' | 'park' | 'cluster' | 'manager'>,
   skipFields: ReadonlySet<string> = new Set(),
 ): Pick<FilterState, 'search' | 'park' | 'cluster' | 'manager'> {
-  let next = { ...filters }
+  const next = { ...filters }
   let changed = true
 
   while (changed) {

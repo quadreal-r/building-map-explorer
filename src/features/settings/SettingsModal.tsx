@@ -71,22 +71,20 @@ function SettingsForm({
     applyTheme(draftTheme)
     setThemeIndex(draftTheme)
 
-    let nextPortfolio = portfolio
     let anyChange = false
     for (const [original, name] of Object.entries(draftManagers)) {
       const trimmed = name.trim() || original
       if (trimmed !== original) anyChange = true
     }
     if (anyChange) {
-      nextPortfolio = {
+      onPortfolioPatch({
         ...portfolio,
         buildings: portfolio.buildings.map((b) => {
           const renamed = draftManagers[b.manager]
           if (!renamed?.trim() || renamed.trim() === b.manager) return b
           return { ...b, manager: renamed.trim() }
         }),
-      }
-      onPortfolioPatch(nextPortfolio)
+      })
     }
 
     await saveSettings()
