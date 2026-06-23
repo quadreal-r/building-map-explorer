@@ -7,6 +7,22 @@ import {
   USGS_TILE_URL,
   UTILITY_LAYER_MAP,
 } from '@/lib/constants'
+import {
+  applySnapshotToPortfolio,
+  buildGroupDragSnapshot,
+  buildingDragKey,
+  detailDragKey,
+  utilityDragKey,
+} from '@/lib/dragSelection'
+import {
+  applyGroupDragDelta,
+  beginGroupDrag,
+  endGroupDrag,
+  isGroupDragActive,
+  registerGroupDragVisuals,
+} from '@/lib/mapGroupDragSession'
+import { buildPolygonBuildingIndex, polygonsForBuilding } from '@/lib/polygonBuildings'
+import { consumeMapClickClearSuppression, registerMarqueeTarget, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
 import { afterMapViewChange, fitBoundsPreserveRotation, panToPreserveRotation } from '@/lib/mapRotation'
 import { closeAllMapPopups, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
 import { collectSearchHits } from '@/lib/searchHits'
@@ -16,7 +32,7 @@ import { showToastSuccess } from '@/lib/toast'
 import { useLayerStore } from '@/stores/layerStore'
 import { useFilterStore } from '@/stores/filterStore'
 import { useSelectionStore } from '@/stores/selectionStore'
-import type { Building, LayerKey, Polygon, Rtu, Tenant, Utility } from '@/types/domain'
+import type { Building, LayerKey, Polygon, Rtu, Utility } from '@/types/domain'
 
 const TRANSPARENT_ICON =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
@@ -30,9 +46,10 @@ interface BuildingMarkerEntry {
 interface DetailMarkerEntry {
   type: LayerKey
   building: Building | null
-  data: Rtu | Tenant | Utility
+  data: Rtu | Utility
   marker: google.maps.Marker
   label?: google.maps.Marker
+  dragKey: string
 }
 
 export interface UseMapMarkersOptions {
@@ -43,8 +60,9 @@ export interface UseMapMarkersOptions {
   polygons: Polygon[]
   onSelectBuilding: (building: Building) => void
   onBuildingMoved?: (building: Building, lat: number, lng: number) => void
-  onDetailMoved?: (layerKey: LayerKey, data: Rtu | Tenant | Utility, lat: number, lng: number, building: Building | null) => void
-  onDeleteDetail?: (layerKey: LayerKey, data: Rtu | Tenant | Utility, building: Building | null) => void
+  onDetailMoved?: (layerKey: LayerKey, data: Rtu | Utility, lat: number, lng: number, building: Building | null) => void
+  onDeleteDetail?: (layerKey: LayerKey, data: Rtu | Utility, building: Building | null) => void
+  onGroupMoved?: (portfolio: { buildings: Building[]; utilities: Utility[]; polygons: Polygon[] }) => void
 }
 
 export function useMapMarkers({
@@ -57,12 +75,22 @@ export function useMapMarkers({
   onBuildingMoved,
   onDetailMoved,
   onDeleteDetail,
+  onGroupMoved,
 }: UseMapMarkersOptions) {
   const layers = useLayerStore((s) => s.layers)
   const search = useFilterStore((s) => s.search)
   const currentBuilding = useSelectionStore((s) => s.currentBuilding)
   const dragMode = useSelectionStore((s) => s.dragMode)
+  const dragSelectedKeys = useSelectionStore((s) => s.dragSelectedKeys)
   const setLastDragUndo = useSelectionStore((s) => s.setLastDragUndo)
+
+  const portfolioRef = useRef({ buildings, utilities, polygons })
+  const polygonIndexRef = useRef(buildPolygonBuildingIndex(buildings, polygons))
+
+  useEffect(() => {
+    portfolioRef.current = { buildings, utilities, polygons }
+    polygonIndexRef.current = buildPolygonBuildingIndex(buildings, polygons)
+  }, [buildings, utilities, polygons])
 
   const buildingMarkersRef = useRef<BuildingMarkerEntry[]>([])
   const detailMarkersRef = useRef<DetailMarkerEntry[]>([])
@@ -89,6 +117,88 @@ export function useMapMarkers({
   useEffect(() => {
     layersRef.current = layers
   }, [layers])
+
+  const resolveGroupKeys = useCallback((anchorKey: string) => {
+    const selected = useSelectionStore.getState().dragSelectedKeys
+    if (selected.length > 0 && selected.includes(anchorKey)) return selected
+    return [anchorKey]
+  }, [])
+
+  const commitGroupDrag = useCallback(() => {
+    const finalSnapshot = endGroupDrag()
+    if (!finalSnapshot || !onGroupMoved) return
+    onGroupMoved(applySnapshotToPortfolio(portfolioRef.current, finalSnapshot))
+    showToastSuccess('✓ Positions updated — save to HTML to keep changes.')
+  }, [onGroupMoved])
+
+  const beginDragSession = useCallback(
+    (anchorKey: string, startLat: number, startLng: number) => {
+      const keys = resolveGroupKeys(anchorKey)
+      const portfolio = portfolioRef.current
+      const beforeSnapshot = buildGroupDragSnapshot(portfolio, keys)
+      if (keys.length > 1) {
+        beginGroupDrag({ lat: startLat, lng: startLng }, beforeSnapshot)
+        setLastDragUndo(() => {
+          onGroupMoved?.(applySnapshotToPortfolio(portfolioRef.current, beforeSnapshot))
+        })
+      }
+    },
+    [onGroupMoved, resolveGroupKeys, setLastDragUndo],
+  )
+
+  useEffect(() => {
+    registerGroupDragVisuals({
+      setBuildingPosition: (address, lat, lng) => {
+        const entry = buildingMarkersRef.current.find((m) => m.building.address === address)
+        if (!entry) return
+        entry.marker.setPosition({ lat, lng })
+        entry.label.setPosition({ lat, lng })
+        entry.marker.setVisible(true)
+        entry.label.setVisible(true)
+      },
+      setDetailPosition: (key, lat, lng) => {
+        const entry = detailMarkersRef.current.find((m) => m.dragKey === key)
+        if (!entry) return
+        entry.marker.setPosition({ lat, lng })
+        entry.label?.setPosition({ lat, lng })
+        entry.marker.setVisible(true)
+        entry.label?.setVisible(true)
+      },
+    })
+    return () => {
+      registerGroupDragVisuals({
+        setBuildingPosition: undefined,
+        setDetailPosition: undefined,
+      })
+    }
+  }, [])
+
+  const refreshDragSelectionStyles = useCallback(() => {
+    const selected = new Set(useSelectionStore.getState().dragSelectedKeys)
+    for (const entry of buildingMarkersRef.current) {
+      const color = getColor(entry.building.park)
+      const isSelected = selected.has(buildingDragKey(entry.building.address))
+      entry.marker.setIcon(getMarkerIcon(color, isSelected))
+      entry.marker.setZIndex(isSelected ? 999 : 10)
+    }
+    for (const entry of detailMarkersRef.current) {
+      const cfg = LAYER_COLORS[entry.type]
+      const isSelected = selected.has(entry.dragKey)
+      entry.marker.setIcon({
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: cfg.fill,
+        fillOpacity: 0.9,
+        strokeColor: isSelected ? '#ffffff' : cfg.stroke,
+        strokeWeight: isSelected ? 3 : 1,
+        scale: isSelected ? cfg.scale + 2 : cfg.scale,
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!dragMode) return
+    refreshDragSelectionStyles()
+  }, [dragMode, dragSelectedKeys, refreshDragSelectionStyles])
 
   const resetBuildingIcons = useCallback(() => {
     for (const entry of buildingMarkersRef.current) {
@@ -118,7 +228,8 @@ export function useMapMarkers({
         return
       }
       closeAllMapPopups()
-      infoWindowRef.current.setContent(buildBuildingInfoHtml(building))
+      const tenantPolygons = polygonsForBuilding(polygonIndexRef.current, building.address)
+      infoWindowRef.current.setContent(buildBuildingInfoHtml(building, tenantPolygons))
       infoWindowRef.current.open({ map, anchor: marker })
       activeInfoMarkerRef.current = marker
       afterMapViewChange(map)
@@ -239,15 +350,23 @@ export function useMapMarkers({
 
   const refreshDetailVisibility = useCallback(() => {
     if (!map) return
+    if (isGroupDragActive()) return
+
     const zoom = map.getZoom() ?? 0
     const bounds = map.getBounds()
     const activeLayers = layersRef.current
+    const editMode = useSelectionStore.getState().dragMode
+    const selected = new Set(useSelectionStore.getState().dragSelectedKeys)
+
     for (const dm of detailMarkersRef.current) {
       const pos = dm.marker.getPosition()
+      const layerOn = activeLayers[dm.type]
+      const zoomOk = zoom >= 16
+      const inBounds = Boolean(bounds && pos && bounds.contains(pos))
       const show =
-        activeLayers[dm.type] &&
-        zoom >= 16 &&
-        Boolean(bounds && pos && bounds.contains(pos))
+        layerOn &&
+        zoomOk &&
+        (editMode && selected.has(dm.dragKey) ? true : inBounds)
       dm.marker.setVisible(show)
       dm.label?.setVisible(show)
     }
@@ -255,10 +374,11 @@ export function useMapMarkers({
 
   const fitAllMarkers = useCallback(() => {
     if (!map) return
+    const editMode = useSelectionStore.getState().dragMode
     const bounds = new google.maps.LatLngBounds()
     const visibleSet = new Set(mapBuildings.map((b) => b.address))
     for (const entry of buildingMarkersRef.current) {
-      if (!visibleSet.has(entry.building.address)) {
+      if (!editMode && !visibleSet.has(entry.building.address)) {
         entry.marker.setVisible(false)
         entry.label.setVisible(false)
         continue
@@ -360,7 +480,14 @@ export function useMapMarkers({
         draggable: dragMode,
       })
 
-      marker.addListener('click', () => {
+      marker.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (useSelectionStore.getState().dragMode) {
+          const domEvent = e.domEvent as MouseEvent | undefined
+          const additive = Boolean(domEvent?.ctrlKey || domEvent?.metaKey || domEvent?.shiftKey)
+          useSelectionStore.getState().toggleDragSelect(buildingDragKey(b.address), additive)
+          refreshDragSelectionStyles()
+          return
+        }
         callbacksRef.current.onSelectBuilding(b)
         openBuildingInfo(b, marker)
       })
@@ -393,14 +520,29 @@ export function useMapMarkers({
         if (!startPos) return
         const startLat = startPos.lat()
         const startLng = startPos.lng()
-        setLastDragUndo(() => {
-          marker.setPosition({ lat: startLat, lng: startLng })
-          label.setPosition({ lat: startLat, lng: startLng })
-          callbacksRef.current.onBuildingMoved?.(b, startLat, startLng)
-        })
+        const anchorKey = buildingDragKey(b.address)
+        beginDragSession(anchorKey, startLat, startLng)
+        if (!isGroupDragActive()) {
+          setLastDragUndo(() => {
+            marker.setPosition({ lat: startLat, lng: startLng })
+            label.setPosition({ lat: startLat, lng: startLng })
+            callbacksRef.current.onBuildingMoved?.(b, startLat, startLng)
+          })
+        }
+      })
+
+      marker.addListener('drag', () => {
+        if (!isGroupDragActive()) return
+        const pos = marker.getPosition()
+        if (!pos) return
+        applyGroupDragDelta({ lat: pos.lat(), lng: pos.lng() })
       })
 
       marker.addListener('dragend', () => {
+        if (isGroupDragActive()) {
+          commitGroupDrag()
+          return
+        }
         const pos = marker.getPosition()
         if (!pos) return
         const lat = pos.lat()
@@ -410,6 +552,13 @@ export function useMapMarkers({
       })
 
       buildingMarkersRef.current.push({ building: b, marker, label })
+      registerMarqueeTarget(buildingDragKey(b.address), {
+        kind: 'point',
+        resolve: () => {
+          const pos = marker.getPosition()
+          return pos ? { lat: pos.lat(), lng: pos.lng() } : null
+        },
+      })
     }
 
     const makeDetailMarker = (
@@ -421,6 +570,12 @@ export function useMapMarkers({
     ) => {
       if (!lat || !lng) return
       const cfg = LAYER_COLORS[layerKey]
+      const dragKey =
+        building != null
+          ? detailDragKey(layerKey, data.name ?? '', building.address)
+          : 'utility_type' in data
+            ? utilityDragKey(data)
+            : detailDragKey(layerKey, data.name ?? '', '')
       const marker = new google.maps.Marker({
         position: { lat, lng },
         map,
@@ -466,8 +621,15 @@ export function useMapMarkers({
         })
       }
 
-      marker.addListener('click', () => {
-        openDetailInfo({ type: layerKey, building, data, marker, label })
+      marker.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (useSelectionStore.getState().dragMode) {
+          const domEvent = e.domEvent as MouseEvent | undefined
+          const additive = Boolean(domEvent?.ctrlKey || domEvent?.metaKey || domEvent?.shiftKey)
+          useSelectionStore.getState().toggleDragSelect(dragKey, additive)
+          refreshDragSelectionStyles()
+          return
+        }
+        openDetailInfo({ type: layerKey, building, data, marker, label, dragKey })
       })
 
       marker.addListener('dragstart', () => {
@@ -475,14 +637,28 @@ export function useMapMarkers({
         if (!startPos) return
         const startLat = startPos.lat()
         const startLng = startPos.lng()
-        setLastDragUndo(() => {
-          marker.setPosition({ lat: startLat, lng: startLng })
-          label?.setPosition({ lat: startLat, lng: startLng })
-          callbacksRef.current.onDetailMoved?.(layerKey, data, startLat, startLng, building)
-        })
+        beginDragSession(dragKey, startLat, startLng)
+        if (!isGroupDragActive()) {
+          setLastDragUndo(() => {
+            marker.setPosition({ lat: startLat, lng: startLng })
+            label?.setPosition({ lat: startLat, lng: startLng })
+            callbacksRef.current.onDetailMoved?.(layerKey, data, startLat, startLng, building)
+          })
+        }
+      })
+
+      marker.addListener('drag', () => {
+        if (!isGroupDragActive()) return
+        const pos = marker.getPosition()
+        if (!pos) return
+        applyGroupDragDelta({ lat: pos.lat(), lng: pos.lng() })
       })
 
       marker.addListener('dragend', () => {
+        if (isGroupDragActive()) {
+          commitGroupDrag()
+          return
+        }
         const pos = marker.getPosition()
         if (!pos) return
         const lat = pos.lat()
@@ -491,7 +667,14 @@ export function useMapMarkers({
         callbacksRef.current.onDetailMoved?.(layerKey, data, lat, lng, building)
       })
 
-      detailMarkersRef.current.push({ type: layerKey, building, data, marker, label })
+      detailMarkersRef.current.push({ type: layerKey, building, data, marker, label, dragKey })
+      registerMarqueeTarget(dragKey, {
+        kind: 'point',
+        resolve: () => {
+          const pos = marker.getPosition()
+          return pos ? { lat: pos.lat(), lng: pos.lng() } : null
+        },
+      })
     }
 
     for (const b of buildings) {
@@ -510,10 +693,12 @@ export function useMapMarkers({
 
     return () => {
       for (const entry of buildingMarkersRef.current) {
+        unregisterMarqueeTarget(buildingDragKey(entry.building.address))
         entry.marker.setMap(null)
         entry.label.setMap(null)
       }
       for (const entry of detailMarkersRef.current) {
+        unregisterMarqueeTarget(entry.dragKey)
         entry.marker.setMap(null)
         entry.label?.setMap(null)
       }
@@ -523,7 +708,20 @@ export function useMapMarkers({
       infoWindowRef.current = null
       stopSoloMove()
     }
-  }, [map, buildings, utilities, openBuildingInfo, openDetailInfo, attachInfoWindowActions, refreshDetailVisibility, stopSoloMove])
+  }, [
+    map,
+    buildings,
+    utilities,
+    openBuildingInfo,
+    openDetailInfo,
+    attachInfoWindowActions,
+    refreshDetailVisibility,
+    stopSoloMove,
+    beginDragSession,
+    commitGroupDrag,
+    refreshDragSelectionStyles,
+    dragMode,
+  ])
 
   useEffect(() => {
     refreshDetailVisibility()
@@ -541,9 +739,16 @@ export function useMapMarkers({
 
   useEffect(() => {
     if (!map) return
-    const listener = map.addListener('click', closeAllMapPopups)
+    const listener = map.addListener('click', () => {
+      if (consumeMapClickClearSuppression()) return
+      if (useSelectionStore.getState().dragMode) {
+        useSelectionStore.getState().clearDragSelect()
+        refreshDragSelectionStyles()
+      }
+      closeAllMapPopups()
+    })
     return () => google.maps.event.removeListener(listener)
-  }, [map])
+  }, [map, refreshDragSelectionStyles])
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -616,7 +821,7 @@ export function useMapMarkers({
 
   useEffect(() => {
     refreshDetailVisibility()
-  }, [layers, refreshDetailVisibility])
+  }, [layers, dragMode, dragSelectedKeys, refreshDetailVisibility])
 
   useEffect(() => {
     for (const entry of buildingMarkersRef.current) {

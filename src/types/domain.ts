@@ -2,7 +2,6 @@
 
 export type LayerKey =
   | 'rtu'
-  | 'tenants'
   | 'sprinkler'
   | 'electrical'
   | 'hydrant'
@@ -42,15 +41,6 @@ export interface Rtu {
   suite?: string | null
 }
 
-export interface Tenant {
-  id?: number
-  building_id?: number
-  name: string
-  description: string
-  lat: number
-  lng: number
-}
-
 export interface Building {
   id?: number
   park: string
@@ -64,7 +54,6 @@ export interface Building {
   notes?: string | null
   sold?: boolean
   rtus?: Rtu[]
-  tenants?: Tenant[]
 }
 
 export interface Utility {
@@ -131,17 +120,10 @@ export interface ImageryMode {
   borderColor: string
 }
 
-/** Legacy JSON snapshot shape (nested rtus/tenants use `desc`). */
+/** Legacy JSON snapshot shape (nested rtus use `desc`). */
 export interface LegacyRtuJson {
   name: string
   desc: string
-  lat: number
-  lng: number
-}
-
-export interface LegacyTenantJson {
-  name: string
-  desc?: string
   lat: number
   lng: number
 }
@@ -158,7 +140,6 @@ export interface LegacyBuildingJson {
   notes?: string
   sold?: boolean
   rtus?: LegacyRtuJson[]
-  tenants?: LegacyTenantJson[]
 }
 
 export interface LegacyUtilityJson {
@@ -193,12 +174,6 @@ export function normalizeLegacyBuilding(raw: LegacyBuildingJson): Building {
       description: r.desc,
       lat: r.lat,
       lng: r.lng,
-    })),
-    tenants: (raw.tenants ?? []).map((t) => ({
-      name: t.name,
-      description: t.desc ?? '',
-      lat: t.lat,
-      lng: t.lng,
     })),
   }
 }

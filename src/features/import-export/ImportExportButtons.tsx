@@ -6,15 +6,22 @@ import type { PortfolioData } from '@/types/domain'
 export interface ImportExportButtonsProps {
   portfolio: PortfolioData
   onImport: (data: PortfolioData) => void
+  onExportComplete?: () => void
   compact?: boolean
 }
 
-export function ImportExportButtons({ portfolio, onImport, compact }: ImportExportButtonsProps) {
+export function ImportExportButtons({
+  portfolio,
+  onImport,
+  onExportComplete,
+  compact,
+}: ImportExportButtonsProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleExport = () => {
     exportPortfolioExcel(portfolio)
     showToastSuccess('✓ Excel exported')
+    onExportComplete?.()
   }
 
   const handleFile = async (file: File) => {
@@ -22,7 +29,6 @@ export function ImportExportButtons({ portfolio, onImport, compact }: ImportExpo
       const buffer = await file.arrayBuffer()
       const data = importPortfolioExcel(buffer)
       onImport(data)
-      showToastSuccess('✓ Import complete — save to HTML to keep changes.')
     } catch (e) {
       showToastError(e instanceof Error ? e.message : 'Import failed')
     }
@@ -42,7 +48,7 @@ export function ImportExportButtons({ portfolio, onImport, compact }: ImportExpo
         type="button"
         className="btn-action"
         onClick={() => inputRef.current?.click()}
-        title="Import Excel (Buildings, RTUs, Tenants, Polygons, Utilities)"
+        title="Import Excel (Buildings, RTUs, Tenant Polygons, Utilities)"
       >
         Import Excel
       </button>

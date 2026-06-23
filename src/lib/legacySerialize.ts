@@ -26,12 +26,6 @@ export function serializeBuilding(b: Building): LegacyBuildingJson {
       lat: r.lat,
       lng: r.lng,
     })),
-    tenants: (b.tenants ?? []).map((t) => ({
-      name: t.name,
-      desc: t.description,
-      lat: t.lat,
-      lng: t.lng,
-    })),
   }
 }
 

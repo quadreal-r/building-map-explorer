@@ -1,11 +1,16 @@
 import { RTU_AGE_WARN } from '@/lib/constants'
 import { hasPlaceholderGps, hasVacant, mlCount } from '@/lib/dataQuality'
+import {
+  type PolygonBuildingIndex,
+  polygonsForBuilding,
+} from '@/lib/polygonBuildings'
 import { oldestRtuAge } from '@/lib/rtu'
 import type {
   AdvFilterState,
   Building,
   DqFilterState,
   FilterState,
+  Polygon,
 } from '@/types/domain'
 
 const ADV_RTU_AGE_THRESHOLD = 20
@@ -14,8 +19,19 @@ function normalizeSearch(search: string): string {
   return search.trim().toLowerCase()
 }
 
-/** Search match across address, metadata, tenants, and RTUs. */
-export function matchesSearch(building: Building, search: string): boolean {
+function buildingPolygons(
+  index: PolygonBuildingIndex | undefined,
+  building: Building,
+): Polygon[] {
+  return index ? polygonsForBuilding(index, building.address) : []
+}
+
+/** Search match across address, metadata, tenant polygons, and RTUs. */
+export function matchesSearch(
+  building: Building,
+  search: string,
+  polygonIndex?: PolygonBuildingIndex,
+): boolean {
   const q = normalizeSearch(search)
   if (!q) return true
 
@@ -24,11 +40,12 @@ export function matchesSearch(building: Building, search: string): boolean {
   if (building.cluster?.toLowerCase().includes(q)) return true
   if (building.manager?.toLowerCase().includes(q)) return true
 
+  const tenantPolygons = buildingPolygons(polygonIndex, building)
   if (
-    building.tenants?.some(
-      (t) =>
-        t.description.toLowerCase().includes(q) ||
-        t.name.toLowerCase().includes(q),
+    tenantPolygons.some(
+      (polygon) =>
+        polygon.description.toLowerCase().includes(q) ||
+        polygon.name.toLowerCase().includes(q),
     )
   ) {
     return true
@@ -51,9 +68,11 @@ export function matchesSearch(building: Building, search: string): boolean {
 export function passAdvFilter(
   building: Building,
   adv: AdvFilterState,
+  polygonIndex?: PolygonBuildingIndex,
 ): boolean {
-  if (adv.vacant === 'yes' && !hasVacant(building)) return false
-  if (adv.vacant === 'no' && hasVacant(building)) return false
+  const tenantPolygons = buildingPolygons(polygonIndex, building)
+  if (adv.vacant === 'yes' && !hasVacant(building, tenantPolygons)) return false
+  if (adv.vacant === 'no' && hasVacant(building, tenantPolygons)) return false
 
   const oldest = oldestRtuAge(building)
   if (adv.rtu === 'yes' && oldest < ADV_RTU_AGE_THRESHOLD) return false
@@ -71,10 +90,15 @@ export function passAdvFilter(
 }
 
 /** Data-quality chip filters applied on top of primary filters. */
-export function passDqFilter(building: Building, dq: DqFilterState): boolean {
+export function passDqFilter(
+  building: Building,
+  dq: DqFilterState,
+  polygonIndex?: PolygonBuildingIndex,
+): boolean {
+  const tenantPolygons = buildingPolygons(polygonIndex, building)
   if (dq.gps && !hasPlaceholderGps(building)) return false
   if (dq.rtu && oldestRtuAge(building) < RTU_AGE_WARN) return false
-  if (dq.vacant && !hasVacant(building)) return false
+  if (dq.vacant && !hasVacant(building, tenantPolygons)) return false
   if (dq.ml && !mlCount(building)) return false
   return true
 }
@@ -83,12 +107,13 @@ export function passDqFilter(building: Building, dq: DqFilterState): boolean {
 export function reconcileFilterDropdowns(
   buildings: Building[],
   filters: FilterState,
+  polygonIndex?: PolygonBuildingIndex,
 ): FilterState {
   const search = normalizeSearch(filters.search)
   const next = { ...filters }
 
   if (search) {
-    const searchMatches = buildings.filter((b) => matchesSearch(b, search))
+    const searchMatches = buildings.filter((b) => matchesSearch(b, search, polygonIndex))
     if (next.park && !searchMatches.some((b) => b.park === next.park)) {
       next.park = ''
     }
@@ -124,13 +149,14 @@ export function autoFillFilterDropdowns(
   buildings: Building[],
   filters: Pick<FilterState, 'search' | 'park' | 'cluster' | 'manager'>,
   skipFields: ReadonlySet<string> = new Set(),
+  polygonIndex?: PolygonBuildingIndex,
 ): Pick<FilterState, 'search' | 'park' | 'cluster' | 'manager'> {
   const next = { ...filters }
   let changed = true
 
   while (changed) {
     changed = false
-    const options = collectFilterOptions(buildings, next)
+    const options = collectFilterOptions(buildings, next, polygonIndex)
 
     if (!next.park && !skipFields.has('park') && options.parks.length === 1) {
       next.park = options.parks[0]!
@@ -154,6 +180,7 @@ export function applyFilterSelection(
   buildings: Building[],
   filters: FilterState,
   patch: Partial<Pick<FilterState, 'park' | 'cluster' | 'manager'>>,
+  polygonIndex?: PolygonBuildingIndex,
 ): Pick<FilterState, 'search' | 'park' | 'cluster' | 'manager'> {
   const expanded = { ...patch }
   if (patch.park === '') {
@@ -165,24 +192,25 @@ export function applyFilterSelection(
     expanded.cluster = ''
   }
 
-  const reconciled = reconcileFilterDropdowns(buildings, { ...filters, ...expanded })
-  return autoFillFilterDropdowns(buildings, reconciled, new Set(Object.keys(expanded)))
+  const reconciled = reconcileFilterDropdowns(buildings, { ...filters, ...expanded }, polygonIndex)
+  return autoFillFilterDropdowns(buildings, reconciled, new Set(Object.keys(expanded)), polygonIndex)
 }
 
 /** Primary filter pass (search, park, cluster, manager, advanced). */
 export function applyPrimaryFilters(
   buildings: Building[],
   filters: FilterState,
+  polygonIndex?: PolygonBuildingIndex,
 ): Building[] {
-  const reconciled = reconcileFilterDropdowns(buildings, filters)
+  const reconciled = reconcileFilterDropdowns(buildings, filters, polygonIndex)
   const search = normalizeSearch(reconciled.search)
 
   return buildings.filter((building) => {
-    if (!matchesSearch(building, search)) return false
+    if (!matchesSearch(building, search, polygonIndex)) return false
     if (reconciled.park && building.park !== reconciled.park) return false
     if (reconciled.cluster && building.cluster !== reconciled.cluster) return false
     if (reconciled.manager && building.manager !== reconciled.manager) return false
-    if (!passAdvFilter(building, reconciled.adv)) return false
+    if (!passAdvFilter(building, reconciled.adv, polygonIndex)) return false
     return true
   })
 }
@@ -191,9 +219,10 @@ export function applyPrimaryFilters(
 export function applyFilters(
   buildings: Building[],
   filters: FilterState,
+  polygonIndex?: PolygonBuildingIndex,
 ): Building[] {
-  return applyPrimaryFilters(buildings, filters).filter((building) =>
-    passDqFilter(building, filters.dq),
+  return applyPrimaryFilters(buildings, filters, polygonIndex).filter((building) =>
+    passDqFilter(building, filters.dq, polygonIndex),
   )
 }
 
@@ -202,10 +231,11 @@ function buildingsForFilterOptions(
   buildings: Building[],
   filters: Pick<FilterState, 'search' | 'park' | 'cluster' | 'manager'>,
   exclude: 'park' | 'cluster' | 'manager',
+  polygonIndex?: PolygonBuildingIndex,
 ): Building[] {
   const search = normalizeSearch(filters.search)
   return buildings.filter((building) => {
-    if (!matchesSearch(building, search)) return false
+    if (!matchesSearch(building, search, polygonIndex)) return false
     if (exclude !== 'park' && filters.park && building.park !== filters.park) return false
     if (exclude !== 'cluster' && filters.cluster && building.cluster !== filters.cluster) {
       return false
@@ -226,24 +256,25 @@ export function collectFilterOptions(
     cluster: '',
     manager: '',
   },
+  polygonIndex?: PolygonBuildingIndex,
 ): {
   parks: string[]
   clusters: string[]
   managers: string[]
 } {
   const parks = [
-    ...new Set(buildingsForFilterOptions(buildings, filters, 'park').map((b) => b.park)),
+    ...new Set(buildingsForFilterOptions(buildings, filters, 'park', polygonIndex).map((b) => b.park)),
   ].sort()
   const clusters = [
     ...new Set(
-      buildingsForFilterOptions(buildings, filters, 'cluster')
+      buildingsForFilterOptions(buildings, filters, 'cluster', polygonIndex)
         .map((b) => b.cluster)
         .filter(Boolean),
     ),
   ].sort()
   const managers = [
     ...new Set(
-      buildingsForFilterOptions(buildings, filters, 'manager')
+      buildingsForFilterOptions(buildings, filters, 'manager', polygonIndex)
         .map((b) => b.manager)
         .filter(Boolean),
     ),

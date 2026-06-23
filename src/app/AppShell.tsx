@@ -37,7 +37,10 @@ export function AppShell() {
 
   const portfolio = portfolioOverride ?? data ?? EMPTY_PORTFOLIO
 
-  const { filteredBuildings, listBuildings } = useFilteredBuildings(portfolio.buildings)
+  const { filteredBuildings, listBuildings } = useFilteredBuildings(
+    portfolio.buildings,
+    portfolio.polygons,
+  )
 
   useKeyboardShortcuts({ portfolio, onSaved: markSaved })
 

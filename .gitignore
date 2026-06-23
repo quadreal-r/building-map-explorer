@@ -1,6 +1,9 @@
 node_modules
 dist
+dist-portable
 dist-ssr
+public/portable-template.html
+.tmp-xlsx-inspect
 *.local
 .env
 .env.local

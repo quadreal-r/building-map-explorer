@@ -5,7 +5,20 @@ import {
   buildDetailInfoHtml,
   buildDetailInfoPlainText,
 } from '@/lib/mapInfoWindow'
-import type { Building, Rtu } from '@/types/domain'
+import type { Building, Polygon, Rtu } from '@/types/domain'
+
+const tenantPolygons: Polygon[] = [
+  {
+    name: 'Unit 1',
+    description: 'Acme Corp',
+    color: '#60a5fa',
+    paths: [
+      { lat: 43.651, lng: -79.621 },
+      { lat: 43.652, lng: -79.621 },
+      { lat: 43.652, lng: -79.62 },
+    ],
+  },
+]
 
 const building: Building = {
   park: 'Test Park (x 2)',
@@ -24,7 +37,6 @@ const building: Building = {
       lng: -79.621,
     },
   ],
-  tenants: [{ name: 'Unit 1', description: 'Acme Corp', lat: 0, lng: 0 }],
 }
 
 const rtu: Rtu = {
@@ -44,7 +56,7 @@ const rtuWithBuilding: Rtu = {
 
 describe('mapInfoWindow', () => {
   it('includes Copy and Move in building popup', () => {
-    const html = buildBuildingInfoHtml(building)
+    const html = buildBuildingInfoHtml(building, tenantPolygons)
     expect(html).toContain('data-iw-action="copy-all"')
     expect(html).toContain('data-iw-action="move"')
     expect(html).toContain('class="iw-copy-source"')
@@ -53,14 +65,14 @@ describe('mapInfoWindow', () => {
   })
 
   it('builds building plain text matching popup layout', () => {
-    const text = buildBuildingInfoPlainText(building)
+    const text = buildBuildingInfoPlainText(building, tenantPolygons)
     expect(text).toContain('100 Main Street')
     expect(text).toContain('Test Park')
     expect(text).toContain('BU #        123')
     expect(text).toContain('RTUs (1)')
     expect(text).toContain('RTU-01')
     expect(text).toContain('  ABC · TRANE')
-    expect(text).toContain('Tenants (1)')
+    expect(text).toContain('Tenant Polygons (1)')
     expect(text).toContain('Unit 1  Acme Corp')
   })
 

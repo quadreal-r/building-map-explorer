@@ -22,6 +22,18 @@ export type { PortfolioData } from '@/types/domain'
 
 const STORAGE_KEY = 'bme-portfolio'
 
+declare global {
+  interface Window {
+    __BME_EMBEDDED_PORTFOLIO__?: PortfolioData
+  }
+}
+
+function loadEmbeddedPortfolio(): PortfolioData | null {
+  if (typeof window === 'undefined') return null
+  const data = window.__BME_EMBEDDED_PORTFOLIO__
+  return isValidStoredPortfolio(data) ? data : null
+}
+
 export function isValidStoredPortfolio(data: unknown): data is PortfolioData {
   if (!data || typeof data !== 'object') return false
   const portfolio = data as PortfolioData
@@ -61,7 +73,7 @@ function loadStoredPortfolio(): PortfolioData | null {
 }
 
 export async function loadPortfolioData(): Promise<PortfolioData> {
-  return loadStoredPortfolio() ?? loadStaticPortfolio()
+  return loadEmbeddedPortfolio() ?? loadStoredPortfolio() ?? loadStaticPortfolio()
 }
 
 export function usePortfolioData() {

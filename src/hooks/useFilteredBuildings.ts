@@ -1,14 +1,20 @@
 import { useMemo } from 'react'
 import { useFilterStore } from '@/stores/filterStore'
 import { applyPrimaryFilters, reconcileFilterDropdowns } from '@/lib/filters'
-import type { Building, FilterState } from '@/types/domain'
+import { buildPolygonBuildingIndex } from '@/lib/polygonBuildings'
+import type { Building, FilterState, Polygon } from '@/types/domain'
 
-export function useFilteredBuildings(buildings: Building[]) {
+export function useFilteredBuildings(buildings: Building[], polygons: Polygon[] = []) {
   const search = useFilterStore((state) => state.search)
   const park = useFilterStore((state) => state.park)
   const cluster = useFilterStore((state) => state.cluster)
   const manager = useFilterStore((state) => state.manager)
   const adv = useFilterStore((state) => state.adv)
+
+  const polygonIndex = useMemo(
+    () => buildPolygonBuildingIndex(buildings, polygons),
+    [buildings, polygons],
+  )
 
   const filters: FilterState = useMemo(
     () => ({
@@ -23,8 +29,13 @@ export function useFilteredBuildings(buildings: Building[]) {
   )
 
   const filteredBuildings = useMemo(
-    () => applyPrimaryFilters(buildings, reconcileFilterDropdowns(buildings, filters)),
-    [buildings, filters],
+    () =>
+      applyPrimaryFilters(
+        buildings,
+        reconcileFilterDropdowns(buildings, filters, polygonIndex),
+        polygonIndex,
+      ),
+    [buildings, filters, polygonIndex],
   )
 
   return {
@@ -34,5 +45,6 @@ export function useFilteredBuildings(buildings: Building[]) {
     count: filteredBuildings.length,
     mapCount: filteredBuildings.length,
     filters,
+    polygonIndex,
   }
 }

@@ -1,14 +1,28 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { polygonDragKey, buildGroupDragSnapshot, applySnapshotToPortfolio } from '@/lib/dragSelection'
+import {
+  applyGroupDragDelta,
+  beginGroupDrag,
+  endGroupDrag,
+  isGroupDragActive,
+  registerGroupDragVisuals,
+  setNativeDragPolygonKey,
+} from '@/lib/mapGroupDragSession'
 import { afterMapViewChange, panToPreserveRotation } from '@/lib/mapRotation'
+import { consumeMapClickClearSuppression, registerMarqueeTarget, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
 import { closeAllMapPopups, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
 import { showToastSuccess } from '@/lib/toast'
-import type { Polygon } from '@/types/domain'
+import { useSelectionStore } from '@/stores/selectionStore'
+import type { Building, Polygon, Utility } from '@/types/domain'
 
 export interface UsePolygonsOptions {
   map: google.maps.Map | null
+  buildings: Building[]
+  utilities: Utility[]
   polygons: Polygon[]
   onPolygonUpdated?: (polygon: Polygon) => void
   onPolygonDeleted?: (polygon: Polygon) => void
+  onGroupMoved?: (data: { buildings: Building[]; utilities: Utility[]; polygons: Polygon[] }) => void
 }
 
 interface RenderedPolygon {
@@ -27,20 +41,97 @@ function panToPolygon(map: google.maps.Map, data: Polygon) {
 }
 
 function polygonKey(data: Polygon): string {
-  return `${data.name}\0${data.description}`
+  return polygonDragKey(data.name, data.description)
+}
+
+function polygonCentroid(data: Polygon): { lat: number; lng: number } {
+  const lats = data.paths.reduce((s, pt) => s + pt.lat, 0)
+  const lngs = data.paths.reduce((s, pt) => s + pt.lng, 0)
+  return { lat: lats / data.paths.length, lng: lngs / data.paths.length }
 }
 
 export function usePolygons({
   map,
+  buildings,
+  utilities,
   polygons,
   onPolygonUpdated,
   onPolygonDeleted,
+  onGroupMoved,
 }: UsePolygonsOptions) {
+  const dragMode = useSelectionStore((s) => s.dragMode)
+  const dragSelectedKeys = useSelectionStore((s) => s.dragSelectedKeys)
+  const setLastDragUndo = useSelectionStore((s) => s.setLastDragUndo)
+
+  const portfolioRef = useRef({ buildings, utilities, polygons })
+
+  useEffect(() => {
+    portfolioRef.current = { buildings, utilities, polygons }
+  }, [buildings, utilities, polygons])
   const renderedRef = useRef<RenderedPolygon[]>([])
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null)
   const infoPolyRef = useRef<google.maps.Polygon | null>(null)
   const editingRef = useRef<{ poly: google.maps.Polygon; data: Polygon } | null>(null)
   const movingRef = useRef<{ poly: google.maps.Polygon; data: Polygon } | null>(null)
+  const resolveGroupKeys = useCallback((anchorKey: string) => {
+    const selected = useSelectionStore.getState().dragSelectedKeys
+    if (selected.length > 0 && selected.includes(anchorKey)) return selected
+    return [anchorKey]
+  }, [])
+
+  const commitGroupDrag = useCallback(() => {
+    const finalSnapshot = endGroupDrag()
+    if (!finalSnapshot || !onGroupMoved) return
+    onGroupMoved(applySnapshotToPortfolio(portfolioRef.current, finalSnapshot))
+    showToastSuccess('✓ Positions updated — save to HTML to keep changes.')
+  }, [onGroupMoved])
+
+  const beginDragSession = useCallback(
+    (anchorKey: string, startLat: number, startLng: number) => {
+      const keys = resolveGroupKeys(anchorKey)
+      const portfolio = portfolioRef.current
+      const beforeSnapshot = buildGroupDragSnapshot(portfolio, keys)
+      if (keys.length > 1) {
+        beginGroupDrag({ lat: startLat, lng: startLng }, beforeSnapshot)
+        setLastDragUndo(() => {
+          onGroupMoved?.(applySnapshotToPortfolio(portfolio, beforeSnapshot))
+        })
+      }
+    },
+    [onGroupMoved, resolveGroupKeys, setLastDragUndo],
+  )
+
+  useEffect(() => {
+    registerGroupDragVisuals({
+      setPolygonPaths: (key, paths) => {
+        const entry = renderedRef.current.find((r) => polygonKey(r.data) === key)
+        if (!entry) return
+        entry.gmPoly.setPath(paths)
+      },
+    })
+    return () => {
+      registerGroupDragVisuals({ setPolygonPaths: undefined })
+    }
+  }, [])
+
+  const refreshPolygonSelectionStyles = useCallback(() => {
+    const selected = new Set(useSelectionStore.getState().dragSelectedKeys)
+    for (const entry of renderedRef.current) {
+      const key = polygonKey(entry.data)
+      const isSelected = selected.has(key)
+      entry.gmPoly.setOptions({
+        strokeWeight: isSelected ? 4 : 2,
+        fillOpacity: isSelected ? 0.15 : 0.02,
+        strokeColor: isSelected ? '#ffffff' : entry.data.color,
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!dragMode) return
+    refreshPolygonSelectionStyles()
+  }, [dragMode, dragSelectedKeys, refreshPolygonSelectionStyles])
+
   const callbacksRef = useRef({ onPolygonUpdated, onPolygonDeleted })
 
   const syncPaths = useCallback((poly: google.maps.Polygon, data: Polygon) => {
@@ -178,6 +269,7 @@ export function usePolygons({
 
     for (const p of polygons) {
       if (p.paths.length < 3) continue
+      const key = polygonKey(p)
       const gmPoly = new google.maps.Polygon({
         paths: p.paths,
         strokeColor: p.color,
@@ -187,22 +279,88 @@ export function usePolygons({
         fillOpacity: 0.02,
         map,
         zIndex: 40,
+        draggable: false,
       })
 
-      gmPoly.addListener('click', () => {
+      gmPoly.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (useSelectionStore.getState().dragMode) {
+          e.stop()
+          const domEvent = e.domEvent as MouseEvent | undefined
+          const additive = Boolean(domEvent?.ctrlKey || domEvent?.metaKey || domEvent?.shiftKey)
+          useSelectionStore.getState().toggleDragSelect(key, additive)
+          refreshPolygonSelectionStyles()
+          return
+        }
         closeAllMapPopups()
       })
 
       gmPoly.addListener('dblclick', (e: google.maps.MapMouseEvent) => {
+        if (useSelectionStore.getState().dragMode) return
         e.stop()
         openPopupRef.current(gmPoly, p, e.latLng ?? undefined)
       })
 
+      gmPoly.addListener('dragstart', () => {
+        if (movingRef.current?.poly === gmPoly) return
+        if (!useSelectionStore.getState().dragMode) return
+        const start = polygonCentroid(p)
+        beginDragSession(key, start.lat, start.lng)
+        if (isGroupDragActive()) {
+          setNativeDragPolygonKey(key)
+        }
+      })
+
+      gmPoly.addListener('drag', () => {
+        if (movingRef.current?.poly === gmPoly) return
+        if (!isGroupDragActive()) return
+        const path = gmPoly.getPath()
+        let latSum = 0
+        let lngSum = 0
+        const count = path.getLength()
+        for (let i = 0; i < count; i++) {
+          const pt = path.getAt(i)
+          latSum += pt.lat()
+          lngSum += pt.lng()
+        }
+        if (!count) return
+        applyGroupDragDelta({ lat: latSum / count, lng: lngSum / count })
+      })
+
+      gmPoly.addListener('dragend', () => {
+        setNativeDragPolygonKey(null)
+        if (movingRef.current?.poly === gmPoly) {
+          stopMove()
+          return
+        }
+        if (isGroupDragActive()) {
+          commitGroupDrag()
+          return
+        }
+        if (useSelectionStore.getState().dragMode) {
+          syncPaths(gmPoly, p)
+        }
+      })
+
       renderedRef.current.push({ data: p, gmPoly })
+      registerMarqueeTarget(key, {
+        kind: 'polygon',
+        resolve: () => {
+          const path = gmPoly.getPath()
+          const paths: Array<{ lat: number; lng: number }> = []
+          for (let i = 0; i < path.getLength(); i++) {
+            const pt = path.getAt(i)
+            paths.push({ lat: pt.lat(), lng: pt.lng() })
+          }
+          return paths
+        },
+      })
     }
+
+    refreshPolygonSelectionStyles()
 
     return () => {
       for (const entry of renderedRef.current) {
+        unregisterMarqueeTarget(polygonKey(entry.data))
         entry.gmPoly.setMap(null)
       }
       renderedRef.current = []
@@ -210,7 +368,16 @@ export function usePolygons({
       editingRef.current = null
       movingRef.current = null
     }
-  }, [map, polygons])
+  }, [map, polygons, refreshPolygonSelectionStyles, beginDragSession, commitGroupDrag, stopMove, syncPaths])
+
+  useEffect(() => {
+    for (const entry of renderedRef.current) {
+      const key = polygonKey(entry.data)
+      const selected = useSelectionStore.getState().isDragSelected(key)
+      const popupMoving = movingRef.current?.poly === entry.gmPoly
+      entry.gmPoly.setDraggable((dragMode && selected) || popupMoving)
+    }
+  }, [dragMode, dragSelectedKeys])
 
   useEffect(() => {
     const closePopups = () => {
@@ -224,7 +391,14 @@ export function usePolygons({
 
   useEffect(() => {
     if (!map) return
-    const listener = map.addListener('click', closeAllMapPopups)
+    const listener = map.addListener('click', () => {
+      if (consumeMapClickClearSuppression()) return
+      if (useSelectionStore.getState().dragMode) {
+        useSelectionStore.getState().clearDragSelect()
+        refreshPolygonSelectionStyles()
+      }
+      closeAllMapPopups()
+    })
     return () => google.maps.event.removeListener(listener)
-  }, [map])
+  }, [map, refreshPolygonSelectionStyles])
 }

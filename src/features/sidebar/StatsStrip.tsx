@@ -1,15 +1,22 @@
 import { useMemo } from 'react'
 import { hasVacant, mlCount } from '@/lib/dataQuality'
 import { formatTotalSqft } from '@/lib/format'
+import { buildPolygonBuildingIndex, polygonsForBuilding } from '@/lib/polygonBuildings'
 import { getRtuAge, oldestRtuAge } from '@/lib/rtu'
-import type { Building } from '@/types/domain'
+import type { Building, Polygon } from '@/types/domain'
 
 export interface StatsStripProps {
   buildings: Building[]
+  polygons: Polygon[]
   totalPortfolioCount: number
 }
 
-export function StatsStrip({ buildings, totalPortfolioCount }: StatsStripProps) {
+export function StatsStrip({ buildings, polygons, totalPortfolioCount }: StatsStripProps) {
+  const polygonIndex = useMemo(
+    () => buildPolygonBuildingIndex(buildings, polygons),
+    [buildings, polygons],
+  )
+
   const stats = useMemo(() => {
     let totalSqft = 0
     let totalRtus = 0
@@ -23,7 +30,7 @@ export function StatsStrip({ buildings, totalPortfolioCount }: StatsStripProps) 
       if (!Number.isNaN(sq)) totalSqft += sq
       totalRtus += b.rtus?.length ?? 0
       if (mlCount(b)) mlBuildings++
-      if (hasVacant(b)) vacantCount++
+      if (hasVacant(b, polygonsForBuilding(polygonIndex, b.address))) vacantCount++
 
       for (const r of b.rtus ?? []) {
         const age = getRtuAge(r)
@@ -65,7 +72,7 @@ export function StatsStrip({ buildings, totalPortfolioCount }: StatsStripProps) 
       totalMl,
       vacPct,
     }
-  }, [buildings])
+  }, [buildings, polygonIndex])
 
   const sqftDisplay =
     stats.totalSqft >= 1_000_000

@@ -5,7 +5,6 @@ import { APP_THEMES } from '@/lib/themes'
 import { collectFilterOptions } from '@/lib/filters'
 import { saveDatabase } from '@/lib/saveDatabase'
 import { showToastSuccess } from '@/lib/toast'
-import { usePortfolioStore } from '@/stores/portfolioStore'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import type { PortfolioData } from '@/types/domain'
@@ -23,6 +22,7 @@ export interface SettingsModalProps {
 }
 
 interface SettingsFormProps {
+  open: boolean
   portfolio: PortfolioData
   themeIndex: number
   onClose: () => void
@@ -34,6 +34,7 @@ interface SettingsFormProps {
 }
 
 function SettingsForm({
+  open,
   portfolio,
   themeIndex,
   onClose,
@@ -46,19 +47,17 @@ function SettingsForm({
   const setThemeIndex = useSettingsStore((s) => s.setThemeIndex)
   const applyTheme = useSettingsStore((s) => s.applyTheme)
   const saveSettings = useSettingsStore((s) => s.saveSettings)
-  const unsaved = usePortfolioStore((s) => s.unsaved)
 
   const dragMode = useSelectionStore((s) => s.dragMode)
-  const toggleDragMode = useSelectionStore((s) => s.toggleDragMode)
-
-  const [savingHtml, setSavingHtml] = useState(false)
+  const dragSelectedCount = useSelectionStore((s) => s.dragSelectedKeys.length)
+  const setDragMode = useSelectionStore((s) => s.setDragMode)
+  const clearDragSelect = useSelectionStore((s) => s.clearDragSelect)
 
   const managers = useMemo(
     () => collectFilterOptions(portfolio.buildings).managers,
     [portfolio.buildings],
   )
 
-  const [draftTheme, setDraftTheme] = useState(themeIndex)
   const [draftManagers, setDraftManagers] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {}
     for (const manager of managers) {
@@ -67,50 +66,46 @@ function SettingsForm({
     return initial
   })
 
-  const handleApply = async () => {
-    applyTheme(draftTheme)
-    setThemeIndex(draftTheme)
-
-    let anyChange = false
-    for (const [original, name] of Object.entries(draftManagers)) {
-      const trimmed = name.trim() || original
-      if (trimmed !== original) anyChange = true
-    }
-    if (anyChange) {
-      onPortfolioPatch({
-        ...portfolio,
-        buildings: portfolio.buildings.map((b) => {
-          const renamed = draftManagers[b.manager]
-          if (!renamed?.trim() || renamed.trim() === b.manager) return b
-          return { ...b, manager: renamed.trim() }
-        }),
-      })
-    }
-
-    await saveSettings()
-    closeSettings()
-    showToastSuccess('✓ Settings applied')
+  const applyManagerRename = (original: string, nextName: string) => {
+    const trimmed = nextName.trim() || original
+    if (trimmed === original) return
+    onPortfolioPatch({
+      ...portfolio,
+      buildings: portfolio.buildings.map((b) =>
+        b.manager === original ? { ...b, manager: trimmed } : b,
+      ),
+    })
+    showToastSuccess('✓ Manager name updated')
   }
 
-  const closeSettings = onClose
-
-  const previewTheme = (index: number) => {
-    setDraftTheme(index)
+  const handleThemeSelect = (index: number) => {
     applyTheme(index)
+    setThemeIndex(index)
+    void saveSettings()
   }
 
-  const handleSaveToHtml = async () => {
-    setSavingHtml(true)
-    try {
-      const ok = await saveDatabase(portfolio)
-      if (ok) onSaved?.()
-    } finally {
-      setSavingHtml(false)
-    }
+  const handleEditPositions = () => {
+    setDragMode(!dragMode)
+    onClose()
+  }
+
+  const handleImport = (data: PortfolioData) => {
+    onImport(data)
+    onClose()
+    const save = window.confirm(
+      'Import complete. Save to HTML to keep these changes on this computer?',
+    )
+    if (!save) return
+    void saveDatabase(data).then((ok) => {
+      if (ok) {
+        onSaved?.()
+        showToastSuccess('✓ Saved to HTML')
+      }
+    })
   }
 
   return (
-    <>
+    <Modal open={open} onClose={onClose} title="Settings" width={420} align="right">
       <div className={styles.body}>
         <section>
           <div className={styles.sectionLabel}>Colour theme</div>
@@ -119,8 +114,8 @@ function SettingsForm({
               <button
                 key={theme.name}
                 type="button"
-                className={`${styles.themeSwatch}${draftTheme === index ? ` ${styles.active}` : ''}`}
-                onClick={() => previewTheme(index)}
+                className={`${styles.themeSwatch}${themeIndex === index ? ` ${styles.active}` : ''}`}
+                onClick={() => handleThemeSelect(index)}
               >
                 <div className={styles.themeName}>{theme.name}</div>
                 <div className={styles.themePalette}>
@@ -147,10 +142,14 @@ function SettingsForm({
                 onChange={(e) =>
                   setDraftManagers((prev) => ({ ...prev, [manager]: e.target.value }))
                 }
+                onBlur={(e) => applyManagerRename(manager, e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') e.currentTarget.blur()
+                }}
               />
             </div>
           ))}
-          <p className={styles.hint}>Renames update building records when you apply settings.</p>
+          <p className={styles.hint}>Renames apply when you leave each field.</p>
         </section>
 
         <section>
@@ -160,10 +159,27 @@ function SettingsForm({
               type="button"
               className="btn-action"
               style={{ width: '100%', justifyContent: 'flex-start' }}
-              onClick={toggleDragMode}
+              onClick={handleEditPositions}
             >
-              {dragMode ? '✓ Edit positions (on)' : 'Edit positions'}
+              {dragMode ? `✓ Edit positions (on${dragSelectedCount ? ` · ${dragSelectedCount} selected` : ''})` : 'Edit positions'}
             </button>
+            {dragMode ? (
+              <button
+                type="button"
+                className="btn-action"
+                style={{ width: '100%', justifyContent: 'flex-start' }}
+                onClick={() => {
+                  clearDragSelect()
+                  onClose()
+                }}
+                disabled={dragSelectedCount === 0}
+              >
+                Clear map selection
+              </button>
+            ) : null}
+            <p className={styles.hint}>
+              Drag a box on the map to select markers and polygons, or click to toggle selection (Ctrl/Shift+click or Ctrl/Shift+drag to add). Drag any selected item to move the group.
+            </p>
             <button
               type="button"
               className="btn-action"
@@ -187,31 +203,15 @@ function SettingsForm({
             >
               Add polygon
             </button>
-            <ImportExportButtons portfolio={portfolio} onImport={onImport} />
-            <button
-              type="button"
-              id="btn-save"
-              className={`btn-action btn-save${unsaved ? ' unsaved' : ''}`}
-              style={{ width: '100%', justifyContent: 'flex-start' }}
-              onClick={() => void handleSaveToHtml()}
-              disabled={savingHtml}
-              title="Download current data as a standalone HTML file"
-            >
-              {savingHtml ? 'Saving…' : 'Save to HTML'}
-            </button>
+            <ImportExportButtons
+              portfolio={portfolio}
+              onImport={handleImport}
+              onExportComplete={onClose}
+            />
           </div>
         </section>
       </div>
-
-      <div className={styles.footer}>
-        <button type="button" className={styles.cancelBtn} onClick={onClose}>
-          Cancel
-        </button>
-        <button type="button" className={styles.applyBtn} onClick={() => void handleApply()}>
-          Apply &amp; save
-        </button>
-      </div>
-    </>
+    </Modal>
   )
 }
 
@@ -227,21 +227,20 @@ export function SettingsModal({
 }: SettingsModalProps) {
   const themeIndex = useSettingsStore((s) => s.themeIndex)
 
+  if (!open) return null
+
   return (
-    <Modal open={open} onClose={onClose} title="Settings" width={420} align="right">
-      {open ? (
-        <SettingsForm
-          key={themeIndex}
-          portfolio={portfolio}
-          themeIndex={themeIndex}
-          onClose={onClose}
-          onImport={onImport}
-          onPortfolioPatch={onPortfolioPatch}
-          onOpenPolygonDraw={onOpenPolygonDraw}
-          onOpenAddMarker={onOpenAddMarker}
-          onSaved={onSaved}
-        />
-      ) : null}
-    </Modal>
+    <SettingsForm
+      key={themeIndex}
+      open={open}
+      portfolio={portfolio}
+      themeIndex={themeIndex}
+      onClose={onClose}
+      onImport={onImport}
+      onPortfolioPatch={onPortfolioPatch}
+      onOpenPolygonDraw={onOpenPolygonDraw}
+      onOpenAddMarker={onOpenAddMarker}
+      onSaved={onSaved}
+    />
   )
 }

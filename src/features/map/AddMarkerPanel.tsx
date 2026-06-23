@@ -10,7 +10,7 @@ import {
 import { showToastSuccess } from '@/lib/toast'
 import type { LayerKey, PortfolioData, Rtu, Utility } from '@/types/domain'
 
-type MarkerCategory = 'rtu' | Exclude<LayerKey, 'tenants'>
+type MarkerCategory = 'rtu' | 'sprinkler' | 'electrical' | 'hydrant' | 'gas'
 
 const CATEGORY_OPTIONS: { value: MarkerCategory; label: string }[] = [
   { value: 'rtu', label: 'RTU' },

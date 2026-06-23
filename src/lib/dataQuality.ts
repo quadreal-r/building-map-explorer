@@ -1,5 +1,5 @@
 import { PLACEHOLDER_LAT, PLACEHOLDER_LNG } from '@/lib/constants'
-import type { Building } from '@/types/domain'
+import type { Building, Polygon } from '@/types/domain'
 
 const ML_RE = /\bML\b|Missing Lamicoid|No Lamacoid/i
 const VACANT_RE = /^(vacant|no information)$/i
@@ -19,9 +19,9 @@ export function mlCount(building: Building): number {
   ).length
 }
 
-/** True when any tenant description is "vacant" or "no information". */
-export function hasVacant(building: Building): boolean {
-  return (building.tenants ?? []).some((tenant) =>
-    VACANT_RE.test((tenant.description ?? '').trim()),
+/** True when any tenant polygon description is "vacant" or "no information". */
+export function hasVacant(_building: Building, tenantPolygons: Polygon[]): boolean {
+  return tenantPolygons.some((polygon) =>
+    VACANT_RE.test((polygon.description ?? '').trim()),
   )
 }

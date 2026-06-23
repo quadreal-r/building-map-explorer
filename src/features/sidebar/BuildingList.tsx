@@ -6,6 +6,7 @@ import { showToastSuccess } from '@/lib/toast'
 import { oldestRtuAge } from '@/lib/rtu'
 import { Tag } from '@/components/Tag/Tag'
 import { useSelectionStore } from '@/stores/selectionStore'
+import { buildPolygonBuildingIndex, polygonsForBuilding } from '@/lib/polygonBuildings'
 import type { Building, PortfolioData } from '@/types/domain'
 
 export interface BuildingListProps {
@@ -17,6 +18,7 @@ export interface BuildingListProps {
 export function BuildingList({ buildings, portfolio, onNotesChange }: BuildingListProps) {
   const currentBuilding = useSelectionStore((s) => s.currentBuilding)
   const selectBuilding = useSelectionStore((s) => s.selectBuilding)
+  const polygonIndex = buildPolygonBuildingIndex(portfolio.buildings, portfolio.polygons)
 
   const openNotesEditor = (address: string) => {
     const building = portfolio.buildings.find((b) => b.address === address)
@@ -73,7 +75,8 @@ export function BuildingList({ buildings, portfolio, onNotesChange }: BuildingLi
               const age = oldestRtuAge(b)
               const gpsBad = hasPlaceholderGps(b)
               const ml = mlCount(b)
-              const vac = hasVacant(b)
+              const tenantPolygons = polygonsForBuilding(polygonIndex, b.address)
+              const vac = hasVacant(b, tenantPolygons)
               const sqftDisp = formatSqft(b.sqft)
               const mgr = b.manager || ''
               const isActive = currentBuilding?.address === b.address
@@ -93,8 +96,8 @@ export function BuildingList({ buildings, portfolio, onNotesChange }: BuildingLi
                   <div className="building-tags">
                     {sqftDisp ? <Tag variant="sqft">{sqftDisp}</Tag> : null}
                     {b.rtus?.length ? <Tag variant="rtu">{b.rtus.length} RTUs</Tag> : null}
-                    {b.tenants?.length ? (
-                      <Tag variant="tenant">{b.tenants.length} tenants</Tag>
+                    {tenantPolygons.length ? (
+                      <Tag variant="tenant">{tenantPolygons.length} tenant polygons</Tag>
                     ) : null}
                     {mgr ? <Tag variant="pm">{mgr.split(' ')[0]}</Tag> : null}
                     {gpsBad ? (

@@ -219,7 +219,6 @@ select option{background:#1f2436}
 .tag-vacant{background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25)}
 .tag-ml{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.25)}
 .tag-old-rtu{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
-#drag-notice{position:absolute;top:66px;left:50%;transform:translateX(-50%);background:rgba(61,127,255,.92);color:#fff;font:600 12px/1.4 Inter,sans-serif;padding:7px 16px;border-radius:6px;border:1px solid rgba(255,255,255,.2);pointer-events:none;white-space:nowrap;z-index:100}
 
 /* ── SAVE BUTTON ──────────────────────────────────────────────────────────── */
 .btn-save{background:#16a34a!important;color:#fff!important;border-color:#16a34a!important}

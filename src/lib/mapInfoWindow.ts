@@ -3,7 +3,7 @@ import { getColor } from '@/lib/colors'
 import { hasPlaceholderGps, hasVacant, mlCount } from '@/lib/dataQuality'
 import { getRtuAge, getRtuYear, oldestRtuAge } from '@/lib/rtu'
 import { showToastSuccess } from '@/lib/toast'
-import type { Building, LayerKey, Rtu, Tenant, Utility } from '@/types/domain'
+import type { Building, LayerKey, Polygon, Rtu, Utility } from '@/types/domain'
 import { LAYER_COLORS } from '@/lib/constants'
 
 const VACANT_RE = /^(vacant|no information)$/i
@@ -67,19 +67,26 @@ export function copyPopupText(text: string): void {
   showToastSuccess('📋 Copied popup contents')
 }
 
-function buildingBadgeText(building: Building): string {
+function buildingBadgeText(building: Building, tenantPolygons: Polygon[]): string {
   const parts = [building.park.replace(/\s*\(x\s*\d+\)/, '').trim()]
   const oldest = oldestRtuAge(building)
   if (oldest >= RTU_AGE_CRITICAL) parts.push(`🔥 ${oldest} yr RTU`)
   else if (oldest >= RTU_AGE_WARN) parts.push(`${oldest} yr RTU`)
-  if (hasVacant(building)) parts.push('VACANT')
+  if (hasVacant(building, tenantPolygons)) parts.push('VACANT')
   const ml = mlCount(building)
   if (ml) parts.push(`ML×${ml}`)
   return parts.join('  ')
 }
 
-export function buildBuildingInfoPlainText(building: Building): string {
-  const lines: string[] = [building.address, buildingBadgeText(building), '']
+function isPolygonVacant(polygon: Polygon): boolean {
+  return VACANT_RE.test((polygon.description ?? '').trim())
+}
+
+export function buildBuildingInfoPlainText(
+  building: Building,
+  tenantPolygons: Polygon[] = [],
+): string {
+  const lines: string[] = [building.address, buildingBadgeText(building, tenantPolygons), '']
   lines.push(plainRow('BU #', building.bu || '—'))
   lines.push(plainRow('Portfolio', building.cluster || building.park || '—'))
   lines.push(plainRow('Manager', building.manager || '—'))
@@ -115,11 +122,11 @@ export function buildBuildingInfoPlainText(building: Building): string {
     }
   }
 
-  if (building.tenants?.length) {
-    lines.push('', `Tenants (${building.tenants.length})`)
-    for (const t of building.tenants) {
-      const desc = t.description || ''
-      lines.push(desc ? `${t.name}  ${desc}` : t.name)
+  if (tenantPolygons.length) {
+    lines.push('', `Tenant Polygons (${tenantPolygons.length})`)
+    for (const polygon of tenantPolygons) {
+      const desc = polygon.description || ''
+      lines.push(desc ? `${polygon.name}  ${desc}` : polygon.name)
     }
   }
 
@@ -128,7 +135,7 @@ export function buildBuildingInfoPlainText(building: Building): string {
 
 export function buildDetailInfoPlainText(
   layerKey: LayerKey,
-  data: Rtu | Tenant | Utility,
+  data: Rtu | Utility,
   options?: { buildingAddress?: string },
 ): string {
   void options
@@ -149,14 +156,17 @@ export function buildDetailInfoPlainText(
   return lines.join('\n').trimEnd()
 }
 
-function isTenantVacant(tenant: Tenant): boolean {
-  return VACANT_RE.test((tenant.description ?? '').trim())
+function isTenantVacant(polygon: Polygon): boolean {
+  return isPolygonVacant(polygon)
 }
 
-export function buildBuildingInfoHtml(building: Building): string {
+export function buildBuildingInfoHtml(
+  building: Building,
+  tenantPolygons: Polygon[] = [],
+): string {
   const bColor = getColor(building.park)
   const oldest = oldestRtuAge(building)
-  const vac = hasVacant(building)
+  const vac = hasVacant(building, tenantPolygons)
   const ml = mlCount(building)
 
   let badges = `<span class="iw-badge" style="background:${bColor}22;color:${bColor};border:1px solid ${bColor}44">${escapeHtml(building.park.replace(/\s*\(x\s*\d+\)/, ''))}</span>`
@@ -219,25 +229,25 @@ export function buildBuildingInfoHtml(building: Building): string {
   }
 
   let tenantHtml = ''
-  if (building.tenants?.length) {
-    const items = building.tenants
-      .map((t) => {
-        const vacClass = isTenantVacant(t) ? ' vacant' : ''
-        return `<div class="iw-tenant${vacClass}"><span class="iw-tenant-unit">${escapeHtml(t.name)}</span>${escapeHtml(t.description || '')}</div>`
+  if (tenantPolygons.length) {
+    const items = tenantPolygons
+      .map((polygon) => {
+        const vacClass = isTenantVacant(polygon) ? ' vacant' : ''
+        return `<div class="iw-tenant${vacClass}"><span class="iw-tenant-unit">${escapeHtml(polygon.name)}</span>${escapeHtml(polygon.description || '')}</div>`
       })
       .join('')
-    tenantHtml = `<div class="iw-section"><div class="iw-section-title">Tenants (${building.tenants.length})</div>${items}</div>`
+    tenantHtml = `<div class="iw-section"><div class="iw-section-title">Tenant Polygons (${tenantPolygons.length})</div>${items}</div>`
   }
 
   const moveBtn = moveButton({ 'iw-kind': 'building', 'iw-address': building.address })
-  const plainText = buildBuildingInfoPlainText(building)
+  const plainText = buildBuildingInfoPlainText(building, tenantPolygons)
 
   return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(building.address)}</div><div class="iw-badges">${badges}</div>${closeButton()}</div><div class="iw-body">${stats}${rtuHtml}${tenantHtml}</div>${actionFooter(`${copyButton()}${moveBtn}`)}</div>`
 }
 
 export function buildDetailInfoHtml(
   layerKey: LayerKey,
-  data: Rtu | Tenant | Utility,
+  data: Rtu | Utility,
   options?: { showDelete?: boolean; buildingAddress?: string },
 ): string {
   const cfg = LAYER_COLORS[layerKey]
@@ -266,7 +276,7 @@ export function buildDetailInfoHtml(
     }
   }
 
-  const badge = layerKey === 'rtu' ? '#fbbf24' : layerKey === 'tenants' ? '#34d399' : cfg.fill
+  const badge = layerKey === 'rtu' ? '#fbbf24' : cfg.fill
 
   const moveBtn = moveButton({
     'iw-kind': 'detail',

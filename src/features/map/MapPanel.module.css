@@ -16,9 +16,62 @@
   min-height: 0;
 }
 
+.dragNotice {
+  position: absolute;
+  top: 66px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100% - 24px);
+  background: rgba(61, 127, 255, 0.92);
+  color: #fff;
+  font: 600 12px/1.4 Inter, sans-serif;
+  padding: 7px 10px 7px 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 100;
+  pointer-events: auto;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.dragNoticeText {
+  min-width: 0;
+}
+
+.dragNoticeMuted {
+  opacity: 0.8;
+}
+
+.dragNoticeOff {
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font: 600 11px/1 Inter, sans-serif;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dragNoticeOff:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
 .mapCanvas {
   width: 100%;
   height: 100%;
+}
+
+.marqueeBox {
+  position: absolute;
+  border: 2px dashed var(--accent, #3b82f6);
+  background: rgba(59, 130, 246, 0.12);
+  pointer-events: none;
+  z-index: 1000;
+  box-sizing: border-box;
 }
 
 .topbarLeft {

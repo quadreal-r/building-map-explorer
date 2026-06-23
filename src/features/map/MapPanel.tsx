@@ -4,10 +4,13 @@ import { PolygonDrawPanel } from '@/features/polygons/PolygonDrawPanel'
 import { useMapMarkers } from '@/features/map/useMapMarkers'
 import { usePolygons } from '@/features/polygons/usePolygons'
 import { useMapRotation } from '@/hooks/useMapRotation'
+import { useMapMarqueeSelect } from '@/hooks/useMapMarqueeSelect'
 import { readGoogleMapsEnv, loadGoogleMaps } from '@/lib/googleMaps'
 import { IMAGERY_MODES } from '@/lib/constants'
+import { matchesUtility } from '@/lib/dragSelection'
+import { tenantPolygonCount, buildPolygonBuildingIndex } from '@/lib/polygonBuildings'
 import { panToPreserveRotation } from '@/lib/mapRotation'
-import type { Building, LayerKey, Polygon, PortfolioData, Rtu, Tenant, Utility } from '@/types/domain'
+import type { Building, LayerKey, Polygon, PortfolioData, Rtu, Utility } from '@/types/domain'
 import type { ImageryMode } from '@/types/domain'
 import { useFilterStore } from '@/stores/filterStore'
 import { usePortfolioStore } from '@/stores/portfolioStore'
@@ -44,12 +47,14 @@ export function MapPanel({
   const selectBuilding = useSelectionStore((s) => s.selectBuilding)
   const clearSelection = useSelectionStore((s) => s.clearSelection)
   const dragMode = useSelectionStore((s) => s.dragMode)
+  const setDragMode = useSelectionStore((s) => s.setDragMode)
   const resetFilters = useFilterStore((s) => s.resetFilters)
   const openSettings = useUiStore((s) => s.openSettings)
 
   const { mapId, isConfigured: mapsConfigured } = readGoogleMapsEnv()
 
   useMapRotation(map, mapRef)
+  useMapMarqueeSelect(map, dragMode)
 
   useEffect(() => {
     usePortfolioStore.setState({ portfolio })
@@ -77,7 +82,7 @@ export function MapPanel({
   const handleDetailMoved = useCallback(
     (
       layerKey: LayerKey,
-      data: Rtu | Tenant | Utility,
+      data: Rtu | Utility,
       lat: number,
       lng: number,
       building: Building | null,
@@ -100,9 +105,7 @@ export function MapPanel({
         onPortfolioPatch({
           ...portfolio,
           utilities: portfolio.utilities.map((u) =>
-            u.name === data.name && u.utility_type === data.utility_type
-              ? { ...u, lat, lng }
-              : u,
+            matchesUtility(u, data) ? { ...u, lat, lng } : u,
           ),
         })
       }
@@ -111,7 +114,7 @@ export function MapPanel({
   )
 
   const handleDeleteDetail = useCallback(
-    (layerKey: LayerKey, data: Rtu | Tenant | Utility, building: Building | null) => {
+    (layerKey: LayerKey, data: Rtu | Utility, building: Building | null) => {
       if (layerKey === 'rtu' && building) {
         onPortfolioPatch({
           ...portfolio,
@@ -124,9 +127,7 @@ export function MapPanel({
       } else if ('utility_type' in data) {
         onPortfolioPatch({
           ...portfolio,
-          utilities: portfolio.utilities.filter(
-            (u) => !(u.name === data.name && u.utility_type === data.utility_type),
-          ),
+          utilities: portfolio.utilities.filter((u) => !matchesUtility(u, data)),
         })
       }
     },
@@ -157,6 +158,13 @@ export function MapPanel({
     [onPortfolioPatch, portfolio],
   )
 
+  const handleGroupMoved = useCallback(
+    (next: PortfolioData) => {
+      onPortfolioPatch(next)
+    },
+    [onPortfolioPatch],
+  )
+
   const { showAllMarkers, cycleImagery } = useMapMarkers({
     map,
     buildings: portfolio.buildings,
@@ -167,13 +175,17 @@ export function MapPanel({
     onBuildingMoved: handleBuildingMoved,
     onDetailMoved: handleDetailMoved,
     onDeleteDetail: handleDeleteDetail,
+    onGroupMoved: handleGroupMoved,
   })
 
   usePolygons({
     map,
+    buildings: portfolio.buildings,
+    utilities: portfolio.utilities,
     polygons: portfolio.polygons,
     onPolygonUpdated: handlePolygonUpdated,
     onPolygonDeleted: handlePolygonDeleted,
+    onGroupMoved: handleGroupMoved,
   })
 
   useEffect(() => {
@@ -215,23 +227,6 @@ export function MapPanel({
     }
   }, [mapsConfigured, mapId])
 
-  useEffect(() => {
-    const panel = mapRef.current?.closest('.map-panel')
-    if (!panel) return
-    const existing = panel.querySelector('#drag-notice')
-    if (!dragMode) {
-      existing?.remove()
-      return
-    }
-    if (existing) return
-    const notice = document.createElement('div')
-    notice.id = 'drag-notice'
-    notice.innerHTML =
-      '✦ Drag mode ON &nbsp;—&nbsp; drag any marker to reposition it &nbsp;·&nbsp; <span style="opacity:.8">click Edit Positions again to exit</span>'
-    panel.appendChild(notice)
-    return () => notice.remove()
-  }, [dragMode])
-
   const handleCycleImagery = () => {
     const mode = cycleImagery()
     if (mode) setImageryMode(mode)
@@ -243,13 +238,15 @@ export function MapPanel({
     showAllMarkers()
   }
 
+  const polygonIndex = buildPolygonBuildingIndex(portfolio.buildings, portfolio.polygons)
+
   const mapTitle = currentBuilding?.address ?? 'Industrial Portfolio — Ontario'
   const subtitle = currentBuilding
     ? [
         currentBuilding.cluster || currentBuilding.park,
         currentBuilding.sqft ? `${currentBuilding.sqft} sf` : null,
         `${currentBuilding.rtus?.length ?? 0} RTUs`,
-        `${currentBuilding.tenants?.length ?? 0} tenants`,
+        `${tenantPolygonCount(polygonIndex, currentBuilding.address)} tenant polygons`,
         currentBuilding.manager,
       ]
         .filter(Boolean)
@@ -299,6 +296,22 @@ export function MapPanel({
       </div>
 
       <div className={styles.mapWrap}>
+        {dragMode ? (
+          <div className={styles.dragNotice} role="status">
+            <span className={styles.dragNoticeText}>
+              ✦ Edit positions — drag a box to select · click to toggle · Ctrl/Shift+click or drag to add ·{' '}
+              <span className={styles.dragNoticeMuted}>click empty map to clear</span>
+            </span>
+            <button
+              type="button"
+              className={styles.dragNoticeOff}
+              onClick={() => setDragMode(false)}
+              title="Turn off edit positions"
+            >
+              Turn off
+            </button>
+          </div>
+        ) : null}
         {!mapsConfigured || mapError ? (
           <div className={styles.mapPlaceholder} id="map">
             <div>

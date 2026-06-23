@@ -1,18 +1,24 @@
-import { serializePortfolio } from '@/lib/legacySerialize'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import type { PortfolioData } from '@/types/domain'
 
+const PORTFOLIO_PLACEHOLDER = 'window.__BME_EMBEDDED_PORTFOLIO__=null'
+
 export async function saveDatabase(portfolio: PortfolioData): Promise<boolean> {
   try {
-    const res = await fetch(`${import.meta.env.BASE_URL}portfolio-template.html`)
-    if (!res.ok) throw new Error('portfolio-template.html not found in public/. Run: node scripts/build-portfolio-template.mjs')
+    const res = await fetch(`${import.meta.env.BASE_URL}portable-template.html`)
+    if (!res.ok) {
+      throw new Error(
+        'portable-template.html not found. Run: npm run build:portable (needs a production build with .env.local)',
+      )
+    }
     let html = await res.text()
 
-    const { buildings, utilities, polygons } = serializePortfolio(portfolio)
-    html = html
-      .replace('__BUILDINGS__', JSON.stringify(buildings))
-      .replace('__UTILITIES__', JSON.stringify(utilities))
-      .replace('__POLYGONS__', JSON.stringify(polygons))
+    if (!html.includes(PORTFOLIO_PLACEHOLDER)) {
+      throw new Error('Portable template is outdated. Run: npm run build:portable')
+    }
+
+    const payload = JSON.stringify(portfolio).replace(/</g, '\\u003c')
+    html = html.replace(PORTFOLIO_PLACEHOLDER, `window.__BME_EMBEDDED_PORTFOLIO__=${payload}`)
 
     const blob = new Blob([html], { type: 'text/html' })
     const a = document.createElement('a')

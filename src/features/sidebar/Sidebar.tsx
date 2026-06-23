@@ -3,6 +3,7 @@ import { SearchInput } from '@/components/SearchInput/SearchInput'
 import { Select } from '@/components/Select/Select'
 import { LAYER_COLORS } from '@/lib/constants'
 import { collectFilterOptions, reconcileFilterDropdowns, applyFilterSelection } from '@/lib/filters'
+import { buildPolygonBuildingIndex } from '@/lib/polygonBuildings'
 import { useFilterStore } from '@/stores/filterStore'
 import { useLayerStore } from '@/stores/layerStore'
 import { useSelectionStore } from '@/stores/selectionStore'
@@ -56,9 +57,14 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
     [search, park, cluster, manager],
   )
 
+  const polygonIndex = useMemo(
+    () => buildPolygonBuildingIndex(allBuildings, portfolio.polygons),
+    [allBuildings, portfolio.polygons],
+  )
+
   const options = useMemo(
-    () => collectFilterOptions(allBuildings, filterContext),
-    [allBuildings, filterContext],
+    () => collectFilterOptions(allBuildings, filterContext, polygonIndex),
+    [allBuildings, filterContext, polygonIndex],
   )
 
   const baseFilters = useMemo(
@@ -69,18 +75,18 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
   const handleFilterChange = (
     patch: Partial<Pick<typeof baseFilters, 'park' | 'cluster' | 'manager'>>,
   ) => {
-    const next = applyFilterSelection(allBuildings, baseFilters, patch)
+    const next = applyFilterSelection(allBuildings, baseFilters, patch, polygonIndex)
     if (next.park !== park) setPark(next.park)
     if (next.cluster !== cluster) setCluster(next.cluster)
     if (next.manager !== manager) setManager(next.manager)
   }
 
   useLayoutEffect(() => {
-    const reconciled = reconcileFilterDropdowns(allBuildings, baseFilters)
+    const reconciled = reconcileFilterDropdowns(allBuildings, baseFilters, polygonIndex)
     if (reconciled.park !== park) setPark(reconciled.park)
     if (reconciled.cluster !== cluster) setCluster(reconciled.cluster)
     if (reconciled.manager !== manager) setManager(reconciled.manager)
-  }, [baseFilters, allBuildings, park, cluster, manager, setPark, setCluster, setManager])
+  }, [baseFilters, allBuildings, polygonIndex, park, cluster, manager, setPark, setCluster, setManager])
 
   return (
     <>
@@ -143,7 +149,11 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
           />
         </div>
 
-        <StatsStrip buildings={filteredBuildings} totalPortfolioCount={allBuildings.length} />
+        <StatsStrip
+          buildings={filteredBuildings}
+          polygons={portfolio.polygons}
+          totalPortfolioCount={allBuildings.length}
+        />
         <AdvancedFilters />
 
         <div style={{ padding: '4px 14px 2px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

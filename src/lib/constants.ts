@@ -11,7 +11,6 @@ export const DEFAULT_PARK_COLOR = '#3d7fff'
 
 export const LAYER_COLORS: Record<LayerKey, LayerStyle> = {
   rtu: { fill: '#fbbf24', stroke: '#92400e', scale: 6 },
-  tenants: { fill: '#34d399', stroke: '#065f46', scale: 6 },
   sprinkler: { fill: '#60a5fa', stroke: '#1e3a5f', scale: 5 },
   electrical: { fill: '#a78bfa', stroke: '#3b0764', scale: 5 },
   hydrant: { fill: '#f87171', stroke: '#7f1d1d', scale: 5 },

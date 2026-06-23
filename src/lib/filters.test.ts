@@ -1,4 +1,5 @@
 import legacyBuildings from '../../supabase/data/buildings.json'
+import legacyPolygons from '../../supabase/data/polygons.json'
 import {
   applyFilterSelection,
   applyFilters,
@@ -8,33 +9,40 @@ import {
   passDqFilter,
   reconcileFilterDropdowns,
 } from '@/lib/filters'
+import { buildPolygonBuildingIndex, polygonsForBuilding } from '@/lib/polygonBuildings'
 import { getRtuAge } from '@/lib/rtu'
 import {
   DEFAULT_ADV_FILTERS,
   DEFAULT_DQ_FILTERS,
   DEFAULT_FILTER_STATE,
   normalizeLegacyBuilding,
+  normalizeLegacyPolygon,
   type FilterState,
   type LegacyBuildingJson,
+  type LegacyPolygonJson,
 } from '@/types/domain'
 
 const buildings = (legacyBuildings as LegacyBuildingJson[]).map(
   normalizeLegacyBuilding,
 )
+const polygons = (legacyPolygons as LegacyPolygonJson[]).map(normalizeLegacyPolygon)
+const polygonIndex = buildPolygonBuildingIndex(buildings, polygons)
 
 describe('matchesSearch', () => {
   it('matches address substring', () => {
     const hit = buildings.find((b) => b.address.includes('1850'))
     expect(hit).toBeDefined()
-    expect(matchesSearch(hit!, '1850')).toBe(true)
+    expect(matchesSearch(hit!, '1850', polygonIndex)).toBe(true)
   })
 
-  it('matches tenant description', () => {
+  it('matches tenant polygon description', () => {
     const hit = buildings.find((b) =>
-      b.tenants?.some((t) => t.description.includes('National Energy')),
+      polygonsForBuilding(polygonIndex, b.address).some((polygon) =>
+        polygon.description.includes('National Energy'),
+      ),
     )
     expect(hit).toBeDefined()
-    expect(matchesSearch(hit!, 'national energy')).toBe(true)
+    expect(matchesSearch(hit!, 'national energy', polygonIndex)).toBe(true)
   })
 })
 
