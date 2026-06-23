@@ -2,6 +2,7 @@
 
 export type LayerKey =
   | 'rtu'
+  | 'polygons'
   | 'sprinkler'
   | 'electrical'
   | 'hydrant'

@@ -196,7 +196,6 @@ export function useMapMarkers({
   }, [])
 
   useEffect(() => {
-    if (!dragMode) return
     refreshDragSelectionStyles()
   }, [dragMode, dragSelectedKeys, refreshDragSelectionStyles])
 
