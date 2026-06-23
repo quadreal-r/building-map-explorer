@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   RCB_DEFAULT_BASIS,
   RCB_DEFAULT_THRESHOLD,
@@ -50,13 +50,12 @@ export function CostBanner({ buildings }: CostBannerProps) {
     [buildings, basis, year, threshold, scopeLabel],
   )
 
-  const yearOptions = RCB_YEARS[basis] ?? [year]
+  const yearOptions = useMemo(() => RCB_YEARS[basis] ?? [year], [basis, year])
 
-  useEffect(() => {
-    setReplacementYearByRtu((prev) =>
-      rcbSanitizeReplacementYearAssignments(prev, yearOptions, year),
-    )
-  }, [basis, year, yearOptions])
+  const sanitizedReplacementYearByRtu = useMemo(
+    () => rcbSanitizeReplacementYearAssignments(replacementYearByRtu, yearOptions, year),
+    [replacementYearByRtu, yearOptions, year],
+  )
 
   const setRtuReplacementYear = (address: string, rtu: string, replacementYear: string) => {
     const key = rcbReplacementYearKey(address, rtu)
@@ -91,15 +90,6 @@ export function CostBanner({ buildings }: CostBannerProps) {
     () => sortedBuildings.find((row) => row.address === selectedBuildingAddress) ?? null,
     [sortedBuildings, selectedBuildingAddress],
   )
-
-  useEffect(() => {
-    if (
-      selectedBuildingAddress &&
-      !result.perBldg.some((row) => row.address === selectedBuildingAddress)
-    ) {
-      setSelectedBuildingAddress(null)
-    }
-  }, [result.perBldg, selectedBuildingAddress])
 
   const openBuildingDetail = (address: string) => {
     setSelectedBuildingAddress(address)
@@ -269,7 +259,7 @@ export function CostBanner({ buildings }: CostBannerProps) {
           <button
             type="button"
             className={`${styles.rcbBtn} ${styles.rcbBtnXls}`}
-            onClick={() => exportRcbExcel(result, scopeLabel, { replacementYearByRtu })}
+            onClick={() => exportRcbExcel(result, scopeLabel, { replacementYearByRtu: sanitizedReplacementYearByRtu })}
             title="Export this estimate to Excel"
           >
             Excel
@@ -294,7 +284,7 @@ export function CostBanner({ buildings }: CostBannerProps) {
             building={selectedBuilding}
             result={result}
             defaultReplacementYear={year}
-            replacementYearByRtu={replacementYearByRtu}
+            replacementYearByRtu={sanitizedReplacementYearByRtu}
             onReplacementYearChange={setRtuReplacementYear}
             onBack={closeBuildingDetail}
           />
