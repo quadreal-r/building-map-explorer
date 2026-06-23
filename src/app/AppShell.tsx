@@ -37,7 +37,7 @@ export function AppShell() {
 
   const portfolio = portfolioOverride ?? data ?? EMPTY_PORTFOLIO
 
-  const { filteredBuildings, listBuildings } = useFilteredBuildings(
+  const { filteredBuildings, listBuildings, costScopeBuildings } = useFilteredBuildings(
     portfolio.buildings,
     portfolio.polygons,
   )
@@ -100,7 +100,7 @@ export function AppShell() {
           addMarkerOpen={addMarkerOpen}
           onAddMarkerClose={() => closeAddMarker('addMarker')}
         />
-        <CostBanner buildings={filteredBuildings} />
+        <CostBanner buildings={costScopeBuildings} />
       </div>
       <SettingsModal
         open={settingsOpen}

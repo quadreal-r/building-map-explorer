@@ -113,8 +113,59 @@
   padding: 3px 6px;
 }
 
-.rcbCtl input[type='number'] {
-  width: 46px;
+.ageStepper {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 5px;
+}
+
+.ageInput {
+  width: 40px;
+  text-align: center;
+  padding: 3px 4px;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.ageInput::-webkit-outer-spin-button,
+.ageInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.ageStepperBtns {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ageStepBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  min-height: 13px;
+  flex: 1;
+  padding: 0;
+  background: var(--surface, #1f5aa8);
+  border: 1px solid var(--accent, #7db8ff);
+  border-radius: 3px;
+  color: var(--accent, #7db8ff);
+  font-size: 9px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ageStepBtn:hover:not(:disabled) {
+  background: var(--hover-bg, #205298);
+  color: #fff;
+}
+
+.ageStepBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  border-color: var(--border, #2e6ec0);
+  color: var(--text-muted, #90b8e0);
 }
 
 .rcbBtn {

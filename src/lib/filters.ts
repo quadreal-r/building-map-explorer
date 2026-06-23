@@ -19,6 +19,17 @@ function normalizeSearch(search: string): string {
   return search.trim().toLowerCase()
 }
 
+/** Building-level search (address, BU, cluster, manager) — not RTU/tenant detail fields. */
+export function matchesBuildingMetadata(building: Building, search: string): boolean {
+  const q = normalizeSearch(search)
+  if (!q) return true
+  if (building.address.toLowerCase().includes(q)) return true
+  if (building.bu?.toLowerCase().includes(q)) return true
+  if (building.cluster?.toLowerCase().includes(q)) return true
+  if (building.manager?.toLowerCase().includes(q)) return true
+  return false
+}
+
 function buildingPolygons(
   index: PolygonBuildingIndex | undefined,
   building: Building,
@@ -224,6 +235,22 @@ export function applyFilters(
   return applyPrimaryFilters(buildings, filters, polygonIndex).filter((building) =>
     passDqFilter(building, filters.dq, polygonIndex),
   )
+}
+
+/**
+ * Buildings for RTU replacement cost scope.
+ * When search matches any address/metadata, exclude buildings that only matched via RTU/tenant detail.
+ */
+export function applyCostScopeFilters(
+  buildings: Building[],
+  filters: FilterState,
+  polygonIndex?: PolygonBuildingIndex,
+): Building[] {
+  const filtered = applyPrimaryFilters(buildings, filters, polygonIndex)
+  const search = normalizeSearch(filters.search)
+  if (!search) return filtered
+  const metadataHits = filtered.filter((building) => matchesBuildingMetadata(building, search))
+  return metadataHits.length > 0 ? metadataHits : filtered
 }
 
 /** Buildings eligible for a dropdown, excluding that dropdown's own filter. */

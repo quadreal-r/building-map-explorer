@@ -1,9 +1,11 @@
 import legacyBuildings from '../../supabase/data/buildings.json'
 import legacyPolygons from '../../supabase/data/polygons.json'
 import {
+  applyCostScopeFilters,
   applyFilterSelection,
   applyFilters,
   collectFilterOptions,
+  matchesBuildingMetadata,
   matchesSearch,
   passAdvFilter,
   passDqFilter,
@@ -189,6 +191,34 @@ describe('reconcileFilterDropdowns', () => {
     expect(next.manager).toBe('')
     expect(next.park).toBe('')
     expect(next.cluster).toBe('')
+  })
+})
+
+describe('applyCostScopeFilters', () => {
+  it('narrows to address-level hits when search matches a building address', () => {
+    const full = applyFilters(buildings, { ...DEFAULT_FILTER_STATE, search: '441' }, polygonIndex)
+    const scoped = applyCostScopeFilters(
+      buildings,
+      { ...DEFAULT_FILTER_STATE, search: '441' },
+      polygonIndex,
+    )
+    expect(scoped.length).toBeGreaterThan(0)
+    expect(scoped.every((b) => matchesBuildingMetadata(b, '441'))).toBe(true)
+    expect(scoped.some((b) => b.address.includes('441 Courtneypark'))).toBe(true)
+    if (full.length > scoped.length) {
+      expect(full.length).toBeGreaterThan(scoped.length)
+    }
+  })
+
+  it('keeps RTU-only search hits when no building metadata matches', () => {
+    const query = 'RTU- 01'
+    const full = applyFilters(buildings, { ...DEFAULT_FILTER_STATE, search: query }, polygonIndex)
+    const scoped = applyCostScopeFilters(
+      buildings,
+      { ...DEFAULT_FILTER_STATE, search: query },
+      polygonIndex,
+    )
+    expect(scoped).toEqual(full)
   })
 })
 

@@ -23,6 +23,9 @@ export interface CostBannerProps {
 
 type SortKey = keyof RcbBuildingSummary
 
+const THR_MIN = 0
+const THR_MAX = 60
+
 export function CostBanner({ buildings }: CostBannerProps) {
   const [threshold, setThreshold] = useState(RCB_DEFAULT_THRESHOLD)
   const [basis, setBasis] = useState<CostBasis>(RCB_DEFAULT_BASIS)
@@ -64,6 +67,14 @@ export function CostBanner({ buildings }: CostBannerProps) {
     setBasis(next)
     const years = RCB_YEARS[next] ?? ['2026']
     setYear(years[0]!)
+  }
+
+  const setThresholdClamped = (value: number) => {
+    setThreshold(Math.min(THR_MAX, Math.max(THR_MIN, value)))
+  }
+
+  const bumpThreshold = (delta: number) => {
+    setThresholdClamped(threshold + delta)
   }
 
   const footnote = useMemo(() => {
@@ -140,15 +151,41 @@ export function CostBanner({ buildings }: CostBannerProps) {
         <div className={styles.rcbControls}>
           <label className={styles.rcbCtl}>
             Age ≥
-            <input
-              type="number"
-              id="rcb-thr"
-              min={0}
-              max={60}
-              step={1}
-              value={threshold}
-              onChange={(e) => setThreshold(parseInt(e.target.value, 10) || 20)}
-            />{' '}
+            <span className={styles.ageStepper}>
+              <input
+                type="number"
+                id="rcb-thr"
+                className={styles.ageInput}
+                min={THR_MIN}
+                max={THR_MAX}
+                step={1}
+                value={threshold}
+                onChange={(e) => {
+                  const next = parseInt(e.target.value, 10)
+                  if (!Number.isNaN(next)) setThresholdClamped(next)
+                }}
+              />
+              <span className={styles.ageStepperBtns} aria-hidden="true">
+                <button
+                  type="button"
+                  className={styles.ageStepBtn}
+                  onClick={() => bumpThreshold(1)}
+                  disabled={threshold >= THR_MAX}
+                  aria-label="Increase age threshold"
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  className={styles.ageStepBtn}
+                  onClick={() => bumpThreshold(-1)}
+                  disabled={threshold <= THR_MIN}
+                  aria-label="Decrease age threshold"
+                >
+                  ▼
+                </button>
+              </span>
+            </span>{' '}
             yr
           </label>
           <label className={styles.rcbCtl}>

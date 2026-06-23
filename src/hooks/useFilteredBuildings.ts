@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useFilterStore } from '@/stores/filterStore'
-import { applyPrimaryFilters, reconcileFilterDropdowns } from '@/lib/filters'
+import { applyCostScopeFilters, applyPrimaryFilters, reconcileFilterDropdowns } from '@/lib/filters'
 import { buildPolygonBuildingIndex } from '@/lib/polygonBuildings'
 import type { Building, FilterState, Polygon } from '@/types/domain'
 
@@ -38,8 +38,19 @@ export function useFilteredBuildings(buildings: Building[], polygons: Polygon[] 
     [buildings, filters, polygonIndex],
   )
 
+  const costScopeBuildings = useMemo(
+    () =>
+      applyCostScopeFilters(
+        buildings,
+        reconcileFilterDropdowns(buildings, filters, polygonIndex),
+        polygonIndex,
+      ),
+    [buildings, filters, polygonIndex],
+  )
+
   return {
     filteredBuildings,
+    costScopeBuildings,
     listBuildings: filteredBuildings,
     allFiltered: filteredBuildings,
     count: filteredBuildings.length,
