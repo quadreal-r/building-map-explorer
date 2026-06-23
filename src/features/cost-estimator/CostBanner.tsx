@@ -9,6 +9,8 @@ import {
   rcbCompute,
   rcbMoney,
   rcbProjection,
+  rcbReplacementYearKey,
+  rcbSanitizeReplacementYearAssignments,
   type RcbBuildingSummary,
 } from '@/lib/costEstimator'
 import { exportRcbExcel } from '@/lib/excel'
@@ -33,6 +35,7 @@ export function CostBanner({ buildings }: CostBannerProps) {
   const [year, setYear] = useState(RCB_DEFAULT_YEAR)
   const [detailOpen, setDetailOpen] = useState(false)
   const [selectedBuildingAddress, setSelectedBuildingAddress] = useState<string | null>(null)
+  const [replacementYearByRtu, setReplacementYearByRtu] = useState<Record<string, string>>({})
   const [sort, setSort] = useState<{ key: SortKey; dir: -1 | 1 }>({ key: 'cost', dir: -1 })
 
   const search = useFilterStore((s) => s.search)
@@ -46,6 +49,27 @@ export function CostBanner({ buildings }: CostBannerProps) {
     () => rcbCompute(buildings, { basis, year, threshold, scope: scopeLabel }),
     [buildings, basis, year, threshold, scopeLabel],
   )
+
+  const yearOptions = RCB_YEARS[basis] ?? [year]
+
+  useEffect(() => {
+    setReplacementYearByRtu((prev) =>
+      rcbSanitizeReplacementYearAssignments(prev, yearOptions, year),
+    )
+  }, [basis, year, yearOptions])
+
+  const setRtuReplacementYear = (address: string, rtu: string, replacementYear: string) => {
+    const key = rcbReplacementYearKey(address, rtu)
+    setReplacementYearByRtu((prev) => {
+      if (replacementYear === year) {
+        if (!(key in prev)) return prev
+        const next = { ...prev }
+        delete next[key]
+        return next
+      }
+      return { ...prev, [key]: replacementYear }
+    })
+  }
 
   const projection = useMemo(() => rcbProjection(result), [result])
 
@@ -92,8 +116,6 @@ export function CostBanner({ buildings }: CostBannerProps) {
       return !open
     })
   }
-
-  const yearOptions = RCB_YEARS[basis] ?? [year]
 
   const handleBasisChange = (next: CostBasis) => {
     setBasis(next)
@@ -247,7 +269,7 @@ export function CostBanner({ buildings }: CostBannerProps) {
           <button
             type="button"
             className={`${styles.rcbBtn} ${styles.rcbBtnXls}`}
-            onClick={() => exportRcbExcel(result, scopeLabel)}
+            onClick={() => exportRcbExcel(result, scopeLabel, { replacementYearByRtu })}
             title="Export this estimate to Excel"
           >
             Excel
@@ -271,6 +293,9 @@ export function CostBanner({ buildings }: CostBannerProps) {
           <RcbBuildingDetail
             building={selectedBuilding}
             result={result}
+            defaultReplacementYear={year}
+            replacementYearByRtu={replacementYearByRtu}
+            onReplacementYearChange={setRtuReplacementYear}
             onBack={closeBuildingDetail}
           />
         ) : (

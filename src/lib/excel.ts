@@ -14,7 +14,7 @@ import {
   tenantPolygonCount,
 } from '@/lib/polygonBuildings'
 import type { RcbComputeResult } from '@/lib/costEstimator'
-import { rcbProjection } from '@/lib/costEstimator'
+import { rcbBuildScheduledExport, rcbCostForTier, rcbProjection } from '@/lib/costEstimator'
 
 const FMT_COORD = '0.0000000'
 const FMT_INT = '#,##0'
@@ -509,13 +509,20 @@ export function importPortfolioExcel(buffer: ArrayBuffer): PortfolioData {
 }
 
 /** Export RTU replacement cost estimate (RCB) to Excel. */
-export function exportRcbExcel(result: RcbComputeResult, scopeLabel: string): void {
-  const T = result.totals
+export function exportRcbExcel(
+  result: RcbComputeResult,
+  scopeLabel: string,
+  options: { replacementYearByRtu?: Record<string, string> } = {},
+): void {
+  const scheduled = rcbBuildScheduledExport(result, options.replacementYearByRtu ?? {})
+  const T = scheduled.totals
+  const global = result.totals
   const basisLbl =
     result.basis === 'hyb'
       ? 'Hybrid Lennox (all-in installed)'
       : 'Standard Efficiency / Lennox Xion (all-in installed)'
   const today = new Date().toISOString().slice(0, 10)
+  const hasCustomSchedule = scheduled.customizedCount > 0
 
   const sum: unknown[][] = [
     ['RTU Replacement Cost Estimate'],
@@ -523,21 +530,42 @@ export function exportRcbExcel(result: RcbComputeResult, scopeLabel: string): vo
     ['Selection (scope)', scopeLabel],
     ['Age threshold', `≥ ${result.threshold} years (by install date)`],
     ['Pricing basis', basisLbl],
-    ['Replacement year', result.year],
+    ['Global replacement year (default)', scheduled.defaultYear],
+  ]
+
+  if (hasCustomSchedule) {
+    sum.push(
+      ['RTUs with custom replacement year', scheduled.customizedCount],
+      [
+        'Global estimate — all units at default year (CAD)',
+        Math.round(global.cost),
+      ],
+      ['Scheduled estimate — per-RTU replacement years (CAD)', Math.round(T.cost)],
+    )
+  }
+
+  sum.push(
     [],
     ['Buildings with qualifying RTUs', T.bldgCount],
     ['Qualifying RTUs', T.units],
     ['Total cooling tonnage', Math.round(T.tons * 10) / 10],
     ['Average cost per unit', T.units ? Math.round(T.cost / T.units) : 0],
-    ['TOTAL ESTIMATED REPLACEMENT COST (CAD)', Math.round(T.cost)],
+    [
+      hasCustomSchedule
+        ? 'TOTAL SCHEDULED REPLACEMENT COST (CAD)'
+        : 'TOTAL ESTIMATED REPLACEMENT COST (CAD)',
+      Math.round(T.cost),
+    ],
     [],
-    ['Aged units excluded (no rated tonnage)', T.excludedOld],
+    ['Aged units excluded (no rated tonnage)', result.totals.excludedOld],
     [],
     [
       'Note',
-      'Budgetary estimate only — not a vendor quote. Tonnage rounded up to nearest supplied tier (2–50 ton).',
+      hasCustomSchedule
+        ? 'Scheduled costs use each RTU’s assigned replacement year (see By RTU). Projection by Year still shows uniform-year scenarios for comparison.'
+        : 'Budgetary estimate only — not a vendor quote. Tonnage rounded up to nearest supplied tier (2–50 ton).',
     ],
-  ]
+  )
 
   const bldg: unknown[][] = [
     [
@@ -547,10 +575,10 @@ export function exportRcbExcel(result: RcbComputeResult, scopeLabel: string): vo
       'Manager',
       'Qualifying RTUs',
       'Total Tons',
-      'Est. Replacement Cost (CAD)',
+      'Scheduled Replacement Cost (CAD)',
     ],
   ]
-  for (const r of [...result.perBldg].sort((a, b) => b.cost - a.cost)) {
+  for (const r of scheduled.perBldg) {
     bldg.push([
       r.address,
       r.park,
@@ -570,47 +598,71 @@ export function exportRcbExcel(result: RcbComputeResult, scopeLabel: string): vo
       'Cluster',
       'Manager',
       'RTU',
-      'Install Year',
+      'Model',
+      'Serial',
+      'Make',
+      'Suite',
+      'Installed',
       'Age (yr)',
       'Cooling Tons',
       'Priced Tier',
-      `Unit Cost ${result.year} (CAD)`,
+      'Replacement Year',
+      'Unit Cost (CAD)',
+      'vs Global Year',
     ],
   ]
-  for (const r of [...result.lineItems].sort((a, b) =>
+  for (const r of [...scheduled.items].sort((a, b) =>
     a.address < b.address ? -1 : a.address > b.address ? 1 : a.rtu.localeCompare(b.rtu),
   )) {
+    const globalUnitCost = rcbCostForTier(r.tierKey, result.basis, scheduled.defaultYear) ?? r.cost
+    const vsGlobal =
+      r.replacementYear === scheduled.defaultYear ? '—' : Math.round(r.cost - globalUnitCost)
     li.push([
       r.address,
       r.park,
       r.cluster,
       r.manager,
       r.rtu,
+      r.model || '',
+      r.serial || '',
+      r.make || '',
+      r.suite || '',
       r.year,
       r.age,
       r.tons,
       r.tier,
+      r.replacementYear,
       Math.round(r.cost),
+      vsGlobal,
     ])
   }
 
   const tier: unknown[][] = [
-    ['Tonnage Tier', `Unit Cost ${result.year} (CAD)`, 'Qty', 'Extended Cost (CAD)'],
+    ['Tonnage Tier', 'Avg Unit Cost (CAD)', 'Qty', 'Extended Cost (CAD)'],
   ]
-  for (const kk of Object.keys(result.tiers)
-    .map(Number)
-    .sort((a, b) => a - b)) {
-    const t = result.tiers[String(kk)]!
+  for (const t of scheduled.tiers) {
     tier.push([t.label, Math.round(t.unit), t.qty, Math.round(t.ext)])
   }
   tier.push(['TOTAL', '', T.units, Math.round(T.cost)])
 
   const pj = rcbProjection(result)
   const proj: unknown[][] = [
-    ['Replacement Year', 'Est. Total Cost (CAD)', `vs ${pj[0]?.year ?? ''} (CAD)`],
+    [
+      'Replacement Year',
+      'Est. Total Cost — all units same year (CAD)',
+      `vs ${pj[0]?.year ?? ''} (CAD)`,
+    ],
   ]
   for (const p of pj) {
     proj.push([p.year, Math.round(p.total), Math.round(p.total - (pj[0]?.total ?? 0))])
+  }
+  if (hasCustomSchedule) {
+    proj.push([])
+    proj.push([
+      'Scheduled mix (per-RTU years)',
+      Math.round(T.cost),
+      Math.round(T.cost - (pj.find((p) => p.year === scheduled.defaultYear)?.total ?? global.cost)),
+    ])
   }
 
   const wb = XLSX.utils.book_new()
@@ -624,5 +676,9 @@ export function exportRcbExcel(result: RcbComputeResult, scopeLabel: string): vo
     .replace(/[^A-Za-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '')
     .slice(0, 40)
-  XLSX.writeFile(wb, `RTU_Replacement_Estimate_${safe}_${result.year}_${today}.xlsx`)
+  const scheduleTag = hasCustomSchedule ? '_scheduled' : ''
+  XLSX.writeFile(
+    wb,
+    `RTU_Replacement_Estimate_${safe}_${scheduled.defaultYear}${scheduleTag}_${today}.xlsx`,
+  )
 }

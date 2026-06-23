@@ -49,6 +49,8 @@ export interface RcbLineItem {
   cost: number
 }
 
+export type RcbScheduledLineItem = RcbLineItem & { replacementYear: string }
+
 export interface RcbTierAggregate {
   tier: number
   label: string
@@ -269,6 +271,115 @@ export function rcbLineItemsForBuilding(
     .sort((a, b) => a.rtu.localeCompare(b.rtu))
 }
 
+export function rcbReplacementYearKey(address: string, rtu: string): string {
+  return `${address}::${rtu}`
+}
+
+/** Unit cost for a priced tier at a specific replacement year. */
+export function rcbCostForTier(
+  tierKey: number,
+  basis: CostBasis,
+  replacementYear: string,
+): number | null {
+  const unit = RTU_PRICING[String(tierKey)]
+  return unit ? rcbUnitCost(unit, basis, replacementYear) : null
+}
+
+/**
+ * Apply per-RTU replacement year assignments on top of the global default year.
+ * Unassigned RTUs inherit defaultYear; cost follows projection-by-year pricing.
+ */
+export function rcbLineItemsWithReplacementYears(
+  items: RcbLineItem[],
+  basis: CostBasis,
+  defaultYear: string,
+  assignments: Record<string, string> = {},
+): RcbScheduledLineItem[] {
+  return items.map((item) => {
+    const key = rcbReplacementYearKey(item.address, item.rtu)
+    const replacementYear = assignments[key] ?? defaultYear
+    const cost = rcbCostForTier(item.tierKey, basis, replacementYear) ?? item.cost
+    return { ...item, replacementYear, cost }
+  })
+}
+
+/** Drop assignments that match the default year or are invalid for the current basis. */
+export function rcbSanitizeReplacementYearAssignments(
+  assignments: Record<string, string>,
+  allowedYears: string[],
+  defaultYear: string,
+): Record<string, string> {
+  const allowed = new Set(allowedYears)
+  const next: Record<string, string> = {}
+  for (const [key, year] of Object.entries(assignments)) {
+    if (year !== defaultYear && allowed.has(year)) next[key] = year
+  }
+  return next
+}
+
+export interface RcbScheduledExport {
+  defaultYear: string
+  items: RcbScheduledLineItem[]
+  perBldg: RcbBuildingSummary[]
+  tiers: RcbTierAggregate[]
+  totals: Pick<RcbTotals, 'units' | 'tons' | 'cost' | 'bldgCount'>
+  customizedCount: number
+}
+
+/** Merge global RCB result with per-RTU replacement year assignments for export/display. */
+export function rcbBuildScheduledExport(
+  result: RcbComputeResult,
+  replacementYearByRtu: Record<string, string> = {},
+): RcbScheduledExport {
+  const defaultYear = result.year
+  const items = rcbLineItemsWithReplacementYears(
+    result.lineItems,
+    result.basis,
+    defaultYear,
+    replacementYearByRtu,
+  )
+
+  const perBldgMap = new Map<string, RcbBuildingSummary>()
+  for (const item of items) {
+    let row = perBldgMap.get(item.address)
+    if (!row) {
+      row = {
+        address: item.address,
+        park: item.park,
+        cluster: item.cluster,
+        manager: item.manager,
+        units: 0,
+        tons: 0,
+        cost: 0,
+      }
+      perBldgMap.set(item.address, row)
+    }
+    row.units++
+    row.tons += item.tons ?? 0
+    row.cost += item.cost
+  }
+
+  const perBldg = [...perBldgMap.values()].sort((a, b) => b.cost - a.cost)
+  const tiers = rcbTierBreakdownForItems(items)
+  const cost = items.reduce((sum, item) => sum + item.cost, 0)
+  const tons = items.reduce((sum, item) => sum + (item.tons ?? 0), 0)
+  const customizedCount = items.filter((item) => item.replacementYear !== defaultYear).length
+
+  return {
+    defaultYear,
+    items,
+    perBldg,
+    tiers,
+    totals: {
+      bldgCount: perBldg.length,
+      units: items.length,
+      tons,
+      cost,
+    },
+    customizedCount,
+  }
+}
+
 /** Tonnage-tier rollup for a subset of line items (e.g. one building). */
 export function rcbTierBreakdownForItems(items: RcbLineItem[]): RcbTierAggregate[] {
   const map = new Map<number, RcbTierAggregate>()
@@ -286,6 +397,9 @@ export function rcbTierBreakdownForItems(items: RcbLineItem[]): RcbTierAggregate
         ext: item.cost,
       })
     }
+  }
+  for (const row of map.values()) {
+    row.unit = row.qty ? Math.round(row.ext / row.qty) : 0
   }
   return [...map.values()].sort((a, b) => a.tier - b.tier)
 }
