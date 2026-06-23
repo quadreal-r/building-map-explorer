@@ -2,8 +2,11 @@ import { RTU_AGE_CRITICAL, RTU_AGE_WARN } from '@/lib/constants'
 import { getColor } from '@/lib/colors'
 import { hasPlaceholderGps, hasVacant, mlCount } from '@/lib/dataQuality'
 import { getRtuAge, getRtuYear, oldestRtuAge } from '@/lib/rtu'
-import type { Building, LayerKey, Rtu, Utility } from '@/types/domain'
+import { showToastSuccess } from '@/lib/toast'
+import type { Building, LayerKey, Rtu, Tenant, Utility } from '@/types/domain'
 import { LAYER_COLORS } from '@/lib/constants'
+
+const VACANT_RE = /^(vacant|no information)$/i
 
 function escapeHtml(text: string): string {
   return text
@@ -13,7 +16,143 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;')
 }
 
-export function buildBuildingInfoHtml(building: Building, getManagerName: (m: string) => string): string {
+function closeButton(): string {
+  return '<button class="iw-close" data-iw-action="close" title="Close">✕</button>'
+}
+
+function moveButton(attrs: Record<string, string>): string {
+  const dataAttrs = Object.entries(attrs)
+    .map(([key, value]) => ` data-${key}="${escapeHtml(value)}"`)
+    .join('')
+  return `<button class="iw-move-btn" data-iw-action="move"${dataAttrs} title="Move this marker">↔ Move</button>`
+}
+
+function actionFooter(buttons: string): string {
+  return buttons ? `<div class="iw-foot"><div class="iw-actions">${buttons}</div></div>` : ''
+}
+
+function copyButton(): string {
+  return `<button class="iw-copy-btn" data-iw-action="copy-all" title="Copy all information">📋 Copy</button>`
+}
+
+function copySource(text: string): string {
+  return `<textarea class="iw-copy-source" readonly aria-hidden="true" tabindex="-1">${escapeHtml(text)}</textarea>`
+}
+
+function plainRow(label: string, value: string): string {
+  return `${label.padEnd(12)}${value}`
+}
+
+function plainDetailLines(desc: string): string[] {
+  return desc.split(/\r?\n/).filter(Boolean).map((line) => {
+    const idx = line.indexOf(':')
+    if (idx > 0) {
+      return plainRow(line.slice(0, idx).trim(), line.slice(idx + 1).trim())
+    }
+    return line
+  })
+}
+
+export function copyPopupText(text: string): void {
+  if (navigator.clipboard?.writeText) {
+    void navigator.clipboard.writeText(text).then(() => showToastSuccess('📋 Copied popup contents'))
+    return
+  }
+  const ta = document.createElement('textarea')
+  ta.value = text
+  document.body.appendChild(ta)
+  ta.select()
+  document.execCommand('copy')
+  document.body.removeChild(ta)
+  showToastSuccess('📋 Copied popup contents')
+}
+
+function buildingBadgeText(building: Building): string {
+  const parts = [building.park.replace(/\s*\(x\s*\d+\)/, '').trim()]
+  const oldest = oldestRtuAge(building)
+  if (oldest >= RTU_AGE_CRITICAL) parts.push(`🔥 ${oldest} yr RTU`)
+  else if (oldest >= RTU_AGE_WARN) parts.push(`${oldest} yr RTU`)
+  if (hasVacant(building)) parts.push('VACANT')
+  const ml = mlCount(building)
+  if (ml) parts.push(`ML×${ml}`)
+  return parts.join('  ')
+}
+
+export function buildBuildingInfoPlainText(building: Building): string {
+  const lines: string[] = [building.address, buildingBadgeText(building), '']
+  lines.push(plainRow('BU #', building.bu || '—'))
+  lines.push(plainRow('Portfolio', building.cluster || building.park || '—'))
+  lines.push(plainRow('Manager', building.manager || '—'))
+  lines.push(plainRow('Sq Ft', building.sqft || '—'))
+
+  if (building.rtus?.length) {
+    let nCritical = 0
+    let nWarn = 0
+    for (const r of building.rtus) {
+      const age = getRtuAge(r)
+      if (age == null) continue
+      if (age >= RTU_AGE_CRITICAL) nCritical++
+      else if (age >= RTU_AGE_WARN) nWarn++
+    }
+    let title = `RTUs (${building.rtus.length})`
+    if (nCritical > 0) title += ` · ${nCritical} CRITICAL`
+    else if (nWarn > 0) title += ' · SOME AGING'
+    lines.push('', title)
+
+    for (const r of building.rtus) {
+      const age = getRtuAge(r)
+      const yr = getRtuYear(r)
+      let nameLine = r.name
+      if (age != null && age >= RTU_AGE_CRITICAL) nameLine += `  ${age} yrs`
+      else if (age != null && age >= RTU_AGE_WARN) nameLine += `  ${age} yrs`
+      lines.push(nameLine)
+      const mModel = r.description.match(/Model[:\s]+([^\r\n]+)/i)
+      const mMake = r.description.match(/Make[:\s]+([^\r\n]+)/i)
+      const detail = [mModel?.[1]?.trim(), mMake?.[1]?.trim(), yr ? `(${yr})` : '']
+        .filter(Boolean)
+        .join(' · ')
+      if (detail) lines.push(`  ${detail}`)
+    }
+  }
+
+  if (building.tenants?.length) {
+    lines.push('', `Tenants (${building.tenants.length})`)
+    for (const t of building.tenants) {
+      const desc = t.description || ''
+      lines.push(desc ? `${t.name}  ${desc}` : t.name)
+    }
+  }
+
+  return lines.join('\n').trimEnd()
+}
+
+export function buildDetailInfoPlainText(
+  layerKey: LayerKey,
+  data: Rtu | Tenant | Utility,
+  _options?: { buildingAddress?: string },
+): string {
+  const name = data.name ?? ''
+  const lines: string[] = [name]
+
+  if (layerKey === 'rtu') {
+    const age = getRtuAge(data as Rtu)
+    if (age != null) {
+      if (age >= RTU_AGE_CRITICAL) lines[0] = `${name}  ${age} yrs old`
+      else if (age >= RTU_AGE_WARN) lines[0] = `${name}  ${age} yrs old`
+    }
+  }
+
+  lines.push('')
+  lines.push(...plainDetailLines(data.description ?? ''))
+
+  return lines.join('\n').trimEnd()
+}
+
+function isTenantVacant(tenant: Tenant): boolean {
+  return VACANT_RE.test((tenant.description ?? '').trim())
+}
+
+export function buildBuildingInfoHtml(building: Building): string {
   const bColor = getColor(building.park)
   const oldest = oldestRtuAge(building)
   const vac = hasVacant(building)
@@ -35,7 +174,7 @@ export function buildBuildingInfoHtml(building: Building, getManagerName: (m: st
   const stats = [
     `<div class="iw-row"><strong>BU #</strong>${escapeHtml(building.bu || '—')}</div>`,
     `<div class="iw-row"><strong>Portfolio</strong>${escapeHtml(building.cluster || building.park || '—')}</div>`,
-    `<div class="iw-row"><strong>Manager</strong>${escapeHtml(getManagerName(building.manager || '') || '—')}</div>`,
+    `<div class="iw-row"><strong>Manager</strong>${escapeHtml(building.manager || '—')}</div>`,
     `<div class="iw-row"><strong>Sq Ft</strong>${escapeHtml(building.sqft || '—')}</div>`,
   ].join('')
 
@@ -81,26 +220,28 @@ export function buildBuildingInfoHtml(building: Building, getManagerName: (m: st
   let tenantHtml = ''
   if (building.tenants?.length) {
     const items = building.tenants
-      .map(
-        (t) =>
-          `<div class="iw-tenant"><span class="iw-tenant-unit">${escapeHtml(t.name)}</span>${escapeHtml(t.description || '')}</div>`,
-      )
+      .map((t) => {
+        const vacClass = isTenantVacant(t) ? ' vacant' : ''
+        return `<div class="iw-tenant${vacClass}"><span class="iw-tenant-unit">${escapeHtml(t.name)}</span>${escapeHtml(t.description || '')}</div>`
+      })
       .join('')
     tenantHtml = `<div class="iw-section"><div class="iw-section-title">Tenants (${building.tenants.length})</div>${items}</div>`
   }
 
-  const gmapsLink = `https://www.google.com/maps?q=${building.lat},${building.lng}`
+  const moveBtn = moveButton({ 'iw-kind': 'building', 'iw-address': building.address })
+  const plainText = buildBuildingInfoPlainText(building)
 
-  return `<div class="iw"><div class="iw-head"><div class="iw-name">${escapeHtml(building.address)}</div><div class="iw-badges">${badges}</div></div><div class="iw-body">${stats}${rtuHtml}${tenantHtml}<a class="iw-link" href="${gmapsLink}" target="_blank" rel="noopener">Open in Google Maps ↗</a></div></div>`
+  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(building.address)}</div><div class="iw-badges">${badges}</div>${closeButton()}</div><div class="iw-body">${stats}${rtuHtml}${tenantHtml}</div>${actionFooter(`${copyButton()}${moveBtn}`)}</div>`
 }
 
 export function buildDetailInfoHtml(
   layerKey: LayerKey,
-  data: Rtu | Utility | { name?: string; description?: string; desc?: string },
+  data: Rtu | Tenant | Utility,
+  options?: { showDelete?: boolean; buildingAddress?: string },
 ): string {
   const cfg = LAYER_COLORS[layerKey]
-  const name = 'name' in data ? data.name : ''
-  const desc = ('description' in data ? data.description : '') || ('desc' in data ? data.desc : '') || ''
+  const name = data.name ?? ''
+  const desc = data.description ?? ''
   const lines = desc.split(/\r?\n/).filter(Boolean)
   const rows = lines
     .map((line) => {
@@ -113,7 +254,7 @@ export function buildDetailInfoHtml(
     .join('')
 
   let ageLine = ''
-  if (layerKey === 'rtu' && 'description' in data) {
+  if (layerKey === 'rtu') {
     const age = getRtuAge(data as Rtu)
     if (age != null) {
       if (age >= RTU_AGE_CRITICAL) {
@@ -126,32 +267,19 @@ export function buildDetailInfoHtml(
 
   const badge = layerKey === 'rtu' ? '#fbbf24' : layerKey === 'tenants' ? '#34d399' : cfg.fill
 
-  return `<div class="iw"><div class="iw-head"><div class="iw-name">${escapeHtml(name ?? '')}${ageLine}</div><div class="iw-badges"><span class="iw-badge" style="background:${badge}22;color:${badge};border:1px solid ${badge}44">${layerKey.toUpperCase()}</span></div></div><div class="iw-body">${rows}</div></div>`
-}
-
-export function buildHoverTipHtml(building: Building, getManagerName: (m: string) => string): string {
-  const vac = hasVacant(building)
-  const ml = mlCount(building)
-  const oldest = oldestRtuAge(building)
-  const sqftStr = building.sqft || '—'
-  const vacBadge = vac
-    ? '<span class="ht-badge" style="background:rgba(251,146,60,.2);color:#fb923c">VACANT</span>'
-    : ''
-  const mlBadge = ml
-    ? `<span class="ht-badge" style="background:rgba(167,139,250,.2);color:#a78bfa">ML×${ml}</span>`
-    : ''
-  const rtuBadge =
-    oldest >= 20
-      ? `<span class="ht-badge" style="background:rgba(251,191,36,.2);color:#fbbf24">🔥${oldest}yr</span>`
+  const moveBtn = moveButton({
+    'iw-kind': 'detail',
+    'iw-layer': layerKey,
+    'iw-name': name,
+    'iw-building': options?.buildingAddress ?? '',
+  })
+  const deleteBtn =
+    options?.showDelete !== false
+      ? `<button class="iw-del-btn" data-iw-action="delete" data-iw-layer="${layerKey}" data-iw-name="${escapeHtml(name)}" data-iw-building="${escapeHtml(options?.buildingAddress ?? '')}" title="Delete this marker">🗑 Delete</button>`
       : ''
-  const rtuCount = building.rtus?.length ?? 0
-  const tenCount = building.tenants?.length ?? 0
-  const badgeRow =
-    vacBadge || mlBadge || rtuBadge
-      ? `<div class="ht-row">${vacBadge}${mlBadge}${rtuBadge}</div>`
-      : ''
+  const plainText = buildDetailInfoPlainText(layerKey, data, options)
 
-  return `<div class="ht-addr">${escapeHtml(building.address)}</div><div class="ht-park">${escapeHtml(building.park)}</div><div class="ht-row"><span class="ht-meta">📐 ${escapeHtml(sqftStr)} sf</span><span class="ht-meta">❄ ${rtuCount} RTUs</span><span class="ht-meta">🏢 ${tenCount} tenants</span></div>${badgeRow}<div class="ht-meta" style="margin-top:4px">👤 ${escapeHtml(getManagerName(building.manager || '') || '—')}</div>`
+  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div><div class="iw-badges"><span class="iw-badge" style="background:${badge}22;color:${badge};border:1px solid ${badge}44">${layerKey.toUpperCase()}</span></div>${closeButton()}</div><div class="iw-body">${rows}</div>${actionFooter(`${copyButton()}${moveBtn}${deleteBtn}`)}</div>`
 }
 
 export function hasBadGps(building: Building): boolean {

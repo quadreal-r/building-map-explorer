@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { LoginModal } from '@/features/auth/LoginModal'
 import { CostBanner } from '@/features/cost-estimator/CostBanner'
 import { MapPanel } from '@/features/map/MapPanel'
 import { SettingsModal } from '@/features/settings/SettingsModal'
 import { Sidebar } from '@/features/sidebar/Sidebar'
 import { useFilteredBuildings } from '@/hooks/useFilteredBuildings'
-import { usePortfolioData, type PortfolioData } from '@/hooks/usePortfolioData'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { usePortfolioData, persistPortfolio, type PortfolioData } from '@/hooks/usePortfolioData'
 import { useSettingsStore } from '@/stores/settingsStore'
+import { usePortfolioStore } from '@/stores/portfolioStore'
 import { useUiStore } from '@/stores/uiStore'
 import styles from './AppShell.module.css'
 
@@ -17,7 +18,6 @@ export function AppShell() {
   const queryClient = useQueryClient()
   const { data, isLoading, isError } = usePortfolioData()
   const [portfolioOverride, setPortfolioOverride] = useState<PortfolioData | null>(null)
-  const [loginOpen, setLoginOpen] = useState(false)
 
   const loadSettings = useSettingsStore((s) => s.loadSettings)
   const settingsOpen = useUiStore((s) => s.settingsOpen)
@@ -25,6 +25,11 @@ export function AppShell() {
   const polygonDrawOpen = useUiStore((s) => s.isModalOpen('polygonDraw'))
   const openPolygonDraw = useUiStore((s) => s.openModal)
   const closePolygonDraw = useUiStore((s) => s.closeModal)
+  const addMarkerOpen = useUiStore((s) => s.isModalOpen('addMarker'))
+  const openAddMarker = useUiStore((s) => s.openModal)
+  const closeAddMarker = useUiStore((s) => s.closeModal)
+
+  const markSaved = usePortfolioStore((s) => s.markSaved)
 
   useEffect(() => {
     void loadSettings()
@@ -34,15 +39,27 @@ export function AppShell() {
 
   const { filteredBuildings, listBuildings } = useFilteredBuildings(portfolio.buildings)
 
-  const handlePortfolioImport = (next: PortfolioData) => {
-    setPortfolioOverride(next)
-    queryClient.setQueryData(['portfolio'], next)
-  }
+  useKeyboardShortcuts({ portfolio, onSaved: markSaved })
 
-  const handlePortfolioPatch = (next: PortfolioData) => {
-    setPortfolioOverride(next)
-    queryClient.setQueryData(['portfolio'], next)
-  }
+  const handlePortfolioImport = useCallback(
+    (next: PortfolioData) => {
+      persistPortfolio(next)
+      setPortfolioOverride(next)
+      queryClient.setQueryData(['portfolio'], next)
+      usePortfolioStore.getState().patchPortfolio(next)
+    },
+    [queryClient],
+  )
+
+  const handlePortfolioPatch = useCallback(
+    (next: PortfolioData) => {
+      persistPortfolio(next)
+      setPortfolioOverride(next)
+      queryClient.setQueryData(['portfolio'], next)
+      usePortfolioStore.getState().patchPortfolio(next)
+    },
+    [queryClient],
+  )
 
   if (isLoading && !portfolioOverride) {
     return (
@@ -66,6 +83,8 @@ export function AppShell() {
         allBuildings={portfolio.buildings}
         listBuildings={listBuildings}
         filteredBuildings={filteredBuildings}
+        portfolio={portfolio}
+        onNotesChange={handlePortfolioPatch}
       />
       <div className={styles.mainColumn}>
         <MapPanel
@@ -75,6 +94,8 @@ export function AppShell() {
           onPortfolioPatch={handlePortfolioPatch}
           polygonDrawOpen={polygonDrawOpen}
           onPolygonDrawClose={() => closePolygonDraw('polygonDraw')}
+          addMarkerOpen={addMarkerOpen}
+          onAddMarkerClose={() => closeAddMarker('addMarker')}
         />
         <CostBanner buildings={filteredBuildings} />
       </div>
@@ -83,16 +104,17 @@ export function AppShell() {
         onClose={closeSettings}
         portfolio={portfolio}
         onImport={handlePortfolioImport}
-        onOpenLogin={() => {
-          closeSettings()
-          setLoginOpen(true)
-        }}
+        onPortfolioPatch={handlePortfolioPatch}
         onOpenPolygonDraw={() => {
           closeSettings()
           openPolygonDraw('polygonDraw')
         }}
+        onOpenAddMarker={() => {
+          closeSettings()
+          openAddMarker('addMarker')
+        }}
+        onSaved={markSaved}
       />
-      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </div>
   )
 }

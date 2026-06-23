@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { useAuthContext } from '@/hooks/useAuthContext'
-import { canPersistToSupabase, upsertPolygon } from '@/lib/portfolioApi'
+import { showToastSuccess } from '@/lib/toast'
 import { usePolygonDraw } from '@/features/polygons/usePolygonDraw'
 import type { Polygon } from '@/types/domain'
 import styles from './PolygonDrawPanel.module.css'
@@ -13,12 +12,10 @@ export interface PolygonDrawPanelProps {
 }
 
 export function PolygonDrawPanel({ open, onClose, map, onSaved }: PolygonDrawPanelProps) {
-  const { isAuthenticated } = useAuthContext()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [color, setColor] = useState('#60a5fa')
   const [status, setStatus] = useState('')
-  const [saving, setSaving] = useState(false)
 
   const { points, isDrawing, toggleDrawing, reset } = usePolygonDraw({
     map,
@@ -27,36 +24,26 @@ export function PolygonDrawPanel({ open, onClose, map, onSaved }: PolygonDrawPan
 
   if (!open) return null
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (points.length < 3) {
       setStatus('Draw at least 3 points first.')
       return
     }
     const polygon: Polygon = {
+      id: Date.now(),
       name: name.trim() || 'Polygon',
       description: description.trim(),
       color,
       paths: points,
     }
-    setSaving(true)
-    try {
-      if (canPersistToSupabase(isAuthenticated)) {
-        const saved = await upsertPolygon(polygon)
-        onSaved(saved)
-      } else {
-        onSaved({ ...polygon, id: Date.now() })
-      }
-      reset()
-      setName('')
-      setDescription('')
-      setColor('#60a5fa')
-      setStatus('')
-      onClose()
-    } catch (e) {
-      setStatus(e instanceof Error ? e.message : 'Failed to save polygon')
-    } finally {
-      setSaving(false)
-    }
+    onSaved(polygon)
+    showToastSuccess('✓ Polygon added — save to HTML to keep it.')
+    reset()
+    setName('')
+    setDescription('')
+    setColor('#60a5fa')
+    setStatus('')
+    onClose()
   }
 
   const handleCancel = () => {
@@ -116,13 +103,8 @@ export function PolygonDrawPanel({ open, onClose, map, onSaved }: PolygonDrawPan
       <div className={styles.status}>{status || pointLabel}</div>
 
       <div className={styles.actions}>
-        <button
-          type="button"
-          className={`btn-action ${styles.saveBtn}`}
-          disabled={saving}
-          onClick={() => void handleSave()}
-        >
-          {saving ? 'Saving…' : '✓ Save'}
+        <button type="button" className={`btn-action ${styles.saveBtn}`} onClick={handleSave}>
+          ✓ Save
         </button>
         <button type="button" className="btn-action" onClick={handleCancel}>
           Cancel

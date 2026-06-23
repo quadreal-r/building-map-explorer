@@ -1,13 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { useAuthContext } from '@/hooks/useAuthContext'
 import { getColor } from '@/lib/colors'
-import {
-  canPersistToSupabase,
-  updateBuildingPosition,
-  updateRtuPosition,
-  updateTenantPosition,
-  updateUtilityPosition,
-} from '@/lib/portfolioApi'
 import {
   ESRI_TILE_URL,
   IMAGERY_MODES,
@@ -15,10 +7,15 @@ import {
   USGS_TILE_URL,
   UTILITY_LAYER_MAP,
 } from '@/lib/constants'
-import { buildBuildingInfoHtml, buildDetailInfoHtml, buildHoverTipHtml } from '@/lib/mapInfoWindow'
+import { afterMapViewChange, fitBoundsPreserveRotation, panToPreserveRotation } from '@/lib/mapRotation'
+import { closeAllMapPopups, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
+import { collectSearchHits } from '@/lib/searchHits'
+import { getMarkerIcon } from '@/lib/markerStyles'
+import { buildBuildingInfoHtml, buildDetailInfoHtml, copyPopupText } from '@/lib/mapInfoWindow'
+import { showToastSuccess } from '@/lib/toast'
 import { useLayerStore } from '@/stores/layerStore'
+import { useFilterStore } from '@/stores/filterStore'
 import { useSelectionStore } from '@/stores/selectionStore'
-import { useSettingsStore } from '@/stores/settingsStore'
 import type { Building, LayerKey, Polygon, Rtu, Tenant, Utility } from '@/types/domain'
 
 const TRANSPARENT_ICON =
@@ -46,7 +43,8 @@ export interface UseMapMarkersOptions {
   polygons: Polygon[]
   onSelectBuilding: (building: Building) => void
   onBuildingMoved?: (building: Building, lat: number, lng: number) => void
-  onDetailMoved?: (layerKey: LayerKey, data: Rtu | Tenant | Utility, lat: number, lng: number) => void
+  onDetailMoved?: (layerKey: LayerKey, data: Rtu | Tenant | Utility, lat: number, lng: number, building: Building | null) => void
+  onDeleteDetail?: (layerKey: LayerKey, data: Rtu | Tenant | Utility, building: Building | null) => void
 }
 
 export function useMapMarkers({
@@ -54,15 +52,17 @@ export function useMapMarkers({
   buildings,
   mapBuildings,
   utilities,
+  polygons,
   onSelectBuilding,
   onBuildingMoved,
   onDetailMoved,
+  onDeleteDetail,
 }: UseMapMarkersOptions) {
-  const { isAuthenticated } = useAuthContext()
   const layers = useLayerStore((s) => s.layers)
+  const search = useFilterStore((s) => s.search)
   const currentBuilding = useSelectionStore((s) => s.currentBuilding)
   const dragMode = useSelectionStore((s) => s.dragMode)
-  const getManagerName = useSettingsStore((s) => s.getManagerName)
+  const setLastDragUndo = useSelectionStore((s) => s.setLastDragUndo)
 
   const buildingMarkersRef = useRef<BuildingMarkerEntry[]>([])
   const detailMarkersRef = useRef<DetailMarkerEntry[]>([])
@@ -70,19 +70,24 @@ export function useMapMarkers({
   const activeInfoMarkerRef = useRef<google.maps.Marker | null>(null)
   const imageryModeRef = useRef(0)
   const imageryOverlayRef = useRef<google.maps.ImageMapType | null>(null)
-  const hoverTipRef = useRef<HTMLDivElement | null>(null)
+  const soloMoveRef = useRef<{ marker: google.maps.Marker; label?: google.maps.Marker } | null>(null)
+  const soloMoveListenerRef = useRef<google.maps.MapsEventListener | null>(null)
+
+  const callbacksRef = useRef({
+    onSelectBuilding,
+    onBuildingMoved,
+    onDetailMoved,
+    onDeleteDetail,
+  })
+  callbacksRef.current = { onSelectBuilding, onBuildingMoved, onDetailMoved, onDeleteDetail }
+
+  const layersRef = useRef(layers)
+  layersRef.current = layers
 
   const resetBuildingIcons = useCallback(() => {
     for (const entry of buildingMarkersRef.current) {
       const color = getColor(entry.building.park)
-      entry.marker.setIcon({
-        path: google.maps.SymbolPath.CIRCLE,
-        fillColor: color,
-        fillOpacity: 0.95,
-        strokeColor: '#fff',
-        strokeWeight: 1.5,
-        scale: 9,
-      })
+      entry.marker.setIcon(getMarkerIcon(color, false))
       entry.marker.setZIndex(10)
     }
   }, [])
@@ -93,14 +98,7 @@ export function useMapMarkers({
       const entry = buildingMarkersRef.current.find((m) => m.building.address === building.address)
       if (!entry) return
       const color = getColor(building.park)
-      entry.marker.setIcon({
-        path: google.maps.SymbolPath.CIRCLE,
-        fillColor: color,
-        fillOpacity: 1,
-        strokeColor: '#fff',
-        strokeWeight: 3,
-        scale: 14,
-      })
+      entry.marker.setIcon(getMarkerIcon(color, true))
       entry.marker.setZIndex(999)
     },
     [resetBuildingIcons],
@@ -110,31 +108,144 @@ export function useMapMarkers({
     (building: Building, marker: google.maps.Marker) => {
       if (!map || !infoWindowRef.current) return
       if (activeInfoMarkerRef.current === marker) {
-        infoWindowRef.current.close()
-        activeInfoMarkerRef.current = null
+        closeAllMapPopups()
         return
       }
-      infoWindowRef.current.setContent(buildBuildingInfoHtml(building, getManagerName))
+      closeAllMapPopups()
+      infoWindowRef.current.setContent(buildBuildingInfoHtml(building))
       infoWindowRef.current.open({ map, anchor: marker })
       activeInfoMarkerRef.current = marker
+      afterMapViewChange(map)
     },
-    [map, getManagerName],
+    [map],
   )
+
+  const openDetailInfo = useCallback(
+    (entry: DetailMarkerEntry) => {
+      if (!map || !infoWindowRef.current) return
+      const { type, data, building, marker } = entry
+      if (activeInfoMarkerRef.current === marker) {
+        closeAllMapPopups()
+        return
+      }
+      closeAllMapPopups()
+      infoWindowRef.current.setContent(
+        buildDetailInfoHtml(type, data, { buildingAddress: building?.address }),
+      )
+      infoWindowRef.current.open({ map, anchor: marker })
+      activeInfoMarkerRef.current = marker
+      marker.setVisible(true)
+      entry.label?.setVisible(true)
+      afterMapViewChange(map)
+    },
+    [map],
+  )
+
+  const stopSoloMove = useCallback(() => {
+    const solo = soloMoveRef.current
+    if (!solo) return
+    const globalDrag = useSelectionStore.getState().dragMode
+    solo.marker.setDraggable(globalDrag)
+    solo.marker.setCursor(globalDrag ? 'grab' : null)
+    if (soloMoveListenerRef.current) {
+      google.maps.event.removeListener(soloMoveListenerRef.current)
+      soloMoveListenerRef.current = null
+    }
+    soloMoveRef.current = null
+  }, [])
+
+  const startSoloMove = useCallback(
+    (marker: google.maps.Marker, label?: google.maps.Marker) => {
+      stopSoloMove()
+      infoWindowRef.current?.close()
+      activeInfoMarkerRef.current = null
+      soloMoveRef.current = { marker, label }
+      marker.setDraggable(true)
+      marker.setCursor('grab')
+      showToastSuccess('↔ Drag marker to reposition.')
+      soloMoveListenerRef.current = marker.addListener('dragend', () => {
+        stopSoloMove()
+        showToastSuccess('✓ Position updated — save to HTML to keep changes.')
+      })
+    },
+    [stopSoloMove],
+  )
+
+  const attachInfoWindowActions = useCallback(() => {
+    const iw = infoWindowRef.current
+    if (!iw) return
+    google.maps.event.addListenerOnce(iw, 'domready', () => {
+      const container = document.querySelector('.gm-style-iw-d')
+      if (!container) return
+      container.querySelector('[data-iw-action="close"]')?.addEventListener('click', () => {
+        iw.close()
+        activeInfoMarkerRef.current = null
+      })
+      container.querySelector('[data-iw-action="copy-all"]')?.addEventListener('click', () => {
+        const source = container.querySelector('.iw-copy-source') as HTMLTextAreaElement | null
+        if (source?.value) copyPopupText(source.value)
+      })
+      container.querySelector('[data-iw-action="move"]')?.addEventListener('click', (e) => {
+        const btn = e.currentTarget as HTMLElement
+        const kind = btn.getAttribute('data-iw-kind')
+        if (kind === 'building') {
+          const address = btn.getAttribute('data-iw-address') ?? ''
+          const entry = buildingMarkersRef.current.find((m) => m.building.address === address)
+          if (!entry) return
+          startSoloMove(entry.marker, entry.label)
+          return
+        }
+        if (kind === 'detail') {
+          const layerKey = btn.getAttribute('data-iw-layer') as LayerKey
+          const name = btn.getAttribute('data-iw-name') ?? ''
+          const buildingAddr = btn.getAttribute('data-iw-building') ?? ''
+          const entry = detailMarkersRef.current.find(
+            (dm) =>
+              dm.type === layerKey &&
+              dm.data.name === name &&
+              (buildingAddr ? dm.building?.address === buildingAddr : !dm.building),
+          )
+          if (!entry) return
+          startSoloMove(entry.marker, entry.label)
+        }
+      })
+      const delBtn = container.querySelector('[data-iw-action="delete"]')
+      if (delBtn) {
+        delBtn.addEventListener('click', () => {
+          const layerKey = delBtn.getAttribute('data-iw-layer') as LayerKey
+          const name = delBtn.getAttribute('data-iw-name') ?? ''
+          const buildingAddr = delBtn.getAttribute('data-iw-building') ?? ''
+          const entry = detailMarkersRef.current.find(
+            (dm) =>
+              dm.type === layerKey &&
+              dm.data.name === name &&
+              (buildingAddr ? dm.building?.address === buildingAddr : !dm.building),
+          )
+          if (!entry) return
+          if (!window.confirm(`Delete marker "${name}"?`)) return
+          iw.close()
+          activeInfoMarkerRef.current = null
+          callbacksRef.current.onDeleteDetail?.(entry.type, entry.data, entry.building)
+        })
+      }
+    })
+  }, [startSoloMove])
 
   const refreshDetailVisibility = useCallback(() => {
     if (!map) return
     const zoom = map.getZoom() ?? 0
     const bounds = map.getBounds()
+    const activeLayers = layersRef.current
     for (const dm of detailMarkersRef.current) {
       const pos = dm.marker.getPosition()
       const show =
-        layers[dm.type] &&
+        activeLayers[dm.type] &&
         zoom >= 16 &&
         Boolean(bounds && pos && bounds.contains(pos))
       dm.marker.setVisible(show)
       dm.label?.setVisible(show)
     }
-  }, [map, layers])
+  }, [map])
 
   const fitAllMarkers = useCallback(() => {
     if (!map) return
@@ -152,7 +263,7 @@ export function useMapMarkers({
       if (pos) bounds.extend(pos)
     }
     if (!bounds.isEmpty()) {
-      map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 })
+      fitBoundsPreserveRotation(map, bounds, { top: 40, right: 40, bottom: 40, left: 40 })
     }
     refreshDetailVisibility()
   }, [map, mapBuildings, refreshDetailVisibility])
@@ -169,7 +280,7 @@ export function useMapMarkers({
       if (pos) bounds.extend(pos)
     }
     if (!bounds.isEmpty()) {
-      map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 })
+      fitBoundsPreserveRotation(map, bounds, { top: 40, right: 40, bottom: 40, left: 40 })
     }
     refreshDetailVisibility()
   }, [map, refreshDetailVisibility])
@@ -223,10 +334,11 @@ export function useMapMarkers({
   useEffect(() => {
     if (!map) return
 
-    infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 340 })
+    infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 340, disableAutoPan: true })
     infoWindowRef.current.addListener('closeclick', () => {
       activeInfoMarkerRef.current = null
     })
+    infoWindowRef.current.addListener('content_changed', attachInfoWindowActions)
 
     buildingMarkersRef.current = []
     detailMarkersRef.current = []
@@ -237,54 +349,14 @@ export function useMapMarkers({
         position: { lat: b.lat, lng: b.lng },
         map,
         title: b.address,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          fillColor: color,
-          fillOpacity: 0.95,
-          strokeColor: '#fff',
-          strokeWeight: 1.5,
-          scale: 9,
-        },
+        icon: getMarkerIcon(color, false),
         zIndex: 10,
         draggable: dragMode,
       })
 
       marker.addListener('click', () => {
-        onSelectBuilding(b)
+        callbacksRef.current.onSelectBuilding(b)
         openBuildingInfo(b, marker)
-      })
-
-      marker.addListener('mouseover', (e: google.maps.MapMouseEvent) => {
-        const tip = hoverTipRef.current
-        if (!tip) return
-        tip.innerHTML = buildHoverTipHtml(b, getManagerName)
-        tip.style.display = 'block'
-        const domEvent = (e as google.maps.MapMouseEvent & { domEvent?: MouseEvent }).domEvent
-        const mapDiv = map.getDiv()
-        if (mapDiv && domEvent) {
-          const rect = mapDiv.getBoundingClientRect()
-          let x = domEvent.clientX - rect.left + 14
-          let y = domEvent.clientY - rect.top - 14
-          if (x + 240 > rect.width) x = domEvent.clientX - rect.left - 244
-          if (y < 0) y = 4
-          tip.style.left = `${x}px`
-          tip.style.top = `${y}px`
-        }
-      })
-      marker.addListener('mouseout', () => {
-        if (hoverTipRef.current) hoverTipRef.current.style.display = 'none'
-      })
-
-      marker.addListener('dragend', () => {
-        const pos = marker.getPosition()
-        if (!pos) return
-        const lat = pos.lat()
-        const lng = pos.lng()
-        label.setPosition({ lat, lng })
-        onBuildingMoved?.(b, lat, lng)
-        if (canPersistToSupabase(isAuthenticated) && b.id) {
-          void updateBuildingPosition(b.id, lat, lng).catch(console.error)
-        }
       })
 
       const labelText = b.address.length > 24 ? `${b.address.slice(0, 22)}…` : b.address
@@ -303,10 +375,32 @@ export function useMapMarkers({
           fontSize: '10px',
           fontWeight: '600',
           fontFamily: 'Inter,sans-serif',
+          className: 'bldg-label',
         },
         zIndex: 5,
         clickable: false,
         optimized: false,
+      })
+
+      marker.addListener('dragstart', () => {
+        const startPos = marker.getPosition()
+        if (!startPos) return
+        const startLat = startPos.lat()
+        const startLng = startPos.lng()
+        setLastDragUndo(() => {
+          marker.setPosition({ lat: startLat, lng: startLng })
+          label.setPosition({ lat: startLat, lng: startLng })
+          callbacksRef.current.onBuildingMoved?.(b, startLat, startLng)
+        })
+      })
+
+      marker.addListener('dragend', () => {
+        const pos = marker.getPosition()
+        if (!pos) return
+        const lat = pos.lat()
+        const lng = pos.lng()
+        label.setPosition({ lat, lng })
+        callbacksRef.current.onBuildingMoved?.(b, lat, lng)
       })
 
       buildingMarkersRef.current.push({ building: b, marker, label })
@@ -357,6 +451,7 @@ export function useMapMarkers({
             fontSize: '9px',
             fontWeight: '700',
             fontFamily: 'Inter,sans-serif',
+            className: 'rtu-label',
           },
           zIndex: 19,
           visible: false,
@@ -366,15 +461,19 @@ export function useMapMarkers({
       }
 
       marker.addListener('click', () => {
-        if (!infoWindowRef.current) return
-        if (activeInfoMarkerRef.current === marker) {
-          infoWindowRef.current.close()
-          activeInfoMarkerRef.current = null
-          return
-        }
-        infoWindowRef.current.setContent(buildDetailInfoHtml(layerKey, data))
-        infoWindowRef.current.open({ map, anchor: marker })
-        activeInfoMarkerRef.current = marker
+        openDetailInfo({ type: layerKey, building, data, marker, label })
+      })
+
+      marker.addListener('dragstart', () => {
+        const startPos = marker.getPosition()
+        if (!startPos) return
+        const startLat = startPos.lat()
+        const startLng = startPos.lng()
+        setLastDragUndo(() => {
+          marker.setPosition({ lat: startLat, lng: startLng })
+          label?.setPosition({ lat: startLat, lng: startLng })
+          callbacksRef.current.onDetailMoved?.(layerKey, data, startLat, startLng, building)
+        })
       })
 
       marker.addListener('dragend', () => {
@@ -383,17 +482,7 @@ export function useMapMarkers({
         const lat = pos.lat()
         const lng = pos.lng()
         label?.setPosition({ lat, lng })
-        onDetailMoved?.(layerKey, data, lat, lng)
-        if (!canPersistToSupabase(isAuthenticated)) return
-        if (layerKey === 'rtu' && 'building_id' in data && data.id) {
-          void updateRtuPosition(data.id, lat, lng).catch(console.error)
-        } else if (layerKey === 'tenants' && 'building_id' in data && data.id) {
-          void updateTenantPosition(data.id, lat, lng).catch(console.error)
-        } else if (data.id && !('building_id' in data)) {
-          void updateUtilityPosition(data.id, lat, lng).catch(console.error)
-        } else if (data.id && 'utility_type' in data) {
-          void updateUtilityPosition(data.id, lat, lng).catch(console.error)
-        }
+        callbacksRef.current.onDetailMoved?.(layerKey, data, lat, lng, building)
       })
 
       detailMarkersRef.current.push({ type: layerKey, building, data, marker, label })
@@ -402,9 +491,6 @@ export function useMapMarkers({
     for (const b of buildings) {
       for (const r of b.rtus ?? []) {
         makeDetailMarker(r.lat, r.lng, 'rtu', r, b)
-      }
-      for (const t of b.tenants ?? []) {
-        makeDetailMarker(t.lat, t.lng, 'tenants', t, b)
       }
     }
 
@@ -415,7 +501,6 @@ export function useMapMarkers({
 
     map.addListener('zoom_changed', refreshDetailVisibility)
     map.addListener('idle', refreshDetailVisibility)
-    fitAllMarkers()
 
     return () => {
       for (const entry of buildingMarkersRef.current) {
@@ -430,25 +515,81 @@ export function useMapMarkers({
       detailMarkersRef.current = []
       infoWindowRef.current?.close()
       infoWindowRef.current = null
+      stopSoloMove()
     }
-  }, [
-    map,
-    buildings,
-    utilities,
-    dragMode,
-    onSelectBuilding,
-    onBuildingMoved,
-    onDetailMoved,
-    openBuildingInfo,
-    getManagerName,
-    refreshDetailVisibility,
-    fitAllMarkers,
-    isAuthenticated,
-  ])
+  }, [map, buildings, utilities, openBuildingInfo, openDetailInfo, attachInfoWindowActions, refreshDetailVisibility, stopSoloMove])
 
   useEffect(() => {
+    refreshDetailVisibility()
+  }, [layers, refreshDetailVisibility])
+
+  useEffect(() => {
+    const closePopups = () => {
+      infoWindowRef.current?.close()
+      activeInfoMarkerRef.current = null
+      stopSoloMove()
+    }
+    window.addEventListener(MAP_CLOSE_POPUPS_EVENT, closePopups)
+    return () => window.removeEventListener(MAP_CLOSE_POPUPS_EVENT, closePopups)
+  }, [stopSoloMove])
+
+  useEffect(() => {
+    if (!map) return
+    const listener = map.addListener('click', closeAllMapPopups)
+    return () => google.maps.event.removeListener(listener)
+  }, [map])
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ layerKey: LayerKey; name: string; buildingAddress?: string }>).detail
+      const entry = detailMarkersRef.current.find(
+        (dm) =>
+          dm.type === detail.layerKey &&
+          dm.data.name === detail.name &&
+          (detail.buildingAddress
+            ? dm.building?.address === detail.buildingAddress
+            : !dm.building),
+      )
+      if (!entry || !map) return
+      panToPreserveRotation(map, { lat: entry.data.lat, lng: entry.data.lng }, 21)
+      openDetailInfo(entry)
+    }
+    window.addEventListener('map:openDetail', handler)
+    return () => window.removeEventListener('map:openDetail', handler)
+  }, [map, openDetailInfo])
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ address: string }>).detail
+      if (!map) return
+      const entry = buildingMarkersRef.current.find((m) => m.building.address === detail.address)
+      if (!entry) return
+      panToPreserveRotation(map, { lat: entry.building.lat, lng: entry.building.lng }, 21)
+      callbacksRef.current.onSelectBuilding(entry.building)
+      openBuildingInfo(entry.building, entry.marker)
+    }
+    window.addEventListener('map:openBuilding', handler)
+    return () => window.removeEventListener('map:openBuilding', handler)
+  }, [map, openBuildingInfo])
+
+  const visibleAddressesRef = useRef('')
+
+  useEffect(() => {
+    const q = search.trim()
+    if (q && collectSearchHits(buildings, polygons, q).length > 0) {
+      return
+    }
+
+    const addressKey = mapBuildings
+      .map((b) => b.address)
+      .sort()
+      .join('\n')
+    if (addressKey === visibleAddressesRef.current) {
+      return
+    }
+    visibleAddressesRef.current = addressKey
     fitAllMarkers()
-  }, [mapBuildings, fitAllMarkers])
+  }, [mapBuildings, fitAllMarkers, buildings, polygons, search])
 
   useEffect(() => {
     if (currentBuilding) {
@@ -458,11 +599,11 @@ export function useMapMarkers({
         (m) => m.building.address === currentBuilding.address,
       )
       if (entry) {
-        const savedHdg = map.getHeading() ?? 0
-        map.panTo({ lat: currentBuilding.lat, lng: currentBuilding.lng })
-        map.setZoom(21)
-        if (savedHdg) map.setHeading(savedHdg)
+        panToPreserveRotation(map, { lat: currentBuilding.lat, lng: currentBuilding.lng }, 21)
         openBuildingInfo(currentBuilding, entry.marker)
+        setTimeout(() => {
+          document.querySelector('.building-item.active')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }, 60)
       }
     }
   }, [currentBuilding, map, highlightBuilding, openBuildingInfo])
@@ -473,15 +614,18 @@ export function useMapMarkers({
 
   useEffect(() => {
     for (const entry of buildingMarkersRef.current) {
-      entry.marker.setDraggable(dragMode)
+      const isSolo = soloMoveRef.current?.marker === entry.marker
+      entry.marker.setDraggable(dragMode || isSolo)
+      if (!isSolo) entry.marker.setCursor(dragMode ? 'grab' : null)
     }
     for (const entry of detailMarkersRef.current) {
-      entry.marker.setDraggable(dragMode)
+      const isSolo = soloMoveRef.current?.marker === entry.marker
+      entry.marker.setDraggable(dragMode || isSolo)
+      if (!isSolo) entry.marker.setCursor(dragMode ? 'grab' : null)
     }
   }, [dragMode])
 
   return {
-    hoverTipRef,
     fitAllMarkers,
     showAllMarkers,
     cycleImagery,

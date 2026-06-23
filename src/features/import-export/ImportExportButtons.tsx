@@ -1,7 +1,6 @@
 import { useRef } from 'react'
-import { useAuthContext } from '@/hooks/useAuthContext'
 import { exportPortfolioExcel, importPortfolioExcel } from '@/lib/excel'
-import { canPersistToSupabase, importPortfolioToSupabase } from '@/lib/portfolioApi'
+import { showToastError, showToastSuccess } from '@/lib/toast'
 import type { PortfolioData } from '@/types/domain'
 
 export interface ImportExportButtonsProps {
@@ -12,19 +11,21 @@ export interface ImportExportButtonsProps {
 
 export function ImportExportButtons({ portfolio, onImport, compact }: ImportExportButtonsProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const { isAuthenticated } = useAuthContext()
 
   const handleExport = () => {
     exportPortfolioExcel(portfolio)
+    showToastSuccess('✓ Excel exported')
   }
 
   const handleFile = async (file: File) => {
-    const buffer = await file.arrayBuffer()
-    const data = importPortfolioExcel(buffer)
-    if (canPersistToSupabase(isAuthenticated)) {
-      await importPortfolioToSupabase(data)
+    try {
+      const buffer = await file.arrayBuffer()
+      const data = importPortfolioExcel(buffer)
+      onImport(data)
+      showToastSuccess('✓ Import complete — save to HTML to keep changes.')
+    } catch (e) {
+      showToastError(e instanceof Error ? e.message : 'Import failed')
     }
-    onImport(data)
   }
 
   return (
@@ -35,7 +36,7 @@ export function ImportExportButtons({ portfolio, onImport, compact }: ImportExpo
         onClick={handleExport}
         title="Export portfolio to Excel"
       >
-        Export
+        Export Excel
       </button>
       <button
         type="button"
@@ -43,7 +44,7 @@ export function ImportExportButtons({ portfolio, onImport, compact }: ImportExpo
         onClick={() => inputRef.current?.click()}
         title="Import Excel (Buildings, RTUs, Tenants, Polygons, Utilities)"
       >
-        Import
+        Import Excel
       </button>
       <input
         ref={inputRef}

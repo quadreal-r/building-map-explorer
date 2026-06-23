@@ -1,0 +1,52 @@
+import { create } from 'zustand'
+import type { PortfolioData } from '@/types/domain'
+
+const STORAGE_KEY = 'bme-portfolio'
+
+interface PortfolioStoreState {
+  portfolio: PortfolioData | null
+  unsaved: boolean
+  setPortfolio: (data: PortfolioData, options?: { markSaved?: boolean }) => void
+  patchPortfolio: (data: PortfolioData) => void
+  markSaved: () => void
+  markUnsaved: () => void
+  loadFromStorage: () => PortfolioData | null
+  persistToStorage: (data: PortfolioData) => void
+}
+
+export const usePortfolioStore = create<PortfolioStoreState>((set, get) => ({
+  portfolio: null,
+  unsaved: false,
+
+  setPortfolio: (data, options) => {
+    get().persistToStorage(data)
+    set({ portfolio: data, unsaved: options?.markSaved === false })
+    if (options?.markSaved !== false) set({ unsaved: false })
+  },
+
+  patchPortfolio: (data) => {
+    get().persistToStorage(data)
+    set({ portfolio: data, unsaved: true })
+  },
+
+  markSaved: () => set({ unsaved: false }),
+  markUnsaved: () => set({ unsaved: true }),
+
+  loadFromStorage: () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (!raw) return null
+      return JSON.parse(raw) as PortfolioData
+    } catch {
+      return null
+    }
+  },
+
+  persistToStorage: (data) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    } catch {
+      /* quota */
+    }
+  },
+}))

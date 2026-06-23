@@ -5,6 +5,7 @@ interface SelectionState {
   currentBuilding: Building | null
   dragMode: boolean
   sidebarCollapsed: boolean
+  lastDragUndo: (() => void) | null
   setCurrentBuilding: (building: Building | null) => void
   selectBuilding: (building: Building) => void
   clearSelection: () => void
@@ -12,12 +13,15 @@ interface SelectionState {
   toggleDragMode: () => void
   setSidebarCollapsed: (collapsed: boolean) => void
   toggleSidebar: () => void
+  setLastDragUndo: (fn: (() => void) | null) => void
+  runDragUndo: () => boolean
 }
 
-export const useSelectionStore = create<SelectionState>((set) => ({
+export const useSelectionStore = create<SelectionState>((set, get) => ({
   currentBuilding: null,
   dragMode: false,
   sidebarCollapsed: false,
+  lastDragUndo: null,
 
   setCurrentBuilding: (building) => set({ currentBuilding: building }),
   selectBuilding: (building) => set({ currentBuilding: building }),
@@ -28,4 +32,14 @@ export const useSelectionStore = create<SelectionState>((set) => ({
 
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+
+  setLastDragUndo: (fn) => set({ lastDragUndo: fn }),
+
+  runDragUndo: () => {
+    const fn = get().lastDragUndo
+    if (!fn) return false
+    fn()
+    set({ lastDragUndo: null })
+    return true
+  },
 }))

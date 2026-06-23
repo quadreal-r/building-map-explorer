@@ -1,64 +1,46 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { collectSearchHits, openSearchHit, type SearchHit } from '@/lib/searchHits'
 import { useFilterStore } from '@/stores/filterStore'
-import type { Building } from '@/types/domain'
+import type { Building, Polygon } from '@/types/domain'
 
 export interface SearchHitNavProps {
   buildings: Building[]
+  polygons: Polygon[]
 }
 
-/** Prev/next navigation when search matches RTU/tenant detail markers only. */
-export function SearchHitNav({ buildings }: SearchHitNavProps) {
-  const search = useFilterStore((s) => s.search).trim().toLowerCase()
+/** Prev/next navigation when search matches RTU markers, tenant polygons, or buildings. */
+export function SearchHitNav({ buildings, polygons }: SearchHitNavProps) {
+  const search = useFilterStore((s) => s.search).trim()
   const [index, setIndex] = useState(0)
 
-  const hits = useMemo(() => {
-    if (!search) return []
-    const q = search
-    const addressMatch = buildings.some(
-      (b) =>
-        b.address.toLowerCase().includes(q) ||
-        b.bu?.toLowerCase().includes(q) ||
-        b.cluster?.toLowerCase().includes(q) ||
-        b.manager?.toLowerCase().includes(q),
-    )
-    if (addressMatch) return []
+  const hits = useMemo(
+    (): SearchHit[] => collectSearchHits(buildings, polygons, search),
+    [buildings, polygons, search],
+  )
 
-    const list: { label: string; lat: number; lng: number }[] = []
-    for (const b of buildings) {
-      for (const r of b.rtus ?? []) {
-        if (
-          r.name.toLowerCase().includes(q) ||
-          (r.description ?? '').toLowerCase().includes(q)
-        ) {
-          list.push({ label: `${b.address} · ${r.name}`, lat: r.lat, lng: r.lng })
-        }
-      }
-      for (const t of b.tenants ?? []) {
-        if (
-          t.name.toLowerCase().includes(q) ||
-          (t.description ?? '').toLowerCase().includes(q)
-        ) {
-          list.push({ label: `${b.address} · ${t.name}`, lat: t.lat, lng: t.lng })
-        }
-      }
+  const openHit = useCallback((target: SearchHit, i: number) => {
+    setIndex(i)
+    openSearchHit(target)
+  }, [])
+
+  useEffect(() => {
+    setIndex(0)
+    if (hits.length >= 1) {
+      openHit(hits[0]!, 0)
     }
-    return list
-  }, [buildings, search])
+  }, [search, hits, openHit])
 
-  if (hits.length <= 1) return null
+  if (!hits.length) return null
 
   const safeIndex = Math.min(index, hits.length - 1)
   const hit = hits[safeIndex]!
 
   const panTo = (i: number) => {
     const next = ((i % hits.length) + hits.length) % hits.length
-    setIndex(next)
-    window.dispatchEvent(
-      new CustomEvent('map:panTo', {
-        detail: { lat: hits[next]!.lat, lng: hits[next]!.lng, zoom: 18 },
-      }),
-    )
+    openHit(hits[next]!, next)
   }
+
+  if (hits.length <= 1) return null
 
   return (
     <div
@@ -67,13 +49,14 @@ export function SearchHitNav({ buildings }: SearchHitNavProps) {
         display: 'flex',
         gap: 6,
         alignItems: 'center',
-        padding: '4px 14px 6px',
+        padding: '5px 14px 6px',
         fontSize: 11,
         color: 'var(--text-muted)',
         borderBottom: '1px solid var(--border)',
+        background: 'var(--surface2)',
       }}
     >
-      <span title={hit.label}>
+      <span id="shn-count" title={hit.label} style={{ flex: 1, fontFamily: "'DM Mono', monospace" }}>
         {safeIndex + 1} of {hits.length}
       </span>
       <button type="button" className="btn-action" style={{ padding: '2px 8px' }} onClick={() => panTo(safeIndex - 1)}>

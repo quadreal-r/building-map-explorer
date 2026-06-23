@@ -2,20 +2,37 @@ import { getColor } from '@/lib/colors'
 import { RTU_AGE_CRITICAL, RTU_AGE_WARN } from '@/lib/constants'
 import { hasPlaceholderGps, hasVacant, mlCount } from '@/lib/dataQuality'
 import { formatSqft } from '@/lib/format'
+import { showToastSuccess } from '@/lib/toast'
 import { oldestRtuAge } from '@/lib/rtu'
 import { Tag } from '@/components/Tag/Tag'
 import { useSelectionStore } from '@/stores/selectionStore'
-import { useSettingsStore } from '@/stores/settingsStore'
-import type { Building } from '@/types/domain'
+import type { Building, PortfolioData } from '@/types/domain'
 
 export interface BuildingListProps {
   buildings: Building[]
+  portfolio: PortfolioData
+  onNotesChange: (portfolio: PortfolioData) => void
 }
 
-export function BuildingList({ buildings }: BuildingListProps) {
+export function BuildingList({ buildings, portfolio, onNotesChange }: BuildingListProps) {
   const currentBuilding = useSelectionStore((s) => s.currentBuilding)
   const selectBuilding = useSelectionStore((s) => s.selectBuilding)
-  const getManagerName = useSettingsStore((s) => s.getManagerName)
+
+  const openNotesEditor = (address: string) => {
+    const building = portfolio.buildings.find((b) => b.address === address)
+    if (!building) return
+    const current = building.notes ?? ''
+    const newNotes = window.prompt(`Notes for ${address}\n(leave blank to clear):`, current)
+    if (newNotes === null) return
+    const nextBuildings = portfolio.buildings.map((b) =>
+      b.address === address ? { ...b, notes: newNotes.trim() || null } : b,
+    )
+    onNotesChange({
+      ...portfolio,
+      buildings: nextBuildings,
+    })
+    showToastSuccess('✓ Notes saved — save to HTML to keep them.')
+  }
 
   if (!buildings.length) {
     return (
@@ -58,7 +75,7 @@ export function BuildingList({ buildings }: BuildingListProps) {
               const ml = mlCount(b)
               const vac = hasVacant(b)
               const sqftDisp = formatSqft(b.sqft)
-              const mgr = getManagerName(b.manager || '')
+              const mgr = b.manager || ''
               const isActive = currentBuilding?.address === b.address
 
               return (
@@ -111,6 +128,16 @@ export function BuildingList({ buildings }: BuildingListProps) {
                     ) : null}
                     {sold ? <Tag variant="sold">SOLD</Tag> : null}
                   </div>
+                  <button
+                    type="button"
+                    className="bldg-notes-btn"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      openNotesEditor(b.address)
+                    }}
+                  >
+                    {b.notes ? '📝 Notes' : '+ Notes'}
+                  </button>
                 </div>
               )
             })}

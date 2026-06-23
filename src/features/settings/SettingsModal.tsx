@@ -3,8 +3,9 @@ import { ImportExportButtons } from '@/features/import-export/ImportExportButton
 import { Modal } from '@/components/Modal/Modal'
 import { APP_THEMES } from '@/lib/themes'
 import { collectFilterOptions } from '@/lib/filters'
-import { isSupabaseConfigured } from '@/lib/supabaseClient'
-import { useAuthContext } from '@/hooks/useAuthContext'
+import { saveDatabase } from '@/lib/saveDatabase'
+import { showToastSuccess } from '@/lib/toast'
+import { usePortfolioStore } from '@/stores/portfolioStore'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import type { PortfolioData } from '@/types/domain'
@@ -15,38 +16,42 @@ export interface SettingsModalProps {
   onClose: () => void
   portfolio: PortfolioData
   onImport: (data: PortfolioData) => void
-  onOpenLogin: () => void
+  onPortfolioPatch: (data: PortfolioData) => void
   onOpenPolygonDraw: () => void
+  onOpenAddMarker: () => void
+  onSaved?: () => void
 }
 
 interface SettingsFormProps {
   portfolio: PortfolioData
   themeIndex: number
-  managerRenames: Record<string, string>
   onClose: () => void
   onImport: (data: PortfolioData) => void
-  onOpenLogin: () => void
+  onPortfolioPatch: (data: PortfolioData) => void
   onOpenPolygonDraw: () => void
+  onOpenAddMarker: () => void
+  onSaved?: () => void
 }
 
 function SettingsForm({
   portfolio,
   themeIndex,
-  managerRenames,
   onClose,
   onImport,
-  onOpenLogin,
+  onPortfolioPatch,
   onOpenPolygonDraw,
+  onOpenAddMarker,
+  onSaved,
 }: SettingsFormProps) {
   const setThemeIndex = useSettingsStore((s) => s.setThemeIndex)
   const applyTheme = useSettingsStore((s) => s.applyTheme)
-  const setManagerRename = useSettingsStore((s) => s.setManagerRename)
   const saveSettings = useSettingsStore((s) => s.saveSettings)
+  const unsaved = usePortfolioStore((s) => s.unsaved)
 
   const dragMode = useSelectionStore((s) => s.dragMode)
   const toggleDragMode = useSelectionStore((s) => s.toggleDragMode)
 
-  const { isAuthenticated } = useAuthContext()
+  const [savingHtml, setSavingHtml] = useState(false)
 
   const managers = useMemo(
     () => collectFilterOptions(portfolio.buildings).managers,
@@ -57,7 +62,7 @@ function SettingsForm({
   const [draftManagers, setDraftManagers] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {}
     for (const manager of managers) {
-      initial[manager] = managerRenames[manager] ?? manager
+      initial[manager] = manager
     }
     return initial
   })
@@ -65,16 +70,45 @@ function SettingsForm({
   const handleApply = async () => {
     applyTheme(draftTheme)
     setThemeIndex(draftTheme)
+
+    let nextPortfolio = portfolio
+    let anyChange = false
     for (const [original, name] of Object.entries(draftManagers)) {
-      setManagerRename(original, name)
+      const trimmed = name.trim() || original
+      if (trimmed !== original) anyChange = true
     }
+    if (anyChange) {
+      nextPortfolio = {
+        ...portfolio,
+        buildings: portfolio.buildings.map((b) => {
+          const renamed = draftManagers[b.manager]
+          if (!renamed?.trim() || renamed.trim() === b.manager) return b
+          return { ...b, manager: renamed.trim() }
+        }),
+      }
+      onPortfolioPatch(nextPortfolio)
+    }
+
     await saveSettings()
-    onClose()
+    closeSettings()
+    showToastSuccess('✓ Settings applied')
   }
+
+  const closeSettings = onClose
 
   const previewTheme = (index: number) => {
     setDraftTheme(index)
     applyTheme(index)
+  }
+
+  const handleSaveToHtml = async () => {
+    setSavingHtml(true)
+    try {
+      const ok = await saveDatabase(portfolio)
+      if (ok) onSaved?.()
+    } finally {
+      setSavingHtml(false)
+    }
   }
 
   return (
@@ -110,6 +144,7 @@ function SettingsForm({
               </span>
               <input
                 className={styles.mgrInput}
+                data-original={manager}
                 value={draftManagers[manager] ?? manager}
                 onChange={(e) =>
                   setDraftManagers((prev) => ({ ...prev, [manager]: e.target.value }))
@@ -117,7 +152,7 @@ function SettingsForm({
               />
             </div>
           ))}
-          <p className={styles.hint}>Renames apply to sidebar tags, filters, and map info windows.</p>
+          <p className={styles.hint}>Renames update building records when you apply settings.</p>
         </section>
 
         <section>
@@ -137,6 +172,17 @@ function SettingsForm({
               style={{ width: '100%', justifyContent: 'flex-start' }}
               onClick={() => {
                 onClose()
+                onOpenAddMarker()
+              }}
+            >
+              Add marker
+            </button>
+            <button
+              type="button"
+              className="btn-action"
+              style={{ width: '100%', justifyContent: 'flex-start' }}
+              onClick={() => {
+                onClose()
                 onOpenPolygonDraw()
               }}
               title="Add a new polygon by clicking points on the map"
@@ -144,15 +190,18 @@ function SettingsForm({
               Add polygon
             </button>
             <ImportExportButtons portfolio={portfolio} onImport={onImport} />
-            {isSupabaseConfigured ? (
-              <button type="button" className="btn-action" onClick={onOpenLogin}>
-                {isAuthenticated ? 'Account / sign out' : 'Sign in'}
-              </button>
-            ) : null}
+            <button
+              type="button"
+              id="btn-save"
+              className={`btn-action btn-save${unsaved ? ' unsaved' : ''}`}
+              style={{ width: '100%', justifyContent: 'flex-start' }}
+              onClick={() => void handleSaveToHtml()}
+              disabled={savingHtml}
+              title="Download current data as a standalone HTML file"
+            >
+              {savingHtml ? 'Saving…' : 'Save to HTML'}
+            </button>
           </div>
-          {!isAuthenticated && isSupabaseConfigured ? (
-            <p className={styles.hint}>Sign in to edit polygons and persist settings to Supabase.</p>
-          ) : null}
         </section>
       </div>
 
@@ -173,26 +222,26 @@ export function SettingsModal({
   onClose,
   portfolio,
   onImport,
-  onOpenLogin,
+  onPortfolioPatch,
   onOpenPolygonDraw,
+  onOpenAddMarker,
+  onSaved,
 }: SettingsModalProps) {
   const themeIndex = useSettingsStore((s) => s.themeIndex)
-  const managerRenames = useSettingsStore((s) => s.managerRenames)
-
-  const formKey = `${themeIndex}:${JSON.stringify(managerRenames)}`
 
   return (
     <Modal open={open} onClose={onClose} title="Settings" width={420} align="right">
       {open ? (
         <SettingsForm
-          key={formKey}
+          key={themeIndex}
           portfolio={portfolio}
           themeIndex={themeIndex}
-          managerRenames={managerRenames}
           onClose={onClose}
           onImport={onImport}
-          onOpenLogin={onOpenLogin}
+          onPortfolioPatch={onPortfolioPatch}
           onOpenPolygonDraw={onOpenPolygonDraw}
+          onOpenAddMarker={onOpenAddMarker}
+          onSaved={onSaved}
         />
       ) : null}
     </Modal>

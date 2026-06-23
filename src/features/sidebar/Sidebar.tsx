@@ -1,54 +1,49 @@
-import { useMemo } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { SearchInput } from '@/components/SearchInput/SearchInput'
 import { Select } from '@/components/Select/Select'
-import { Chip } from '@/components/Chip/Chip'
 import { LAYER_COLORS } from '@/lib/constants'
-import { collectFilterOptions } from '@/lib/filters'
+import { collectFilterOptions, reconcileFilterDropdowns, applyFilterSelection } from '@/lib/filters'
 import { useFilterStore } from '@/stores/filterStore'
 import { useLayerStore } from '@/stores/layerStore'
 import { useSelectionStore } from '@/stores/selectionStore'
-import type { Building, DqFilterState, LayerKey } from '@/types/domain'
+import { DEFAULT_DQ_FILTERS, type Building, type LayerKey, type PortfolioData } from '@/types/domain'
 import { AdvancedFilters } from './AdvancedFilters'
 import { BuildingList } from './BuildingList'
-import { BuildingNotesEditor } from './BuildingNotesEditor'
-import { RtuHistogram } from './RtuHistogram'
 import { SearchHitNav } from './SearchHitNav'
 import { StatsStrip } from './StatsStrip'
 import styles from './Sidebar.module.css'
 
-const LAYER_LABELS: Record<LayerKey, string> = {
+const LAYER_LABELS: Partial<Record<LayerKey, string>> = {
   rtu: 'RTUs',
-  tenants: 'Tenants',
   sprinkler: 'Sprinkler',
   electrical: 'Electrical',
-  hydrant: 'Hydrant',
+  hydrant: 'Hydrants',
   gas: 'Gas',
 }
 
-const DQ_CHIPS: { key: keyof DqFilterState; label: string; variant: 'dq-gps' | 'dq-rtu' | 'dq-vacant' | 'dq-ml' }[] = [
-  { key: 'gps', label: '📍 GPS?', variant: 'dq-gps' },
-  { key: 'rtu', label: 'RTU ≥19', variant: 'dq-rtu' },
-  { key: 'vacant', label: 'Vacant', variant: 'dq-vacant' },
-  { key: 'ml', label: 'ML', variant: 'dq-ml' },
-]
+const LAYER_TOGGLE_KEYS = Object.keys(LAYER_LABELS) as LayerKey[]
 
 export interface SidebarProps {
   allBuildings: Building[]
   listBuildings: Building[]
   filteredBuildings: Building[]
+  portfolio: PortfolioData
+  onNotesChange: (portfolio: PortfolioData) => void
 }
 
-export function Sidebar({ allBuildings, listBuildings, filteredBuildings }: SidebarProps) {
+export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfolio, onNotesChange }: SidebarProps) {
+  const searchInput = useFilterStore((s) => s.searchInput)
   const search = useFilterStore((s) => s.search)
   const park = useFilterStore((s) => s.park)
   const cluster = useFilterStore((s) => s.cluster)
   const manager = useFilterStore((s) => s.manager)
-  const dq = useFilterStore((s) => s.dq)
-  const setSearch = useFilterStore((s) => s.setSearch)
+  const adv = useFilterStore((s) => s.adv)
+  const setSearchInput = useFilterStore((s) => s.setSearchInput)
+  const applySearch = useFilterStore((s) => s.applySearch)
+  const clearSearch = useFilterStore((s) => s.clearSearch)
   const setPark = useFilterStore((s) => s.setPark)
   const setCluster = useFilterStore((s) => s.setCluster)
   const setManager = useFilterStore((s) => s.setManager)
-  const toggleDqFilter = useFilterStore((s) => s.toggleDqFilter)
 
   const layers = useLayerStore((s) => s.layers)
   const toggleLayer = useLayerStore((s) => s.toggleLayer)
@@ -56,13 +51,42 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings }: Side
   const sidebarCollapsed = useSelectionStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useSelectionStore((s) => s.toggleSidebar)
 
-  const options = useMemo(() => collectFilterOptions(allBuildings), [allBuildings])
+  const filterContext = useMemo(
+    () => ({ search, park, cluster, manager }),
+    [search, park, cluster, manager],
+  )
+
+  const options = useMemo(
+    () => collectFilterOptions(allBuildings, filterContext),
+    [allBuildings, filterContext],
+  )
+
+  const baseFilters = useMemo(
+    () => ({ search, park, cluster, manager, adv, dq: DEFAULT_DQ_FILTERS }),
+    [search, park, cluster, manager, adv],
+  )
+
+  const handleFilterChange = (
+    patch: Partial<Pick<typeof baseFilters, 'park' | 'cluster' | 'manager'>>,
+  ) => {
+    const next = applyFilterSelection(allBuildings, baseFilters, patch)
+    if (next.park !== park) setPark(next.park)
+    if (next.cluster !== cluster) setCluster(next.cluster)
+    if (next.manager !== manager) setManager(next.manager)
+  }
+
+  useLayoutEffect(() => {
+    const reconciled = reconcileFilterDropdowns(allBuildings, baseFilters)
+    if (reconciled.park !== park) setPark(reconciled.park)
+    if (reconciled.cluster !== cluster) setCluster(reconciled.cluster)
+    if (reconciled.manager !== manager) setManager(reconciled.manager)
+  }, [baseFilters, allBuildings, park, cluster, manager, setPark, setCluster, setManager])
 
   return (
     <>
       {sidebarCollapsed ? (
         <button type="button" className={styles.pullTab} onClick={toggleSidebar} title="Expand sidebar">
-          ▶
+          ▶ Panel
         </button>
       ) : null}
       <aside className={`sidebar${sidebarCollapsed ? ` ${styles.sidebarCollapsed}` : ''}`}>
@@ -78,8 +102,8 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings }: Side
           </button>
           <div className="logo-row">
             <div>
-              <div className="logo">QuadReal · Industrial</div>
-              <div className="sidebar-title">Building Map Explorer</div>
+              <div className="logo">QuadReal Property Group</div>
+              <div className="sidebar-title">Industrial Portfolio</div>
             </div>
           </div>
           <div className="sidebar-meta" id="portfolio-meta">
@@ -88,56 +112,48 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings }: Side
         </div>
 
         <div className="controls">
-          <SearchInput value={search} onValueChange={setSearch} id="search" />
+          <SearchInput
+            id="search"
+            value={searchInput}
+            onValueChange={setSearchInput}
+            onApply={applySearch}
+            onClear={clearSearch}
+          />
+          <SearchHitNav buildings={allBuildings} polygons={portfolio.polygons} />
           <Select
             id="park-filter"
             options={options.parks.map((p) => ({ value: p, label: p }))}
             value={park}
-            onChange={(e) => setPark(e.target.value)}
-            placeholder="All portfolios"
+            onChange={(e) => handleFilterChange({ park: e.target.value })}
+            placeholder="All business parks"
           />
           <Select
             id="cluster-filter"
             options={options.clusters.map((c) => ({ value: c, label: c }))}
             value={cluster}
-            onChange={(e) => setCluster(e.target.value)}
+            onChange={(e) => handleFilterChange({ cluster: e.target.value })}
             placeholder="All clusters"
           />
           <Select
             id="manager-filter"
             options={options.managers.map((m) => ({ value: m, label: m }))}
             value={manager}
-            onChange={(e) => setManager(e.target.value)}
-            placeholder="All managers"
+            onChange={(e) => handleFilterChange({ manager: e.target.value })}
+            placeholder="All property managers"
           />
-          <div className="result-count" id="result-count">
-            {listBuildings.length} buildings
-          </div>
         </div>
 
-        <SearchHitNav buildings={filteredBuildings} />
-        <BuildingNotesEditor />
-
         <StatsStrip buildings={filteredBuildings} totalPortfolioCount={allBuildings.length} />
-        <RtuHistogram buildings={filteredBuildings} />
         <AdvancedFilters />
 
-        <div className="dq-filter-wrap">
-          {DQ_CHIPS.map(({ key, label, variant }) => (
-            <Chip
-              key={key}
-              variant={variant}
-              active={dq[key]}
-              className={`dq-chip active-${key}`}
-              onClick={() => toggleDqFilter(key)}
-            >
-              {label}
-            </Chip>
-          ))}
+        <div style={{ padding: '4px 14px 2px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span className="result-count" id="result-count">
+            {listBuildings.length} buildings
+          </span>
         </div>
 
         <div className="layer-toggles" id="layer-toggles">
-          {(Object.keys(LAYER_LABELS) as LayerKey[]).map((key) => (
+          {LAYER_TOGGLE_KEYS.map((key) => (
             <button
               key={key}
               type="button"
@@ -151,7 +167,7 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings }: Side
           ))}
         </div>
 
-        <BuildingList buildings={listBuildings} />
+        <BuildingList buildings={listBuildings} portfolio={portfolio} onNotesChange={onNotesChange} />
       </aside>
     </>
   )

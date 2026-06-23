@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AddMarkerPanel } from '@/features/map/AddMarkerPanel'
-import { ImportExportButtons } from '@/features/import-export/ImportExportButtons'
 import { PolygonDrawPanel } from '@/features/polygons/PolygonDrawPanel'
 import { useMapMarkers } from '@/features/map/useMapMarkers'
 import { usePolygons } from '@/features/polygons/usePolygons'
+import { useMapRotation } from '@/hooks/useMapRotation'
 import { readGoogleMapsEnv, loadGoogleMaps } from '@/lib/googleMaps'
 import { IMAGERY_MODES } from '@/lib/constants'
-import type { Building, PortfolioData } from '@/types/domain'
+import { panToPreserveRotation } from '@/lib/mapRotation'
+import type { Building, LayerKey, Polygon, PortfolioData, Rtu, Tenant, Utility } from '@/types/domain'
 import type { ImageryMode } from '@/types/domain'
+import { useFilterStore } from '@/stores/filterStore'
+import { usePortfolioStore } from '@/stores/portfolioStore'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useUiStore } from '@/stores/uiStore'
 import styles from './MapPanel.module.css'
@@ -19,28 +22,38 @@ export interface MapPanelProps {
   onPortfolioPatch: (data: PortfolioData) => void
   polygonDrawOpen?: boolean
   onPolygonDrawClose?: () => void
-  onOpenPolygonDraw?: () => void
+  addMarkerOpen?: boolean
+  onAddMarkerClose?: () => void
 }
 
 export function MapPanel({
   portfolio,
   mapBuildings,
-  onPortfolioImport,
   onPortfolioPatch,
   polygonDrawOpen = false,
   onPolygonDrawClose,
+  addMarkerOpen = false,
+  onAddMarkerClose,
 }: MapPanelProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<google.maps.Map | null>(null)
   const [mapError, setMapError] = useState<string | null>(null)
   const [imageryMode, setImageryMode] = useState<ImageryMode>(IMAGERY_MODES[0]!)
-  const [addMarkerOpen, setAddMarkerOpen] = useState(false)
 
   const currentBuilding = useSelectionStore((s) => s.currentBuilding)
   const selectBuilding = useSelectionStore((s) => s.selectBuilding)
+  const clearSelection = useSelectionStore((s) => s.clearSelection)
+  const dragMode = useSelectionStore((s) => s.dragMode)
+  const resetFilters = useFilterStore((s) => s.resetFilters)
   const openSettings = useUiStore((s) => s.openSettings)
 
-  const { apiKey, mapId, isConfigured: mapsConfigured } = readGoogleMapsEnv()
+  const { mapId, isConfigured: mapsConfigured } = readGoogleMapsEnv()
+
+  useMapRotation(map, mapRef)
+
+  useEffect(() => {
+    usePortfolioStore.setState({ portfolio })
+  }, [portfolio])
 
   const handleSelectBuilding = useCallback(
     (building: Building) => {
@@ -61,7 +74,90 @@ export function MapPanel({
     [onPortfolioPatch, portfolio],
   )
 
-  const { hoverTipRef, showAllMarkers, cycleImagery } = useMapMarkers({
+  const handleDetailMoved = useCallback(
+    (
+      layerKey: LayerKey,
+      data: Rtu | Tenant | Utility,
+      lat: number,
+      lng: number,
+      building: Building | null,
+    ) => {
+      if (layerKey === 'rtu' && building) {
+        onPortfolioPatch({
+          ...portfolio,
+          buildings: portfolio.buildings.map((b) =>
+            b.address === building.address
+              ? {
+                  ...b,
+                  rtus: b.rtus?.map((r) =>
+                    r.name === data.name ? { ...r, lat, lng } : r,
+                  ),
+                }
+              : b,
+          ),
+        })
+      } else if ('utility_type' in data) {
+        onPortfolioPatch({
+          ...portfolio,
+          utilities: portfolio.utilities.map((u) =>
+            u.name === data.name && u.utility_type === data.utility_type
+              ? { ...u, lat, lng }
+              : u,
+          ),
+        })
+      }
+    },
+    [onPortfolioPatch, portfolio],
+  )
+
+  const handleDeleteDetail = useCallback(
+    (layerKey: LayerKey, data: Rtu | Tenant | Utility, building: Building | null) => {
+      if (layerKey === 'rtu' && building) {
+        onPortfolioPatch({
+          ...portfolio,
+          buildings: portfolio.buildings.map((b) =>
+            b.address === building.address
+              ? { ...b, rtus: b.rtus?.filter((r) => r.name !== data.name) }
+              : b,
+          ),
+        })
+      } else if ('utility_type' in data) {
+        onPortfolioPatch({
+          ...portfolio,
+          utilities: portfolio.utilities.filter(
+            (u) => !(u.name === data.name && u.utility_type === data.utility_type),
+          ),
+        })
+      }
+    },
+    [onPortfolioPatch, portfolio],
+  )
+
+  const handlePolygonUpdated = useCallback(
+    (polygon: Polygon) => {
+      onPortfolioPatch({
+        ...portfolio,
+        polygons: portfolio.polygons.map((p) =>
+          p.name === polygon.name && p.description === polygon.description ? polygon : p,
+        ),
+      })
+    },
+    [onPortfolioPatch, portfolio],
+  )
+
+  const handlePolygonDeleted = useCallback(
+    (polygon: Polygon) => {
+      onPortfolioPatch({
+        ...portfolio,
+        polygons: portfolio.polygons.filter(
+          (p) => !(p.name === polygon.name && p.description === polygon.description),
+        ),
+      })
+    },
+    [onPortfolioPatch, portfolio],
+  )
+
+  const { showAllMarkers, cycleImagery } = useMapMarkers({
     map,
     buildings: portfolio.buildings,
     mapBuildings,
@@ -69,31 +165,22 @@ export function MapPanel({
     polygons: portfolio.polygons,
     onSelectBuilding: handleSelectBuilding,
     onBuildingMoved: handleBuildingMoved,
+    onDetailMoved: handleDetailMoved,
+    onDeleteDetail: handleDeleteDetail,
   })
 
   usePolygons({
     map,
     polygons: portfolio.polygons,
-    onPolygonUpdated: (polygon) => {
-      onPortfolioPatch({
-        ...portfolio,
-        polygons: portfolio.polygons.map((p) => (p.id === polygon.id ? polygon : p)),
-      })
-    },
-    onPolygonDeleted: (id) => {
-      onPortfolioPatch({
-        ...portfolio,
-        polygons: portfolio.polygons.filter((p) => p.id !== id),
-      })
-    },
+    onPolygonUpdated: handlePolygonUpdated,
+    onPolygonDeleted: handlePolygonDeleted,
   })
 
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<{ lat: number; lng: number; zoom?: number }>).detail
       if (!map) return
-      map.panTo({ lat: detail.lat, lng: detail.lng })
-      if (detail.zoom) map.setZoom(detail.zoom)
+      panToPreserveRotation(map, { lat: detail.lat, lng: detail.lng }, detail.zoom)
     }
     window.addEventListener('map:panTo', handler)
     return () => window.removeEventListener('map:panTo', handler)
@@ -101,9 +188,7 @@ export function MapPanel({
 
   useEffect(() => {
     if (!mapsConfigured || !mapRef.current) return
-
     let cancelled = false
-
     loadGoogleMaps()
       .then((google) => {
         if (cancelled || !mapRef.current) return
@@ -120,23 +205,45 @@ export function MapPanel({
           headingInteractionEnabled: true,
           tiltInteractionEnabled: true,
           isFractionalZoomEnabled: true,
+          renderingType: google.maps.RenderingType.VECTOR,
         })
         setMap(instance)
       })
-      .catch((err: Error) => {
-        setMapError(err.message)
-      })
-
+      .catch((err: Error) => setMapError(err.message))
     return () => {
       cancelled = true
     }
   }, [mapsConfigured, mapId])
+
+  useEffect(() => {
+    const panel = mapRef.current?.closest('.map-panel')
+    if (!panel) return
+    const existing = panel.querySelector('#drag-notice')
+    if (!dragMode) {
+      existing?.remove()
+      return
+    }
+    if (existing) return
+    const notice = document.createElement('div')
+    notice.id = 'drag-notice'
+    notice.innerHTML =
+      '✦ Drag mode ON &nbsp;—&nbsp; drag any marker to reposition it &nbsp;·&nbsp; <span style="opacity:.8">click Edit Positions again to exit</span>'
+    panel.appendChild(notice)
+    return () => notice.remove()
+  }, [dragMode])
 
   const handleCycleImagery = () => {
     const mode = cycleImagery()
     if (mode) setImageryMode(mode)
   }
 
+  const handleShowAll = () => {
+    clearSelection()
+    resetFilters()
+    showAllMarkers()
+  }
+
+  const mapTitle = currentBuilding?.address ?? 'Industrial Portfolio — Ontario'
   const subtitle = currentBuilding
     ? [
         currentBuilding.cluster || currentBuilding.park,
@@ -147,54 +254,47 @@ export function MapPanel({
       ]
         .filter(Boolean)
         .join(' · ')
-    : `${mapBuildings.length} buildings on map`
+    : `${portfolio.buildings.length} buildings · Click a marker or address to focus`
 
   return (
     <div className="map-panel">
       <div className="map-topbar">
         <div className={styles.topbarLeft}>
           <div className="map-address" id="map-address">
-            {currentBuilding?.address ?? 'Building Map Explorer'}
+            {mapTitle}
           </div>
           <div className="map-subtitle" id="map-subtitle">
             {subtitle}
           </div>
         </div>
         <div className="map-actions">
-          {currentBuilding ? (
-            <a
-              id="gmaps-link"
-              className="btn-action"
-              href={`https://www.google.com/maps?q=${currentBuilding.lat},${currentBuilding.lng}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Google Maps ↗
-            </a>
-          ) : null}
-          <button type="button" className="btn-action primary" onClick={showAllMarkers}>
-            Show all
+          <button type="button" className="btn-action" style={{ background: '#16a34a', color: '#fff', borderColor: '#16a34a' }} onClick={handleShowAll}>
+            All Buildings
           </button>
           <button
             type="button"
             id="imagery-btn"
             className="btn-action"
             onClick={handleCycleImagery}
-            style={{
-              borderColor: imageryMode.borderColor,
-              color: imageryMode.color,
-            }}
+            style={{ borderColor: imageryMode.borderColor, color: imageryMode.color }}
             title="Switch satellite imagery: Google / Esri / USGS"
           >
             {imageryMode.label}
           </button>
-          <button type="button" className="btn-action" onClick={() => setAddMarkerOpen(true)} title="Add marker">
-            + Marker
+          <button type="button" className="btn-action" onClick={openSettings} title="Settings — themes & manager names" style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
+            Settings
           </button>
-          <ImportExportButtons portfolio={portfolio} onImport={onPortfolioImport} compact />
-          <button type="button" className="btn-action" onClick={openSettings} title="Settings">
-            ⚙ Settings
-          </button>
+          {currentBuilding ? (
+            <a
+              id="gmaps-link"
+              className="btn-action primary"
+              href={`https://www.google.com/maps?q=${currentBuilding.lat},${currentBuilding.lng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open in Maps ↗
+            </a>
+          ) : null}
         </div>
       </div>
 
@@ -206,28 +306,21 @@ export function MapPanel({
                 <strong>Map placeholder</strong>
               </p>
               <p style={{ marginTop: 8, fontSize: 12 }}>
-                {mapError ??
-                  'Set VITE_GOOGLE_MAPS_API_KEY in .env.local to enable the interactive map.'}
+                {mapError ?? 'Set VITE_GOOGLE_MAPS_API_KEY in .env.local to enable the interactive map.'}
               </p>
-              {!apiKey ? (
-                <p style={{ marginTop: 8, fontSize: 11, opacity: 0.8 }}>
-                  Sidebar filters and cost estimator work without a map key.
-                </p>
-              ) : null}
             </div>
           </div>
         ) : (
           <div ref={mapRef} id="map" className={styles.mapCanvas} />
         )}
-        <div id="map-hover-tip" ref={hoverTipRef} />
       </div>
+
       <AddMarkerPanel
         open={addMarkerOpen}
-        onClose={() => setAddMarkerOpen(false)}
+        onClose={() => onAddMarkerClose?.()}
         portfolio={portfolio}
-        onAdded={(utility) =>
-          onPortfolioPatch({ ...portfolio, utilities: [...portfolio.utilities, utility] })
-        }
+        map={map}
+        onAdded={onPortfolioPatch}
         defaultLat={currentBuilding?.lat}
         defaultLng={currentBuilding?.lng}
       />

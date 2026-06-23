@@ -4,10 +4,17 @@ import type { AdvFilterState, AdvFilterValue } from '@/types/domain'
 
 const ROWS: { key: keyof AdvFilterState; label: string }[] = [
   { key: 'vacant', label: 'Vacant' },
-  { key: 'rtu', label: 'RTU ≥20' },
-  { key: 'hasrtu', label: 'Has RTU' },
-  { key: 'ml', label: 'ML flag' },
+  { key: 'rtu', label: 'Old RTU' },
+  { key: 'hasrtu', label: 'RTUs' },
+  { key: 'ml', label: 'Missing ML' },
 ]
+
+const CHIP_LABELS: Record<keyof AdvFilterState, Record<AdvFilterValue, string>> = {
+  vacant: { yes: 'Has Vacant', no: 'Fully Leased', any: 'Any' },
+  rtu: { yes: 'Has 20+ yr', no: 'All New', any: 'Any' },
+  hasrtu: { yes: 'Has RTUs', no: 'No RTUs', any: 'Any' },
+  ml: { yes: 'Has ML', no: 'None', any: 'Any' },
+}
 
 function chipVariant(value: AdvFilterValue): 'adv-yes' | 'adv-no' | 'adv-any' {
   if (value === 'yes') return 'adv-yes'
@@ -30,7 +37,7 @@ export function AdvancedFilters() {
         className={advPanelOpen ? 'open' : ''}
         onClick={toggleAdvPanel}
       >
-        <span className="afg-arrow">▶</span> Advanced filters
+        <span className="afg-arrow">▶</span>&nbsp;ADVANCED FILTERS
       </button>
       <div id="adv-filter-panel" className={advPanelOpen ? 'open' : ''}>
         {ROWS.map(({ key, label }) => (
@@ -44,14 +51,14 @@ export function AdvancedFilters() {
                 className={`af-chip${adv[key] === value ? ` on-${value}` : ''}`}
                 onClick={() => setAdvFilter(key, value)}
               >
-                {value}
+                {CHIP_LABELS[key][value]}
               </Chip>
             ))}
           </div>
         ))}
         <div className="af-row">
           <button type="button" className="af-clear" onClick={clearAdvFilters}>
-            Clear all
+            ✕ Clear filters
           </button>
         </div>
       </div>

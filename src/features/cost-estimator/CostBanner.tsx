@@ -14,7 +14,6 @@ import {
 import { exportRcbExcel } from '@/lib/excel'
 import { formatFilterScope } from '@/lib/format'
 import { useFilterStore } from '@/stores/filterStore'
-import { useUiStore } from '@/stores/uiStore'
 import type { Building, CostBasis } from '@/types/domain'
 import styles from './CostBanner.module.css'
 
@@ -35,9 +34,6 @@ export function CostBanner({ buildings }: CostBannerProps) {
   const park = useFilterStore((s) => s.park)
   const cluster = useFilterStore((s) => s.cluster)
   const manager = useFilterStore((s) => s.manager)
-
-  const costBannerOpen = useUiStore((s) => s.costBannerOpen)
-  const toggleCostBanner = useUiStore((s) => s.toggleCostBanner)
 
   const scopeLabel = formatFilterScope({ search, park, cluster, manager })
 
@@ -92,8 +88,6 @@ export function CostBanner({ buildings }: CostBannerProps) {
         : { key, dir: key === 'address' || key === 'cluster' || key === 'manager' ? 1 : -1 },
     )
   }
-
-  if (!costBannerOpen) return null
 
   return (
     <div
@@ -197,9 +191,6 @@ export function CostBanner({ buildings }: CostBannerProps) {
             <svg className={styles.rcbChev} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <polyline points="6 9 12 15 18 9" />
             </svg>
-          </button>
-          <button type="button" className={styles.rcbBtn} onClick={toggleCostBanner} title="Toggle banner">
-            {costBannerOpen ? 'Hide' : 'Show'}
           </button>
         </div>
       </div>

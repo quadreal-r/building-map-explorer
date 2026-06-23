@@ -1,6 +1,8 @@
 import legacyBuildings from '../../supabase/data/buildings.json'
 import {
+  applyFilterSelection,
   applyFilters,
+  collectFilterOptions,
   matchesSearch,
   passAdvFilter,
   passDqFilter,
@@ -81,6 +83,42 @@ describe('passDqFilter', () => {
   })
 })
 
+describe('collectFilterOptions', () => {
+  it('narrows parks and clusters when a manager is selected', () => {
+    const all = collectFilterOptions(buildings)
+    const josh = collectFilterOptions(buildings, {
+      search: '',
+      park: '',
+      cluster: '',
+      manager: 'Josh Starkey',
+    })
+
+    expect(josh.parks.length).toBeGreaterThan(0)
+    expect(josh.parks.length).toBeLessThan(all.parks.length)
+    expect(josh.clusters.length).toBeGreaterThan(0)
+    expect(josh.clusters.length).toBeLessThanOrEqual(all.clusters.length)
+
+    const joshBuildings = buildings.filter((b) => b.manager === 'Josh Starkey')
+    expect(josh.parks.every((p) => joshBuildings.some((b) => b.park === p))).toBe(true)
+    expect(josh.clusters.every((c) => joshBuildings.some((b) => b.cluster === c))).toBe(true)
+  })
+
+  it('narrows clusters and managers when a business park is selected', () => {
+    const park = 'Dixie Business Park (x 34)'
+    const scoped = collectFilterOptions(buildings, {
+      search: '',
+      park,
+      cluster: '',
+      manager: '',
+    })
+    const parkBuildings = buildings.filter((b) => b.park === park)
+
+    expect(scoped.parks).toContain(park)
+    expect(scoped.clusters.every((c) => parkBuildings.some((b) => b.cluster === c))).toBe(true)
+    expect(scoped.managers.every((m) => parkBuildings.some((b) => b.manager === m))).toBe(true)
+  })
+})
+
 describe('reconcileFilterDropdowns', () => {
   it('clears park when it does not appear in search hits', () => {
     const filters: FilterState = {
@@ -89,7 +127,60 @@ describe('reconcileFilterDropdowns', () => {
       park: 'Western Business Park (x 22)',
     }
     const reconciled = reconcileFilterDropdowns(buildings, filters)
+    expect(reconciled.park).not.toBe('Western Business Park (x 22)')
     expect(reconciled.park).toBe('')
+  })
+
+  it('clears park when it does not belong to the selected manager', () => {
+    const joshParks = new Set(
+      buildings.filter((b) => b.manager === 'Josh Starkey').map((b) => b.park),
+    )
+    const otherPark = [...new Set(buildings.map((b) => b.park))].find((p) => !joshParks.has(p))!
+
+    const reconciled = reconcileFilterDropdowns(buildings, {
+      ...DEFAULT_FILTER_STATE,
+      manager: 'Josh Starkey',
+      park: otherPark,
+    })
+    expect(reconciled.park).toBe('')
+  })
+
+  it('auto-fills park when manager leaves only one business park', () => {
+    const next = applyFilterSelection(buildings, DEFAULT_FILTER_STATE, {
+      manager: 'Josh Starkey',
+    })
+    expect(next.park).toBe('Western Business Park (x 22)')
+  })
+
+  it('does not re-fill park when user clears it to all parks', () => {
+    const next = applyFilterSelection(
+      buildings,
+      {
+        ...DEFAULT_FILTER_STATE,
+        manager: 'Josh Starkey',
+        park: 'Western Business Park (x 22)',
+      },
+      { park: '' },
+    )
+    expect(next.park).toBe('')
+    expect(next.manager).toBe('')
+    expect(next.cluster).toBe('')
+  })
+
+  it('resets park and cluster when user clears manager to all managers', () => {
+    const next = applyFilterSelection(
+      buildings,
+      {
+        ...DEFAULT_FILTER_STATE,
+        manager: 'Josh Starkey',
+        park: 'Western Business Park (x 22)',
+        cluster: 'Single (x 5)',
+      },
+      { manager: '' },
+    )
+    expect(next.manager).toBe('')
+    expect(next.park).toBe('')
+    expect(next.cluster).toBe('')
   })
 })
 

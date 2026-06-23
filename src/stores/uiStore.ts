@@ -11,7 +11,6 @@ export type ModalId =
 interface UiState {
   modals: Partial<Record<ModalId, boolean>>
   settingsOpen: boolean
-  costBannerOpen: boolean
   openModal: (id: ModalId) => void
   closeModal: (id: ModalId) => void
   toggleModal: (id: ModalId) => void
@@ -20,14 +19,11 @@ interface UiState {
   setSettingsOpen: (open: boolean) => void
   openSettings: () => void
   closeSettings: () => void
-  setCostBannerOpen: (open: boolean) => void
-  toggleCostBanner: () => void
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
   modals: {},
   settingsOpen: false,
-  costBannerOpen: true,
 
   openModal: (id) =>
     set((state) => ({
@@ -51,7 +47,4 @@ export const useUiStore = create<UiState>((set, get) => ({
   setSettingsOpen: (open) => set({ settingsOpen: open }),
   openSettings: () => set({ settingsOpen: true }),
   closeSettings: () => set({ settingsOpen: false }),
-
-  setCostBannerOpen: (open) => set({ costBannerOpen: open }),
-  toggleCostBanner: () => set((state) => ({ costBannerOpen: !state.costBannerOpen })),
 }))

@@ -121,10 +121,28 @@ export const APP_THEMES: ThemeDefinition[] = [
   },
 ]
 
+export function updateBldgLabelColor(bg: string, accent: string): void {
+  for (const sheet of document.styleSheets) {
+    try {
+      const rules = sheet.cssRules ?? []
+      for (let j = 0; j < rules.length; j++) {
+        const rule = rules[j] as CSSStyleRule
+        if (rule.selectorText === '.bldg-label') {
+          rule.style.setProperty('background', `${bg}eb`, 'important')
+          rule.style.setProperty('border', `1px solid ${accent}66`, 'important')
+        }
+      }
+    } catch {
+      /* cross-origin stylesheets */
+    }
+  }
+}
+
 export function applyThemeVars(themeIndex: number): void {
   const theme = APP_THEMES[themeIndex] ?? APP_THEMES[0]!
   const root = document.documentElement
   for (const [key, value] of Object.entries(theme.vars)) {
     root.style.setProperty(key, value)
   }
+  updateBldgLabelColor(theme.vars['--bg']!, theme.vars['--accent']!)
 }
