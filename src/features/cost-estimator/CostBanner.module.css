@@ -12,6 +12,14 @@
   max-height: 46vh;
 }
 
+.bannerBuildingDetail {
+  max-height: 62vh;
+}
+
+.bannerBuildingDetail.bannerOpen {
+  max-height: 62vh;
+}
+
 .bar {
   display: flex;
   align-items: center;
@@ -287,4 +295,76 @@
   font-weight: 700;
   color: #fff;
   background: var(--hover-bg, #205298);
+}
+
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow td:first-child {
+  color: var(--accent, #7db8ff);
+}
+
+.buildingDetail {
+  padding-top: 4px;
+}
+
+.buildingDetailHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 8px 0 4px;
+}
+
+.rcbBackBtn {
+  background: var(--surface, #1f5aa8);
+  border: 1px solid var(--border, #2e6ec0);
+  border-radius: 5px;
+  color: var(--accent, #7db8ff);
+  font-size: 11px;
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rcbBackBtn:hover {
+  border-color: var(--accent, #7db8ff);
+  color: #fff;
+}
+
+.buildingDetailTitle {
+  flex: 1;
+  min-width: 220px;
+}
+
+.buildingDetailTitle h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.buildingDetailTitle p {
+  margin: 2px 0 0;
+  font-size: 10.5px;
+  color: var(--text-muted, #90b8e0);
+}
+
+.buildingDetailKpis {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-secondary, #c8dff8);
+}
+
+.buildingDetailKpis strong {
+  font-size: 14px;
+  color: #fff;
+}
+
+.buildingDetailCost strong {
+  color: #7fffcf;
+  font-size: 16px;
 }

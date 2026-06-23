@@ -4,7 +4,7 @@ import {
   type LegacyBuildingJson,
   type Rtu,
 } from '@/types/domain'
-import { getRtuAge, getRtuYear, oldestRtuAge, rcbGetTons } from '@/lib/rtu'
+import { getRtuAge, getRtuYear, oldestRtuAge, parseRtuMeta, rcbGetTons } from '@/lib/rtu'
 
 const sampleBuildings = (legacyBuildings as LegacyBuildingJson[])
   .slice(0, 3)
@@ -42,6 +42,17 @@ describe('oldestRtuAge', () => {
     const building = sampleBuildings[0]
     expect(building).toBeDefined()
     expect(oldestRtuAge(building!, 2026)).toBeGreaterThanOrEqual(14)
+  })
+})
+
+describe('parseRtuMeta', () => {
+  it('parses model and serial from legacy description', () => {
+    const rtu = sampleBuildings[0]?.rtus?.[4]
+    expect(rtu).toBeDefined()
+    const meta = parseRtuMeta(rtu!)
+    expect(meta.model).toBe('PGD430040K000C1')
+    expect(meta.serial).toBe('C102888078')
+    expect(meta.make).toBe('ICP')
   })
 })
 

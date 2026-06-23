@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   RCB_DEFAULT_BASIS,
   RCB_DEFAULT_THRESHOLD,
@@ -15,6 +15,7 @@ import { exportRcbExcel } from '@/lib/excel'
 import { formatFilterScope } from '@/lib/format'
 import { useFilterStore } from '@/stores/filterStore'
 import type { Building, CostBasis } from '@/types/domain'
+import { RcbBuildingDetail } from './RcbBuildingDetail'
 import styles from './CostBanner.module.css'
 
 export interface CostBannerProps {
@@ -31,6 +32,7 @@ export function CostBanner({ buildings }: CostBannerProps) {
   const [basis, setBasis] = useState<CostBasis>(RCB_DEFAULT_BASIS)
   const [year, setYear] = useState(RCB_DEFAULT_YEAR)
   const [detailOpen, setDetailOpen] = useState(false)
+  const [selectedBuildingAddress, setSelectedBuildingAddress] = useState<string | null>(null)
   const [sort, setSort] = useState<{ key: SortKey; dir: -1 | 1 }>({ key: 'cost', dir: -1 })
 
   const search = useFilterStore((s) => s.search)
@@ -60,6 +62,36 @@ export function CostBanner({ buildings }: CostBannerProps) {
     })
     return rows
   }, [result.perBldg, sort])
+
+  const selectedBuilding = useMemo(
+    () => sortedBuildings.find((row) => row.address === selectedBuildingAddress) ?? null,
+    [sortedBuildings, selectedBuildingAddress],
+  )
+
+  useEffect(() => {
+    if (
+      selectedBuildingAddress &&
+      !result.perBldg.some((row) => row.address === selectedBuildingAddress)
+    ) {
+      setSelectedBuildingAddress(null)
+    }
+  }, [result.perBldg, selectedBuildingAddress])
+
+  const openBuildingDetail = (address: string) => {
+    setSelectedBuildingAddress(address)
+    setDetailOpen(true)
+  }
+
+  const closeBuildingDetail = () => {
+    setSelectedBuildingAddress(null)
+  }
+
+  const toggleDetail = () => {
+    setDetailOpen((open) => {
+      if (open) setSelectedBuildingAddress(null)
+      return !open
+    })
+  }
 
   const yearOptions = RCB_YEARS[basis] ?? [year]
 
@@ -103,7 +135,9 @@ export function CostBanner({ buildings }: CostBannerProps) {
   return (
     <div
       id="rcb-banner"
-      className={`${styles.banner}${detailOpen ? ` ${styles.bannerOpen}` : ''}`}
+      className={`${styles.banner}${detailOpen ? ` ${styles.bannerOpen}` : ''}${
+        selectedBuilding ? ` ${styles.bannerBuildingDetail}` : ''
+      }`}
     >
       <div id="rcb-bar" className={styles.bar}>
         <div className={styles.rcbTitle}>
@@ -221,7 +255,7 @@ export function CostBanner({ buildings }: CostBannerProps) {
           <button
             type="button"
             className={styles.rcbBtn}
-            onClick={() => setDetailOpen((v) => !v)}
+            onClick={toggleDetail}
             title="Show / hide line-item breakdown"
           >
             Detail
@@ -233,7 +267,14 @@ export function CostBanner({ buildings }: CostBannerProps) {
       </div>
 
       <div id="rcb-detail" className={styles.detail}>
-        <div className={styles.rcbDetailGrid}>
+        {selectedBuilding ? (
+          <RcbBuildingDetail
+            building={selectedBuilding}
+            result={result}
+            onBack={closeBuildingDetail}
+          />
+        ) : (
+          <div className={styles.rcbDetailGrid}>
           <div className={styles.rcbTblwrap}>
             <h4>By building</h4>
             <table className={styles.rcbTbl} id="rcb-tbl-bldg">
@@ -265,7 +306,12 @@ export function CostBanner({ buildings }: CostBannerProps) {
                 ) : (
                   <>
                     {sortedBuildings.map((r) => (
-                      <tr key={r.address}>
+                      <tr
+                        key={r.address}
+                        className={styles.clickableRow}
+                        onClick={() => openBuildingDetail(r.address)}
+                        title="View RTU breakdown for this building"
+                      >
                         <td>{r.address}</td>
                         <td>{r.cluster}</td>
                         <td>{r.manager}</td>
@@ -368,7 +414,8 @@ export function CostBanner({ buildings }: CostBannerProps) {
               </tbody>
             </table>
           </div>
-        </div>
+          </div>
+        )}
         <div className={styles.rcbFoot} id="rcb-foot">
           {footnote}
         </div>

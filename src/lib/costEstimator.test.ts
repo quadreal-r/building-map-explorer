@@ -1,8 +1,11 @@
 import legacyBuildings from '../../supabase/data/buildings.json'
 import {
+  formatRtuTons,
   rcbCompute,
+  rcbLineItemsForBuilding,
   rcbMoney,
   rcbProjection,
+  rcbTierBreakdownForItems,
   rcbTierFor,
   rcbUnitCost,
 } from '@/lib/costEstimator'
@@ -19,6 +22,14 @@ const buildings = (legacyBuildings as LegacyBuildingJson[]).map(
 describe('rcbMoney', () => {
   it('formats CAD currency', () => {
     expect(rcbMoney(25927)).toBe('$25,927')
+  })
+})
+
+describe('formatRtuTons', () => {
+  it('formats whole and fractional tonnage', () => {
+    expect(formatRtuTons(5)).toBe('5 Ton')
+    expect(formatRtuTons(7.5)).toBe('7.5 Ton')
+    expect(formatRtuTons(null)).toBe('—')
   })
 })
 
@@ -55,6 +66,25 @@ describe('rcbCompute', () => {
     expect(result.totals.units).toBeGreaterThan(0)
     expect(result.totals.cost).toBeGreaterThan(0)
     expect(result.lineItems.length).toBe(result.totals.units)
+    const first = result.lineItems[0]
+    expect(first).toBeDefined()
+    expect(first?.serial).toBeTruthy()
+    expect(first?.model).toBeTruthy()
+  })
+
+  it('groups line items and tiers per building', () => {
+    const subset = buildings.filter((b) => b.address === '1850 Derry Road East')
+    const result = rcbCompute(subset, {
+      basis: 'hyb',
+      year: '2026',
+      threshold: 10,
+      currentYear: 2026,
+    })
+    const items = rcbLineItemsForBuilding(result, '1850 Derry Road East')
+    expect(items.length).toBeGreaterThan(0)
+    expect(items.every((item) => item.address === '1850 Derry Road East')).toBe(true)
+    const tiers = rcbTierBreakdownForItems(items)
+    expect(tiers.reduce((sum, tier) => sum + tier.qty, 0)).toBe(items.length)
   })
 })
 

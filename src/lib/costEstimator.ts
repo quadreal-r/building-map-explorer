@@ -5,7 +5,7 @@ import {
   RTU_PRICING,
   type RtuPricingUnit,
 } from '@/lib/costEstimator.pricing'
-import { getRtuAge, getRtuYear, rcbGetTons } from '@/lib/rtu'
+import { getRtuAge, getRtuYear, parseRtuMeta, rcbGetTons } from '@/lib/rtu'
 import type { Building, CostBasis } from '@/types/domain'
 
 export {
@@ -37,9 +37,14 @@ export interface RcbLineItem {
   cluster: string
   manager: string
   rtu: string
+  model: string
+  serial: string
+  make: string
+  suite: string
   year: number | null
   age: number | null
   tons: number | null
+  tierKey: number
   tier: string
   cost: number
 }
@@ -78,6 +83,14 @@ export interface RcbProjectionPoint {
 
 export function rcbMoney(amount: number): string {
   return `$${Math.round(amount || 0).toLocaleString('en-CA')}`
+}
+
+/** Display cooling tonnage as e.g. "5 Ton" or "7.5 Ton". */
+export function formatRtuTons(tons: number | null | undefined): string {
+  if (tons == null || tons <= 0) return '—'
+  const rounded = Math.round(tons * 10) / 10
+  const label = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1)
+  return `${label} Ton`
 }
 
 /** Round tons up to the nearest supplied pricing tier. */
@@ -179,15 +192,21 @@ export function rcbCompute(
       tiers[tierKey].qty++
       tiers[tierKey].ext += cost
 
+      const meta = parseRtuMeta(rtu)
       lineItems.push({
         address: building.address,
         park: building.park,
         cluster: building.cluster ?? '',
         manager: building.manager ?? '',
         rtu: rtu.name,
+        model: meta.model,
+        serial: meta.serial,
+        make: meta.make,
+        suite: meta.suite,
         year: getRtuYear(rtu),
         age,
         tons,
+        tierKey: tierMatch.tier,
         tier: tierMatch.unit.l,
         cost,
       })
@@ -238,6 +257,37 @@ export function rcbScopeLabel(parts: {
   const search = parts.search?.trim()
   if (search) labels.push(`"${search}"`)
   return labels.length > 0 ? labels.join(' · ') : 'All buildings'
+}
+
+/** Line items for one building, sorted by RTU name. */
+export function rcbLineItemsForBuilding(
+  result: RcbComputeResult,
+  address: string,
+): RcbLineItem[] {
+  return result.lineItems
+    .filter((item) => item.address === address)
+    .sort((a, b) => a.rtu.localeCompare(b.rtu))
+}
+
+/** Tonnage-tier rollup for a subset of line items (e.g. one building). */
+export function rcbTierBreakdownForItems(items: RcbLineItem[]): RcbTierAggregate[] {
+  const map = new Map<number, RcbTierAggregate>()
+  for (const item of items) {
+    const existing = map.get(item.tierKey)
+    if (existing) {
+      existing.qty++
+      existing.ext += item.cost
+    } else {
+      map.set(item.tierKey, {
+        tier: item.tierKey,
+        label: item.tier,
+        unit: item.cost,
+        qty: 1,
+        ext: item.cost,
+      })
+    }
+  }
+  return [...map.values()].sort((a, b) => a.tier - b.tier)
 }
 
 /** Project total cost across every available year for the current basis. */
