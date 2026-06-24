@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { VersionStamp } from '@/components/VersionStamp/VersionStamp'
 import { CostBanner } from '@/features/cost-estimator/CostBanner'
 import { MapPanel } from '@/features/map/MapPanel'
 import { SettingsModal } from '@/features/settings/SettingsModal'
@@ -64,9 +65,18 @@ export function AppShell() {
     [queryClient],
   )
 
+  const handleAddMarkerClose = useCallback(() => {
+    closeAddMarker('addMarker')
+  }, [closeAddMarker])
+
+  const handlePolygonDrawClose = useCallback(() => {
+    closePolygonDraw('polygonDraw')
+  }, [closePolygonDraw])
+
   if (isLoading && !portfolioOverride) {
     return (
       <div className="app">
+        <VersionStamp placement="fixed" />
         <div className={styles.loading}>Loading portfolio…</div>
       </div>
     )
@@ -75,6 +85,7 @@ export function AppShell() {
   if (isError && !portfolio.buildings.length) {
     return (
       <div className="app">
+        <VersionStamp placement="fixed" />
         <div className={styles.loading}>Failed to load portfolio data.</div>
       </div>
     )
@@ -96,9 +107,9 @@ export function AppShell() {
           onPortfolioImport={handlePortfolioImport}
           onPortfolioPatch={handlePortfolioPatch}
           polygonDrawOpen={polygonDrawOpen}
-          onPolygonDrawClose={() => closePolygonDraw('polygonDraw')}
+          onPolygonDrawClose={handlePolygonDrawClose}
           addMarkerOpen={addMarkerOpen}
-          onAddMarkerClose={() => closeAddMarker('addMarker')}
+          onAddMarkerClose={handleAddMarkerClose}
         />
         <CostBanner buildings={costScopeBuildings} />
       </div>

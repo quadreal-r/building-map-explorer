@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "extract": "tsx scripts/extract.ts"
+    "extract": "tsx scripts/extract.ts",
+    "version:bump": "node scripts/bump-version.mjs"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",

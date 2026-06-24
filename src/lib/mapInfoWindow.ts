@@ -1,7 +1,7 @@
 import { RTU_AGE_CRITICAL, RTU_AGE_WARN } from '@/lib/constants'
 import { getColor } from '@/lib/colors'
-import { hasPlaceholderGps, hasVacant, mlCount } from '@/lib/dataQuality'
-import { getRtuAge, getRtuYear, oldestRtuAge } from '@/lib/rtu'
+import { hasPlaceholderGps } from '@/lib/dataQuality'
+import { getRtuAge, getRtuYear } from '@/lib/rtu'
 import { showToastSuccess } from '@/lib/toast'
 import type { Building, LayerKey, Polygon, Rtu, Utility } from '@/types/domain'
 import { LAYER_COLORS } from '@/lib/constants'
@@ -67,14 +67,9 @@ export function copyPopupText(text: string): void {
   showToastSuccess('📋 Copied popup contents')
 }
 
-function buildingBadgeText(building: Building, tenantPolygons: Polygon[]): string {
+function buildingBadgeText(building: Building): string {
   const parts = [building.park.replace(/\s*\(x\s*\d+\)/, '').trim()]
-  const oldest = oldestRtuAge(building)
-  if (oldest >= RTU_AGE_CRITICAL) parts.push(`🔥 ${oldest} yr RTU`)
-  else if (oldest >= RTU_AGE_WARN) parts.push(`${oldest} yr RTU`)
-  if (hasVacant(building, tenantPolygons)) parts.push('VACANT')
-  const ml = mlCount(building)
-  if (ml) parts.push(`ML×${ml}`)
+  if (building.cluster?.trim()) parts.push(building.cluster.trim())
   return parts.join('  ')
 }
 
@@ -86,7 +81,7 @@ export function buildBuildingInfoPlainText(
   building: Building,
   tenantPolygons: Polygon[] = [],
 ): string {
-  const lines: string[] = [building.address, buildingBadgeText(building, tenantPolygons), '']
+  const lines: string[] = [building.address, buildingBadgeText(building), '']
   lines.push(plainRow('BU #', building.bu || '—'))
   lines.push(plainRow('Portfolio', building.cluster || building.park || '—'))
   lines.push(plainRow('Manager', building.manager || '—'))
@@ -165,21 +160,10 @@ export function buildBuildingInfoHtml(
   tenantPolygons: Polygon[] = [],
 ): string {
   const bColor = getColor(building.park)
-  const oldest = oldestRtuAge(building)
-  const vac = hasVacant(building, tenantPolygons)
-  const ml = mlCount(building)
 
   let badges = `<span class="iw-badge" style="background:${bColor}22;color:${bColor};border:1px solid ${bColor}44">${escapeHtml(building.park.replace(/\s*\(x\s*\d+\)/, ''))}</span>`
-  if (oldest >= RTU_AGE_CRITICAL) {
-    badges += ` <span class="iw-badge" style="background:rgba(255,80,80,.22);color:#ff6060;border:1px solid rgba(255,80,80,.5)">🔥 ${oldest} yr RTU</span>`
-  } else if (oldest >= RTU_AGE_WARN) {
-    badges += ` <span class="iw-badge" style="background:rgba(251,191,36,.22);color:#fbbf24;border:1px solid rgba(251,191,36,.5)">${oldest} yr RTU</span>`
-  }
-  if (vac) {
-    badges += ' <span class="iw-badge" style="background:rgba(251,146,60,.2);color:#fb923c;border:1px solid rgba(251,146,60,.4)">VACANT</span>'
-  }
-  if (ml) {
-    badges += ` <span class="iw-badge" style="background:rgba(167,139,250,.2);color:#a78bfa;border:1px solid rgba(167,139,250,.4)">ML×${ml}</span>`
+  if (building.cluster?.trim()) {
+    badges += ` <span class="iw-badge" style="background:rgba(125,184,255,.12);color:#7db8ff;border:1px solid rgba(125,184,255,.3)">${escapeHtml(building.cluster)}</span>`
   }
 
   const stats = [
@@ -276,7 +260,10 @@ export function buildDetailInfoHtml(
     }
   }
 
-  const badge = layerKey === 'rtu' ? '#fbbf24' : cfg.fill
+  const badgeHtml =
+    layerKey === 'rtu'
+      ? ''
+      : `<div class="iw-badges"><span class="iw-badge" style="background:${cfg.fill}22;color:${cfg.fill};border:1px solid ${cfg.fill}44">${layerKey.toUpperCase()}</span></div>`
 
   const moveBtn = moveButton({
     'iw-kind': 'detail',
@@ -290,7 +277,7 @@ export function buildDetailInfoHtml(
       : ''
   const plainText = buildDetailInfoPlainText(layerKey, data, options)
 
-  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div><div class="iw-badges"><span class="iw-badge" style="background:${badge}22;color:${badge};border:1px solid ${badge}44">${layerKey.toUpperCase()}</span></div>${closeButton()}</div><div class="iw-body">${rows}</div>${actionFooter(`${copyButton()}${moveBtn}${deleteBtn}`)}</div>`
+  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${badgeHtml}${closeButton()}</div><div class="iw-body">${rows}</div>${actionFooter(`${copyButton()}${moveBtn}${deleteBtn}`)}</div>`
 }
 
 export function hasBadGps(building: Building): boolean {

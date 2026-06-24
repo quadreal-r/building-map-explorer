@@ -6,25 +6,74 @@ export interface UsePolygonDrawOptions {
   color: string
 }
 
+function pointMarkerIcon(color: string): google.maps.Symbol {
+  return {
+    path: google.maps.SymbolPath.CIRCLE,
+    scale: 6,
+    fillColor: color,
+    fillOpacity: 1,
+    strokeColor: '#ffffff',
+    strokeWeight: 2,
+  }
+}
+
 export function usePolygonDraw({ map, color }: UsePolygonDrawOptions) {
   const [points, setPoints] = useState<LatLng[]>([])
   const [isDrawing, setIsDrawing] = useState(false)
   const polylineRef = useRef<google.maps.Polyline | null>(null)
   const closingLineRef = useRef<google.maps.Polyline | null>(null)
+  const fillPreviewRef = useRef<google.maps.Polygon | null>(null)
+  const pointMarkersRef = useRef<google.maps.Marker[]>([])
   const clickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
-  const dblClickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
 
-  const clearPreview = useCallback(() => {
+  const clearPreviewLines = useCallback(() => {
     polylineRef.current?.setMap(null)
     polylineRef.current = null
     closingLineRef.current?.setMap(null)
     closingLineRef.current = null
+    fillPreviewRef.current?.setMap(null)
+    fillPreviewRef.current = null
   }, [])
+
+  const clearPointMarkers = useCallback(() => {
+    for (const marker of pointMarkersRef.current) {
+      marker.setMap(null)
+    }
+    pointMarkersRef.current = []
+  }, [])
+
+  const syncPointMarkers = useCallback(
+    (nextPoints: LatLng[]) => {
+      if (!map) return
+      while (pointMarkersRef.current.length > nextPoints.length) {
+        pointMarkersRef.current.pop()?.setMap(null)
+      }
+      nextPoints.forEach((point, index) => {
+        let marker = pointMarkersRef.current[index]
+        if (!marker) {
+          marker = new google.maps.Marker({
+            map,
+            position: point,
+            zIndex: 55,
+            clickable: false,
+            icon: pointMarkerIcon(color),
+          })
+          pointMarkersRef.current[index] = marker
+          return
+        }
+        marker.setPosition(point)
+        marker.setIcon(pointMarkerIcon(color))
+        marker.setMap(map)
+      })
+    },
+    [color, map],
+  )
 
   const updatePreview = useCallback(
     (nextPoints: LatLng[]) => {
       if (!map) return
-      clearPreview()
+      syncPointMarkers(nextPoints)
+      clearPreviewLines()
       if (nextPoints.length > 1) {
         polylineRef.current = new google.maps.Polyline({
           path: nextPoints,
@@ -46,29 +95,36 @@ export function usePolygonDraw({ map, color }: UsePolygonDrawOptions) {
           map,
           zIndex: 49,
         })
+        fillPreviewRef.current = new google.maps.Polygon({
+          paths: nextPoints,
+          strokeOpacity: 0,
+          fillColor: color,
+          fillOpacity: 0.15,
+          map,
+          zIndex: 48,
+          clickable: false,
+        })
       }
     },
-    [clearPreview, color, map],
+    [clearPreviewLines, color, map, syncPointMarkers],
   )
 
-  const stopDrawing = useCallback(() => {
+  const stopListeners = useCallback(() => {
     setIsDrawing(false)
     clickListenerRef.current?.remove()
     clickListenerRef.current = null
-    dblClickListenerRef.current?.remove()
-    dblClickListenerRef.current = null
-    clearPreview()
-  }, [clearPreview])
+  }, [])
 
   const reset = useCallback(() => {
-    stopDrawing()
+    stopListeners()
     setPoints([])
-  }, [stopDrawing])
+    clearPreviewLines()
+    clearPointMarkers()
+  }, [clearPointMarkers, clearPreviewLines, stopListeners])
 
   const startDrawing = useCallback(() => {
     if (!map) return
-    stopDrawing()
-    setPoints([])
+    reset()
     setIsDrawing(true)
     clickListenerRef.current = map.addListener('click', (e: google.maps.MapMouseEvent) => {
       const latLng = e.latLng
@@ -80,31 +136,7 @@ export function usePolygonDraw({ map, color }: UsePolygonDrawOptions) {
         return updated
       })
     })
-    dblClickListenerRef.current = map.addListener('dblclick', (e: google.maps.MapMouseEvent) => {
-      const latLng = e.latLng
-      if (!latLng) return
-      setPoints((prev) => {
-        const updated = [...prev, { lat: latLng.lat(), lng: latLng.lng() }]
-        updatePreview(updated)
-        return updated
-      })
-      setIsDrawing(false)
-      clickListenerRef.current?.remove()
-      clickListenerRef.current = null
-      dblClickListenerRef.current?.remove()
-      dblClickListenerRef.current = null
-      clearPreview()
-      return
-    })
-  }, [clearPreview, map, stopDrawing, updatePreview])
-
-  const toggleDrawing = useCallback(() => {
-    if (isDrawing) {
-      stopDrawing()
-      return
-    }
-    startDrawing()
-  }, [isDrawing, startDrawing, stopDrawing])
+  }, [map, reset, updatePreview])
 
   useEffect(() => {
     if (points.length > 0) {
@@ -112,14 +144,13 @@ export function usePolygonDraw({ map, color }: UsePolygonDrawOptions) {
     }
   }, [color, points, updatePreview])
 
-  useEffect(() => () => stopDrawing(), [stopDrawing])
+  useEffect(() => () => reset(), [reset])
 
   return {
     points,
     isDrawing,
     startDrawing,
-    stopDrawing,
-    toggleDrawing,
+    stopDrawing: stopListeners,
     reset,
     setPoints,
   }

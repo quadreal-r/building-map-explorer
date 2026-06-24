@@ -1,16 +1,21 @@
-import { useEffect, useState } from 'react'
-import { Modal } from '@/components/Modal/Modal'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  getDetailMarkerIcon,
   getMarkerScale,
   getMarkerShapeIndex,
   MARKER_SHAPES,
-  setMarkerScale,
-  setMarkerShapeIndex,
 } from '@/lib/markerStyles'
+import { LAYER_COLORS } from '@/lib/constants'
+import { setMapAddMarkerPickHandler } from '@/lib/mapAddMarkerPick'
+import { afterMapViewChange } from '@/lib/mapRotation'
 import { showToastSuccess } from '@/lib/toast'
+import { useLayerStore } from '@/stores/layerStore'
+import { useUiStore } from '@/stores/uiStore'
 import type { LayerKey, PortfolioData, Rtu, Utility } from '@/types/domain'
+import styles from './AddMarkerPanel.module.css'
 
 type MarkerCategory = 'rtu' | 'sprinkler' | 'electrical' | 'hydrant' | 'gas'
+type AddMarkerPhase = 'config' | 'awaitMapClick' | 'placing'
 
 const CATEGORY_OPTIONS: { value: MarkerCategory; label: string }[] = [
   { value: 'rtu', label: 'RTU' },
@@ -35,14 +40,21 @@ const LAYER_TO_UTILITY: Partial<Record<LayerKey, Utility['utility_type']>> = {
   gas: 'Natural Gas Shut-Off',
 }
 
+/** RTU/utility markers only show at zoom ≥ 16 — bump zoom without panning. */
+function ensureDetailMarkerZoom(map: google.maps.Map): void {
+  if ((map.getZoom() ?? 10) < 16) {
+    map.setZoom(16)
+    afterMapViewChange(map)
+  }
+}
+
 export interface AddMarkerPanelProps {
   open: boolean
   onClose: () => void
   portfolio: PortfolioData
   map: google.maps.Map | null
   onAdded: (patch: PortfolioData) => void
-  defaultLat?: number
-  defaultLng?: number
+  defaultBuildingAddress?: string
 }
 
 interface AddMarkerFormProps {
@@ -50,8 +62,7 @@ interface AddMarkerFormProps {
   portfolio: PortfolioData
   map: google.maps.Map | null
   onAdded: (patch: PortfolioData) => void
-  defaultLat: number
-  defaultLng: number
+  defaultBuildingAddress?: string
 }
 
 function AddMarkerForm({
@@ -59,67 +70,183 @@ function AddMarkerForm({
   portfolio,
   map,
   onAdded,
-  defaultLat,
-  defaultLng,
+  defaultBuildingAddress,
 }: AddMarkerFormProps) {
   const [category, setCategory] = useState<MarkerCategory>('rtu')
-  const [buildingAddress, setBuildingAddress] = useState(portfolio.buildings[0]?.address ?? '')
+  const [buildingAddress, setBuildingAddress] = useState(
+    defaultBuildingAddress ?? portfolio.buildings[0]?.address ?? '',
+  )
   const [name, setName] = useState(DEFAULT_NAMES.rtu)
   const [description, setDescription] = useState('')
-  const [lat, setLat] = useState(defaultLat ? String(defaultLat) : '')
-  const [lng, setLng] = useState(defaultLng ? String(defaultLng) : '')
-  const [pickMode, setPickMode] = useState(false)
+  const [phase, setPhase] = useState<AddMarkerPhase>('config')
+  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [shapeIdx, setShapeIdx] = useState(getMarkerShapeIndex())
   const [scale, setScale] = useState(getMarkerScale())
   const [error, setError] = useState<string | null>(null)
+  const previewMarkerRef = useRef<google.maps.Marker | null>(null)
+  const dragListenerRef = useRef<google.maps.MapsEventListener | null>(null)
+  const mapRef = useRef(map)
+  const phaseRef = useRef(phase)
+  const onMapClickPlaceRef = useRef<(lat: number, lng: number) => void>(() => {})
+
+  mapRef.current = map
+  phaseRef.current = phase
 
   const needsBuilding = category === 'rtu'
+  const layerKey: LayerKey = category === 'rtu' ? 'rtu' : category
+  const layerCfg = LAYER_COLORS[layerKey]
+
+  const removePreviewMarker = useCallback(() => {
+    dragListenerRef.current?.remove()
+    dragListenerRef.current = null
+    previewMarkerRef.current?.setMap(null)
+    previewMarkerRef.current = null
+  }, [])
+
+  const resetFlow = useCallback(() => {
+    setPhase('config')
+    setPosition(null)
+    removePreviewMarker()
+    useUiStore.getState().clearAddMarkerPlacement()
+  }, [removePreviewMarker])
+
+  const handleCancel = () => {
+    resetFlow()
+    onClose()
+  }
+
+  onMapClickPlaceRef.current = (lat: number, lng: number) => {
+    if (phaseRef.current !== 'awaitMapClick') return
+    setError(null)
+    const coords = { lat, lng }
+    setPosition(coords)
+    setPhase('placing')
+    const activeMap = mapRef.current
+    if (activeMap) {
+      ensureDetailMarkerZoom(activeMap)
+    }
+  }
+
+  const registerMapClickHandler = useCallback(() => {
+    setMapAddMarkerPickHandler((lat, lng) => {
+      onMapClickPlaceRef.current(lat, lng)
+    })
+  }, [])
 
   useEffect(() => {
-    if (!map || !pickMode) return
-    map.setOptions({ draggableCursor: 'crosshair' })
-    const listener = map.addListener('click', (e: google.maps.MapMouseEvent) => {
-      const pos = e.latLng
-      if (!pos) return
-      setLat(pos.lat().toFixed(6))
-      setLng(pos.lng().toFixed(6))
-      setPickMode(false)
-    })
+    const active = phase === 'awaitMapClick' || phase === 'placing'
+    useUiStore.getState().setAddMarkerPickMode(active)
+  }, [phase])
+
+  useEffect(() => {
+    if (phase !== 'awaitMapClick') {
+      if (phase === 'config') {
+        setMapAddMarkerPickHandler(null)
+      }
+      return
+    }
+    registerMapClickHandler()
+    return () => setMapAddMarkerPickHandler(null)
+  }, [phase, registerMapClickHandler])
+
+  useEffect(() => {
+    if (!map) return
+    map.setOptions({ draggableCursor: phase === 'awaitMapClick' ? 'crosshair' : '' })
     return () => {
-      google.maps.event.removeListener(listener)
       map.setOptions({ draggableCursor: '' })
     }
-  }, [map, pickMode])
+  }, [map, phase])
+
+  useEffect(() => {
+    if (phase !== 'placing' || !map || !position) {
+      removePreviewMarker()
+      return
+    }
+
+    if (!previewMarkerRef.current) {
+      previewMarkerRef.current = new google.maps.Marker({
+        map,
+        position,
+        draggable: true,
+        zIndex: 1000,
+        cursor: 'grab',
+      })
+      dragListenerRef.current = previewMarkerRef.current.addListener('dragend', () => {
+        const pos = previewMarkerRef.current?.getPosition()
+        if (!pos) return
+        setPosition({ lat: pos.lat(), lng: pos.lng() })
+      })
+    } else {
+      previewMarkerRef.current.setPosition(position)
+      previewMarkerRef.current.setMap(map)
+    }
+  }, [map, phase, position, removePreviewMarker])
+
+  useEffect(() => {
+    if (!previewMarkerRef.current || phase !== 'placing') return
+    previewMarkerRef.current.setIcon(
+      getDetailMarkerIcon(layerCfg.fill, layerCfg.stroke, {
+        shapeIndex: shapeIdx,
+        scale,
+        defaultScale: layerCfg.scale,
+      }),
+    )
+  }, [phase, layerCfg, shapeIdx, scale])
+
+  useEffect(
+    () => () => {
+      removePreviewMarker()
+      useUiStore.getState().clearAddMarkerPlacement()
+    },
+    [removePreviewMarker],
+  )
 
   const handleCategoryChange = (next: MarkerCategory) => {
     setCategory(next)
     setName(DEFAULT_NAMES[next])
-    if (next === 'rtu') {
-      setBuildingAddress(portfolio.buildings[0]?.address ?? '')
+    if (next === 'rtu' && !buildingAddress) {
+      setBuildingAddress(defaultBuildingAddress ?? portfolio.buildings[0]?.address ?? '')
     }
   }
 
-  const handleSave = () => {
+  const startPlacing = () => {
     setError(null)
-    const parsedLat = parseFloat(lat)
-    const parsedLng = parseFloat(lng)
     if (!name.trim()) {
       setError('Please enter a name.')
       return
     }
-    if (!parsedLat || !parsedLng || Number.isNaN(parsedLat) || Number.isNaN(parsedLng)) {
-      setError('Set GPS by clicking the map or entering coordinates.')
+    if (!map) {
+      setError('Map is not ready.')
       return
     }
+    if (category === 'rtu') {
+      const building = portfolio.buildings.find((b) => b.address === buildingAddress)
+      if (!building) {
+        setError('Building not found.')
+        return
+      }
+    }
 
-    setMarkerShapeIndex(shapeIdx)
-    setMarkerScale(scale)
+    useLayerStore.getState().setLayer(layerKey, true)
+    setPhase('awaitMapClick')
+    registerMapClickHandler()
+  }
+
+  const handleSave = () => {
+    setError(null)
+    if (!position) return
+    if (!name.trim()) {
+      setError('Please enter a name.')
+      return
+    }
 
     const marker = {
       name: name.trim(),
       description: description.trim(),
-      lat: parsedLat,
-      lng: parsedLng,
+      lat: position.lat,
+      lng: position.lng,
+      marker_shape: shapeIdx,
+      marker_scale: scale,
     }
 
     if (category === 'rtu') {
@@ -142,21 +269,40 @@ function AddMarkerForm({
         utility_type: utilityType,
         name: name.trim(),
         description: description.trim(),
-        lat: parsedLat,
-        lng: parsedLng,
+        lat: position.lat,
+        lng: position.lng,
+        marker_shape: shapeIdx,
+        marker_scale: scale,
       }
       onAdded({ ...portfolio, utilities: [...portfolio.utilities, utility] })
     }
 
+    if (map) {
+      ensureDetailMarkerZoom(map)
+    }
+
+    resetFlow()
     showToastSuccess('✓ Marker added — save to HTML to keep it.')
     onClose()
   }
 
+  const handlePrimary = () => {
+    if (phase === 'placing') handleSave()
+    else if (phase === 'config') startPlacing()
+  }
+
+  const fieldsLocked = phase !== 'config'
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12, opacity: pickMode ? 0.75 : 1 }}>
+    <div className={styles.form}>
       <label>
         Category
-        <select value={category} onChange={(e) => handleCategoryChange(e.target.value as MarkerCategory)} style={{ width: '100%', marginTop: 4 }}>
+        <select
+          value={category}
+          disabled={fieldsLocked}
+          onChange={(e) => handleCategoryChange(e.target.value as MarkerCategory)}
+          style={{ width: '100%', marginTop: 4 }}
+        >
           {CATEGORY_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
@@ -165,7 +311,12 @@ function AddMarkerForm({
       {needsBuilding ? (
         <label>
           Building
-          <select value={buildingAddress} onChange={(e) => setBuildingAddress(e.target.value)} style={{ width: '100%', marginTop: 4 }}>
+          <select
+            value={buildingAddress}
+            disabled={fieldsLocked}
+            onChange={(e) => setBuildingAddress(e.target.value)}
+            style={{ width: '100%', marginTop: 4 }}
+          >
             {portfolio.buildings.map((b) => (
               <option key={b.address} value={b.address}>{b.address}</option>
             ))}
@@ -174,21 +325,39 @@ function AddMarkerForm({
       ) : null}
       <label>
         Name
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={{ width: '100%', marginTop: 4 }} />
+        <input
+          type="text"
+          value={name}
+          disabled={fieldsLocked}
+          onChange={(e) => setName(e.target.value)}
+          style={{ width: '100%', marginTop: 4 }}
+        />
       </label>
       <label>
         Description
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} style={{ width: '100%', marginTop: 4, resize: 'vertical' }} />
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          style={{ width: '100%', marginTop: 4, resize: 'vertical' }}
+        />
       </label>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <label style={{ flex: 1 }}>Lat<input type="text" value={lat} onChange={(e) => setLat(e.target.value)} style={{ width: '100%', marginTop: 4 }} /></label>
-        <label style={{ flex: 1 }}>Lng<input type="text" value={lng} onChange={(e) => setLng(e.target.value)} style={{ width: '100%', marginTop: 4 }} /></label>
-      </div>
-      <button type="button" className={`btn-action${pickMode ? ' primary' : ''}`} onClick={() => setPickMode(true)} disabled={!map}>
-        {pickMode ? '🎯 Click anywhere on the map…' : '📍 Click on Map to Place'}
-      </button>
+
+      {phase === 'awaitMapClick' ? (
+        <p className={styles.placingHint}>
+          Click the map to place the marker at that location.
+        </p>
+      ) : null}
+      {phase === 'placing' ? (
+        <p className={styles.placingHint}>
+          Drag the marker to fine-tune its position. Adjust shape, size, or description, then Save.
+        </p>
+      ) : null}
+
       <div>
-        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase' }}>Marker shape</div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase' }}>
+          Marker shape
+        </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
           {MARKER_SHAPES.map((s, i) => (
             <button
@@ -212,12 +381,26 @@ function AddMarkerForm({
       </div>
       <label>
         Size ({scale})
-        <input type="range" min={4} max={20} value={scale} onChange={(e) => setScale(Number(e.target.value))} style={{ width: '100%' }} />
+        <input
+          type="range"
+          min={4}
+          max={20}
+          value={scale}
+          onChange={(e) => setScale(Number(e.target.value))}
+          style={{ width: '100%' }}
+        />
       </label>
       {error ? <p style={{ color: '#f87171', fontSize: 11 }}>{error}</p> : null}
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-        <button type="button" className="btn-action" onClick={onClose}>Cancel</button>
-        <button type="button" className="btn-action primary" onClick={handleSave}>Add marker</button>
+        <button type="button" className="btn-action" onClick={handleCancel}>Cancel</button>
+        <button
+          type="button"
+          className="btn-action primary"
+          onClick={handlePrimary}
+          disabled={!map || phase === 'awaitMapClick'}
+        >
+          {phase === 'placing' ? 'Save' : 'Add marker'}
+        </button>
       </div>
     </div>
   )
@@ -229,24 +412,59 @@ export function AddMarkerPanel({
   portfolio,
   map,
   onAdded,
-  defaultLat = 43.65,
-  defaultLng = -79.62,
+  defaultBuildingAddress,
 }: AddMarkerPanelProps) {
-  const formKey = `${defaultLat},${defaultLng}`
+  const [formSession, setFormSession] = useState(0)
+  const wasOpenRef = useRef(false)
+
+  const handleClose = useCallback(() => {
+    useUiStore.getState().clearAddMarkerPlacement()
+    onClose()
+  }, [onClose])
+
+  useEffect(() => {
+    if (open && !wasOpenRef.current) {
+      setFormSession((n) => n + 1)
+    }
+    wasOpenRef.current = open
+    if (!open) {
+      useUiStore.getState().clearAddMarkerPlacement()
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') handleClose()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [open, handleClose])
+
+  if (!open) return null
 
   return (
-    <Modal open={open} onClose={onClose} title="Add map marker" width={320}>
-      {open ? (
-        <AddMarkerForm
-          key={formKey}
-          onClose={onClose}
-          portfolio={portfolio}
-          map={map}
-          onAdded={onAdded}
-          defaultLat={defaultLat}
-          defaultLng={defaultLng}
-        />
-      ) : null}
-    </Modal>
+    <div
+      className={styles.panel}
+      data-add-marker-panel=""
+      role="dialog"
+      aria-modal="true"
+      aria-label="Add map marker"
+    >
+      <header className={styles.header}>
+        <h2 className={styles.title}>Add map marker</h2>
+        <button type="button" className={styles.close} onClick={handleClose} aria-label="Close">
+          ×
+        </button>
+      </header>
+      <AddMarkerForm
+        key={formSession}
+        onClose={handleClose}
+        portfolio={portfolio}
+        map={map}
+        onAdded={onAdded}
+        defaultBuildingAddress={defaultBuildingAddress}
+      />
+    </div>
   )
 }

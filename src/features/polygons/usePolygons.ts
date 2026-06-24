@@ -10,6 +10,7 @@ import {
 } from '@/lib/mapGroupDragSession'
 import { afterMapViewChange, panToPreserveRotation } from '@/lib/mapRotation'
 import { consumeMapClickClearSuppression, registerMarqueeTarget, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
+import { tryConsumeMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
 import { closeAllMapPopups, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
 import { showToastSuccess } from '@/lib/toast'
 import { useLayerStore } from '@/stores/layerStore'
@@ -335,6 +336,7 @@ export function usePolygons({
       })
 
       gmPoly.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (tryConsumeMapAddMarkerPick(e.latLng)) return
         if (useSelectionStore.getState().dragMode) {
           e.stop()
           const domEvent = e.domEvent as MouseEvent | undefined
@@ -459,7 +461,8 @@ export function usePolygons({
 
   useEffect(() => {
     if (!map) return
-    const listener = map.addListener('click', () => {
+    const listener = map.addListener('click', (e: google.maps.MapMouseEvent) => {
+      if (tryConsumeMapAddMarkerPick(e.latLng)) return
       if (consumeMapClickClearSuppression()) return
       if (useSelectionStore.getState().dragMode) {
         useSelectionStore.getState().clearDragSelect()

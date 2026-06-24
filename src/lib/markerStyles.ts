@@ -38,16 +38,53 @@ export function setMarkerScale(scale: number): void {
 }
 
 export function getMarkerIcon(color: string, isSelected = false): google.maps.Symbol {
-  const shape = MARKER_SHAPES[markerShapeIdx]!
-  const scale = isSelected ? markerScale * 1.55 : markerScale
+  const scale = isSelected ? 9 * 1.55 : 9
   const strokeWeight = isSelected ? 3 : 1.5
-  const path = shape.isBuiltin ? google.maps.SymbolPath.CIRCLE : shape.path
   return {
-    path,
+    path: google.maps.SymbolPath.CIRCLE,
     fillColor: color,
     fillOpacity: isSelected ? 1 : 0.95,
     strokeColor: '#fff',
     strokeWeight,
     scale,
+  }
+}
+
+export interface DetailMarkerIconOptions {
+  shapeIndex?: number
+  scale?: number
+  /** Circle scale for legacy/imported markers without custom shape. */
+  defaultScale?: number
+}
+
+/** RTU / utility pin icon — uses per-marker shape when stored, else legacy circle. */
+export function getDetailMarkerIcon(
+  fillColor: string,
+  strokeColor: string,
+  options: DetailMarkerIconOptions = {},
+): google.maps.Symbol {
+  const { shapeIndex, scale, defaultScale = 5 } = options
+  const hasCustomShape = shapeIndex != null
+
+  if (!hasCustomShape && scale == null) {
+    return {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillColor,
+      fillOpacity: 0.9,
+      strokeColor,
+      strokeWeight: 1,
+      scale: defaultScale,
+    }
+  }
+
+  const shape = MARKER_SHAPES[shapeIndex ?? 0]!
+  const path = shape.isBuiltin ? google.maps.SymbolPath.CIRCLE : shape.path
+  return {
+    path,
+    fillColor,
+    fillOpacity: 0.9,
+    strokeColor,
+    strokeWeight: 1,
+    scale: scale ?? defaultScale,
   }
 }

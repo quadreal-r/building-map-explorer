@@ -14,6 +14,15 @@ interface SettingsState {
 
 const SETTINGS_KEY = 'bme-settings'
 
+declare global {
+  interface Window {
+    __BME_EMBEDDED_SETTINGS__?: {
+      themeIndex?: number
+      managerRenames?: Record<string, string>
+    } | null
+  }
+}
+
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   themeIndex: 0,
   managerRenames: {},
@@ -32,6 +41,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   loadSettings: async () => {
+    const embedded = typeof window !== 'undefined' ? window.__BME_EMBEDDED_SETTINGS__ : null
+    if (embedded && typeof embedded === 'object') {
+      const themeIndex = embedded.themeIndex ?? 0
+      get().applyTheme(themeIndex)
+      set({
+        themeIndex,
+        managerRenames: embedded.managerRenames ?? {},
+        loaded: true,
+      })
+      return
+    }
+
     const stored = localStorage.getItem(SETTINGS_KEY)
     if (stored) {
       try {

@@ -1,7 +1,9 @@
 import { showToastError, showToastSuccess } from '@/lib/toast'
+import { useSettingsStore } from '@/stores/settingsStore'
 import type { PortfolioData } from '@/types/domain'
 
 const PORTFOLIO_PLACEHOLDER = 'window.__BME_EMBEDDED_PORTFOLIO__=null'
+const SETTINGS_PLACEHOLDER = 'window.__BME_EMBEDDED_SETTINGS__=null'
 
 export async function saveDatabase(portfolio: PortfolioData): Promise<boolean> {
   try {
@@ -17,8 +19,14 @@ export async function saveDatabase(portfolio: PortfolioData): Promise<boolean> {
       throw new Error('Portable template is outdated. Run: npm run build:portable')
     }
 
-    const payload = JSON.stringify(portfolio).replace(/</g, '\\u003c')
-    html = html.replace(PORTFOLIO_PLACEHOLDER, `window.__BME_EMBEDDED_PORTFOLIO__=${payload}`)
+    const portfolioPayload = JSON.stringify(portfolio).replace(/</g, '\\u003c')
+    html = html.replace(PORTFOLIO_PLACEHOLDER, `window.__BME_EMBEDDED_PORTFOLIO__=${portfolioPayload}`)
+
+    if (html.includes(SETTINGS_PLACEHOLDER)) {
+      const { themeIndex, managerRenames } = useSettingsStore.getState()
+      const settingsPayload = JSON.stringify({ themeIndex, managerRenames }).replace(/</g, '\\u003c')
+      html = html.replace(SETTINGS_PLACEHOLDER, `window.__BME_EMBEDDED_SETTINGS__=${settingsPayload}`)
+    }
 
     const blob = new Blob([html], { type: 'text/html' })
     const a = document.createElement('a')

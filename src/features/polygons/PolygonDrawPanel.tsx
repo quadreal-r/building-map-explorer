@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { showToastSuccess } from '@/lib/toast'
 import { usePolygonDraw } from '@/features/polygons/usePolygonDraw'
+import { useUiStore } from '@/stores/uiStore'
 import type { Polygon } from '@/types/domain'
 import styles from './PolygonDrawPanel.module.css'
 
@@ -11,22 +12,73 @@ export interface PolygonDrawPanelProps {
   onSaved: (polygon: Polygon) => void
 }
 
+type DrawPhase = 'config' | 'drawing'
+
 export function PolygonDrawPanel({ open, onClose, map, onSaved }: PolygonDrawPanelProps) {
+  const [phase, setPhase] = useState<DrawPhase>('config')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [color, setColor] = useState('#60a5fa')
   const [status, setStatus] = useState('')
+  const wasOpenRef = useRef(false)
 
-  const { points, isDrawing, toggleDrawing, reset } = usePolygonDraw({
+  const { points, startDrawing, reset } = usePolygonDraw({
     map,
     color,
   })
+
+  const resetPanel = useCallback(() => {
+    setPhase('config')
+    setStatus('')
+    reset()
+    useUiStore.getState().setPolygonDrawMode(false)
+  }, [reset])
+
+  const handleClose = useCallback(() => {
+    resetPanel()
+    onClose()
+  }, [onClose, resetPanel])
+
+  useEffect(() => {
+    if (open && !wasOpenRef.current) {
+      setName('')
+      setDescription('')
+      setColor('#60a5fa')
+      setPhase('config')
+      setStatus('')
+      reset()
+    }
+    wasOpenRef.current = open
+    if (!open) {
+      useUiStore.getState().setPolygonDrawMode(false)
+    }
+  }, [open])
+
+  useEffect(() => {
+    useUiStore.getState().setPolygonDrawMode(phase === 'drawing')
+  }, [phase])
+
+  useEffect(() => {
+    if (!map) return
+    map.setOptions({ draggableCursor: phase === 'drawing' ? 'crosshair' : '' })
+    return () => {
+      map.setOptions({ draggableCursor: '' })
+    }
+  }, [map, phase])
+
+  useEffect(
+    () => () => {
+      reset()
+      useUiStore.getState().setPolygonDrawMode(false)
+    },
+    [reset],
+  )
 
   if (!open) return null
 
   const handleSave = () => {
     if (points.length < 3) {
-      setStatus('Draw at least 3 points first.')
+      setStatus('Add at least 3 points on the map.')
       return
     }
     const polygon: Polygon = {
@@ -38,31 +90,36 @@ export function PolygonDrawPanel({ open, onClose, map, onSaved }: PolygonDrawPan
     }
     onSaved(polygon)
     showToastSuccess('✓ Polygon added — save to HTML to keep it.')
-    reset()
-    setName('')
-    setDescription('')
-    setColor('#60a5fa')
-    setStatus('')
+    resetPanel()
     onClose()
   }
 
-  const handleCancel = () => {
-    reset()
-    setStatus('')
-    onClose()
+  const handlePrimary = () => {
+    if (phase === 'config') {
+      if (!map) {
+        setStatus('Map is not ready.')
+        return
+      }
+      setStatus('Click the map to place each corner point.')
+      startDrawing()
+      setPhase('drawing')
+      return
+    }
+    handleSave()
   }
 
-  const pointLabel =
-    points.length === 0
-      ? isDrawing
-        ? 'Click map to place points. Double-click last point to finish.'
-        : ''
-      : isDrawing
-        ? `${points.length} point${points.length === 1 ? '' : 's'} placed. Double-click to finish.`
-        : `✓ ${points.length} points — fill in details and click Save.`
+  const statusText =
+    status ||
+    (phase === 'drawing'
+      ? points.length === 0
+        ? 'Click the map to place the first point.'
+        : points.length < 3
+          ? `${points.length} point${points.length === 1 ? '' : 's'} — need ${3 - points.length} more.`
+          : `${points.length} points placed — adjust details if needed, then Save.`
+      : '')
 
   return (
-    <div className={styles.panel}>
+    <div className={styles.panel} data-polygon-draw-panel="">
       <div className={styles.title}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <polygon points="3,18 9,4 15,14 20,8 21,18" />
@@ -89,25 +146,19 @@ export function PolygonDrawPanel({ open, onClose, map, onSaved }: PolygonDrawPan
         </div>
       </div>
 
-      <button
-        type="button"
-        className={`btn-action ${styles.drawBtn}`}
-        onClick={() => {
-          toggleDrawing()
-          if (!isDrawing) setStatus('Click map to place points. Double-click last point to finish.')
-        }}
-      >
-        {isDrawing ? '⏹ Stop Drawing' : '🖊 Click Map to Add Points'}
-      </button>
-
-      <div className={styles.status}>{status || pointLabel}</div>
+      {statusText ? <div className={styles.status}>{statusText}</div> : null}
 
       <div className={styles.actions}>
-        <button type="button" className={`btn-action ${styles.saveBtn}`} onClick={handleSave}>
-          ✓ Save
-        </button>
-        <button type="button" className="btn-action" onClick={handleCancel}>
+        <button type="button" className="btn-action" onClick={handleClose}>
           Cancel
+        </button>
+        <button
+          type="button"
+          className={`btn-action ${phase === 'drawing' ? styles.saveBtn : styles.drawBtn}`}
+          onClick={handlePrimary}
+          disabled={!map || (phase === 'drawing' && points.length < 3)}
+        >
+          {phase === 'drawing' ? 'Save' : 'Click map to add points'}
         </button>
       </div>
     </div>

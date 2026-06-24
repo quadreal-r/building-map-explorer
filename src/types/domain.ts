@@ -40,6 +40,8 @@ export interface Rtu {
   heating_btu?: string | null
   cooling_tons?: number | null
   suite?: string | null
+  marker_shape?: number
+  marker_scale?: number
 }
 
 export interface Building {
@@ -64,6 +66,8 @@ export interface Utility {
   description: string
   lat: number
   lng: number
+  marker_shape?: number
+  marker_scale?: number
 }
 
 export interface Polygon {

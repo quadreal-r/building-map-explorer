@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
 const PLACEHOLDER = 'window.__BME_EMBEDDED_PORTFOLIO__=null'
+const SETTINGS_PLACEHOLDER = 'window.__BME_EMBEDDED_SETTINGS__=null'
 
 execSync('npx vite build --config vite.config.portable.ts', {
   cwd: ROOT,
@@ -20,6 +21,9 @@ execSync('npx vite build --config vite.config.portable.ts', {
 const built = readFileSync(join(ROOT, 'dist-portable', 'index.html'), 'utf8')
 if (!built.includes(PLACEHOLDER)) {
   throw new Error(`Built HTML is missing portfolio placeholder: ${PLACEHOLDER}`)
+}
+if (!built.includes(SETTINGS_PLACEHOLDER)) {
+  throw new Error(`Built HTML is missing settings placeholder: ${SETTINGS_PLACEHOLDER}`)
 }
 
 const outPublic = join(ROOT, 'public', 'portable-template.html')

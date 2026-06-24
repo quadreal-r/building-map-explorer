@@ -93,13 +93,21 @@ function SettingsForm({
     onImport(data)
     onClose()
     const save = window.confirm(
-      'Import complete. Save to HTML to keep these changes on this computer?',
+      'Import complete. Export to HTML to keep these changes on this computer?',
     )
     if (!save) return
     void saveDatabase(data).then((ok) => {
       if (ok) {
         onSaved?.()
-        showToastSuccess('✓ Saved to HTML')
+      }
+    })
+  }
+
+  const handleExportHtml = () => {
+    void saveDatabase(portfolio).then((ok) => {
+      if (ok) {
+        onSaved?.()
+        onClose()
       }
     })
   }
@@ -203,6 +211,19 @@ function SettingsForm({
             >
               Add polygon
             </button>
+            <button
+              type="button"
+              className="btn-action btn-save"
+              style={{ width: '100%', justifyContent: 'flex-start' }}
+              onClick={handleExportHtml}
+              title="Download a self-contained HTML file with map, filters, cost estimator, and all portfolio data"
+            >
+              Export to HTML
+            </button>
+            <p className={styles.hint}>
+              Saves the full app into one file you can open offline (double-click or file://). Ctrl+S
+              works from the map too.
+            </p>
             <ImportExportButtons
               portfolio={portfolio}
               onImport={handleImport}

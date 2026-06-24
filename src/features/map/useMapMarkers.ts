@@ -23,15 +23,17 @@ import {
 } from '@/lib/mapGroupDragSession'
 import { buildPolygonBuildingIndex, polygonsForBuilding } from '@/lib/polygonBuildings'
 import { consumeMapClickClearSuppression, registerMarqueeTarget, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
+import { tryConsumeMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
 import { afterMapViewChange, fitBoundsPreserveRotation, panToPreserveRotation } from '@/lib/mapRotation'
 import { closeAllMapPopups, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
 import { collectSearchHits } from '@/lib/searchHits'
-import { getMarkerIcon } from '@/lib/markerStyles'
+import { getDetailMarkerIcon, getMarkerIcon } from '@/lib/markerStyles'
 import { buildBuildingInfoHtml, buildDetailInfoHtml, copyPopupText } from '@/lib/mapInfoWindow'
 import { showToastSuccess } from '@/lib/toast'
 import { useLayerStore } from '@/stores/layerStore'
 import { useFilterStore } from '@/stores/filterStore'
 import { useSelectionStore } from '@/stores/selectionStore'
+import { useUiStore } from '@/stores/uiStore'
 import type { Building, LayerKey, Polygon, Rtu, Utility } from '@/types/domain'
 
 const TRANSPARENT_ICON =
@@ -480,6 +482,7 @@ export function useMapMarkers({
       })
 
       marker.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (useUiStore.getState().addMarkerPickMode || useUiStore.getState().polygonDrawMode) return
         if (useSelectionStore.getState().dragMode) {
           const domEvent = e.domEvent as MouseEvent | undefined
           const additive = Boolean(domEvent?.ctrlKey || domEvent?.metaKey || domEvent?.shiftKey)
@@ -579,14 +582,11 @@ export function useMapMarkers({
         position: { lat, lng },
         map,
         title: data.name ?? '',
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          fillColor: cfg.fill,
-          fillOpacity: 0.9,
-          strokeColor: cfg.stroke,
-          strokeWeight: 1,
-          scale: cfg.scale,
-        },
+        icon: getDetailMarkerIcon(cfg.fill, cfg.stroke, {
+          shapeIndex: data.marker_shape,
+          scale: data.marker_scale,
+          defaultScale: cfg.scale,
+        }),
         zIndex: 20,
         visible: false,
         draggable: dragMode,
@@ -621,6 +621,7 @@ export function useMapMarkers({
       }
 
       marker.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (useUiStore.getState().addMarkerPickMode || useUiStore.getState().polygonDrawMode) return
         if (useSelectionStore.getState().dragMode) {
           const domEvent = e.domEvent as MouseEvent | undefined
           const additive = Boolean(domEvent?.ctrlKey || domEvent?.metaKey || domEvent?.shiftKey)
@@ -738,7 +739,8 @@ export function useMapMarkers({
 
   useEffect(() => {
     if (!map) return
-    const listener = map.addListener('click', () => {
+    const listener = map.addListener('click', (e: google.maps.MapMouseEvent) => {
+      if (tryConsumeMapAddMarkerPick(e.latLng)) return
       if (consumeMapClickClearSuppression()) return
       if (useSelectionStore.getState().dragMode) {
         useSelectionStore.getState().clearDragSelect()
@@ -802,6 +804,11 @@ export function useMapMarkers({
   }, [mapBuildings, fitAllMarkers, buildings, polygons, search])
 
   useEffect(() => {
+    if (
+      useUiStore.getState().addMarkerPickMode ||
+      useUiStore.getState().polygonDrawMode ||
+      useUiStore.getState().isModalOpen('addMarker')
+    ) return
     if (currentBuilding) {
       highlightBuilding(currentBuilding)
       if (!map) return
@@ -822,18 +829,24 @@ export function useMapMarkers({
     refreshDetailVisibility()
   }, [layers, dragMode, dragSelectedKeys, refreshDetailVisibility])
 
+  const addMarkerPickMode = useUiStore((s) => s.addMarkerPickMode)
+  const polygonDrawMode = useUiStore((s) => s.polygonDrawMode)
+  const blockMarkerClicks = addMarkerPickMode || polygonDrawMode
+
   useEffect(() => {
     for (const entry of buildingMarkersRef.current) {
       const isSolo = soloMoveRef.current?.marker === entry.marker
       entry.marker.setDraggable(dragMode || isSolo)
+      entry.marker.setClickable(!blockMarkerClicks)
       if (!isSolo) entry.marker.setCursor(dragMode ? 'grab' : null)
     }
     for (const entry of detailMarkersRef.current) {
       const isSolo = soloMoveRef.current?.marker === entry.marker
       entry.marker.setDraggable(dragMode || isSolo)
+      entry.marker.setClickable(!blockMarkerClicks)
       if (!isSolo) entry.marker.setCursor(dragMode ? 'grab' : null)
     }
-  }, [dragMode])
+  }, [dragMode, blockMarkerClicks])
 
   return {
     fitAllMarkers,

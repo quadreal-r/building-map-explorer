@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AddMarkerPanel } from '@/features/map/AddMarkerPanel'
+import { VersionStamp } from '@/components/VersionStamp/VersionStamp'
 import { PolygonDrawPanel } from '@/features/polygons/PolygonDrawPanel'
 import { useMapMarkers } from '@/features/map/useMapMarkers'
 import { usePolygons } from '@/features/polygons/usePolygons'
@@ -10,6 +11,7 @@ import { IMAGERY_MODES } from '@/lib/constants'
 import { matchesUtility } from '@/lib/dragSelection'
 import { tenantPolygonCount, buildPolygonBuildingIndex } from '@/lib/polygonBuildings'
 import { panToPreserveRotation } from '@/lib/mapRotation'
+import { installMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
 import type { Building, LayerKey, Polygon, PortfolioData, Rtu, Utility } from '@/types/domain'
 import type { ImageryMode } from '@/types/domain'
 import { useFilterStore } from '@/stores/filterStore'
@@ -165,6 +167,14 @@ export function MapPanel({
     [onPortfolioPatch],
   )
 
+  const handleAddMarkerClose = useCallback(() => {
+    onAddMarkerClose?.()
+  }, [onAddMarkerClose])
+
+  const handlePolygonDrawClose = useCallback(() => {
+    onPolygonDrawClose?.()
+  }, [onPolygonDrawClose])
+
   const { showAllMarkers, cycleImagery } = useMapMarkers({
     map,
     buildings: portfolio.buildings,
@@ -187,6 +197,11 @@ export function MapPanel({
     onPolygonDeleted: handlePolygonDeleted,
     onGroupMoved: handleGroupMoved,
   })
+
+  useEffect(() => {
+    if (!map) return
+    return installMapAddMarkerPick(map)
+  }, [map])
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -281,17 +296,7 @@ export function MapPanel({
           <button type="button" className="btn-action" onClick={openSettings} title="Settings — themes & manager names" style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
             Settings
           </button>
-          {currentBuilding ? (
-            <a
-              id="gmaps-link"
-              className="btn-action primary"
-              href={`https://www.google.com/maps?q=${currentBuilding.lat},${currentBuilding.lng}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Open in Maps ↗
-            </a>
-          ) : null}
+          <VersionStamp />
         </div>
       </div>
 
@@ -330,16 +335,15 @@ export function MapPanel({
 
       <AddMarkerPanel
         open={addMarkerOpen}
-        onClose={() => onAddMarkerClose?.()}
+        onClose={handleAddMarkerClose}
         portfolio={portfolio}
         map={map}
         onAdded={onPortfolioPatch}
-        defaultLat={currentBuilding?.lat}
-        defaultLng={currentBuilding?.lng}
+        defaultBuildingAddress={currentBuilding?.address}
       />
       <PolygonDrawPanel
         open={polygonDrawOpen}
-        onClose={() => onPolygonDrawClose?.()}
+        onClose={handlePolygonDrawClose}
         map={map}
         onSaved={(polygon) =>
           onPortfolioPatch({ ...portfolio, polygons: [...portfolio.polygons, polygon] })

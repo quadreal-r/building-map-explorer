@@ -5,10 +5,23 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QuadReal — Industrial Portfolio Map</title>
+    <style>
+      /* Critical shell layout — applies before JS/CSS bundles (fixes squished sidebar in dev) */
+      html, body, #root { width: 100%; height: 100%; margin: 0; }
+      .app { display: flex; width: 100%; height: 100vh; min-height: 100vh; }
+      .sidebar {
+        width: 340px;
+        min-width: 280px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .map-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
-    <script>window.__BME_EMBEDDED_PORTFOLIO__=null;</script>
+    <script>window.__BME_EMBEDDED_PORTFOLIO__=null;window.__BME_EMBEDDED_SETTINGS__=null;</script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

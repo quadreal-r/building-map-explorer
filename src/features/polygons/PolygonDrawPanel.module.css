@@ -68,13 +68,22 @@
   cursor: pointer;
 }
 
-.drawBtn {
-  width: 100%;
+.drawBtn,
+.saveBtn {
+  flex: 1;
   justify-content: center;
-  margin-bottom: 8px;
+}
+
+.drawBtn {
   background: var(--accent, #3b82f6);
   color: #fff;
   border-color: var(--accent, #3b82f6);
+}
+
+.saveBtn {
+  background: #16a34a;
+  color: #fff;
+  border-color: #16a34a;
 }
 
 .status {
@@ -88,15 +97,4 @@
 .actions {
   display: flex;
   gap: 8px;
-}
-
-.saveBtn {
-  flex: 1;
-  background: #16a34a;
-  color: #fff;
-  border-color: #16a34a;
-}
-
-.actions .btn-action:last-child {
-  flex: 1;
 }
