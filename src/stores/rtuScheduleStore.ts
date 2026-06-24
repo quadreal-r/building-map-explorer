@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { rcbReplacementYearKey } from '@/lib/costEstimator'
 import { importEquipmentSchedule } from '@/lib/equipmentSheet'
 import type { Building } from '@/types/domain'
+import bundledSchedule from '../../supabase/data/rtu-schedule.json'
 
 const STORAGE_KEY = 'bme-rtu-schedule'
 
@@ -40,22 +41,28 @@ export const useRtuScheduleStore = create<RtuScheduleState>((set, get) => ({
 
   load: async () => {
     const stored = localStorage.getItem(STORAGE_KEY)
-    if (!stored) {
-      set({ loaded: true })
-      return
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as StoredRtuSchedule
+        set({
+          replacementYears: parsed.replacementYears ?? {},
+          notes: parsed.notes ?? {},
+          sourceFile: parsed.sourceFile ?? null,
+          loaded: true,
+        })
+        return
+      } catch {
+        /* fall through to bundled defaults */
+      }
     }
 
-    try {
-      const parsed = JSON.parse(stored) as StoredRtuSchedule
-      set({
-        replacementYears: parsed.replacementYears ?? {},
-        notes: parsed.notes ?? {},
-        sourceFile: parsed.sourceFile ?? null,
-        loaded: true,
-      })
-    } catch {
-      set({ loaded: true })
-    }
+    const bundled = bundledSchedule as StoredRtuSchedule
+    set({
+      replacementYears: bundled.replacementYears ?? {},
+      notes: bundled.notes ?? {},
+      sourceFile: bundled.sourceFile ?? null,
+      loaded: true,
+    })
   },
 
   applyEquipmentImport: (result, sourceFile) => {

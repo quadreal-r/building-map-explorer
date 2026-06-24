@@ -3,6 +3,7 @@ import {
   DEFAULT_RTU_PRICING_ROWS,
   DEFAULT_RTU_PRICING_VERSION,
 } from '@/lib/rtuPricing.defaults'
+import bundledPricing from '../../supabase/data/rtu-pricing-rows.json'
 import {
   DEFAULT_RCB_PRICING,
   type RcbPricingTable,
@@ -85,14 +86,26 @@ export const useRtuPricingStore = create<RtuPricingState>((set, get) => ({
       }
     }
 
-    set({ loaded: true })
+    const rows = cloneRows(
+      bundledPricing.rows?.length ? bundledPricing.rows : DEFAULT_RTU_PRICING_ROWS,
+    )
+    set({
+      rows,
+      version: bundledPricing.version ?? DEFAULT_RTU_PRICING_VERSION,
+      sourceFile: null,
+      pricingTable: buildPricingTable(rows),
+      revision: get().revision + 1,
+      loaded: true,
+    })
   },
 
   resetToDefaults: () => {
-    const rows = cloneRows(DEFAULT_RTU_PRICING_ROWS)
+    const rows = cloneRows(
+      bundledPricing.rows?.length ? bundledPricing.rows : DEFAULT_RTU_PRICING_ROWS,
+    )
     set({
       rows,
-      version: DEFAULT_RTU_PRICING_VERSION,
+      version: bundledPricing.version ?? DEFAULT_RTU_PRICING_VERSION,
       sourceFile: null,
       pricingTable: buildPricingTable(rows),
       revision: get().revision + 1,

@@ -7,7 +7,8 @@ import { Modal } from '@/components/Modal/Modal'
 import { APP_THEMES } from '@/lib/themes'
 import { collectFilterOptions } from '@/lib/filters'
 import { saveDatabase } from '@/lib/saveDatabase'
-import { showToastSuccess } from '@/lib/toast'
+import { collectDeployBundle, downloadDeployBundle } from '@/lib/deployBundle'
+import { showToastError, showToastSuccess } from '@/lib/toast'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import type { PortfolioData } from '@/types/domain'
@@ -120,6 +121,19 @@ function SettingsForm({
         handleClose()
       }
     })
+  }
+
+  const handleExportDeployBundle = () => {
+    setUploadBusy(true)
+    void collectDeployBundle(portfolio)
+      .then((bundle) => {
+        downloadDeployBundle(bundle)
+        showToastSuccess('✓ Deploy bundle downloaded')
+      })
+      .catch((e) => {
+        showToastError(e instanceof Error ? e.message : 'Export failed')
+      })
+      .finally(() => setUploadBusy(false))
   }
 
   return (
@@ -249,6 +263,21 @@ function SettingsForm({
             >
               Add polygon
             </button>
+            <button
+              type="button"
+              className="btn-action btn-save"
+              style={{ width: '100%', justifyContent: 'flex-start' }}
+              onClick={handleExportDeployBundle}
+              disabled={uploadBusy}
+              title="Download portfolio, RTU schedule, pricing, and IndexedDB pictures for GitHub deploy"
+            >
+              Export data for GitHub deploy
+            </button>
+            <p className={styles.hint}>
+              Downloads <code>deploy-bundle.json</code> from this browser (local dev is source of
+              truth). Copy it into the project and run{' '}
+              <code>npm run apply-deploy-bundle</code>, then commit and push.
+            </p>
             <button
               type="button"
               className="btn-action btn-save"

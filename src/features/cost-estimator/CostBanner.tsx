@@ -56,17 +56,16 @@ export function CostBanner({ buildings }: CostBannerProps) {
   const pricingTable = useRtuPricingStore((s) => s.pricingTable)
   const pricingRevision = useRtuPricingStore((s) => s.revision)
 
-  const result = useMemo(
-    () =>
-      rcbCompute(buildings, {
-        basis,
-        year,
-        threshold,
-        scope: scopeLabel,
-        pricingTable,
-      }),
-    [buildings, basis, year, threshold, scopeLabel, pricingTable, pricingRevision],
-  )
+  const result = useMemo(() => {
+    void pricingRevision
+    return rcbCompute(buildings, {
+      basis,
+      year,
+      threshold,
+      scope: scopeLabel,
+      pricingTable,
+    })
+  }, [buildings, basis, year, threshold, scopeLabel, pricingTable, pricingRevision])
 
   const yearOptions = useMemo(
     () => rcbScheduleYearOptions(basis, year, replacementYearByRtu),
@@ -82,10 +81,10 @@ export function CostBanner({ buildings }: CostBannerProps) {
     setRtuReplacementYear(address, rtu, replacementYear, year)
   }
 
-  const projection = useMemo(
-    () => rcbProjection(result, pricingTable),
-    [result, pricingTable, pricingRevision],
-  )
+  const projection = useMemo(() => {
+    void pricingRevision
+    return rcbProjection(result, pricingTable)
+  }, [result, pricingTable, pricingRevision])
 
   const sortedBuildings = useMemo(() => {
     const rows = [...result.perBldg]
@@ -107,6 +106,7 @@ export function CostBanner({ buildings }: CostBannerProps) {
   )
 
   const buildingView = useMemo(() => {
+    void pricingRevision
     if (!selectedBuilding) return null
 
     const base = rcbLineItemsForBuilding(result, selectedBuilding.address)

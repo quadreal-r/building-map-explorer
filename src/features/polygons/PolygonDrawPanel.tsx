@@ -52,7 +52,7 @@ export function PolygonDrawPanel({ open, onClose, map, onSaved }: PolygonDrawPan
     if (!open) {
       useUiStore.getState().setPolygonDrawMode(false)
     }
-  }, [open])
+  }, [open, reset])
 
   useEffect(() => {
     useUiStore.getState().setPolygonDrawMode(phase === 'drawing')

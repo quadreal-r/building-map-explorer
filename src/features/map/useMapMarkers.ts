@@ -987,6 +987,8 @@ export function useMapMarkers({
     commitGroupDrag,
     refreshDragSelectionStyles,
     dragMode,
+    clearActiveRtuPictures,
+    setLastDragUndo,
   ])
 
   useEffect(() => {

@@ -153,7 +153,7 @@ export function RtuPictureViewer({
     return () => {
       active = false
     }
-  }, [open, current?.fullUrl, current?.fileName])
+  }, [open, current])
 
   useEffect(() => {
     if (!open) return

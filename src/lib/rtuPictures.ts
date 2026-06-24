@@ -139,6 +139,11 @@ async function idbGetAllRows(): Promise<StoredRtuPictureRow[]> {
   })
 }
 
+/** All IndexedDB picture rows (for deploy bundle export). */
+export async function exportIndexedDbPictureRows(): Promise<StoredRtuPictureRow[]> {
+  return idbGetAllRows()
+}
+
 /** Picture count per RTU key (`buildingAddress|rtuName`), merging manifest + IndexedDB by index. */
 export async function getRtuPictureCountMap(): Promise<Map<string, number>> {
   const manifest = await loadRtuPictureManifest()

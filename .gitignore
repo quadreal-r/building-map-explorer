@@ -14,6 +14,6 @@ supabase/.temp
 supabase/.seed-chunks
 supabase/seed-chunk*.sql
 supabase/seed-part*.sql
-public/database/rtu-pictures/*
-!public/database/rtu-pictures/manifest.json
-!public/database/rtu-pictures/.gitkeep
+# Large one-off export from local dev — apply with scripts/apply-deploy-bundle.mjs instead
+deploy-bundle.json
+supabase/data/deploy-bundle.json

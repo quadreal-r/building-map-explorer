@@ -29,6 +29,8 @@ function devGithubPagesRedirect(): Plugin {
   }
 }
 
+const projectRoot = path.resolve(__dirname)
+
 export default defineConfig(({ command }) => ({
   plugins: [react(), ...(command === 'serve' ? [devGithubPagesRedirect()] : [])],
   // GitHub Pages needs the subpath; local dev is simpler at http://localhost:5173/
@@ -44,5 +46,15 @@ export default defineConfig(({ command }) => ({
   },
   server: {
     open: '/',
+    watch: {
+      // OneDrive can touch .env / config files and trigger restart storms.
+      ignored: [
+        '**/vite.config.ts',
+        '**/.env*',
+        '**/dist/**',
+        '**/dist-portable/**',
+        (watchPath: string) => !path.resolve(watchPath).startsWith(projectRoot),
+      ],
+    },
   },
 }))
