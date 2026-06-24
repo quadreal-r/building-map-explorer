@@ -308,12 +308,10 @@ export function buildRtuPicturesHtml(
   const safeIndex = total ? Math.min(Math.max(pictureIndex, 0), total - 1) : 0
   const current = total ? pictures[safeIndex]! : null
 
-  let body = ''
-  if (!total) {
-    body = `<div class="iw-pictures-empty">No pictures yet.</div>
+  const body = !total
+    ? `<div class="iw-pictures-empty">No pictures yet.</div>
       <p class="iw-pictures-hint">Choose images from your computer to attach to this RTU.</p>`
-  } else {
-    body = `<div class="iw-pictures-view">
+    : `<div class="iw-pictures-view">
       <button type="button" class="iw-pictures-nav" data-iw-action="picture-prev" title="Previous picture"${total <= 1 ? ' disabled' : ''}>‹</button>
       <div class="iw-pictures-frame">
         <button type="button" class="iw-pictures-link" data-iw-action="picture-open-viewer" title="Open full size in viewer">
@@ -326,7 +324,6 @@ export function buildRtuPicturesHtml(
       <span class="iw-pictures-counter">${safeIndex + 1} / ${total}</span>
       <span class="iw-pictures-name">${escapeHtml(current!.fileName)}</span>
     </div>`
-  }
 
   const addBtn = `<button type="button" class="iw-pic-btn" data-iw-action="picture-add" title="Add pictures from disk">＋ Add pictures</button>`
   const backBtn = `<button type="button" class="iw-back-btn" data-iw-action="pictures-back" title="Back to RTU details">← Details</button>`

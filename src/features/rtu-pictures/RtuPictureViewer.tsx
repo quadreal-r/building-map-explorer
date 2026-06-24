@@ -72,6 +72,14 @@ export function RtuPictureViewer({
   const [textInput, setTextInput] = useState('')
   const [isEdited, setIsEdited] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [frameMetrics, setFrameMetrics] = useState<{
+    dw: number
+    dh: number
+    ox: number
+    oy: number
+    nw: number
+    nh: number
+  } | null>(null)
 
   const resetEdits = useCallback(() => {
     setDisplayUrl(null)
@@ -88,17 +96,73 @@ export function RtuPictureViewer({
     setMode('view')
   }, [])
 
+  const syncFrameMetrics = useCallback(() => {
+    const frame = frameRef.current
+    const imgEl = imgRef.current
+    if (!frame || !imgEl?.naturalWidth) {
+      setFrameMetrics(null)
+      return
+    }
+    const fw = frame.clientWidth
+    const fh = frame.clientHeight
+    const ir = imgEl.naturalWidth / imgEl.naturalHeight
+    const fr = fw / fh
+    let dw: number
+    let dh: number
+    if (ir > fr) {
+      dw = fw
+      dh = fw / ir
+    } else {
+      dh = fh
+      dw = fh * ir
+    }
+    const ox = (fw - dw) / 2
+    const oy = (fh - dh) / 2
+    setFrameMetrics({
+      dw,
+      dh,
+      ox,
+      oy,
+      nw: imgEl.naturalWidth,
+      nh: imgEl.naturalHeight,
+    })
+  }, [])
+
   useEffect(() => {
     if (!open || !current) return
-    resetEdits()
+    let active = true
+    /* eslint-disable react-hooks/set-state-in-effect -- reset editor state when switching pictures */
+    setDisplayUrl(null)
+    setIsEdited(false)
+    setCropRect(null)
+    setTextPlacement(null)
+    setTextInput('')
+    setMode('view')
+    setFrameMetrics(null)
     setLoading(true)
+    /* eslint-enable react-hooks/set-state-in-effect */
     void loadImage(current.fullUrl)
       .then((img) => {
+        if (!active) return
         setSourceImage(img)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
-  }, [open, current?.fullUrl, current?.fileName, resetEdits])
+      .catch(() => {
+        if (active) setLoading(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [open, current?.fullUrl, current?.fileName])
+
+  useEffect(() => {
+    if (!open) return
+    const frame = frameRef.current
+    if (!frame) return
+    const observer = new ResizeObserver(() => syncFrameMetrics())
+    observer.observe(frame)
+    return () => observer.disconnect()
+  }, [open, syncFrameMetrics, loading, displayUrl, mode])
 
   useEffect(() => {
     if (!open) return
@@ -281,10 +345,9 @@ export function RtuPictureViewer({
   if (!open || !current) return null
 
   const imageSrc = displayUrl ?? current.fullUrl
-  const metrics = getDisplayMetrics()
   const displayFontSize =
-    metrics && imgRef.current?.naturalWidth
-      ? textFontSize(imgRef.current.naturalWidth) * (metrics.dw / metrics.nw)
+    frameMetrics && sourceImage?.naturalWidth
+      ? textFontSize(sourceImage.naturalWidth) * (frameMetrics.dw / frameMetrics.nw)
       : 16
 
   return (
@@ -319,6 +382,7 @@ export function RtuPictureViewer({
               src={imageSrc}
               alt={current.fileName}
               draggable={false}
+              onLoad={() => syncFrameMetrics()}
             />
             {mode === 'crop' && cropRect && cropRect.w > 0 && cropRect.h > 0 ? (
               <div

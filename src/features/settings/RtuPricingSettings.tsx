@@ -5,7 +5,6 @@ import {
   RTU_PRICING_COLUMN_LABELS,
   RTU_PRICING_COMPONENT_FIELDS,
   RTU_PRICING_MONEY_FIELDS,
-  type RtuPricingComponentField,
 } from '@/lib/rtuPricingSheet'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import { useRtuPricingStore } from '@/stores/rtuPricingStore'

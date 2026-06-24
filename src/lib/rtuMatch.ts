@@ -92,7 +92,8 @@ export function normalizeRtuName(name: string): string {
     .replace(/\s+/g, ' ')
 
   const match = text.match(/^rtu\s*[-–]?\s*(\d+[a-z]?)/i)
-  if (match) return `rtu ${match[1].toLowerCase()}`
+  const unitId = match?.[1]
+  if (unitId) return `rtu ${unitId.toLowerCase()}`
 
   return text
 }

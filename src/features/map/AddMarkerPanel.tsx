@@ -85,12 +85,6 @@ function AddMarkerForm({
   const [error, setError] = useState<string | null>(null)
   const previewMarkerRef = useRef<google.maps.Marker | null>(null)
   const dragListenerRef = useRef<google.maps.MapsEventListener | null>(null)
-  const mapRef = useRef(map)
-  const phaseRef = useRef(phase)
-  const onMapClickPlaceRef = useRef<(lat: number, lng: number) => void>(() => {})
-
-  mapRef.current = map
-  phaseRef.current = phase
 
   const needsBuilding = category === 'rtu'
   const layerKey: LayerKey = category === 'rtu' ? 'rtu' : category
@@ -115,23 +109,23 @@ function AddMarkerForm({
     onClose()
   }
 
-  onMapClickPlaceRef.current = (lat: number, lng: number) => {
-    if (phaseRef.current !== 'awaitMapClick') return
-    setError(null)
-    const coords = { lat, lng }
-    setPosition(coords)
-    setPhase('placing')
-    const activeMap = mapRef.current
-    if (activeMap) {
-      ensureDetailMarkerZoom(activeMap)
-    }
-  }
+  const onMapClickPlace = useCallback(
+    (lat: number, lng: number) => {
+      if (phase !== 'awaitMapClick') return
+      setError(null)
+      const coords = { lat, lng }
+      setPosition(coords)
+      setPhase('placing')
+      if (map) {
+        ensureDetailMarkerZoom(map)
+      }
+    },
+    [map, phase],
+  )
 
   const registerMapClickHandler = useCallback(() => {
-    setMapAddMarkerPickHandler((lat, lng) => {
-      onMapClickPlaceRef.current(lat, lng)
-    })
-  }, [])
+    setMapAddMarkerPickHandler(onMapClickPlace)
+  }, [onMapClickPlace])
 
   useEffect(() => {
     const active = phase === 'awaitMapClick' || phase === 'placing'

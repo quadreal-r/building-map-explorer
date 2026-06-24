@@ -590,30 +590,23 @@ export function useMapMarkers({
     if (!map) return
     const counts = await getRtuPictureCountMap()
 
-    for (const dm of detailMarkersRef.current) {
+    detailMarkersRef.current = detailMarkersRef.current.map((dm) => {
       if (dm.type !== 'rtu' || !dm.building) {
-        if (dm.picBadge) {
-          dm.picBadge.setMap(null)
-          dm.picBadge = undefined
-        }
-        dm.pictureCount = 0
-        continue
+        if (dm.picBadge) dm.picBadge.setMap(null)
+        return { ...dm, picBadge: undefined, pictureCount: 0 }
       }
 
       const key = rtuPictureKey(dm.building.address, dm.data.name)
       const count = counts.get(key) ?? 0
-      dm.pictureCount = count
 
       if (count <= 0) {
-        if (dm.picBadge) {
-          dm.picBadge.setMap(null)
-          dm.picBadge = undefined
-        }
-        continue
+        if (dm.picBadge) dm.picBadge.setMap(null)
+        return { ...dm, pictureCount: count, picBadge: undefined }
       }
 
       const pos = dm.marker.getPosition()
-      if (!pos) continue
+      if (!pos) return { ...dm, pictureCount: count }
+
       const lat = pos.lat()
       const lng = pos.lng()
 
@@ -626,10 +619,15 @@ export function useMapMarkers({
           fontFamily: 'Inter,sans-serif',
           className: 'rtu-pic-badge',
         })
-      } else {
-        dm.picBadge = createRtuPicBadgeMarker(map, lat, lng, count)
+        return { ...dm, pictureCount: count }
       }
-    }
+
+      return {
+        ...dm,
+        pictureCount: count,
+        picBadge: createRtuPicBadgeMarker(map, lat, lng, count),
+      }
+    })
 
     refreshDetailVisibility()
   }, [map, refreshDetailVisibility])
@@ -1065,7 +1063,10 @@ export function useMapMarkers({
   const visibleAddressesRef = useRef('')
   const lastFocusedBuildingRef = useRef<string | null>(null)
   const openBuildingInfoRef = useRef(openBuildingInfo)
-  openBuildingInfoRef.current = openBuildingInfo
+
+  useEffect(() => {
+    openBuildingInfoRef.current = openBuildingInfo
+  })
 
   useEffect(() => {
     const q = search.trim()

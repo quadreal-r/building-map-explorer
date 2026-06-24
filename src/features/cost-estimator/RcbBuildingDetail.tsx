@@ -88,10 +88,8 @@ export function RcbBuildingDetail({
   const getNotes = useRtuScheduleStore((s) => s.getNotes)
 
   const displayedItems = useMemo(() => {
-    let rows = [...viewSummary.displayed]
     const { key, dir } = sort
-    rows.sort((a, b) => compareRtuRows(a, b, key) * dir)
-    return rows
+    return [...viewSummary.displayed].sort((a, b) => compareRtuRows(a, b, key) * dir)
   }, [viewSummary.displayed, sort])
 
   const tierRows = useMemo(() => rcbTierBreakdownForItems(displayedItems), [displayedItems])
