@@ -4,6 +4,8 @@ dist-portable
 dist-ssr
 public/portable-template.html
 .tmp-xlsx-inspect
+.tmp-*
+supabase/seed-query.json
 *.local
 .env
 .env.local

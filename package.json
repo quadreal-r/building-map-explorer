@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:onedrive": "scripts\\start-dev.cmd",
     "build": "tsc -b && vite build && npm run build:portable",
     "build:portable": "node scripts/build-portable-template.mjs",
     "preview": "vite preview",
