@@ -33,13 +33,24 @@ export function afterMapViewChange(map: google.maps.Map): void {
   })
 }
 
+export interface PanToOptions {
+  /** Only call setZoom when the map is currently zoomed out farther than the target. */
+  onlyZoomIn?: boolean
+}
+
 export function panToPreserveRotation(
   map: google.maps.Map,
   center: google.maps.LatLngLiteral,
   zoom?: number,
+  options?: PanToOptions,
 ): void {
   map.panTo(center)
-  if (zoom != null) map.setZoom(zoom)
+  if (zoom != null) {
+    const current = map.getZoom() ?? 0
+    if (!options?.onlyZoomIn || current < zoom) {
+      map.setZoom(zoom)
+    }
+  }
   afterMapViewChange(map)
 }
 

@@ -40,7 +40,7 @@
         "lng": -79.6658799
       },
       {
-        "name": "RTU-06 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-06 Hybrid",
         "desc": "Building: 1850 Derry Road East\r\nSystem: Roof Top Units\r\nDescription: RTU-06 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: DSK180AWSAH02F0D0A1B✓\r\nSerial: 255010845D✓\r\nMake: TRANE\r\nDate Installed: Jan 15, 2026\r\nHeating Capacity: 400,000 BTU\r\nCooling Capacity: 180,000 BTU (15 Ton)\r\nR-454B Refrigerant",
         "lat": 43.6820286,
         "lng": -79.6656702
@@ -766,13 +766,13 @@
         "lng": -79.6488633
       },
       {
-        "name": "RTU-02 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-02 Hybrid",
         "desc": "Building: 1840 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-02 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: LDT092H5EH2J✓\r\nSerial: 5625K04328✓\r\nMake: LENNOX\r\nDate Installed: Nov 01, 2025\r\nHeating Capacity 180,000 BTU's\r\nCooling Capacity: 90,000 BTU (7.5 Ton)",
         "lat": 43.6701722,
         "lng": -79.6499152
       },
       {
-        "name": "RTU-03 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-03 Hybrid",
         "desc": "Building: 1840 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-03 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: LDT092H5EH2J✓\r\nSerial: 5625K03243✓\r\nMake: LENNOX\r\nDate Installed: Nov 01, 2025\r\nHeating Capacity 180,000 BTU's\r\nCooling Capacity: 90,000 BTU (7.5 Ton)",
         "lat": 43.6702218,
         "lng": -79.6498594
@@ -1000,7 +1000,7 @@
         "lng": -79.6543705
       },
       {
-        "name": "RTU-06 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-06 Hybrid",
         "desc": "Building: 1495 Bonhill Road\r\nSystem: Roof Top Units\r\nDescription: RTU-06 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 4, 5, 6, 7, 8\r\nModel: LDT036H5EB1P\r\nSerial: 5625A02961\r\nMake: LENNOX\r\nDate Installed: Mar 19, 2025\r\nHeating capacity: 60,000 BTU's\r\n(2 ton)\r\n$30,618 Replaced by Springbank in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.6616514,
         "lng": -79.654432
@@ -1105,13 +1105,13 @@
         "lng": -79.6547158
       },
       {
-        "name": "RTU-16A Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-16A Hybrid",
         "desc": "Building: 1535 Meyerside\r\nSystem: Roof Top Units\r\nDescription: RTU-16A Hybrid/Dual Fuel Heat Pump\r\nSuite: -\r\nModel: LDT036H5EQ1P✓\r\nSerial: 5625L03877✓\r\nMake: LENNOX\r\nDate Installed: Dec 01, 2025\r\nHeating Capacity 70,000 BTU's\r\nCooling Capacity: 30,000 BTU (2.5 Ton)",
         "lat": 43.6612983,
         "lng": -79.6547776
       },
       {
-        "name": "RTU-15 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-15 Hybrid",
         "desc": "Building: 1535 Meyerside\r\nSystem: Roof Top Units\r\nDescription: RTU-15 Hybrid/Dual Fuel Heat Pump\r\nSuite: -\r\nModel: LDT036H5EQ1P\r\nSerial: 5625A00635\r\nMake: LENNOX\r\nDate Installed: Mar 19, 2025\r\nHeating Capacity: 70,000 BTU's\r\nCooling Capacity: 30,000 BTU (2.5 Ton)",
         "lat": 43.6612482,
         "lng": -79.6547049
@@ -1123,7 +1123,7 @@
         "lng": -79.6545927
       },
       {
-        "name": "RTU-13 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-13 Hybrid",
         "desc": "Building: 1535 Meyerside\r\nSystem: Roof Top Units\r\nDescription: RTU-13 Hybrid/Dual Fuel Heat Pump\r\nSuite: Unit 13, 14\r\nModel: LDT036H5EQ1Y\r\nSerial: 5625A00641\r\nMake: LENNOX\r\nDate Installed: Mar 19, 2025\r\nHeating Capacity 80,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\n$20,828 Replaced by Springbank in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.6611558,
         "lng": -79.6545175
@@ -1581,7 +1581,7 @@
         "lng": -79.6486566
       },
       {
-        "name": "RTU-03 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-03 Hybrid",
         "desc": "Building: 1745 Meyerside\r\nSystem: Roof Top Units\r\nDescription: RTU-03 Hybrid/Dual Fuel Heat Pump\r\nSuite: -\r\nModel: LDT036H5EB1P✓\r\nSerial: 5625L01477✓\r\nMake: LENNOX\r\nDate Installed: Dec 01, 2025\r\nHeating Capacity 60,000 BTU's\r\nCooling Capacity: 24,000 BTU (2 Ton)",
         "lat": 43.6658028,
         "lng": -79.6487551
@@ -1611,7 +1611,7 @@
         "lng": -79.6490003
       },
       {
-        "name": "RTU-08 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-08 Hybrid",
         "desc": "Building: 1745 Meyerside\r\nSystem: Roof Top Units\r\nDescription: RTU-08 Hybrid/Dual Fuel Heat Pump\r\nSuite: -\r\nModel: Pending\r\nSerial: Pending\r\nMake: LENNOX\r\nDate Installed: Nov 19, 2025\r\nHeating Capacity 105,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)",
         "lat": 43.6660137,
         "lng": -79.6490828
@@ -2310,7 +2310,7 @@
         "lng": -79.6559616
       },
       {
-        "name": "RTU-01 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-01 Hybrid",
         "desc": "Building: 1550 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-01 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: LDT036H4EQ1J\r\nSerial: 5624L02272\r\nMake: LENNOX\r\nDate Installed: Mar 19, 2025\r\nHeating Capacity: 80,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\n$20,828 Replaced by Springbank in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.6648719,
         "lng": -79.6560388
@@ -2653,7 +2653,7 @@
         "lng": -79.6570655
       },
       {
-        "name": "RTU- 06 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 06 Hybrid",
         "desc": "Building: 7311 Kimbel St.\r\nSystem: Roof Top Units\r\nDescription: RTU 06 Hybrid/Dual Fuel Heat Pump\r\nSuite: -\r\nModel: LDT048H5EX1J\r\nSerial: 5625A02922\r\nMake: LENNOX\r\nDate Installed: Feb 27, 2025\r\nCooling Capacity: 48,000 BTU (4 Ton)\r\nHeating Capacity: 150,000 BTU\r\nTo be replaced in 2024 by S.Bank at $24,000\r\nHybrid/Dual Fuel Heat Pump",
         "lat": 43.7031851,
         "lng": -79.6570351
@@ -3490,7 +3490,7 @@
         "lng": -79.383599
       },
       {
-        "name": "RTU- 07 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 07 Hybrid",
         "desc": "Building: 45 Mural Street\r\nSystem: Roof Top Units\r\nDescription: RTU 07 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 5\r\nModel: LDT036H5EQ1J✓\r\nSerial: 5625K03054✓\r\nMake: LENNOX\r\nDate Installed: Nov 18, 2025\r\nHeating Capacity 100,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)",
         "lat": 43.8600987,
         "lng": -79.3837461
@@ -3577,7 +3577,7 @@
     "manager": "Sylvia Zwierkowski",
     "rtus": [
       {
-        "name": "RTU- 04 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 04 Hybrid",
         "desc": "Building: 50 Leek Crescent\r\nSystem: Roof Top Units\r\nDescription: RTU 04 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: DSJ180AWS0H2D0E0C1B3✓\r\nSerial: 244510041D✓\r\nMake: TRANE\r\nDate Installed: Feb 06, 2025\r\nHeating Capacity: 400,000 BTU's\r\nCooling Capacity: 180,000 BTU (15 Ton)\r\nCEAR:\r\n$64,082 To be replaced by LPI in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.8624701,
         "lng": -79.3761601
@@ -3607,13 +3607,13 @@
         "lng": -79.3761167
       },
       {
-        "name": "RTU- 06 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 06 Hybrid",
         "desc": "Building: 50 Leek Crescent\r\nSystem: Roof Top Units\r\nDescription: RTU 06 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: LDT120H5EH1J✓\r\nSerial: 5625G01064✓\r\nMake: LENNOX\r\nDate Installed: Dec 08, 2025\r\nHeating Capacity 240,000 BTU's\r\nCooling Capacity: 120,000 BTU (10 Ton)",
         "lat": 43.8626678,
         "lng": -79.3762401
       },
       {
-        "name": "RTU- 07 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 07 Hybrid",
         "desc": "Building: 50 Leek Crescent\r\nSystem: Roof Top Units\r\nDescription: RTU 07 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: LDT180H5MM1J✓\r\nSerial: 5625L02346✓\r\nMake: LENNOX\r\nDate Installed: Dec 08, 2025\r\nHeating Capacity 360,000 BTU's\r\nCooling Capacity: 180,000 BTU (15 Ton)",
         "lat": 43.8626943,
         "lng": -79.3761279
@@ -3718,13 +3718,13 @@
         "lng": -79.3757428
       },
       {
-        "name": "RTU- 06 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 06 Hybrid",
         "desc": "Building: 56 Leek Crescent\r\nSystem: Roof Top Units\r\nDescription: RTU 06 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 1\r\nModel: LDT060H5EX1J✓\r\nSerial: 5625L03604✓\r\nMake: LENNOX✓\r\nDate Installed: Jan 20, 2026\r\nHeating Capacity 140,000 BTU's✓\r\nCooling Capacity: 60,000 BTU (5 Ton)✓",
         "lat": 43.8615586,
         "lng": -79.3758229
       },
       {
-        "name": "RTU- 04 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 04 Hybrid",
         "desc": "Building: 56 Leek Crescent\r\nSystem: Roof Top Units\r\nDescription: RTU 04 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 1\r\nModel: LDT060H5EX1J✓\r\nSerial: 5625L03605✓\r\nMake: LENNOX✓\r\nDate Installed: Jan 20, 2026\r\nHeating Capacity 140,000 BTU's✓\r\nCooling Capacity: 60,000 BTU (5 Ton)✓",
         "lat": 43.8615203,
         "lng": -79.3758282
@@ -3823,19 +3823,19 @@
         "lng": -79.3799527
       },
       {
-        "name": "RTU- 06 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 06 Hybrid",
         "desc": "Building: 85 Leek Crescent\r\nSystem: Roof Top Units\r\nDescription: RTU 06 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: LDT092H5EH2J✓\r\nSerial: 5625L03546✓\r\nMake: LENNOX\r\nDate Installed: Dec 11, 2025\r\nHeating Capacity 180,000 BTU's\r\nCooling Capacity: 84,000 BTU (7 Ton)",
         "lat": 43.8611859,
         "lng": -79.3799153
       },
       {
-        "name": "RTU- 07 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 07 Hybrid",
         "desc": "Building: 85 Leek Crescent\r\nSystem: Roof Top Units\r\nDescription: RTU 07 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: LDT092H5EH2J✓\r\nSerial: 5625L03517✓\r\nMake: LENNOX\r\nDate Installed: Dec 11, 2025\r\nHeating Capacity 180,000 BTU's\r\nCooling Capacity: 84,000 BTU (7 Ton)",
         "lat": 43.8611985,
         "lng": -79.3799624
       },
       {
-        "name": "RTU- 08 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 08 Hybrid",
         "desc": "Building: 85 Leek Crescent\r\nSystem: Roof Top Units\r\nDescription: RTU 08 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: LDT092H5EH2J✓\r\nSerial: 5625L03545✓\r\nMake: LENNOX\r\nDate Installed: Dec 11, 2025\r\nHeating Capacity 180,000 BTU's\r\nCooling Capacity: 84,000 BTU (7 Ton)",
         "lat": 43.8612877,
         "lng": -79.3799411
@@ -4558,7 +4558,7 @@
         "lng": -79.6725192
       },
       {
-        "name": "RTU- 02 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 02 Hybrid",
         "desc": "Building: 6150 Kennedy Road\r\nSystem: Roof Top Units\r\nDescription: RTU 02 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 2\r\nModel: LDT048H4EX1J✓\r\nSerial: 5624L03723✓\r\nMake: LENNOX\r\nDate Installed: Dec 20, 2024\r\nHeating Capacity: BTU'S:150,000\r\nCooling Capacity: 48,000 BTU (4 Ton)\r\n$33,473 Replaced by Springbank in 2024",
         "lat": 43.6381647,
         "lng": -79.6724537
@@ -4600,7 +4600,7 @@
         "lng": -79.6727085
       },
       {
-        "name": "RTU- 09 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 09 Hybrid",
         "desc": "Building: 6150 Kennedy Road\r\nSystem: Roof Top Units\r\nDescription: RTU 09 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 4\r\nModel: LDT036H4EQ1Y✓\r\nSerial: 5624M00571✓\r\nMake: LENNOX\r\nDate Installed: Dec 20, 2024\r\nHeating Capacity: BTU'S:108,000\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\n$31,606 Replaced by Springbank in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.6375527,
         "lng": -79.6727844
@@ -4648,7 +4648,7 @@
         "lng": -79.6737529
       },
       {
-        "name": "RTU- 17 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 17 Hybrid",
         "desc": "Building: 6150 Kennedy Road\r\nSystem: Roof Top Units\r\nDescription: RTU 17 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 10\r\nModel: LDT036H4EQ1Y✓\r\nSerial: 5624M00570✓\r\nMake: LENNOX\r\nDate Installed: Dec 20, 2024\r\nHeating Capacity: BTU'S:108,000\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\n$31,606 Replaced by Springbank in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.637077,
         "lng": -79.6738015
@@ -4846,7 +4846,7 @@
     "manager": "Maia Krasowski",
     "rtus": [
       {
-        "name": "RTU-08 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-08 Hybrid",
         "desc": "Building: 6175 Kenway Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-08 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: LDT036H5EQ1P✓\r\nSerial: 5626C03162✓\r\nMake: LENNOX\r\nDate Installed: Mar 27, 2026\r\nHeating Capacity:. BTU'S:70,000\r\nCooling Capacity: 30,000 BTU (3 Ton)",
         "lat": 43.6370679,
         "lng": -79.6745922
@@ -5848,13 +5848,13 @@
         "lng": -79.743509
       },
       {
-        "name": "RTU- 16 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 16 Hybrid",
         "desc": "Building: 6975 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU 16 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 4-5\r\nModel: DSJ240AWS0H02D0E0C\r\nSerial: 244610905D\r\nMake: TRANE\r\nDate Installed: Dec 16, 2024\r\nHeating Capacity BTU 400,000\r\n- Cooling Capacity: 240,000 BTU (20 Ton)\r\n$74,401 Replaced by LPI in 2024\r\n(dual-fuel hybrid heat pump)\r\nFilter: 20X30X2 (4)\r\n20X24X2 (4)\r\nBelt: D.D",
         "lat": 43.6142494,
         "lng": -79.7433601
       },
       {
-        "name": "RTU- 15 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 15 Hybrid",
         "desc": "Building: 6975 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU 15 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 4-5\r\nModel: DSJ240AWS0H02D0E0C\r\nSerial: 244810147D\r\nMake: TRANE\r\nDate Installed: Dec 16, 2024\r\nHeating Capacity BTU 400,000\r\n- Cooling Capacity: 240,000 BTU (20 Ton)\r\n$74,398 Replaced by LPI in 2024\r\n(dual-fuel hybrid heat pump)\r\nFilter: 20X30X2 (4)\r\n20X24X2 (4)\r\nBelt: D.D",
         "lat": 43.614186,
         "lng": -79.7434201
@@ -5878,7 +5878,7 @@
         "lng": -79.7430136
       },
       {
-        "name": "RTU- 13 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 13 Hybrid",
         "desc": "Building: 6975 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU 13 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 4-5\r\nModel: DHC060HWRHA2FD0E1C\r\nSerial: 244513080L\r\nMake: TRANE\r\nDate Installed: Dec 16, 2024\r\nHeating Capacity BTU 150,000\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\n$40,108 Replaced by LPI in 2024\r\n(dual-fuel hybrid heat pump)\r\nFilter: 16X25X2 (4)\r\nBelt: D.D",
         "lat": 43.6140142,
         "lng": -79.7430302
@@ -5929,7 +5929,7 @@
     "manager": "Maia Krasowski",
     "rtus": [
       {
-        "name": "RTU-01 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-01 Hybrid",
         "desc": "Building: 6990 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU-01 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 1\r\nModel: LGX048S5EH1J✓\r\nSerial: 5225H00958✓\r\nMake: LENNOX\r\nDate Installed: Aug 01, 2025\r\nApprox. BTU'S: 120,000\r\n- Cooling Capacity: 48,000 BTU (4 TON)\r\n- THIS UNIT SERVES UNIT 1\r\n- FILTER SIZE 20X25X1 (1)",
         "lat": 43.6128902,
         "lng": -79.7438683
@@ -5947,7 +5947,7 @@
         "lng": -79.7440689
       },
       {
-        "name": "RTU-04 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-04 Hybrid",
         "desc": "Building: 6990 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU-04 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 1\r\nModel: LGX036S5DQ1J✓\r\nSerial: 5225B02160✓\r\nMake: LENNOX\r\nDate Installed: Feb 01, 2025\r\nHeating Capacity BTU 90,000\r\n- Cooling Capacity: 36,000 BTU (3 Ton)\r\n- THIS UNIT SERVES UNIT 1\r\n- FILTER SIZE 16X25X2 (1)",
         "lat": 43.6129095,
         "lng": -79.7442089
@@ -5977,7 +5977,7 @@
         "lng": -79.7446586
       },
       {
-        "name": "RTU-09 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-09 Hybrid",
         "desc": "Building: 6990 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU-09 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 2\r\nModel: LDT120H5EH1J✓\r\nSerial: 5625K02872✓\r\nMake: LENNOX\r\nDate Installed: Nov 01, 2025\r\nHeating Capacity BTU 250,000\r\n- Cooling Capacity: 120,000 BTU (10 TON)\r\n- THIS UNIT SERVES UNIT 2\r\n- FILTER SIZE 20X25X2 (4)\r\n- BELT AX35",
         "lat": 43.6132921,
         "lng": -79.7447713
@@ -6067,7 +6067,7 @@
         "lng": -79.7453499
       },
       {
-        "name": "RTU-24  Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-24  Hybrid",
         "desc": "Building: 6990 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU-24  Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 3\r\nModel: LDT036H5EQ1J✓\r\nSerial: 5625M01784✓\r\nMake: LENNOX\r\nDate Installed: Nov 01, 2025\r\nHeating Capacity BTU 90,000\r\n- Cooling Capacity: 36,000 BTU (3 TON)\r\n- THIS UNIT SERVES UNIT 3\r\n- FILTER SIZE 16X25X1 (1)",
         "lat": 43.6129488,
         "lng": -79.7452021
@@ -6079,7 +6079,7 @@
         "lng": -79.7451291
       },
       {
-        "name": "RTU-26  Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-26  Hybrid",
         "desc": "Building: 6990 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU-26  Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 3\r\nModel: LDT060H5EX1J✓\r\nSerial: 5625H05772✓\r\nMake: LENNOX\r\nDate Installed: Aug 01, 2025\r\nHeating Capacity BTU 120,000\r\n- Cooling Capacity: 60,000 BTU (5 TON)\r\n- THIS UNIT SERVES UNIT 3\r\n- FILTER SIZE 20X25X1 (1)",
         "lat": 43.6130803,
         "lng": -79.7450617
@@ -6274,25 +6274,25 @@
     "manager": "Maia Krasowski",
     "rtus": [
       {
-        "name": "RTU- 03 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 03 Hybrid",
         "desc": "Building: 6911 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU 03 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: DSJ150AWS0H02D0E0C1B3\r\nSerial: 245010148D\r\nMake: TRANE\r\nDate Installed: Feb 24, 2025\r\nHeating Data: 250,000 BTU\r\nCooling Capacity: 150,000 BTU (12.5 Ton)\r\n$43,067 To be replaced by LPI in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.613267,
         "lng": -79.7405964
       },
       {
-        "name": "RTU- 04 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 04 Hybrid",
         "desc": "Building: 6911 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU 04 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: DSJ180AWS0H02D0E0C1B3\r\nSerial: 244911150D\r\nMake: TRANE\r\nDate Installed: Feb 24, 2025\r\nHeating Data: 400,000 BTU\r\nCooling Capacity: 180,000 BTU (15 Ton)\r\n$53,941 To be replaced by LPI in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.6132289,
         "lng": -79.7406088
       },
       {
-        "name": "RTU- 02 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 02 Hybrid",
         "desc": "Building: 6911 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU 02 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: LDT302H5MS1J✓\r\nSerial: 5625L00574✓\r\nMake: LENNOX\r\nDate Installed: Dec 01, 2025\r\nHeating Data: 260,000 BTU\r\nCooling Capacity: 300,000 BTU (25 Ton)",
         "lat": 43.6132929,
         "lng": -79.7406419
       },
       {
-        "name": "RTU- 05 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 05 Hybrid",
         "desc": "Building: 6911 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU 05 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: LDT180H5MS1J✓\r\nSerial: 5625L02345✓\r\nMake: LENNOX\r\nDate Installed: Dec 01, 2025\r\nHeating Data: 260,000 BTU\r\nCooling Capacity: 180,000 BTU (15 Ton)\r\n(AC# 5)",
         "lat": 43.6131999,
         "lng": -79.740656
@@ -6328,7 +6328,7 @@
         "lng": -79.740678
       },
       {
-        "name": "RTU- 01 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 01 Hybrid",
         "desc": "Building: 6911 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU 01 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: LDT180H5MS1J✓\r\nSerial: 5625L02344✓\r\nMake: LENNOX\r\nDate Installed: Dec 01, 2025\r\nHeating Data: 260,000 BTU\r\nCooling Capacity: 180,000 BTU (15 Ton)",
         "lat": 43.6133566,
         "lng": -79.7406724
@@ -6793,7 +6793,7 @@
         "lng": -79.677797
       },
       {
-        "name": "RTU-13 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-13 Hybrid",
         "desc": "Building: 2320 Bristol Circle\r\nSystem: Roof Top Units\r\nDescription: RT13 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 3-8\r\nModel: LDT048H4EX1Y\r\nSerial: 5624L06702\r\nMake: LENNOX\r\nDate Installed: Dec 20, 2024\r\nHeating Capacity :150,000 BTU\r\nCooling Capacity: 48,000 BTU (4 Ton)\r\n$20,882 To be replaced by Springbank in 2024\r\n(dual-fuel hybrid heat pump)\r\nR-410 Refrigerant",
         "lat": 43.5161913,
         "lng": -79.6776751
@@ -6805,7 +6805,7 @@
         "lng": -79.6775949
       },
       {
-        "name": "RTU-11 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-11 Hybrid",
         "desc": "Building: 2320 Bristol Circle\r\nSystem: Roof Top Units\r\nDescription: RT11 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 3-8\r\nModel: LHT060H4EX1J\r\nSerial: 5624M01134\r\nMake: LENNOX\r\nDate Installed: Dec 20, 2024\r\nHeating Capacity :150,000 BTU\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\n$22,262 ? Replaced by Springbank in 2024\r\n(Full Electric) changed to Hybrid/Dual Fuel Heat Pump",
         "lat": 43.5162874,
         "lng": -79.6774976
@@ -6835,7 +6835,7 @@
         "lng": -79.6768335
       },
       {
-        "name": "RTU-07 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-07 Hybrid",
         "desc": "Building: 2320 Bristol Circle\r\nSystem: Roof Top Units\r\nDescription: RTU-07 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 3-8\r\nModel: LDT060H5EX1J✓\r\nSerial: 5626B03638✓\r\nMake: YORK\r\nDate Installed: Apr 24, 2026\r\nHeating Capacity :150,000 BTU\r\nCooling Capacity: 60,000 BTU (5 TON)\r\nR-22 Refrigerant",
         "lat": 43.5166989,
         "lng": -79.6768097
@@ -6853,7 +6853,7 @@
         "lng": -79.6767035
       },
       {
-        "name": "RTU-04 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-04 Hybrid",
         "desc": "Building: 2320 Bristol Circle\r\nSystem: Roof Top Units\r\nDescription: RTU-04 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 2\r\nModel: LDT060H5EX1Y✓\r\nSerial: 5625M01637✓\r\nMake: LENNOX\r\nDate Installed: Feb 04, 2026\r\nHeating Capacity :125,000 BTU\r\nCooling Capacity: 48,000 BTU (5 Ton)",
         "lat": 43.5163824,
         "lng": -79.6765468
@@ -6871,7 +6871,7 @@
         "lng": -79.6764292
       },
       {
-        "name": "RTU-01 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-01 Hybrid",
         "desc": "Building: 2320 Bristol Circle\r\nSystem: Roof Top Units\r\nDescription: RTU-01 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 1\r\nModel: LDT048H5EX1J✓\r\nSerial: 5625L00600✓\r\nMake: LENNOX\r\nDate Installed: Dec 01, 2025\r\nHeating Capacity:150,000 BTU\r\nCooling Capacity: 48,000 BTU (4 Ton)\r\nR-22 Refrigerant",
         "lat": 43.5161518,
         "lng": -79.6764078
@@ -7150,7 +7150,7 @@
         "lng": -79.7085349
       },
       {
-        "name": "RTU- 19 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 19 Hybrid",
         "desc": "Building: 3105 Unity Drive\r\nSystem: Roof Top Units\r\nDescription: RTU 19 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 19\r\nModel: LDT048H5EX1Y✓\r\nSerial: 5625L01385✓\r\nMake: LENNOX✓\r\nDate Installed: Dec 01, 2025\r\nHeating Capacity 150,000 BTU's\r\nCooling Capacity: 48,000 BTU (4 Ton)\r\nR22",
         "lat": 43.538922,
         "lng": -79.7083704
@@ -7186,7 +7186,7 @@
         "lng": -79.7082498
       },
       {
-        "name": "RTU- 23 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 23 Hybrid",
         "desc": "Building: 3105 Unity Drive\r\nSystem: Roof Top Units\r\nDescription: RTU 23 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 23\r\nModel: LDT060H5EX1J✓\r\nSerial: 5625L02413✓\r\nMake: LENNOX✓\r\nDate Installed: Nov 24, 2025\r\nHeating Capacity 150,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nR22",
         "lat": 43.5385943,
         "lng": -79.7081369
@@ -8071,7 +8071,7 @@
         "lng": -79.6945586
       },
       {
-        "name": "RTU- 63 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 63 Hybrid",
         "desc": "Building: 3176 Ridgeway Drive\r\nSystem: Roof Top Units\r\nDescription: RTU 63 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 63\r\nModel: LDT036H5EQ1P✓\r\nSerial: 5625M00963✓\r\nMake: LENNOX\r\nDate Installed: Dec 01, 2025\r\nHeating capacity 108,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)",
         "lat": 43.517892,
         "lng": -79.6946014
@@ -8113,7 +8113,7 @@
         "lng": -79.6944756
       },
       {
-        "name": "RTU- 56 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 56 Hybrid",
         "desc": "Building: 3176 Ridgeway Drive\r\nSystem: Roof Top Units\r\nDescription: RTU 56 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 56\r\nModel: LDT036H5EB1P✓\r\nSerial: 5625L04202✓\r\nMake: LENNOX\r\nDate Installed: Dec 01, 2025\r\nHeating capacity 65,000 BTU's\r\nCooling Capacity: 24,000 BTU (3 Ton)",
         "lat": 43.5174131,
         "lng": -79.6946183
@@ -8530,7 +8530,7 @@
         "lng": -79.6958418
       },
       {
-        "name": "RTU-17 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-17 Hybrid",
         "desc": "Building: 3190 Ridgeway Drive\r\nSystem: Roof Top Units\r\nDescription: RT17 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 17\r\nModel: LDT036H5EQ1J✓\r\nSerial: 5625K03053✓\r\nMake: LENNOX✓\r\nDate Installed: Dec 22, 2025\r\nHeating capacity 108,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)",
         "lat": 43.5169453,
         "lng": -79.6957278
@@ -9035,7 +9035,7 @@
         "lng": -79.6931757
       },
       {
-        "name": "RTU- 08 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 08 Hybrid",
         "desc": "Building: 3425 Laird Road\r\nSystem: Roof Top Units\r\nDescription: RTU 08 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 08\r\nModel: LDT048H5EX1J✓\r\nSerial: 5625K03031✓\r\nMake: LENNOX\r\nDate Installed: Nov 11, 2025\r\nHeating Capacity 150,000 BTU's\r\nCooling Capacity: 48,000 BTU (4 Ton)",
         "lat": 43.5159146,
         "lng": -79.6930345
@@ -9515,13 +9515,13 @@
         "lng": -79.71713
       },
       {
-        "name": "RTU- 27 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 27 Hybrid",
         "desc": "Building: 4120 Ridgeway Drive\r\nSystem: Roof Top Units\r\nDescription: RTU 27 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 27\r\nModel: LDT036H5EB1P✓\r\nSerial: 5625L04235✓\r\nMake: LENNOX\r\nDate Installed: Dec 01, 2025\r\nHeating capacity 70,000 BTU's\r\nCooling Capacity: 24,000 BTU (3 Ton)",
         "lat": 43.5293871,
         "lng": -79.7171726
       },
       {
-        "name": "RTU- 28 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 28 Hybrid",
         "desc": "Building: 4120 Ridgeway Drive\r\nSystem: Roof Top Units\r\nDescription: RTU 28 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 28\r\nModel: LDT036H5EB1P✓\r\nSerial: 5625L04270✓\r\nMake: LENNOX\r\nDate Installed: Dec 12, 2025\r\nHeating capacity 68,000 BTU's\r\nCooling Capacity: 24,000 BTU (3 Ton)",
         "lat": 43.5294698,
         "lng": -79.7172357
@@ -9841,7 +9841,7 @@
         "lng": -79.7182586
       },
       {
-        "name": "RTU- 14 TB Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 14 TB Hybrid",
         "desc": "Building: 4141 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RTU 14 TB Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 14\r\nModel: LDT036H5EB1P✓\r\nSerial: 5625L04237✓\r\nMake: LENNOX\r\nDate Installed: Jan 01, 2026\r\nHeating Capacity 68,000 BTU's\r\nCooling Capacity: 24,000 BTU (3 Ton)",
         "lat": 43.5294315,
         "lng": -79.7183213
@@ -9859,7 +9859,7 @@
         "lng": -79.7184192
       },
       {
-        "name": "RTU- 17 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 17 Hybrid",
         "desc": "Building: 4141 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RTU 17 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 17\r\nModel: LDT048H5EX1J✓\r\nSerial: 5625L04185✓\r\nMake: LENNOX\r\nDate Installed: Jan 01, 2026\r\nHeating Capacity 150,000 BTU's\r\nCooling Capacity: 48,000 BTU (4 Ton)",
         "lat": 43.5296257,
         "lng": -79.7186107
@@ -10035,13 +10035,13 @@
         "lng": -79.7188048
       },
       {
-        "name": "RTU- 04 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 04 Hybrid",
         "desc": "Building: 4161 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RTU 04 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 04\r\nModel: 4DCZ5024F1060AA\r\nSerial: 24464540FA\r\nMake: TRANE\r\nDate Installed: Nov 29, 2024\r\nHeating Capacity 50,000 BTU's\r\nCooling Capacity: 24,000 BTU (2 Ton)\r\n$28,040 Replaced by LPI in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.5301569,
         "lng": -79.718787
       },
       {
-        "name": "RTU- 05 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 05 Hybrid",
         "desc": "Building: 4161 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RTU 05 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 05\r\nModel: LDT036H5EQ1P✓\r\nSerial: 5626A04701✓\r\nMake: LENNOX\r\nDate Installed: Jan 01, 2026\r\nHeating Capacity 80,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)",
         "lat": 43.5302317,
         "lng": -79.7187542
@@ -10071,7 +10071,7 @@
         "lng": -79.7187392
       },
       {
-        "name": "RTU- 12 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 12 Hybrid",
         "desc": "Building: 4161 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RTU 12 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 12\r\nModel: DHC060HWRHA2FD0E1A1A7\r\nSerial: 244913452L\r\nMake: TRANE\r\nDate Installed: Feb 19, 2025\r\nHeating Capacity: 150,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\n$36,459 To be replaced by LPI in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.5307675,
         "lng": -79.7186358
@@ -10137,13 +10137,13 @@
         "lng": -79.7183374
       },
       {
-        "name": "RTU- 02 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 02 Hybrid",
         "desc": "Building: 4161 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RTU 02 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 02\r\nModel: DHC036HWRMB2FD0E\r\nSerial: 244913404L\r\nMake: TRANE\r\nDate Installed: Dec 04, 2024\r\nHeating Capacity: 80,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\n$46,244 New Installation by LPI in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.5300358,
         "lng": -79.7187856
       },
       {
-        "name": "RTU- 10 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 10 Hybrid",
         "desc": "Building: 4161 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RTU 10 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 10\r\nModel: DHC036HWRMB2FD0E\r\nSerial: 244913499L\r\nMake: TRANE\r\nDate Installed: Nov 29, 2024\r\nHeating Capacity: 80,000 BTU\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\n$39,084 New Installation by LPI in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.530565,
         "lng": -79.7187178
@@ -10295,7 +10295,7 @@
         "lng": -79.7172202
       },
       {
-        "name": "RTU- 45 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU- 45 Hybrid",
         "desc": "Building: 4181 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RTU 45 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 45\r\nModel: LDT036H5EQ1P✓\r\nSerial: 5626A03555✓\r\nMake: LENNOX\r\nDate Installed: Jan 01, 2026\r\nHeating capacity 72,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)",
         "lat": 43.531243,
         "lng": -79.7172802
@@ -10313,7 +10313,7 @@
         "lng": -79.7173654
       },
       {
-        "name": "RTU-42 Hybrid/Dual Fuel Heat Pump",
+        "name": "RTU-42 Hybrid",
         "desc": "Building: 4181 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RT42 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 42\r\nModel: 4DCZ5024F1060AA\r\nSerial: 24464537FA\r\nMake: TRANE\r\nDate Installed: Jan 03, 2025\r\nHeating capacity 60,000 BTU's\r\nCooling Capacity: 24,000 BTU (2 Ton)\r\n$26,767 Replaced by LPI\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.5314322,
         "lng": -79.7174094

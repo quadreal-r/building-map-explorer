@@ -119,3 +119,143 @@
   color: #fff;
   border: 1px solid var(--accent, #7db8ff);
 }
+
+.bulkImport {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hiddenFile {
+  display: none;
+}
+
+.bulkImportRow {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.bulkImportBtn {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  justify-content: flex-start !important;
+}
+
+.bulkImportBtnFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(125, 184, 255, 0.4);
+  pointer-events: none;
+  transition: width 0.12s ease-out;
+}
+
+.bulkImportBtnText {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bulkImportCancel {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: Inter, sans-serif;
+  cursor: pointer;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  color: #fca5a5;
+}
+
+.bulkImportCancel:hover {
+  background: rgba(248, 113, 113, 0.22);
+}
+
+.bulkImportFile {
+  font-size: 10px;
+  color: var(--text-muted, #90b8e0);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'DM Mono', ui-monospace, monospace;
+}
+
+.importReport {
+  font-size: 10px;
+  color: var(--text-secondary, #c8dff8);
+  background: var(--surface2, #143d78);
+  border: 1px solid var(--border, #2e6ec0);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.importReportHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.importReportTitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary, #e8f0fe);
+  margin-bottom: 4px;
+}
+
+.importDownloadBtn {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: Inter, sans-serif;
+  cursor: pointer;
+  background: rgba(125, 184, 255, 0.15);
+  border: 1px solid rgba(125, 184, 255, 0.35);
+  color: var(--text-primary, #e8f0fe);
+}
+
+.importDownloadBtn:hover {
+  background: rgba(125, 184, 255, 0.28);
+}
+
+.importSummary {
+  line-height: 1.4;
+}
+
+.importDetails {
+  margin-top: 4px;
+}
+
+.importDetails summary {
+  cursor: pointer;
+  color: var(--text-muted, #90b8e0);
+  font-weight: 600;
+}
+
+.importDetails ul {
+  margin: 6px 0 0;
+  padding-left: 16px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.importDetails li {
+  margin-bottom: 4px;
+  line-height: 1.35;
+}
+
+.importFile {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  color: var(--text-primary, #e8f0fe);
+}

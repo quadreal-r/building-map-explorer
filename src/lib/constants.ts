@@ -10,7 +10,7 @@ export const PARK_COLORS: Record<string, string> = {
 export const DEFAULT_PARK_COLOR = '#3d7fff'
 
 export const LAYER_COLORS: Record<LayerKey, LayerStyle> = {
-  rtu: { fill: '#fbbf24', stroke: '#92400e', scale: 6 },
+  rtu: { fill: '#fbbf24', stroke: '#92400e', scale: 9 },
   polygons: { fill: '#34d399', stroke: '#065f46', scale: 6 },
   sprinkler: { fill: '#60a5fa', stroke: '#1e3a5f', scale: 5 },
   electrical: { fill: '#a78bfa', stroke: '#3b0764', scale: 5 },
@@ -27,6 +27,11 @@ export const UTILITY_LAYER_MAP: Record<UtilityType, LayerKey> = {
 
 export const PLACEHOLDER_LAT = 43.5852972
 export const PLACEHOLDER_LNG = -79.6449838
+
+/** Highest zoom level allowed on the main map (21 is the practical satellite max in most areas). */
+export const MAP_MAX_ZOOM = 21
+/** Zoom used when panning to a building, RTU, polygon, or search hit. */
+export const MAP_DETAIL_ZOOM = 21
 
 export const RTU_AGE_WARN = 19
 export const RTU_AGE_CRITICAL = 20

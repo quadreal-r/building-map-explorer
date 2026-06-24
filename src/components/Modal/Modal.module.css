@@ -52,6 +52,15 @@
   color: var(--text-primary, #ffffff);
 }
 
+.close:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.close:disabled:hover {
+  color: var(--text-muted, #90b8e0);
+}
+
 .body {
   padding: 14px 16px;
   overflow-y: auto;

@@ -256,7 +256,7 @@ Make: YORK
 Date Installed: May 01, 2007
 Heating Capacity: 80,000 BTU
 Cooling Capacity: 36,000 BTU (3 Ton)', 43.7031971, -79.6570655, 'DJ036N08N5AAA2A', 'N0E7820002', 'YORK', 'May 01, 2007', 2007, '80,000', 3, '-');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (255, 31, 'RTU- 06 Hybrid/Dual Fuel Heat Pump', 'Building: 7311 Kimbel St.
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (255, 31, 'RTU- 06 Hybrid', 'Building: 7311 Kimbel St.
 System: Roof Top Units
 Description: RTU 06 Hybrid/Dual Fuel Heat Pump
 Suite: -

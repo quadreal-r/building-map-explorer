@@ -7,15 +7,20 @@ import {
 } from '@/lib/constants'
 import {
   rcbCompute,
+  rcbLineItemsForBuilding,
+  rcbLineItemsWithReplacementYears,
   rcbMoney,
   rcbProjection,
-  rcbReplacementYearKey,
   rcbSanitizeReplacementYearAssignments,
+  rcbScheduleYearOptions,
   type RcbBuildingSummary,
+  type RcbScheduledLineItem,
 } from '@/lib/costEstimator'
 import { exportRcbExcel } from '@/lib/excel'
 import { formatFilterScope } from '@/lib/format'
 import { useFilterStore } from '@/stores/filterStore'
+import { useRtuPricingStore } from '@/stores/rtuPricingStore'
+import { useRtuScheduleStore } from '@/stores/rtuScheduleStore'
 import type { Building, CostBasis } from '@/types/domain'
 import { RcbBuildingDetail } from './RcbBuildingDetail'
 import styles from './CostBanner.module.css'
@@ -35,8 +40,11 @@ export function CostBanner({ buildings }: CostBannerProps) {
   const [year, setYear] = useState(RCB_DEFAULT_YEAR)
   const [detailOpen, setDetailOpen] = useState(false)
   const [selectedBuildingAddress, setSelectedBuildingAddress] = useState<string | null>(null)
-  const [replacementYearByRtu, setReplacementYearByRtu] = useState<Record<string, string>>({})
+  const [buildingYearFilter, setBuildingYearFilter] = useState('')
   const [sort, setSort] = useState<{ key: SortKey; dir: -1 | 1 }>({ key: 'cost', dir: -1 })
+
+  const replacementYearByRtu = useRtuScheduleStore((s) => s.replacementYears)
+  const setRtuReplacementYear = useRtuScheduleStore((s) => s.setReplacementYear)
 
   const search = useFilterStore((s) => s.search)
   const park = useFilterStore((s) => s.park)
@@ -45,32 +53,39 @@ export function CostBanner({ buildings }: CostBannerProps) {
 
   const scopeLabel = formatFilterScope({ search, park, cluster, manager })
 
+  const pricingTable = useRtuPricingStore((s) => s.pricingTable)
+  const pricingRevision = useRtuPricingStore((s) => s.revision)
+
   const result = useMemo(
-    () => rcbCompute(buildings, { basis, year, threshold, scope: scopeLabel }),
-    [buildings, basis, year, threshold, scopeLabel],
+    () =>
+      rcbCompute(buildings, {
+        basis,
+        year,
+        threshold,
+        scope: scopeLabel,
+        pricingTable,
+      }),
+    [buildings, basis, year, threshold, scopeLabel, pricingTable, pricingRevision],
   )
 
-  const yearOptions = useMemo(() => RCB_YEARS[basis] ?? [year], [basis, year])
+  const yearOptions = useMemo(
+    () => rcbScheduleYearOptions(basis, year, replacementYearByRtu),
+    [basis, year, replacementYearByRtu],
+  )
 
   const sanitizedReplacementYearByRtu = useMemo(
     () => rcbSanitizeReplacementYearAssignments(replacementYearByRtu, yearOptions, year),
     [replacementYearByRtu, yearOptions, year],
   )
 
-  const setRtuReplacementYear = (address: string, rtu: string, replacementYear: string) => {
-    const key = rcbReplacementYearKey(address, rtu)
-    setReplacementYearByRtu((prev) => {
-      if (replacementYear === year) {
-        if (!(key in prev)) return prev
-        const next = { ...prev }
-        delete next[key]
-        return next
-      }
-      return { ...prev, [key]: replacementYear }
-    })
+  const handleSetRtuReplacementYear = (address: string, rtu: string, replacementYear: string) => {
+    setRtuReplacementYear(address, rtu, replacementYear, year)
   }
 
-  const projection = useMemo(() => rcbProjection(result), [result])
+  const projection = useMemo(
+    () => rcbProjection(result, pricingTable),
+    [result, pricingTable, pricingRevision],
+  )
 
   const sortedBuildings = useMemo(() => {
     const rows = [...result.perBldg]
@@ -91,18 +106,99 @@ export function CostBanner({ buildings }: CostBannerProps) {
     [sortedBuildings, selectedBuildingAddress],
   )
 
+  const buildingView = useMemo(() => {
+    if (!selectedBuilding) return null
+
+    const base = rcbLineItemsForBuilding(result, selectedBuilding.address)
+    const items = rcbLineItemsWithReplacementYears(
+      base,
+      result.basis,
+      year,
+      sanitizedReplacementYearByRtu,
+      pricingTable,
+    )
+    const displayed = buildingYearFilter
+      ? items.filter((item) => item.replacementYear === buildingYearFilter)
+      : items
+
+    const sumCost = (rows: RcbScheduledLineItem[]) =>
+      rows.reduce((sum, item) => sum + item.cost, 0)
+    const sumTons = (rows: RcbScheduledLineItem[]) =>
+      rows.reduce((sum, item) => sum + (item.tons ?? 0), 0)
+
+    const totalCost = sumCost(items)
+    const displayedCost = sumCost(displayed)
+    const displayedTons = sumTons(displayed)
+    const ages = displayed.map((item) => item.age).filter((age): age is number => age != null)
+    const avgAge = ages.length
+      ? Math.round(ages.reduce((sum, age) => sum + age, 0) / ages.length)
+      : null
+
+    const basisLabel =
+      result.basis === 'hyb' ? 'Hybrid Lennox (all-in)' : 'Standard / Xion (all-in)'
+
+    return {
+      items,
+      displayed,
+      totalCost,
+      displayedCost,
+      displayedTons,
+      avgAge,
+      avgUnitCost: displayed.length ? displayedCost / displayed.length : 0,
+      costPerTon: displayedTons > 0 ? displayedCost / displayedTons : null,
+      remainingCost: buildingYearFilter ? totalCost - displayedCost : 0,
+      remainingUnits: buildingYearFilter ? items.length - displayed.length : 0,
+      yearLabel: buildingYearFilter || 'All scheduled years',
+      basisLabel,
+    }
+  }, [
+    selectedBuilding,
+    result,
+    year,
+    sanitizedReplacementYearByRtu,
+    pricingTable,
+    pricingRevision,
+    buildingYearFilter,
+  ])
+
+  const bannerKpis = useMemo(() => {
+    if (buildingView) {
+      return {
+        buildings: 1,
+        units: buildingView.displayed.length,
+        avg: buildingView.avgUnitCost,
+        total: buildingView.displayedCost,
+        yearLabel: buildingYearFilter || year,
+        scope: `${selectedBuilding!.address}${buildingYearFilter ? ` · FY ${buildingYearFilter}` : ''}`,
+      }
+    }
+    return {
+      buildings: result.totals.bldgCount,
+      units: result.totals.units,
+      avg: result.totals.units ? result.totals.cost / result.totals.units : 0,
+      total: result.totals.cost,
+      yearLabel: result.year,
+      scope: scopeLabel,
+    }
+  }, [buildingView, buildingYearFilter, year, result, scopeLabel, selectedBuilding])
+
   const openBuildingDetail = (address: string) => {
+    setBuildingYearFilter('')
     setSelectedBuildingAddress(address)
     setDetailOpen(true)
   }
 
   const closeBuildingDetail = () => {
     setSelectedBuildingAddress(null)
+    setBuildingYearFilter('')
   }
 
   const toggleDetail = () => {
     setDetailOpen((open) => {
-      if (open) setSelectedBuildingAddress(null)
+      if (open) {
+        setSelectedBuildingAddress(null)
+        setBuildingYearFilter('')
+      }
       return !open
     })
   }
@@ -154,43 +250,47 @@ export function CostBanner({ buildings }: CostBannerProps) {
       <div id="rcb-bar" className={styles.bar}>
         <div className={styles.rcbTitle}>
           <span className={styles.rcbTitleT1}>RTU replacement cost</span>
-          <span className={styles.rcbTitleT2} id="rcb-scope" title={scopeLabel}>
-            {scopeLabel}
+          <span className={styles.rcbTitleT2} id="rcb-scope" title={bannerKpis.scope}>
+            {bannerKpis.scope}
           </span>
         </div>
         <div className={styles.rcbKpis}>
           <div className={styles.rcbKpi}>
             <span className={styles.kVal} id="rcb-k-bldg">
-              {result.totals.bldgCount.toLocaleString('en-CA')}
+              {bannerKpis.buildings.toLocaleString('en-CA')}
             </span>
             <span className={styles.kLab}>Buildings</span>
           </div>
           <div className={styles.rcbKpi}>
             <span className={styles.kVal} id="rcb-k-units">
-              {result.totals.units.toLocaleString('en-CA')}
+              {bannerKpis.units.toLocaleString('en-CA')}
             </span>
             <span className={styles.kLab}>
-              RTUs <span id="rcb-k-thr">≥{result.threshold}</span> yr
+              RTUs{' '}
+              {buildingView ? (
+                buildingYearFilter ? (
+                  <span>in {buildingYearFilter}</span>
+                ) : (
+                  <span>scheduled</span>
+                )
+              ) : (
+                <span id="rcb-k-thr">≥{result.threshold}</span>
+              )}{' '}
+              {!buildingView && 'yr'}
             </span>
-          </div>
-          <div className={styles.rcbKpi}>
-            <span className={styles.kVal} id="rcb-k-tons">
-              {(Math.round(result.totals.tons * 10) / 10).toLocaleString('en-CA')}
-            </span>
-            <span className={styles.kLab}>Total Tons</span>
           </div>
           <div className={styles.rcbKpi}>
             <span className={styles.kVal} id="rcb-k-avg">
-              {rcbMoney(result.totals.units ? result.totals.cost / result.totals.units : 0)}
+              {rcbMoney(bannerKpis.avg)}
             </span>
             <span className={styles.kLab}>Avg / Unit</span>
           </div>
           <div className={`${styles.rcbKpi} ${styles.rcbKpiTotal}`}>
             <span className={styles.kVal} id="rcb-k-total">
-              {rcbMoney(result.totals.cost)}
+              {rcbMoney(bannerKpis.total)}
             </span>
             <span className={styles.kLab}>
-              Est. Cost · <span id="rcb-k-year">{result.year}</span>
+              Est. Cost · <span id="rcb-k-year">{bannerKpis.yearLabel}</span>
             </span>
           </div>
         </div>
@@ -259,7 +359,12 @@ export function CostBanner({ buildings }: CostBannerProps) {
           <button
             type="button"
             className={`${styles.rcbBtn} ${styles.rcbBtnXls}`}
-            onClick={() => exportRcbExcel(result, scopeLabel, { replacementYearByRtu: sanitizedReplacementYearByRtu })}
+            onClick={() =>
+              exportRcbExcel(result, scopeLabel, {
+                replacementYearByRtu: sanitizedReplacementYearByRtu,
+                pricingTable,
+              })
+            }
             title="Export this estimate to Excel"
           >
             Excel
@@ -279,16 +384,19 @@ export function CostBanner({ buildings }: CostBannerProps) {
       </div>
 
       <div id="rcb-detail" className={styles.detail}>
-        {selectedBuilding ? (
+        {selectedBuilding && buildingView ? (
           <RcbBuildingDetail
             building={selectedBuilding}
             result={result}
             defaultReplacementYear={year}
             replacementYearByRtu={sanitizedReplacementYearByRtu}
-            onReplacementYearChange={setRtuReplacementYear}
+            replacementYearFilter={buildingYearFilter}
+            onReplacementYearFilterChange={setBuildingYearFilter}
+            viewSummary={buildingView}
+            onReplacementYearChange={handleSetRtuReplacementYear}
             onBack={closeBuildingDetail}
           />
-        ) : (
+        ) : selectedBuilding ? null : (
           <div className={styles.rcbDetailGrid}>
           <div className={styles.rcbTblwrap}>
             <h4>By building</h4>
@@ -301,9 +409,6 @@ export function CostBanner({ buildings }: CostBannerProps) {
                   <th className="num" onClick={() => toggleSort('units')}>
                     RTUs
                   </th>
-                  <th className="num" onClick={() => toggleSort('tons')}>
-                    Tons
-                  </th>
                   <th className="num" onClick={() => toggleSort('cost')}>
                     Cost
                   </th>
@@ -312,7 +417,7 @@ export function CostBanner({ buildings }: CostBannerProps) {
               <tbody>
                 {!sortedBuildings.length ? (
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={5}>
                       <div className={styles.rcbEmpty}>
                         No RTUs ≥ {result.threshold} years in the current selection.
                       </div>
@@ -331,7 +436,6 @@ export function CostBanner({ buildings }: CostBannerProps) {
                         <td>{r.cluster}</td>
                         <td>{r.manager}</td>
                         <td className="num">{r.units}</td>
-                        <td className="num">{Math.round(r.tons * 10) / 10}</td>
                         <td className="num">{rcbMoney(r.cost)}</td>
                       </tr>
                     ))}
@@ -340,7 +444,6 @@ export function CostBanner({ buildings }: CostBannerProps) {
                       <td />
                       <td />
                       <td className="num">{result.totals.units}</td>
-                      <td className="num">{Math.round(result.totals.tons * 10) / 10}</td>
                       <td className="num">{rcbMoney(result.totals.cost)}</td>
                     </tr>
                   </>

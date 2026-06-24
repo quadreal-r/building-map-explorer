@@ -8,6 +8,8 @@ export interface ModalProps {
   children: ReactNode
   align?: 'center' | 'right'
   width?: number | string
+  /** When true, overlay click, Escape, and the close button do nothing. */
+  preventClose?: boolean
 }
 
 export function Modal({
@@ -17,9 +19,10 @@ export function Modal({
   children,
   align = 'center',
   width = 400,
+  preventClose = false,
 }: ModalProps) {
   useEffect(() => {
-    if (!open) return
+    if (!open || preventClose) return
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
@@ -27,25 +30,36 @@ export function Modal({
 
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [open, onClose])
+  }, [open, onClose, preventClose])
 
   if (!open) return null
 
   const panelStyle = { width: typeof width === 'number' ? `${width}px` : width }
+
+  const tryClose = () => {
+    if (!preventClose) onClose()
+  }
 
   return (
     <div
       className={styles.overlay}
       data-align={align}
       onClick={(event) => {
-        if (event.target === event.currentTarget) onClose()
+        if (event.target === event.currentTarget) tryClose()
       }}
     >
       <div className={styles.panel} style={panelStyle} role="dialog" aria-modal="true">
         {title ? (
           <header className={styles.header}>
             <h2 className={styles.title}>{title}</h2>
-            <button type="button" className={styles.close} onClick={onClose} aria-label="Close">
+            <button
+              type="button"
+              className={styles.close}
+              onClick={tryClose}
+              disabled={preventClose}
+              aria-label={preventClose ? 'Close disabled during upload' : 'Close'}
+              title={preventClose ? 'Finish or cancel the picture upload first' : 'Close'}
+            >
               ×
             </button>
           </header>

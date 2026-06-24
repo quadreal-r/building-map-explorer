@@ -1,23 +1,41 @@
 import { useMemo, useState } from 'react'
-import { RCB_YEARS } from '@/lib/constants'
 import {
   formatRtuTons,
-  rcbLineItemsForBuilding,
-  rcbLineItemsWithReplacementYears,
   rcbMoney,
   rcbReplacementYearKey,
+  rcbScheduleYearOptions,
   rcbTierBreakdownForItems,
   type RcbScheduledLineItem,
   type RcbBuildingSummary,
   type RcbComputeResult,
 } from '@/lib/costEstimator'
+import { useRtuScheduleStore } from '@/stores/rtuScheduleStore'
+import { RtuNotesModal } from './RtuNotesModal'
 import styles from './CostBanner.module.css'
+
+export interface BuildingViewSummary {
+  items: RcbScheduledLineItem[]
+  displayed: RcbScheduledLineItem[]
+  totalCost: number
+  displayedCost: number
+  displayedTons: number
+  avgAge: number | null
+  avgUnitCost: number
+  costPerTon: number | null
+  remainingCost: number
+  remainingUnits: number
+  yearLabel: string
+  basisLabel: string
+}
 
 export interface RcbBuildingDetailProps {
   building: RcbBuildingSummary
   result: RcbComputeResult
   defaultReplacementYear: string
   replacementYearByRtu: Record<string, string>
+  replacementYearFilter: string
+  onReplacementYearFilterChange: (year: string) => void
+  viewSummary: BuildingViewSummary
   onReplacementYearChange: (address: string, rtu: string, year: string) => void
   onBack: () => void
 }
@@ -48,55 +66,42 @@ export function RcbBuildingDetail({
   result,
   defaultReplacementYear,
   replacementYearByRtu,
+  replacementYearFilter,
+  onReplacementYearFilterChange,
+  viewSummary,
   onReplacementYearChange,
   onBack,
 }: RcbBuildingDetailProps) {
-  const [replacementYearFilter, setReplacementYearFilter] = useState('')
+  const [notesTarget, setNotesTarget] = useState<{ address: string; rtu: string } | null>(null)
   const [sort, setSort] = useState<{ key: RtuSortKey; dir: -1 | 1 }>({
     key: 'rtu',
     dir: 1,
   })
 
-  const yearOptions = RCB_YEARS[result.basis] ?? [defaultReplacementYear]
-
-  const lineItems = useMemo(() => {
-    const base = rcbLineItemsForBuilding(result, building.address)
-    return rcbLineItemsWithReplacementYears(
-      base,
-      result.basis,
-      defaultReplacementYear,
-      replacementYearByRtu,
-    )
-  }, [building.address, defaultReplacementYear, replacementYearByRtu, result])
+  const yearOptions = rcbScheduleYearOptions(
+    result.basis,
+    defaultReplacementYear,
+    replacementYearByRtu,
+  )
+  const notesByRtu = useRtuScheduleStore((s) => s.notes)
+  const setNotes = useRtuScheduleStore((s) => s.setNotes)
+  const getNotes = useRtuScheduleStore((s) => s.getNotes)
 
   const displayedItems = useMemo(() => {
-    let rows = [...lineItems]
-    if (replacementYearFilter) {
-      rows = rows.filter((item) => item.replacementYear === replacementYearFilter)
-    }
+    let rows = [...viewSummary.displayed]
     const { key, dir } = sort
     rows.sort((a, b) => compareRtuRows(a, b, key) * dir)
     return rows
-  }, [lineItems, replacementYearFilter, sort])
+  }, [viewSummary.displayed, sort])
 
   const tierRows = useMemo(() => rcbTierBreakdownForItems(displayedItems), [displayedItems])
 
-  const scheduledCost = useMemo(
-    () => lineItems.reduce((sum, item) => sum + item.cost, 0),
-    [lineItems],
-  )
-
-  const displayedCost = useMemo(
-    () => displayedItems.reduce((sum, item) => sum + item.cost, 0),
-    [displayedItems],
-  )
-
   const deferredCount = useMemo(
     () =>
-      lineItems.filter(
+      viewSummary.items.filter(
         (item) => Number(item.replacementYear) > Number(defaultReplacementYear),
       ).length,
-    [defaultReplacementYear, lineItems],
+    [defaultReplacementYear, viewSummary.items],
   )
 
   const toggleSort = (key: RtuSortKey) => {
@@ -128,19 +133,16 @@ export function RcbBuildingDetail({
               ? ` · ${deferredCount} RTU${deferredCount === 1 ? '' : 's'} scheduled later`
               : ''}
             {replacementYearFilter
-              ? ` · Showing ${displayedItems.length} of ${lineItems.length} RTUs (${replacementYearFilter})`
+              ? ` · ${displayedItems.length} of ${viewSummary.items.length} RTUs in ${replacementYearFilter}`
               : ''}
           </p>
         </div>
         <div className={styles.buildingDetailKpis}>
           <span>
-            <strong>{building.units}</strong> RTUs
-          </span>
-          <span>
-            <strong>{Math.round(building.tons * 10) / 10}</strong> tons
+            <strong>{displayedItems.length}</strong> RTU{displayedItems.length === 1 ? '' : 's'}
           </span>
           <span className={styles.buildingDetailCost}>
-            <strong>{rcbMoney(scheduledCost)}</strong>
+            <strong>{rcbMoney(viewSummary.displayedCost)}</strong>
           </span>
         </div>
       </div>
@@ -172,7 +174,7 @@ export function RcbBuildingDetail({
                     className={styles.rcbYearFilter}
                     value={replacementYearFilter}
                     title="Show RTUs scheduled for a specific replacement year"
-                    onChange={(e) => setReplacementYearFilter(e.target.value)}
+                    onChange={(e) => onReplacementYearFilterChange(e.target.value)}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <option value="">All years</option>
@@ -184,12 +186,13 @@ export function RcbBuildingDetail({
                   </select>
                 </th>
                 <th className="num">Unit cost</th>
+                <th>Notes</th>
               </tr>
             </thead>
             <tbody>
               {!displayedItems.length ? (
                 <tr>
-                  <td colSpan={10}>
+                  <td colSpan={11}>
                     <div className={styles.rcbEmpty}>
                       {replacementYearFilter
                         ? `No RTUs scheduled for ${replacementYearFilter}.`
@@ -205,6 +208,8 @@ export function RcbBuildingDetail({
                     const assigned =
                       replacementYearByRtu[rcbReplacementYearKey(item.address, item.rtu)] !=
                       null
+                    const noteKey = rcbReplacementYearKey(item.address, item.rtu)
+                    const hasNotes = Boolean(notesByRtu[noteKey]?.trim())
                     return (
                       <tr
                         key={item.rtu}
@@ -238,19 +243,30 @@ export function RcbBuildingDetail({
                           </select>
                         </td>
                         <td className="num">{rcbMoney(item.cost)}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className={`${styles.rtuNotesBtn}${hasNotes ? ` ${styles.rtuNotesBtnActive}` : ''}`}
+                            title={hasNotes ? 'View or edit notes' : 'Add notes'}
+                            onClick={() =>
+                              setNotesTarget({ address: item.address, rtu: item.rtu })
+                            }
+                          >
+                            {hasNotes ? '📝 Notes' : '+ Notes'}
+                          </button>
+                        </td>
                       </tr>
                     )
                   })}
                   <tr className={styles.rcbTotal}>
-                    <td colSpan={8}>
+                    <td colSpan={9}>
                       {replacementYearFilter
                         ? `TOTAL — ${displayedItems.length} RTU (${replacementYearFilter})`
-                        : `TOTAL — ${building.units} RTU`}
+                        : `TOTAL — ${viewSummary.items.length} RTU`}
                     </td>
                     <td />
-                    <td className="num">
-                      {rcbMoney(replacementYearFilter ? displayedCost : scheduledCost)}
-                    </td>
+                    <td className="num">{rcbMoney(viewSummary.displayedCost)}</td>
+                    <td />
                   </tr>
                 </>
               )}
@@ -290,9 +306,7 @@ export function RcbBuildingDetail({
                     <td>TOTAL</td>
                     <td />
                     <td className="num">{displayedItems.length}</td>
-                    <td className="num">
-                      {rcbMoney(replacementYearFilter ? displayedCost : scheduledCost)}
-                    </td>
+                    <td className="num">{rcbMoney(viewSummary.displayedCost)}</td>
                   </tr>
                 </>
               )}
@@ -300,6 +314,17 @@ export function RcbBuildingDetail({
           </table>
         </div>
       </div>
+
+      {notesTarget ? (
+        <RtuNotesModal
+          open
+          address={notesTarget.address}
+          rtu={notesTarget.rtu}
+          notes={getNotes(notesTarget.address, notesTarget.rtu)}
+          onClose={() => setNotesTarget(null)}
+          onSave={(text) => setNotes(notesTarget.address, notesTarget.rtu, text)}
+        />
+      ) : null}
     </div>
   )
 }

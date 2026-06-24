@@ -4,6 +4,7 @@ import {
   ESRI_TILE_URL,
   IMAGERY_MODES,
   LAYER_COLORS,
+  MAP_DETAIL_ZOOM,
   USGS_TILE_URL,
   UTILITY_LAYER_MAP,
 } from '@/lib/constants'
@@ -28,8 +29,19 @@ import { afterMapViewChange, fitBoundsPreserveRotation, panToPreserveRotation } 
 import { closeAllMapPopups, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
 import { collectSearchHits } from '@/lib/searchHits'
 import { getDetailMarkerIcon, getMarkerIcon } from '@/lib/markerStyles'
-import { buildBuildingInfoHtml, buildDetailInfoHtml, copyPopupText } from '@/lib/mapInfoWindow'
-import { showToastSuccess } from '@/lib/toast'
+import { buildBuildingInfoHtml, buildDetailInfoHtml, buildRtuPicturesHtml, copyPopupText } from '@/lib/mapInfoWindow'
+import {
+  addRtuPicturesFromFiles,
+  deleteRtuPicture,
+  getRtuPictureCountMap,
+  listRtuPictures,
+  loadRtuPictureManifest,
+  onRtuPicturesChanged,
+  revokeRtuPictureUrls,
+  rtuPictureKey,
+  type RtuPicture,
+} from '@/lib/rtuPictures'
+import { showToastError, showToastSuccess } from '@/lib/toast'
 import { useLayerStore } from '@/stores/layerStore'
 import { useFilterStore } from '@/stores/filterStore'
 import { useSelectionStore } from '@/stores/selectionStore'
@@ -51,7 +63,55 @@ interface DetailMarkerEntry {
   data: Rtu | Utility
   marker: google.maps.Marker
   label?: google.maps.Marker
+  picBadge?: google.maps.Marker
+  pictureCount?: number
   dragKey: string
+}
+
+function formatPicBadgeCount(count: number): string {
+  return count > 99 ? '99+' : String(count)
+}
+
+function createRtuPicBadgeMarker(
+  map: google.maps.Map,
+  lat: number,
+  lng: number,
+  count: number,
+): google.maps.Marker {
+  return new google.maps.Marker({
+    position: { lat, lng },
+    map,
+    icon: {
+      url: TRANSPARENT_ICON,
+      scaledSize: new google.maps.Size(1, 1),
+      anchor: new google.maps.Point(0.5, 0.5),
+      labelOrigin: new google.maps.Point(0.5, 0.5),
+    },
+    label: {
+      text: formatPicBadgeCount(count),
+      color: '#ffffff',
+      fontSize: '11px',
+      fontWeight: '700',
+      fontFamily: 'Inter,sans-serif',
+      className: 'rtu-pic-badge',
+    },
+    zIndex: 21,
+    visible: false,
+    clickable: false,
+    optimized: false,
+  })
+}
+
+function syncDetailMarkerPositions(entry: DetailMarkerEntry, lat: number, lng: number): void {
+  entry.marker.setPosition({ lat, lng })
+  entry.label?.setPosition({ lat, lng })
+  entry.picBadge?.setPosition({ lat, lng })
+}
+
+interface ActiveDetailInfo {
+  entry: DetailMarkerEntry
+  view: 'info' | 'pictures'
+  pictureIndex: number
 }
 
 export interface UseMapMarkersOptions {
@@ -94,10 +154,16 @@ export function useMapMarkers({
     polygonIndexRef.current = buildPolygonBuildingIndex(buildings, polygons)
   }, [buildings, utilities, polygons])
 
+  useEffect(() => {
+    void loadRtuPictureManifest()
+  }, [])
+
   const buildingMarkersRef = useRef<BuildingMarkerEntry[]>([])
   const detailMarkersRef = useRef<DetailMarkerEntry[]>([])
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null)
   const activeInfoMarkerRef = useRef<google.maps.Marker | null>(null)
+  const activeDetailInfoRef = useRef<ActiveDetailInfo | null>(null)
+  const activeRtuPicturesRef = useRef<RtuPicture[]>([])
   const imageryModeRef = useRef(0)
   const imageryOverlayRef = useRef<google.maps.ImageMapType | null>(null)
   const soloMoveRef = useRef<{ marker: google.maps.Marker; label?: google.maps.Marker } | null>(null)
@@ -161,10 +227,10 @@ export function useMapMarkers({
       setDetailPosition: (key, lat, lng) => {
         const entry = detailMarkersRef.current.find((m) => m.dragKey === key)
         if (!entry) return
-        entry.marker.setPosition({ lat, lng })
-        entry.label?.setPosition({ lat, lng })
+        syncDetailMarkerPositions(entry, lat, lng)
         entry.marker.setVisible(true)
         entry.label?.setVisible(true)
+        if (entry.picBadge && (entry.pictureCount ?? 0) > 0) entry.picBadge.setVisible(true)
       },
     })
     return () => {
@@ -221,6 +287,38 @@ export function useMapMarkers({
     [resetBuildingIcons],
   )
 
+  const clearActiveRtuPictures = useCallback(() => {
+    revokeRtuPictureUrls(activeRtuPicturesRef.current.filter((p) => p.source === 'indexeddb'))
+    activeRtuPicturesRef.current = []
+  }, [])
+
+  const refreshRtuPicturesView = useCallback(async () => {
+    const ctx = activeDetailInfoRef.current
+    const iw = infoWindowRef.current
+    if (!ctx || !iw || ctx.entry.type !== 'rtu' || ctx.view !== 'pictures') return
+
+    const buildingAddress = ctx.entry.building?.address ?? ''
+    if (!buildingAddress) return
+
+    clearActiveRtuPictures()
+    const pictures = await listRtuPictures(buildingAddress, ctx.entry.data.name)
+    activeRtuPicturesRef.current = pictures
+    if (pictures.length) {
+      ctx.pictureIndex = Math.min(Math.max(ctx.pictureIndex, 0), pictures.length - 1)
+    } else {
+      ctx.pictureIndex = 0
+    }
+
+    iw.setContent(
+      buildRtuPicturesHtml(
+        ctx.entry.data as Rtu,
+        buildingAddress,
+        pictures,
+        ctx.pictureIndex,
+      ),
+    )
+  }, [clearActiveRtuPictures])
+
   const openBuildingInfo = useCallback(
     (building: Building, marker: google.maps.Marker) => {
       if (!map || !infoWindowRef.current) return
@@ -229,13 +327,15 @@ export function useMapMarkers({
         return
       }
       closeAllMapPopups()
+      activeDetailInfoRef.current = null
+      clearActiveRtuPictures()
       const tenantPolygons = polygonsForBuilding(polygonIndexRef.current, building.address)
       infoWindowRef.current.setContent(buildBuildingInfoHtml(building, tenantPolygons))
       infoWindowRef.current.open({ map, anchor: marker })
       activeInfoMarkerRef.current = marker
       afterMapViewChange(map)
     },
-    [map],
+    [map, clearActiveRtuPictures],
   )
 
   const openDetailInfo = useCallback(
@@ -247,6 +347,8 @@ export function useMapMarkers({
         return
       }
       closeAllMapPopups()
+      clearActiveRtuPictures()
+      activeDetailInfoRef.current = { entry, view: 'info', pictureIndex: 0 }
       infoWindowRef.current.setContent(
         buildDetailInfoHtml(type, data, { buildingAddress: building?.address }),
       )
@@ -254,9 +356,10 @@ export function useMapMarkers({
       activeInfoMarkerRef.current = marker
       marker.setVisible(true)
       entry.label?.setVisible(true)
+      if (entry.picBadge && (entry.pictureCount ?? 0) > 0) entry.picBadge.setVisible(true)
       afterMapViewChange(map)
     },
-    [map],
+    [map, clearActiveRtuPictures],
   )
 
   const stopSoloMove = useCallback(() => {
@@ -298,6 +401,8 @@ export function useMapMarkers({
       container.querySelector('[data-iw-action="close"]')?.addEventListener('click', () => {
         iw.close()
         activeInfoMarkerRef.current = null
+        activeDetailInfoRef.current = null
+        clearActiveRtuPictures()
       })
       container.querySelector('[data-iw-action="copy-all"]')?.addEventListener('click', () => {
         const source = container.querySelector('.iw-copy-source') as HTMLTextAreaElement | null
@@ -346,8 +451,113 @@ export function useMapMarkers({
           callbacksRef.current.onDeleteDetail?.(entry.type, entry.data, entry.building)
         })
       }
+
+      container.querySelector('[data-iw-action="pictures"]')?.addEventListener('click', () => {
+        const ctx = activeDetailInfoRef.current
+        if (!ctx || ctx.entry.type !== 'rtu') return
+        ctx.view = 'pictures'
+        ctx.pictureIndex = 0
+        void refreshRtuPicturesView()
+      })
+
+      container.querySelector('[data-iw-action="pictures-back"]')?.addEventListener('click', () => {
+        const ctx = activeDetailInfoRef.current
+        if (!ctx) return
+        clearActiveRtuPictures()
+        ctx.view = 'info'
+        ctx.pictureIndex = 0
+        const { type, data, building } = ctx.entry
+        iw.setContent(buildDetailInfoHtml(type, data, { buildingAddress: building?.address }))
+      })
+
+      const stepPicture = (delta: number) => {
+        const ctx = activeDetailInfoRef.current
+        const total = activeRtuPicturesRef.current.length
+        if (!ctx || ctx.view !== 'pictures' || total <= 1) return
+        ctx.pictureIndex = (ctx.pictureIndex + delta + total) % total
+        void refreshRtuPicturesView()
+      }
+
+      container.querySelector('[data-iw-action="picture-prev"]')?.addEventListener('click', () => {
+        stepPicture(-1)
+      })
+      container.querySelector('[data-iw-action="picture-next"]')?.addEventListener('click', () => {
+        stepPicture(1)
+      })
+
+      container.querySelector('[data-iw-action="picture-open-viewer"]')?.addEventListener('click', () => {
+        const ctx = activeDetailInfoRef.current
+        if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'pictures') return
+        const buildingAddress = ctx.entry.building?.address
+        if (!buildingAddress) return
+        const pictures = activeRtuPicturesRef.current
+        if (!pictures.length) return
+        useUiStore.getState().openRtuPictureViewer({
+          pictures: pictures.map((p) => ({
+            fileName: p.fileName,
+            fullUrl: p.fullUrl,
+            thumbUrl: p.thumbUrl,
+            index: p.index,
+          })),
+          index: ctx.pictureIndex,
+          buildingAddress,
+          rtuName: ctx.entry.data.name,
+        })
+      })
+
+      container.querySelector('[data-iw-action="picture-add"]')?.addEventListener('click', () => {
+        const input = container.querySelector('[data-iw-picture-input]') as HTMLInputElement | null
+        input?.click()
+      })
+
+      const fileInput = container.querySelector('[data-iw-picture-input]') as HTMLInputElement | null
+      fileInput?.addEventListener('change', () => {
+        void (async () => {
+          const ctx = activeDetailInfoRef.current
+          if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'pictures') return
+          const buildingAddress = ctx.entry.building?.address
+          if (!buildingAddress || !fileInput.files?.length) return
+          const added = await addRtuPicturesFromFiles(
+            buildingAddress,
+            ctx.entry.data.name,
+            [...fileInput.files],
+          )
+          fileInput.value = ''
+          if (added.length) {
+            ctx.pictureIndex = added.length - 1
+            showToastSuccess(`✓ ${added.length} picture${added.length === 1 ? '' : 's'} added`)
+          }
+          await refreshRtuPicturesView()
+        })()
+      })
+
+      container.querySelector('[data-iw-action="picture-delete"]')?.addEventListener('click', () => {
+        void (async () => {
+          const ctx = activeDetailInfoRef.current
+          const btn = container.querySelector('[data-iw-action="picture-delete"]') as HTMLElement | null
+          if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'pictures' || !btn) return
+
+          const fileName = btn.getAttribute('data-iw-picture-file') ?? ''
+          const isStatic = btn.getAttribute('data-iw-picture-static') === '1'
+          const buildingAddress = ctx.entry.building?.address
+          if (!buildingAddress || !fileName) return
+
+          if (isStatic) {
+            showToastError('Bundled images must be removed from public/database/rtu-pictures/')
+            return
+          }
+
+          if (!window.confirm(`Delete picture "${fileName}"?`)) return
+
+          const result = await deleteRtuPicture(buildingAddress, ctx.entry.data.name, fileName)
+          if (result === 'deleted') {
+            showToastSuccess('✓ Picture deleted')
+            await refreshRtuPicturesView()
+          }
+        })()
+      })
     })
-  }, [startSoloMove])
+  }, [startSoloMove, clearActiveRtuPictures, refreshRtuPicturesView])
 
   const refreshDetailVisibility = useCallback(() => {
     if (!map) return
@@ -370,8 +580,59 @@ export function useMapMarkers({
         (editMode && selected.has(dm.dragKey) ? true : inBounds)
       dm.marker.setVisible(show)
       dm.label?.setVisible(show)
+      if (dm.picBadge) {
+        dm.picBadge.setVisible(show && (dm.pictureCount ?? 0) > 0)
+      }
     }
   }, [map])
+
+  const refreshRtuPictureBadges = useCallback(async () => {
+    if (!map) return
+    const counts = await getRtuPictureCountMap()
+
+    for (const dm of detailMarkersRef.current) {
+      if (dm.type !== 'rtu' || !dm.building) {
+        if (dm.picBadge) {
+          dm.picBadge.setMap(null)
+          dm.picBadge = undefined
+        }
+        dm.pictureCount = 0
+        continue
+      }
+
+      const key = rtuPictureKey(dm.building.address, dm.data.name)
+      const count = counts.get(key) ?? 0
+      dm.pictureCount = count
+
+      if (count <= 0) {
+        if (dm.picBadge) {
+          dm.picBadge.setMap(null)
+          dm.picBadge = undefined
+        }
+        continue
+      }
+
+      const pos = dm.marker.getPosition()
+      if (!pos) continue
+      const lat = pos.lat()
+      const lng = pos.lng()
+
+      if (dm.picBadge) {
+        dm.picBadge.setLabel({
+          text: formatPicBadgeCount(count),
+          color: '#ffffff',
+          fontSize: '11px',
+          fontWeight: '700',
+          fontFamily: 'Inter,sans-serif',
+          className: 'rtu-pic-badge',
+        })
+      } else {
+        dm.picBadge = createRtuPicBadgeMarker(map, lat, lng, count)
+      }
+    }
+
+    refreshDetailVisibility()
+  }, [map, refreshDetailVisibility])
 
   const fitAllMarkers = useCallback(() => {
     if (!map) return
@@ -461,9 +722,11 @@ export function useMapMarkers({
   useEffect(() => {
     if (!map) return
 
-    infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 340, disableAutoPan: true })
+    infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 360, disableAutoPan: true })
     infoWindowRef.current.addListener('closeclick', () => {
       activeInfoMarkerRef.current = null
+      activeDetailInfoRef.current = null
+      clearActiveRtuPictures()
     })
     infoWindowRef.current.addListener('content_changed', attachInfoWindowActions)
 
@@ -507,8 +770,8 @@ export function useMapMarkers({
         label: {
           text: labelText,
           color: '#ffffff',
-          fontSize: '10px',
-          fontWeight: '600',
+          fontSize: '11px',
+          fontWeight: '500',
           fontFamily: 'Inter,sans-serif',
           className: 'bldg-label',
         },
@@ -603,15 +866,15 @@ export function useMapMarkers({
             url: TRANSPARENT_ICON,
             scaledSize: new google.maps.Size(1, 1),
             anchor: new google.maps.Point(0.5, 0.5),
-            labelOrigin: new google.maps.Point(0.5, -12),
+            labelOrigin: new google.maps.Point(0.5, layerKey === 'rtu' ? -15 : -12),
           },
           label: {
             text: labelText,
             color: cfg.fill,
-            fontSize: '9px',
-            fontWeight: '700',
+            fontSize: layerKey === 'rtu' ? '11px' : '9px',
+            fontWeight: layerKey === 'rtu' ? '500' : '700',
             fontFamily: 'Inter,sans-serif',
-            className: 'rtu-label',
+            className: layerKey === 'rtu' ? 'rtu-marker-label' : 'rtu-label',
           },
           zIndex: 19,
           visible: false,
@@ -619,6 +882,8 @@ export function useMapMarkers({
           optimized: false,
         })
       }
+
+      const entry: DetailMarkerEntry = { type: layerKey, building, data, marker, label, dragKey }
 
       marker.addListener('click', (e: google.maps.MapMouseEvent) => {
         if (useUiStore.getState().addMarkerPickMode || useUiStore.getState().polygonDrawMode) return
@@ -629,7 +894,7 @@ export function useMapMarkers({
           refreshDragSelectionStyles()
           return
         }
-        openDetailInfo({ type: layerKey, building, data, marker, label, dragKey })
+        openDetailInfo(entry)
       })
 
       marker.addListener('dragstart', () => {
@@ -640,8 +905,7 @@ export function useMapMarkers({
         beginDragSession(dragKey, startLat, startLng)
         if (!isGroupDragActive()) {
           setLastDragUndo(() => {
-            marker.setPosition({ lat: startLat, lng: startLng })
-            label?.setPosition({ lat: startLat, lng: startLng })
+            syncDetailMarkerPositions(entry, startLat, startLng)
             callbacksRef.current.onDetailMoved?.(layerKey, data, startLat, startLng, building)
           })
         }
@@ -663,11 +927,11 @@ export function useMapMarkers({
         if (!pos) return
         const lat = pos.lat()
         const lng = pos.lng()
-        label?.setPosition({ lat, lng })
+        syncDetailMarkerPositions(entry, lat, lng)
         callbacksRef.current.onDetailMoved?.(layerKey, data, lat, lng, building)
       })
 
-      detailMarkersRef.current.push({ type: layerKey, building, data, marker, label, dragKey })
+      detailMarkersRef.current.push(entry)
       registerMarqueeTarget(dragKey, {
         kind: 'point',
         resolve: () => {
@@ -691,6 +955,8 @@ export function useMapMarkers({
     map.addListener('zoom_changed', refreshDetailVisibility)
     map.addListener('idle', refreshDetailVisibility)
 
+    void refreshRtuPictureBadges()
+
     return () => {
       for (const entry of buildingMarkersRef.current) {
         unregisterMarqueeTarget(buildingDragKey(entry.building.address))
@@ -701,6 +967,7 @@ export function useMapMarkers({
         unregisterMarqueeTarget(entry.dragKey)
         entry.marker.setMap(null)
         entry.label?.setMap(null)
+        entry.picBadge?.setMap(null)
       }
       buildingMarkersRef.current = []
       detailMarkersRef.current = []
@@ -716,6 +983,7 @@ export function useMapMarkers({
     openDetailInfo,
     attachInfoWindowActions,
     refreshDetailVisibility,
+    refreshRtuPictureBadges,
     stopSoloMove,
     beginDragSession,
     commitGroupDrag,
@@ -726,6 +994,12 @@ export function useMapMarkers({
   useEffect(() => {
     refreshDetailVisibility()
   }, [layers, refreshDetailVisibility])
+
+  useEffect(() => {
+    return onRtuPicturesChanged(() => {
+      void refreshRtuPictureBadges()
+    })
+  }, [refreshRtuPictureBadges])
 
   useEffect(() => {
     const closePopups = () => {
@@ -763,7 +1037,9 @@ export function useMapMarkers({
             : !dm.building),
       )
       if (!entry || !map) return
-      panToPreserveRotation(map, { lat: entry.data.lat, lng: entry.data.lng }, 21)
+      panToPreserveRotation(map, { lat: entry.data.lat, lng: entry.data.lng }, MAP_DETAIL_ZOOM, {
+        onlyZoomIn: true,
+      })
       openDetailInfo(entry)
     }
     window.addEventListener('map:openDetail', handler)
@@ -776,7 +1052,9 @@ export function useMapMarkers({
       if (!map) return
       const entry = buildingMarkersRef.current.find((m) => m.building.address === detail.address)
       if (!entry) return
-      panToPreserveRotation(map, { lat: entry.building.lat, lng: entry.building.lng }, 21)
+      panToPreserveRotation(map, { lat: entry.building.lat, lng: entry.building.lng }, MAP_DETAIL_ZOOM, {
+        onlyZoomIn: true,
+      })
       callbacksRef.current.onSelectBuilding(entry.building)
       openBuildingInfo(entry.building, entry.marker)
     }
@@ -785,6 +1063,9 @@ export function useMapMarkers({
   }, [map, openBuildingInfo])
 
   const visibleAddressesRef = useRef('')
+  const lastFocusedBuildingRef = useRef<string | null>(null)
+  const openBuildingInfoRef = useRef(openBuildingInfo)
+  openBuildingInfoRef.current = openBuildingInfo
 
   useEffect(() => {
     const q = search.trim()
@@ -808,22 +1089,37 @@ export function useMapMarkers({
       useUiStore.getState().addMarkerPickMode ||
       useUiStore.getState().polygonDrawMode ||
       useUiStore.getState().isModalOpen('addMarker')
-    ) return
-    if (currentBuilding) {
-      highlightBuilding(currentBuilding)
-      if (!map) return
-      const entry = buildingMarkersRef.current.find(
-        (m) => m.building.address === currentBuilding.address,
-      )
-      if (entry) {
-        panToPreserveRotation(map, { lat: currentBuilding.lat, lng: currentBuilding.lng }, 21)
-        openBuildingInfo(currentBuilding, entry.marker)
-        setTimeout(() => {
-          document.querySelector('.building-item.active')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-        }, 60)
-      }
+    ) {
+      return
     }
-  }, [currentBuilding, map, highlightBuilding, openBuildingInfo])
+    if (!currentBuilding) {
+      lastFocusedBuildingRef.current = null
+      return
+    }
+
+    const address = currentBuilding.address
+    const isNewSelection = lastFocusedBuildingRef.current !== address
+    lastFocusedBuildingRef.current = address
+
+    highlightBuilding(currentBuilding)
+    if (!map || !isNewSelection) return
+
+    const entry = buildingMarkersRef.current.find(
+      (m) => m.building.address === currentBuilding.address,
+    )
+    if (entry) {
+      panToPreserveRotation(
+        map,
+        { lat: currentBuilding.lat, lng: currentBuilding.lng },
+        MAP_DETAIL_ZOOM,
+        { onlyZoomIn: true },
+      )
+      openBuildingInfoRef.current(currentBuilding, entry.marker)
+      setTimeout(() => {
+        document.querySelector('.building-item.active')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }, 60)
+    }
+  }, [currentBuilding, map, highlightBuilding])
 
   useEffect(() => {
     refreshDetailVisibility()

@@ -8,6 +8,7 @@ import {
   registerGroupDragVisuals,
   setNativeDragPolygonKey,
 } from '@/lib/mapGroupDragSession'
+import { MAP_DETAIL_ZOOM } from '@/lib/constants'
 import { afterMapViewChange, panToPreserveRotation } from '@/lib/mapRotation'
 import { consumeMapClickClearSuppression, registerMarqueeTarget, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
 import { tryConsumeMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
@@ -38,7 +39,8 @@ function panToPolygon(map: google.maps.Map, data: Polygon) {
   panToPreserveRotation(
     map,
     { lat: lats / data.paths.length, lng: lngs / data.paths.length },
-    21,
+    MAP_DETAIL_ZOOM,
+    { onlyZoomIn: true },
   )
 }
 

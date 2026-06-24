@@ -3,12 +3,15 @@ import { useQueryClient } from '@tanstack/react-query'
 import { VersionStamp } from '@/components/VersionStamp/VersionStamp'
 import { CostBanner } from '@/features/cost-estimator/CostBanner'
 import { MapPanel } from '@/features/map/MapPanel'
+import { RtuPictureViewer } from '@/features/rtu-pictures/RtuPictureViewer'
 import { SettingsModal } from '@/features/settings/SettingsModal'
 import { Sidebar } from '@/features/sidebar/Sidebar'
 import { useFilteredBuildings } from '@/hooks/useFilteredBuildings'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { usePortfolioData, persistPortfolio, type PortfolioData } from '@/hooks/usePortfolioData'
 import { useSettingsStore } from '@/stores/settingsStore'
+import { useRtuPricingStore } from '@/stores/rtuPricingStore'
+import { useRtuScheduleStore } from '@/stores/rtuScheduleStore'
 import { usePortfolioStore } from '@/stores/portfolioStore'
 import { useUiStore } from '@/stores/uiStore'
 import styles from './AppShell.module.css'
@@ -21,6 +24,8 @@ export function AppShell() {
   const [portfolioOverride, setPortfolioOverride] = useState<PortfolioData | null>(null)
 
   const loadSettings = useSettingsStore((s) => s.loadSettings)
+  const loadRtuPricing = useRtuPricingStore((s) => s.load)
+  const loadRtuSchedule = useRtuScheduleStore((s) => s.load)
   const settingsOpen = useUiStore((s) => s.settingsOpen)
   const closeSettings = useUiStore((s) => s.closeSettings)
   const polygonDrawOpen = useUiStore((s) => s.isModalOpen('polygonDraw'))
@@ -29,12 +34,17 @@ export function AppShell() {
   const addMarkerOpen = useUiStore((s) => s.isModalOpen('addMarker'))
   const openAddMarker = useUiStore((s) => s.openModal)
   const closeAddMarker = useUiStore((s) => s.closeModal)
+  const rtuPictureViewer = useUiStore((s) => s.rtuPictureViewer)
+  const closeRtuPictureViewer = useUiStore((s) => s.closeRtuPictureViewer)
+  const setRtuPictureViewerIndex = useUiStore((s) => s.setRtuPictureViewerIndex)
 
   const markSaved = usePortfolioStore((s) => s.markSaved)
 
   useEffect(() => {
     void loadSettings()
-  }, [loadSettings])
+    void loadRtuPricing()
+    void loadRtuSchedule()
+  }, [loadSettings, loadRtuPricing, loadRtuSchedule])
 
   const portfolio = portfolioOverride ?? data ?? EMPTY_PORTFOLIO
 
@@ -129,6 +139,17 @@ export function AppShell() {
         }}
         onSaved={markSaved}
       />
+      {rtuPictureViewer ? (
+        <RtuPictureViewer
+          open
+          pictures={rtuPictureViewer.pictures}
+          index={rtuPictureViewer.index}
+          rtuName={rtuPictureViewer.rtuName}
+          buildingAddress={rtuPictureViewer.buildingAddress}
+          onClose={closeRtuPictureViewer}
+          onIndexChange={setRtuPictureViewerIndex}
+        />
+      ) : null}
     </div>
   )
 }

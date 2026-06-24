@@ -12,7 +12,7 @@ Make: CARRIER
 Date Installed: Aug 21, 2022
 Heating Capacity: BTU''S:110,000
 Cooling Capacity: 48,000 BTU (4 Ton)', 43.6376063, -79.6727085, '48FCEA04A2A5A0B0A0', '3422C08580', 'CARRIER', 'Aug 21, 2022', 2022, NULL, 4, 'SUITE 4');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (460, 61, 'RTU- 09 Hybrid/Dual Fuel Heat Pump', 'Building: 6150 Kennedy Road
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (460, 61, 'RTU- 09 Hybrid', 'Building: 6150 Kennedy Road
 System: Roof Top Units
 Description: RTU 09 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 4
@@ -94,7 +94,7 @@ Make: CARRIER
 Date Installed: Jan 01, 2022
 Heating Capacity: BTU''S:110,000
 Cooling Capacity: 48,000 BTU (4 Ton)', 43.6371242, -79.6737529, '48FCEA04A2A5A0B0A0', '3222C05866', 'CARRIER', 'Jan 01, 2022', 2022, NULL, 4, 'SUITE 10');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (468, 61, 'RTU- 17 Hybrid/Dual Fuel Heat Pump', 'Building: 6150 Kennedy Road
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (468, 61, 'RTU- 17 Hybrid', 'Building: 6150 Kennedy Road
 System: Roof Top Units
 Description: RTU 17 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 10
@@ -272,7 +272,7 @@ Make: YORK
 Date Installed: Oct 17, 2006
 Heating Capacity: BTU''S:180,000
 Cooling Capacity: 90,000 BTU (7.5 Ton)', 43.6363778, -79.6727909, 'DM090N15N5AAA4A', 'NOG6687943', 'YORK', 'Oct 17, 2006', 2006, NULL, 7.5, 'Suite 2');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (485, 63, 'RTU-08 Hybrid/Dual Fuel Heat Pump', 'Building: 6175 Kenway Drive
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (485, 63, 'RTU-08 Hybrid', 'Building: 6175 Kenway Drive
 System: Roof Top Units
 Description: RTU-08 Hybrid/Dual Fuel Heat Pump
 Suite: Single Tenant

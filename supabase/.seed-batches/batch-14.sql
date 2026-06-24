@@ -103,7 +103,7 @@ Make: YORK
 Date Installed: Oct 29, 2007
 Heating Capacity 56,000 BTU''s
 Cooling Capacity: 30,000 BTU (2.5 Ton)', 43.5293488, -79.7182586, 'D2NZ030N05606A', 'NOM7477645', 'YORK', 'Oct 29, 2007', 2007, '56,000', 2.5, 'SUITE 13');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1066, 100, 'RTU- 14 TB Hybrid/Dual Fuel Heat Pump', 'Building: 4141 Sladeview Cres
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1066, 100, 'RTU- 14 TB Hybrid', 'Building: 4141 Sladeview Cres
 System: Roof Top Units
 Description: RTU 14 TB Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 14
@@ -133,7 +133,7 @@ Make: CARRIER
 Date Installed: Oct 29, 2019
 Heating Capacity 60,000 BTU''s
 Cooling Capacity: 30,000 BTU (2.5 Ton)', 43.5295941, -79.7184192, '48VLD3006030', '2219F48783', 'CARRIER', 'Oct 29, 2019', 2019, '60,000', 2.5, 'SUITE 16');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1069, 100, 'RTU- 17 Hybrid/Dual Fuel Heat Pump', 'Building: 4141 Sladeview Cres
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1069, 100, 'RTU- 17 Hybrid', 'Building: 4141 Sladeview Cres
 System: Roof Top Units
 Description: RTU 17 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 17
@@ -241,7 +241,7 @@ Make: LENNOX
 Date Installed: Apr 26, 2023
 Heating Capacity 65,000 BTU''s
 Cooling Capacity: 30,000 BTU (2.5 Ton)', 43.5301071, -79.7188048, 'KGB030S4EW2P', '5623A06453', 'LENNOX', 'Apr 26, 2023', 2023, '65,000', 2.5, 'SUITE 03');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1096, 101, 'RTU- 04 Hybrid/Dual Fuel Heat Pump', 'Building: 4161 Sladeview Cres
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1096, 101, 'RTU- 04 Hybrid', 'Building: 4161 Sladeview Cres
 System: Roof Top Units
 Description: RTU 04 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 04
@@ -253,7 +253,7 @@ Heating Capacity 50,000 BTU''s
 Cooling Capacity: 24,000 BTU (2 Ton)
 $28,040 Replaced by LPI in 2024
 (dual-fuel hybrid heat pump)', 43.5301569, -79.718787, '4DCZ5024F1060AA', '24464540FA', 'TRANE', 'Nov 29, 2024', 2024, '50,000', 2, 'SUITE 04');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1097, 101, 'RTU- 05 Hybrid/Dual Fuel Heat Pump', 'Building: 4161 Sladeview Cres
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1097, 101, 'RTU- 05 Hybrid', 'Building: 4161 Sladeview Cres
 System: Roof Top Units
 Description: RTU 05 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 05
@@ -304,7 +304,7 @@ Make: CARRIER
 Date Installed: Oct 29, 2007
 Heating Capacity 60,000 BTU''s
 Cooling Capacity: 24,000 BTU (2 Ton)', 43.5305077, -79.7187392, '48ES024060301', '5007G50128', 'CARRIER', 'Oct 29, 2007', 2007, '60,000', 2, 'SUITE 09');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1102, 101, 'RTU- 12 Hybrid/Dual Fuel Heat Pump', 'Building: 4161 Sladeview Cres
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1102, 101, 'RTU- 12 Hybrid', 'Building: 4161 Sladeview Cres
 System: Roof Top Units
 Description: RTU 12 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 12
@@ -419,7 +419,7 @@ Date Installed: Jul 07, 2022
 Heating Capacity 60,000 BTU''s
 Cooling Capacity: 24,000 BTU (2 Ton)
 410A', 43.530813, -79.7183374, '48VL-E2406030', '2222F50407', 'CARRIER', 'Jul 07, 2022', 2022, '60,000', 2, 'SUITE 14');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1113, 101, 'RTU- 02 Hybrid/Dual Fuel Heat Pump', 'Building: 4161 Sladeview Cres
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1113, 101, 'RTU- 02 Hybrid', 'Building: 4161 Sladeview Cres
 System: Roof Top Units
 Description: RTU 02 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 02
@@ -431,7 +431,7 @@ Heating Capacity: 80,000 BTU''s
 Cooling Capacity: 36,000 BTU (3 Ton)
 $46,244 New Installation by LPI in 2024
 (dual-fuel hybrid heat pump)', 43.5300358, -79.7187856, 'DHC036HWRMB2FD0E', '244913404L', 'TRANE', 'Dec 04, 2024', 2024, '80,000', 3, 'SUITE 02');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1114, 101, 'RTU- 10 Hybrid/Dual Fuel Heat Pump', 'Building: 4161 Sladeview Cres
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1114, 101, 'RTU- 10 Hybrid', 'Building: 4161 Sladeview Cres
 System: Roof Top Units
 Description: RTU 10 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 10
@@ -514,7 +514,7 @@ Heating capacity 75,000 BTU''s
 Cooling Capacity: 30,000 BTU 2.5 Ton
 $37,571 ? (3 Ton) Replaced by LPI in 2024
 (dual-fuel hybrid heat pump) changed to Full Electric', 43.5311964, -79.7172202, 'WHC036HWREB2FD0E1A', '244913454L', 'TRANE', 'Dec 30, 2024', 2024, '75,000', 3, 'SUITE 46');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1137, 102, 'RTU- 45 Hybrid/Dual Fuel Heat Pump', 'Building: 4181 Sladeview Cres
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1137, 102, 'RTU- 45 Hybrid', 'Building: 4181 Sladeview Cres
 System: Roof Top Units
 Description: RTU 45 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 45
@@ -544,7 +544,7 @@ Make: YORK
 Date Installed: Oct 29, 2011
 Heating capacity 125,000 BTU''s
 Cooling Capacity: 48,000 BTU (4 Ton)', 43.5313704, -79.7173654, 'ZF048N10N1AAA1A', 'N1L1384524', 'YORK', 'Oct 29, 2011', 2011, '125,000', 4, 'SUITE 43');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1140, 102, 'RTU-42 Hybrid/Dual Fuel Heat Pump', 'Building: 4181 Sladeview Cres
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (1140, 102, 'RTU-42 Hybrid', 'Building: 4181 Sladeview Cres
 System: Roof Top Units
 Description: RT42 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 42

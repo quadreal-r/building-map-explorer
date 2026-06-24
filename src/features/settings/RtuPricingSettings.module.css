@@ -1,0 +1,138 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.intro {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-secondary, #c8dff8);
+  margin: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hiddenFile {
+  display: none;
+}
+
+.meta {
+  font-size: 10px;
+  color: var(--text-muted, #90b8e0);
+  margin: 0;
+  font-family: 'DM Mono', ui-monospace, monospace;
+}
+
+.tableWrap {
+  overflow-x: visible;
+  overflow-y: auto;
+  max-height: min(60vh, 520px);
+  border: 1px solid var(--border, #2e6ec0);
+  border-radius: 8px;
+}
+
+.table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface2, #143d78);
+  color: var(--text-muted, #90b8e0);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 6px 6px;
+  white-space: normal;
+  line-height: 1.25;
+  max-width: 76px;
+  vertical-align: bottom;
+  border-bottom: 1px solid var(--border, #2e6ec0);
+}
+
+.table th:first-child,
+.table th:nth-child(2) {
+  max-width: none;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 4px 5px;
+  border-bottom: 1px solid rgba(46, 110, 192, 0.35);
+  vertical-align: middle;
+}
+
+.valueCell {
+  white-space: nowrap;
+}
+
+.tonnage {
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--text-primary, #e8f0fe);
+}
+
+.model {
+  max-width: 118px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary, #c8dff8);
+  font-size: 10px;
+}
+
+.cellInput {
+  width: 72px;
+  background: var(--surface, #0f2d5c);
+  border: 1px solid var(--border, #2e6ec0);
+  border-radius: 4px;
+  color: var(--text-primary, #fff);
+  font-size: 11px;
+  padding: 3px 5px;
+  font-family: 'DM Mono', ui-monospace, monospace;
+  text-align: right;
+}
+
+.moneyInput {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.moneyPrefix {
+  color: var(--text-muted, #90b8e0);
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.moneyCellInput {
+  width: 5.75rem;
+  min-width: 5.75rem;
+}
+
+.computed {
+  white-space: nowrap;
+  font-family: 'DM Mono', ui-monospace, monospace;
+  color: var(--accent, #7db8ff);
+  font-weight: 600;
+  text-align: right;
+}
+
+.hint {
+  font-size: 10px;
+  color: var(--text-muted, #90b8e0);
+  margin: 0;
+}

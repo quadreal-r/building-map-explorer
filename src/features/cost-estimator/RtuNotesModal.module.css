@@ -1,0 +1,41 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted, #90b8e0);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  background: var(--surface2, #143d78);
+  border: 1px solid var(--border, #2e6ec0);
+  border-radius: 6px;
+  color: var(--text-primary, #fff);
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 8px 10px;
+  font-family: Inter, sans-serif;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cancelBtn {
+  padding: 6px 14px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  background: var(--surface2, #143d78);
+  color: var(--text-secondary, #c8dff8);
+  border: 1px solid var(--border, #2e6ec0);
+}

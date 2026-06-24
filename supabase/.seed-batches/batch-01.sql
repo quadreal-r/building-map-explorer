@@ -160,7 +160,7 @@ Date Installed: Jul 01, 2010
 Heating Capacity: 70,000 BTU
 Cooling Capacity: 30,000 BTU (2.5 Ton)
 R22 Refrigerant', 43.6818803, -79.6658799, 'PGD430040K000C1', 'C102888078', 'ICP', 'Jul 01, 2010', 2010, '70,000', 2.5, 'Single Tenant');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (6, 1, 'RTU-06 Hybrid/Dual Fuel Heat Pump', 'Building: 1850 Derry Road East
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (6, 1, 'RTU-06 Hybrid', 'Building: 1850 Derry Road East
 System: Roof Top Units
 Description: RTU-06 Hybrid/Dual Fuel Heat Pump
 Suite: Single Tenant

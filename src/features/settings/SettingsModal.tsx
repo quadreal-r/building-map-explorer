@@ -1,5 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { ImportExportButtons } from '@/features/import-export/ImportExportButtons'
+import { BulkRtuPictureImport } from '@/features/settings/BulkRtuPictureImport'
+import { ImportRtuSchedule } from '@/features/cost-estimator/ImportRtuSchedule'
+import { RtuPricingSettings } from '@/features/settings/RtuPricingSettings'
 import { Modal } from '@/components/Modal/Modal'
 import { APP_THEMES } from '@/lib/themes'
 import { collectFilterOptions } from '@/lib/filters'
@@ -65,6 +68,13 @@ function SettingsForm({
     }
     return initial
   })
+  const [uploadBusy, setUploadBusy] = useState(false)
+  const [pricingOpen, setPricingOpen] = useState(false)
+
+  const handleClose = useCallback(() => {
+    if (uploadBusy) return
+    onClose()
+  }, [onClose, uploadBusy])
 
   const applyManagerRename = (original: string, nextName: string) => {
     const trimmed = nextName.trim() || original
@@ -86,12 +96,12 @@ function SettingsForm({
 
   const handleEditPositions = () => {
     setDragMode(!dragMode)
-    onClose()
+    handleClose()
   }
 
   const handleImport = (data: PortfolioData) => {
     onImport(data)
-    onClose()
+    handleClose()
     const save = window.confirm(
       'Import complete. Export to HTML to keep these changes on this computer?',
     )
@@ -107,13 +117,20 @@ function SettingsForm({
     void saveDatabase(portfolio).then((ok) => {
       if (ok) {
         onSaved?.()
-        onClose()
+        handleClose()
       }
     })
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Settings" width={420} align="right">
+    <Modal
+      open={open}
+      onClose={handleClose}
+      preventClose={uploadBusy}
+      title="Settings"
+      width={420}
+      align="right"
+    >
       <div className={styles.body}>
         <section>
           <div className={styles.sectionLabel}>Colour theme</div>
@@ -161,6 +178,25 @@ function SettingsForm({
         </section>
 
         <section>
+          <div className={styles.sectionLabel}>RTU replacement pricing</div>
+          <div className={styles.tools}>
+            <button
+              type="button"
+              className="btn-action"
+              style={{ width: '100%', justifyContent: 'flex-start' }}
+              onClick={() => setPricingOpen(true)}
+            >
+              Edit RTU&apos;s Pricing
+            </button>
+            <p className={styles.hint}>
+              Use <strong>Import RTU cost</strong> below for replacement years, notes, and tonnage
+              pricing from the Capital workbook, or edit supply/install columns per tier here.
+            </p>
+            <ImportRtuSchedule buildings={portfolio.buildings} />
+          </div>
+        </section>
+
+        <section>
           <div className={styles.sectionLabel}>Tools</div>
           <div className={styles.tools}>
             <button
@@ -169,7 +205,9 @@ function SettingsForm({
               style={{ width: '100%', justifyContent: 'flex-start' }}
               onClick={handleEditPositions}
             >
-              {dragMode ? `✓ Edit positions (on${dragSelectedCount ? ` · ${dragSelectedCount} selected` : ''})` : 'Edit positions'}
+              {dragMode
+                ? `✓ Edit Multiple Positions (on${dragSelectedCount ? ` · ${dragSelectedCount} selected` : ''})`
+                : 'Edit Multiple Positions'}
             </button>
             {dragMode ? (
               <button
@@ -178,7 +216,7 @@ function SettingsForm({
                 style={{ width: '100%', justifyContent: 'flex-start' }}
                 onClick={() => {
                   clearDragSelect()
-                  onClose()
+                  handleClose()
                 }}
                 disabled={dragSelectedCount === 0}
               >
@@ -193,7 +231,7 @@ function SettingsForm({
               className="btn-action"
               style={{ width: '100%', justifyContent: 'flex-start' }}
               onClick={() => {
-                onClose()
+                handleClose()
                 onOpenAddMarker()
               }}
             >
@@ -204,7 +242,7 @@ function SettingsForm({
               className="btn-action"
               style={{ width: '100%', justifyContent: 'flex-start' }}
               onClick={() => {
-                onClose()
+                handleClose()
                 onOpenPolygonDraw()
               }}
               title="Add a new polygon by clicking points on the map"
@@ -218,7 +256,7 @@ function SettingsForm({
               onClick={handleExportHtml}
               title="Download a self-contained HTML file with map, filters, cost estimator, and all portfolio data"
             >
-              Export to HTML
+              Export Application to HTML
             </button>
             <p className={styles.hint}>
               Saves the full app into one file you can open offline (double-click or file://). Ctrl+S
@@ -227,11 +265,13 @@ function SettingsForm({
             <ImportExportButtons
               portfolio={portfolio}
               onImport={handleImport}
-              onExportComplete={onClose}
+              onExportComplete={handleClose}
             />
+            <BulkRtuPictureImport portfolio={portfolio} onBusyChange={setUploadBusy} />
           </div>
         </section>
       </div>
+      <RtuPricingSettings open={pricingOpen} onClose={() => setPricingOpen(false)} />
     </Modal>
   )
 }

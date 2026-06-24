@@ -14,7 +14,13 @@ import {
   tenantPolygonCount,
 } from '@/lib/polygonBuildings'
 import type { RcbComputeResult } from '@/lib/costEstimator'
-import { rcbBuildScheduledExport, rcbCostForTier, rcbProjection } from '@/lib/costEstimator'
+import {
+  rcbBuildScheduledExport,
+  rcbCostForTier,
+  rcbProjection,
+} from '@/lib/costEstimator'
+import type { RcbPricingTable } from '@/lib/costEstimator.pricing'
+import { DEFAULT_RCB_PRICING } from '@/lib/costEstimator.pricing'
 
 const FMT_COORD = '0.0000000'
 const FMT_INT = '#,##0'
@@ -512,9 +518,17 @@ export function importPortfolioExcel(buffer: ArrayBuffer): PortfolioData {
 export function exportRcbExcel(
   result: RcbComputeResult,
   scopeLabel: string,
-  options: { replacementYearByRtu?: Record<string, string> } = {},
+  options: {
+    replacementYearByRtu?: Record<string, string>
+    pricingTable?: RcbPricingTable
+  } = {},
 ): void {
-  const scheduled = rcbBuildScheduledExport(result, options.replacementYearByRtu ?? {})
+  const pricingTable = options.pricingTable ?? DEFAULT_RCB_PRICING
+  const scheduled = rcbBuildScheduledExport(
+    result,
+    options.replacementYearByRtu ?? {},
+    pricingTable,
+  )
   const T = scheduled.totals
   const global = result.totals
   const basisLbl =
@@ -548,7 +562,6 @@ export function exportRcbExcel(
     [],
     ['Buildings with qualifying RTUs', T.bldgCount],
     ['Qualifying RTUs', T.units],
-    ['Total cooling tonnage', Math.round(T.tons * 10) / 10],
     ['Average cost per unit', T.units ? Math.round(T.cost / T.units) : 0],
     [
       hasCustomSchedule
@@ -574,22 +587,13 @@ export function exportRcbExcel(
       'Cluster',
       'Manager',
       'Qualifying RTUs',
-      'Total Tons',
       'Scheduled Replacement Cost (CAD)',
     ],
   ]
   for (const r of scheduled.perBldg) {
-    bldg.push([
-      r.address,
-      r.park,
-      r.cluster,
-      r.manager,
-      r.units,
-      Math.round(r.tons * 10) / 10,
-      Math.round(r.cost),
-    ])
+    bldg.push([r.address, r.park, r.cluster, r.manager, r.units, Math.round(r.cost)])
   }
-  bldg.push(['TOTAL', '', '', '', T.units, Math.round(T.tons * 10) / 10, Math.round(T.cost)])
+  bldg.push(['TOTAL', '', '', '', T.units, Math.round(T.cost)])
 
   const li: unknown[][] = [
     [
@@ -614,7 +618,8 @@ export function exportRcbExcel(
   for (const r of [...scheduled.items].sort((a, b) =>
     a.address < b.address ? -1 : a.address > b.address ? 1 : a.rtu.localeCompare(b.rtu),
   )) {
-    const globalUnitCost = rcbCostForTier(r.tierKey, result.basis, scheduled.defaultYear) ?? r.cost
+    const globalUnitCost =
+      rcbCostForTier(r.tierKey, result.basis, scheduled.defaultYear, pricingTable) ?? r.cost
     const vsGlobal =
       r.replacementYear === scheduled.defaultYear ? '—' : Math.round(r.cost - globalUnitCost)
     li.push([
@@ -645,7 +650,7 @@ export function exportRcbExcel(
   }
   tier.push(['TOTAL', '', T.units, Math.round(T.cost)])
 
-  const pj = rcbProjection(result)
+  const pj = rcbProjection(result, pricingTable)
   const proj: unknown[][] = [
     [
       'Replacement Year',

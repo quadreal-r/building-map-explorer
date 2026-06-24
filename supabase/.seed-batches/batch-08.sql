@@ -796,6 +796,6 @@ Heating Capacity BTU 125,000
 - THIS UNIT SERVES UNIT 4
 - FILTER SIZE 20X25X1 (1)
 - BELT DD', 43.6142301, -79.743509, 'ZE060H12B5A1ABA1A1', 'N1E7671830', 'YORK', 'May 08, 2017', 2017, NULL, 5, 'SUITE 4-5');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (612, 73, 'RTU- 16 Hybrid/Dual Fuel Heat Pump', 'Building: 6975 Creditview Road
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (612, 73, 'RTU- 16 Hybrid', 'Building: 6975 Creditview Road
 System: Roof Top Units
 Description: RTU 16 Hybrid/Dual Fuel Heat Pump

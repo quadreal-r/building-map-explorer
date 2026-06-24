@@ -1,3 +1,4 @@
+import { MAP_DETAIL_ZOOM } from '@/lib/constants'
 import type { Building, Polygon } from '@/types/domain'
 
 export type SearchHitKind = 'rtu' | 'polygon' | 'building'
@@ -106,7 +107,7 @@ export function collectSearchHits(
 export function openSearchHit(hit: SearchHit): void {
   queueMicrotask(() => {
     window.dispatchEvent(
-      new CustomEvent('map:panTo', { detail: { lat: hit.lat, lng: hit.lng, zoom: 21 } }),
+      new CustomEvent('map:panTo', { detail: { lat: hit.lat, lng: hit.lng, zoom: MAP_DETAIL_ZOOM } }),
     )
 
     if (hit.kind === 'rtu' && hit.layerKey && hit.detailName) {

@@ -1,8 +1,8 @@
 import {
+  DEFAULT_RCB_PRICING,
   RCB_DEFAULT_THRESHOLD,
-  RCB_TIERS,
   RCB_YEARS,
-  RTU_PRICING,
+  type RcbPricingTable,
   type RtuPricingUnit,
 } from '@/lib/costEstimator.pricing'
 import { getRtuAge, getRtuYear, parseRtuMeta, rcbGetTons } from '@/lib/rtu'
@@ -12,6 +12,8 @@ export {
   RTU_PRICING,
   RCB_TIERS,
   RCB_YEARS,
+  DEFAULT_RCB_PRICING,
+  type RcbPricingTable,
   type RtuPricingUnit,
 } from '@/lib/costEstimator.pricing'
 
@@ -96,20 +98,23 @@ export function formatRtuTons(tons: number | null | undefined): string {
 }
 
 /** Round tons up to the nearest supplied pricing tier. */
-export function rcbTierFor(tons: number | null): RcbTierMatch | null {
+export function rcbTierFor(
+  tons: number | null,
+  table: RcbPricingTable = DEFAULT_RCB_PRICING,
+): RcbTierMatch | null {
   if (!tons || tons <= 0) return null
 
   let tier: number | null = null
-  for (const candidate of RCB_TIERS) {
+  for (const candidate of table.tiers) {
     if (candidate >= tons - 0.001) {
       tier = candidate
       break
     }
   }
-  if (tier === null) tier = RCB_TIERS[RCB_TIERS.length - 1]!
+  if (tier === null) tier = table.tiers[table.tiers.length - 1]!
 
   const key = String(tier)
-  const unit = RTU_PRICING[key]
+  const unit = table.pricing[key]
   if (!unit) return null
 
   return { tier, key, unit }
@@ -123,8 +128,18 @@ export function rcbUnitCost(
 ): number | null {
   const table = unit[basis]
   if (!table) return null
-  const cost = table[year]
-  return cost == null ? null : cost
+  const direct = table[year]
+  if (direct != null) return direct
+
+  if (basis === 'hyb') {
+    const base2026 = table['2026']
+    const yearNum = Number(year)
+    if (base2026 != null && Number.isFinite(yearNum) && yearNum > 2032) {
+      return Math.round(base2026 * 1.05 ** (yearNum - 2026))
+    }
+  }
+
+  return null
 }
 
 export interface RcbComputeOptions {
@@ -133,6 +148,7 @@ export interface RcbComputeOptions {
   threshold?: number
   scope?: string
   currentYear?: number
+  pricingTable?: RcbPricingTable
 }
 
 /** Core replacement-cost computation for in-scope buildings. */
@@ -147,6 +163,7 @@ export function rcbCompute(
   const threshold = options.threshold ?? RCB_DEFAULT_THRESHOLD
   const scope = options.scope ?? 'All buildings'
   const nowYear = options.currentYear
+  const pricingTable = options.pricingTable ?? DEFAULT_RCB_PRICING
 
   const perBldg: RcbBuildingSummary[] = []
   const tiers: Record<string, RcbTierAggregate> = {}
@@ -164,7 +181,7 @@ export function rcbCompute(
       if (age == null || age < threshold) continue
 
       const tons = rcbGetTons(rtu)
-      const tierMatch = rcbTierFor(tons)
+      const tierMatch = rcbTierFor(tons, pricingTable)
       const cost = tierMatch
         ? rcbUnitCost(tierMatch.unit, basis, year)
         : null
@@ -280,8 +297,9 @@ export function rcbCostForTier(
   tierKey: number,
   basis: CostBasis,
   replacementYear: string,
+  table: RcbPricingTable = DEFAULT_RCB_PRICING,
 ): number | null {
-  const unit = RTU_PRICING[String(tierKey)]
+  const unit = table.pricing[String(tierKey)]
   return unit ? rcbUnitCost(unit, basis, replacementYear) : null
 }
 
@@ -294,11 +312,13 @@ export function rcbLineItemsWithReplacementYears(
   basis: CostBasis,
   defaultYear: string,
   assignments: Record<string, string> = {},
+  table: RcbPricingTable = DEFAULT_RCB_PRICING,
 ): RcbScheduledLineItem[] {
   return items.map((item) => {
     const key = rcbReplacementYearKey(item.address, item.rtu)
     const replacementYear = assignments[key] ?? defaultYear
-    const cost = rcbCostForTier(item.tierKey, basis, replacementYear) ?? item.cost
+    const cost =
+      rcbCostForTier(item.tierKey, basis, replacementYear, table) ?? item.cost
     return { ...item, replacementYear, cost }
   })
 }
@@ -312,9 +332,24 @@ export function rcbSanitizeReplacementYearAssignments(
   const allowed = new Set(allowedYears)
   const next: Record<string, string> = {}
   for (const [key, year] of Object.entries(assignments)) {
-    if (year !== defaultYear && allowed.has(year)) next[key] = year
+    if (year !== defaultYear && (allowed.has(year) || /^\d{4}$/.test(year))) {
+      next[key] = year
+    }
   }
   return next
+}
+
+/** Merge pricing years with any assigned replacement years for dropdowns. */
+export function rcbScheduleYearOptions(
+  basis: CostBasis,
+  defaultYear: string,
+  assignments: Record<string, string> = {},
+): string[] {
+  const base = RCB_YEARS[basis] ?? [defaultYear]
+  const years = new Set([...base, defaultYear, ...Object.values(assignments)])
+  return [...years]
+    .filter((year) => /^\d{4}$/.test(year))
+    .sort((a, b) => Number(a) - Number(b))
 }
 
 export interface RcbScheduledExport {
@@ -330,6 +365,7 @@ export interface RcbScheduledExport {
 export function rcbBuildScheduledExport(
   result: RcbComputeResult,
   replacementYearByRtu: Record<string, string> = {},
+  table: RcbPricingTable = DEFAULT_RCB_PRICING,
 ): RcbScheduledExport {
   const defaultYear = result.year
   const items = rcbLineItemsWithReplacementYears(
@@ -337,6 +373,7 @@ export function rcbBuildScheduledExport(
     result.basis,
     defaultYear,
     replacementYearByRtu,
+    table,
   )
 
   const perBldgMap = new Map<string, RcbBuildingSummary>()
@@ -405,7 +442,10 @@ export function rcbTierBreakdownForItems(items: RcbLineItem[]): RcbTierAggregate
 }
 
 /** Project total cost across every available year for the current basis. */
-export function rcbProjection(result: RcbComputeResult): RcbProjectionPoint[] {
+export function rcbProjection(
+  result: RcbComputeResult,
+  table: RcbPricingTable = DEFAULT_RCB_PRICING,
+): RcbProjectionPoint[] {
   const years = RCB_YEARS[result.basis] ?? [result.year]
   const tierKeys = Object.keys(result.tiers)
 
@@ -413,7 +453,7 @@ export function rcbProjection(result: RcbComputeResult): RcbProjectionPoint[] {
     let total = 0
     for (const key of tierKeys) {
       const tier = result.tiers[key]
-      const unit = RTU_PRICING[key]
+      const unit = table.pricing[key]
       const cost = unit?.[result.basis]?.[year]
       if (cost != null && tier) total += tier.qty * cost
     }

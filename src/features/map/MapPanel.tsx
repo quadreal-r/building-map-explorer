@@ -7,11 +7,11 @@ import { usePolygons } from '@/features/polygons/usePolygons'
 import { useMapRotation } from '@/hooks/useMapRotation'
 import { useMapMarqueeSelect } from '@/hooks/useMapMarqueeSelect'
 import { readGoogleMapsEnv, loadGoogleMaps } from '@/lib/googleMaps'
-import { IMAGERY_MODES } from '@/lib/constants'
+import { IMAGERY_MODES, MAP_MAX_ZOOM } from '@/lib/constants'
 import { matchesUtility } from '@/lib/dragSelection'
 import { tenantPolygonCount, buildPolygonBuildingIndex } from '@/lib/polygonBuildings'
-import { panToPreserveRotation } from '@/lib/mapRotation'
 import { installMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
+import { panToPreserveRotation } from '@/lib/mapRotation'
 import type { Building, LayerKey, Polygon, PortfolioData, Rtu, Utility } from '@/types/domain'
 import type { ImageryMode } from '@/types/domain'
 import { useFilterStore } from '@/stores/filterStore'
@@ -207,7 +207,7 @@ export function MapPanel({
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<{ lat: number; lng: number; zoom?: number }>).detail
       if (!map) return
-      panToPreserveRotation(map, { lat: detail.lat, lng: detail.lng }, detail.zoom)
+      panToPreserveRotation(map, { lat: detail.lat, lng: detail.lng }, detail.zoom, { onlyZoomIn: true })
     }
     window.addEventListener('map:panTo', handler)
     return () => window.removeEventListener('map:panTo', handler)
@@ -223,6 +223,7 @@ export function MapPanel({
           mapId,
           center: { lat: 43.65, lng: -79.62 },
           zoom: 10,
+          maxZoom: MAP_MAX_ZOOM,
           mapTypeId: 'satellite',
           mapTypeControl: true,
           streetViewControl: true,

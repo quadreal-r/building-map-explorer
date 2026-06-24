@@ -2,6 +2,7 @@ import { RTU_AGE_CRITICAL, RTU_AGE_WARN } from '@/lib/constants'
 import { getColor } from '@/lib/colors'
 import { hasPlaceholderGps } from '@/lib/dataQuality'
 import { getRtuAge, getRtuYear } from '@/lib/rtu'
+import type { RtuPicture } from '@/lib/rtuPictures'
 import { showToastSuccess } from '@/lib/toast'
 import type { Building, LayerKey, Polygon, Rtu, Utility } from '@/types/domain'
 import { LAYER_COLORS } from '@/lib/constants'
@@ -33,6 +34,10 @@ function actionFooter(buttons: string): string {
 
 function copyButton(): string {
   return `<button class="iw-copy-btn" data-iw-action="copy-all" title="Copy all information">📋 Copy</button>`
+}
+
+function pictureButton(): string {
+  return `<button class="iw-pic-btn" data-iw-action="pictures" title="View RTU pictures">🖼 Picture</button>`
 }
 
 function copySource(text: string): string {
@@ -277,7 +282,65 @@ export function buildDetailInfoHtml(
       : ''
   const plainText = buildDetailInfoPlainText(layerKey, data, options)
 
-  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${badgeHtml}${closeButton()}</div><div class="iw-body">${rows}</div>${actionFooter(`${copyButton()}${moveBtn}${deleteBtn}`)}</div>`
+  const pictureBtn = layerKey === 'rtu' ? pictureButton() : ''
+
+  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${badgeHtml}${closeButton()}</div><div class="iw-body">${rows}</div>${actionFooter(`${copyButton()}${pictureBtn}${moveBtn}${deleteBtn}`)}</div>`
+}
+
+export function buildRtuPicturesHtml(
+  rtu: Rtu,
+  buildingAddress: string,
+  pictures: RtuPicture[],
+  pictureIndex: number,
+): string {
+  const name = rtu.name ?? ''
+  const age = getRtuAge(rtu)
+  let ageLine = ''
+  if (age != null) {
+    if (age >= RTU_AGE_CRITICAL) {
+      ageLine = `<span class="iw-rtu-age critical" style="margin-left:6px">${age} yrs old</span>`
+    } else if (age >= RTU_AGE_WARN) {
+      ageLine = `<span class="iw-rtu-age warn" style="margin-left:6px">${age} yrs old</span>`
+    }
+  }
+
+  const total = pictures.length
+  const safeIndex = total ? Math.min(Math.max(pictureIndex, 0), total - 1) : 0
+  const current = total ? pictures[safeIndex]! : null
+
+  let body = ''
+  if (!total) {
+    body = `<div class="iw-pictures-empty">No pictures yet.</div>
+      <p class="iw-pictures-hint">Choose images from your computer to attach to this RTU.</p>`
+  } else {
+    body = `<div class="iw-pictures-view">
+      <button type="button" class="iw-pictures-nav" data-iw-action="picture-prev" title="Previous picture"${total <= 1 ? ' disabled' : ''}>‹</button>
+      <div class="iw-pictures-frame">
+        <button type="button" class="iw-pictures-link" data-iw-action="picture-open-viewer" title="Open full size in viewer">
+          <img class="iw-pictures-img" src="${escapeHtml(current!.thumbUrl)}" alt="${escapeHtml(current!.fileName)}" />
+        </button>
+      </div>
+      <button type="button" class="iw-pictures-nav" data-iw-action="picture-next" title="Next picture"${total <= 1 ? ' disabled' : ''}>›</button>
+    </div>
+    <div class="iw-pictures-meta">
+      <span class="iw-pictures-counter">${safeIndex + 1} / ${total}</span>
+      <span class="iw-pictures-name">${escapeHtml(current!.fileName)}</span>
+    </div>`
+  }
+
+  const addBtn = `<button type="button" class="iw-pic-btn" data-iw-action="picture-add" title="Add pictures from disk">＋ Add pictures</button>`
+  const backBtn = `<button type="button" class="iw-back-btn" data-iw-action="pictures-back" title="Back to RTU details">← Details</button>`
+  const deletePicBtn =
+    total && current
+      ? `<button type="button" class="iw-del-btn" data-iw-action="picture-delete" data-iw-picture-file="${escapeHtml(current.fileName)}" data-iw-picture-static="${current.source === 'static' ? '1' : '0'}" title="${current.source === 'static' ? 'Bundled images must be removed from the database folder' : 'Delete this picture'}">🗑 Delete</button>`
+      : ''
+
+  return `<div class="iw iw-pictures" data-iw-building="${escapeHtml(buildingAddress)}" data-iw-rtu="${escapeHtml(name)}" data-iw-picture-index="${safeIndex}">
+    <div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${closeButton()}</div>
+    <div class="iw-body iw-pictures-body">${body}</div>
+    <input type="file" class="iw-pictures-input" data-iw-picture-input accept="image/*" multiple hidden />
+    ${actionFooter(`${backBtn}${addBtn}${deletePicBtn}`)}
+  </div>`
 }
 
 export function hasBadGps(building: Building): boolean {

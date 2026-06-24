@@ -1,0 +1,119 @@
+import { create } from 'zustand'
+import { rcbReplacementYearKey } from '@/lib/costEstimator'
+import { importEquipmentSchedule } from '@/lib/equipmentSheet'
+import type { Building } from '@/types/domain'
+
+const STORAGE_KEY = 'bme-rtu-schedule'
+
+interface StoredRtuSchedule {
+  replacementYears?: Record<string, string>
+  notes?: Record<string, string>
+  sourceFile?: string | null
+}
+
+interface RtuScheduleState {
+  replacementYears: Record<string, string>
+  notes: Record<string, string>
+  sourceFile: string | null
+  loaded: boolean
+  load: () => Promise<void>
+  applyEquipmentImport: (result: import('@/lib/equipmentSheet').EquipmentImportResult, sourceFile: string) => void
+  importWorkbook: (
+    file: File,
+    buildings: Building[],
+  ) => Promise<{ stats: ReturnType<typeof importEquipmentSchedule>['stats'] }>
+  setReplacementYear: (address: string, rtu: string, year: string, defaultYear: string) => void
+  setNotes: (address: string, rtu: string, notes: string) => void
+  getNotes: (address: string, rtu: string) => string
+  persist: () => void
+}
+
+function scheduleStorageKey(address: string, rtu: string): string {
+  return rcbReplacementYearKey(address, rtu)
+}
+
+export const useRtuScheduleStore = create<RtuScheduleState>((set, get) => ({
+  replacementYears: {},
+  notes: {},
+  sourceFile: null,
+  loaded: false,
+
+  load: async () => {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (!stored) {
+      set({ loaded: true })
+      return
+    }
+
+    try {
+      const parsed = JSON.parse(stored) as StoredRtuSchedule
+      set({
+        replacementYears: parsed.replacementYears ?? {},
+        notes: parsed.notes ?? {},
+        sourceFile: parsed.sourceFile ?? null,
+        loaded: true,
+      })
+    } catch {
+      set({ loaded: true })
+    }
+  },
+
+  applyEquipmentImport: (result, sourceFile) => {
+    set({
+      replacementYears: result.replacementYears,
+      notes: result.notes,
+      sourceFile,
+    })
+    get().persist()
+  },
+
+  importWorkbook: async (file, buildings) => {
+    const buffer = await file.arrayBuffer()
+    const result = importEquipmentSchedule(buffer, buildings)
+    set({
+      replacementYears: result.replacementYears,
+      notes: result.notes,
+      sourceFile: file.name,
+    })
+    get().persist()
+    return { stats: result.stats }
+  },
+
+  setReplacementYear: (address, rtu, year, defaultYear) => {
+    const key = rcbReplacementYearKey(address, rtu)
+    set((state) => {
+      const next = { ...state.replacementYears }
+      if (year === defaultYear) delete next[key]
+      else next[key] = year
+      return { replacementYears: next }
+    })
+    get().persist()
+  },
+
+  setNotes: (address, rtu, notes) => {
+    const key = scheduleStorageKey(address, rtu)
+    set((state) => {
+      const next = { ...state.notes }
+      const trimmed = notes.trim()
+      if (trimmed) next[key] = trimmed
+      else delete next[key]
+      return { notes: next }
+    })
+    get().persist()
+  },
+
+  getNotes: (address, rtu) => {
+    return get().notes[scheduleStorageKey(address, rtu)] ?? ''
+  },
+
+  persist: () => {
+    const { replacementYears, notes, sourceFile } = get()
+    const payload: StoredRtuSchedule = { replacementYears, notes, sourceFile }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+  },
+}))
+
+/** Replacement-year map keyed by `rcbReplacementYearKey` for the cost estimator. */
+export function getRtuReplacementYearAssignments(): Record<string, string> {
+  return useRtuScheduleStore.getState().replacementYears
+}

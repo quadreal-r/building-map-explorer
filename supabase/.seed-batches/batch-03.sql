@@ -33,7 +33,7 @@ Make: LENNOX
 Date Installed: Nov 24, 2003
 Heating Capacity 125,000 BTU''s
 Cooling Capacity: 60,000 BTU (5 Ton)', 43.6656825, -79.6486566, 'GCS16-060-120-4J', '5603B 01166', 'LENNOX', 'Nov 24, 2003', 2003, '125,000', 5, '-');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (151, 19, 'RTU-03 Hybrid/Dual Fuel Heat Pump', 'Building: 1745 Meyerside
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (151, 19, 'RTU-03 Hybrid', 'Building: 1745 Meyerside
 System: Roof Top Units
 Description: RTU-03 Hybrid/Dual Fuel Heat Pump
 Suite: -
@@ -83,7 +83,7 @@ Make: YORK
 Date Installed: Nov 24, 2016
 Heating Capacity 125,000 BTU''s
 Cooling Capacity: 48,000 BTU (4 Ton)', 43.6660435, -79.6490003, 'ZF048H12B5A1ABA1A1A', 'N1N6264671', 'YORK', 'Nov 24, 2016', 2016, '125,000', 4, '-');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (156, 19, 'RTU-08 Hybrid/Dual Fuel Heat Pump', 'Building: 1745 Meyerside
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (156, 19, 'RTU-08 Hybrid', 'Building: 1745 Meyerside
 System: Roof Top Units
 Description: RTU-08 Hybrid/Dual Fuel Heat Pump
 Suite: -
@@ -684,7 +684,7 @@ Date Installed: Nov 01, 2023
 Heating Capacity 240,000 BTU''s
 Cooling Capacity: 90,000 BTU (7.5 Ton)
 Installed by LPI Mechanical Inc. INVOICE# W37942', 43.6649409, -79.6559616, 'KGC092S4MH1J', '5623H08049', 'LENNOX', 'Nov 01, 2023', 2023, '240,000', 7.5, 'Single Tenant');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (218, 26, 'RTU-01 Hybrid/Dual Fuel Heat Pump', 'Building: 1550 Courtneypark Drive
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (218, 26, 'RTU-01 Hybrid', 'Building: 1550 Courtneypark Drive
 System: Roof Top Units
 Description: RTU-01 Hybrid/Dual Fuel Heat Pump
 Suite: Single Tenant

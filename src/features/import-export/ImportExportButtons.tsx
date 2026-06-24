@@ -40,17 +40,17 @@ export function ImportExportButtons({
         type="button"
         className={`btn-action${compact ? '' : ' primary'}`}
         onClick={handleExport}
-        title="Export portfolio to Excel"
+        title="Export equipment portfolio to Excel"
       >
-        Export Excel
+        Export Equipment to Excel
       </button>
       <button
         type="button"
         className="btn-action"
         onClick={() => inputRef.current?.click()}
-        title="Import Excel (Buildings, RTUs, Tenant Polygons, Utilities)"
+        title="Import equipment from Excel (Buildings, RTUs, Tenant Polygons, Utilities)"
       >
-        Import Excel
+        Import Equipment to Excel
       </button>
       <input
         ref={inputRef}

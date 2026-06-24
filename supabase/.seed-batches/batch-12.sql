@@ -23,7 +23,7 @@ Make: CARRIER
 Date Installed: Oct 27, 2020
 Heating capacity 110,000 BTU''s
 Cooling Capacity: 36,000 BTU (3 Ton)', 43.5175481, -79.6944756, '48FCEA4A2A5A0B6A0', '4620C80999', 'CARRIER', 'Oct 27, 2020', 2020, '110,000', 3, 'SUITE 58');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (854, 90, 'RTU- 56 Hybrid/Dual Fuel Heat Pump', 'Building: 3176 Ridgeway Drive
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (854, 90, 'RTU- 56 Hybrid', 'Building: 3176 Ridgeway Drive
 System: Roof Top Units
 Description: RTU 56 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 56
@@ -385,7 +385,7 @@ Make: CARRIER
 Date Installed: Oct 28, 2011
 Heating capacity 115,000 BTU''s
 Cooling Capacity: 36,000 BTU (3 Ton)', 43.5169861, -79.6958418, '48TCEA-04A2A1A0B0A0', '2611C52507', 'CARRIER', 'Oct 28, 2011', 2011, '115,000', 3, 'SUITE 18');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (890, 93, 'RTU-17 Hybrid/Dual Fuel Heat Pump', 'Building: 3190 Ridgeway Drive
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (890, 93, 'RTU-17 Hybrid', 'Building: 3190 Ridgeway Drive
 System: Roof Top Units
 Description: RT17 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 17

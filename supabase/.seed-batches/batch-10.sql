@@ -317,7 +317,7 @@ Make: YORK
 Date Installed: Oct 13, 2021
 Heating Capacity :150,000 BTU
 Cooling Capacity: 48,000 BTU (4 Ton)', 43.5161231, -79.677797, 'KGB048S4BH2J', '5621D07422', 'YORK', 'Oct 13, 2021', 2021, '150,000', 4, 'SUITE 3-8');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (728, 82, 'RTU-13 Hybrid/Dual Fuel Heat Pump', 'Building: 2320 Bristol Circle
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (728, 82, 'RTU-13 Hybrid', 'Building: 2320 Bristol Circle
 System: Roof Top Units
 Description: RT13 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 3-8
@@ -340,7 +340,7 @@ Make: TRANE
 Date Installed: Dec 07, 2022
 Heating Capacity :80,000 BTU
 Cooling Capacity: 36,000 BTU (3 Ton)', 43.5162241, -79.6775949, 'GBC036AWEMB-C', '22463504PA', 'TRANE', 'Dec 07, 2022', 2022, '80,000', 3, 'SUITE 3-8');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (730, 82, 'RTU-11 Hybrid/Dual Fuel Heat Pump', 'Building: 2320 Bristol Circle
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (730, 82, 'RTU-11 Hybrid', 'Building: 2320 Bristol Circle
 System: Roof Top Units
 Description: RT11 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 3-8
@@ -383,7 +383,7 @@ Make: LENNOX
 Date Installed: Oct 04, 2013
 Heating Capacity :65,000 BTU
 Cooling Capacity: 24,000 BTU (2 Ton)', 43.5166037, -79.6768335, 'KGA024S4DS2P', '5613B08386', 'LENNOX', 'Oct 04, 2013', 2013, '65,000', 2, 'SUITE 3-8');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (735, 82, 'RTU-07 Hybrid/Dual Fuel Heat Pump', 'Building: 2320 Bristol Circle
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (735, 82, 'RTU-07 Hybrid', 'Building: 2320 Bristol Circle
 System: Roof Top Units
 Description: RTU-07 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 3-8
@@ -414,7 +414,7 @@ Make: LENNOX
 Date Installed: May 11, 2023
 Heating Capacity:150,000 BTU
 Cooling Capacity: 60,000 BTU (5 TON)', 43.5166751, -79.6767035, 'KGB060S4BH4J', '5623A04500', 'LENNOX', 'May 11, 2023', 2023, '150,000', 5, 'SUITE 3-8');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (738, 82, 'RTU-04 Hybrid/Dual Fuel Heat Pump', 'Building: 2320 Bristol Circle
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (738, 82, 'RTU-04 Hybrid', 'Building: 2320 Bristol Circle
 System: Roof Top Units
 Description: RTU-04 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 2
@@ -446,7 +446,7 @@ Date Installed: Oct 07, 2008
 Heating Capacity :125,000 BTU
 Cooling Capacity: 60,000 BTU (5 TON)
 R-410 Refrigerant', 43.516191, -79.6764292, 'ZJ060D10N5ABA1C', 'N0N8508778', 'YORK', 'Oct 07, 2008', 2008, '125,000', 5, 'SUITE 1');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (741, 82, 'RTU-01 Hybrid/Dual Fuel Heat Pump', 'Building: 2320 Bristol Circle
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (741, 82, 'RTU-01 Hybrid', 'Building: 2320 Bristol Circle
 System: Roof Top Units
 Description: RTU-01 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 1
@@ -740,7 +740,7 @@ Date Installed: Oct 27, 2008
 Heating Capacity 90,000 BTU''s
 Cooling Capacity: 42,000 BTU (4 Ton)
 R410A', 43.5390322, -79.7085349, 'D2NZ042N09025A', 'N0H8259428', 'YORK', 'Oct 27, 2008', 2008, '90,000', 4, 'SUITE 17');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (769, 85, 'RTU- 19 Hybrid/Dual Fuel Heat Pump', 'Building: 3105 Unity Drive
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (769, 85, 'RTU- 19 Hybrid', 'Building: 3105 Unity Drive
 System: Roof Top Units
 Description: RTU 19 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 19

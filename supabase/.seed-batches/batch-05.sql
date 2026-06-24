@@ -408,7 +408,7 @@ Make: LENNOX
 Date Installed: Nov 09, 2012
 Heating Capacity 150,000 BTU''s
 Cooling Capacity: 48,000 BTU (4 Ton)', 43.8600768, -79.383599, 'KGA048S4DH2J', '5612E07322', 'LENNOX', 'Nov 09, 2012', 2012, '150,000', 4, 'SUITE 4');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (348, 41, 'RTU- 07 Hybrid/Dual Fuel Heat Pump', 'Building: 45 Mural Street
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (348, 41, 'RTU- 07 Hybrid', 'Building: 45 Mural Street
 System: Roof Top Units
 Description: RTU 07 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 5
@@ -468,7 +468,7 @@ Make: YORK
 Date Installed: Nov 09, 2014
 Heating Capacity 100,000 BTU''s
 Cooling Capacity: 36,000 BTU (3 Ton)', 43.8606769, -79.3838605, 'ZF036N08N5AAA2A', 'NIF4843332', 'YORK', 'Nov 09, 2014', 2014, '100,000', 3, 'Suite 7');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (354, 42, 'RTU- 04 Hybrid/Dual Fuel Heat Pump', 'Building: 50 Leek Crescent
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (354, 42, 'RTU- 04 Hybrid', 'Building: 50 Leek Crescent
 System: Roof Top Units
 Description: RTU 04 Hybrid/Dual Fuel Heat Pump
 Suite: Single Tenant
@@ -523,7 +523,7 @@ Make: LENNOX
 Date Installed: Nov 09, 1998
 Heating Capacity 235,000 BTU''s
 Cooling Capacity: 120,000 BTU (10 Ton)', 43.8626088, -79.3761167, 'LGA120SH1J', '5698F 02314', 'LENNOX', 'Nov 09, 1998', 1998, '235,000', 10, 'Single Tenant');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (359, 42, 'RTU- 06 Hybrid/Dual Fuel Heat Pump', 'Building: 50 Leek Crescent
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (359, 42, 'RTU- 06 Hybrid', 'Building: 50 Leek Crescent
 System: Roof Top Units
 Description: RTU 06 Hybrid/Dual Fuel Heat Pump
 Suite: Single Tenant
@@ -533,7 +533,7 @@ Make: LENNOX
 Date Installed: Dec 08, 2025
 Heating Capacity 240,000 BTU''s
 Cooling Capacity: 120,000 BTU (10 Ton)', 43.8626678, -79.3762401, 'LDT120H5EH1J✓', '5625G01064✓', 'LENNOX', 'Dec 08, 2025', 2025, '240,000', 10, 'Single Tenant');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (360, 42, 'RTU- 07 Hybrid/Dual Fuel Heat Pump', 'Building: 50 Leek Crescent
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (360, 42, 'RTU- 07 Hybrid', 'Building: 50 Leek Crescent
 System: Roof Top Units
 Description: RTU 07 Hybrid/Dual Fuel Heat Pump
 Suite: Single Tenant
@@ -685,7 +685,7 @@ Date Installed: Nov 03, 2018
 Heating Capacity 180,000 BTU''s
 Cooling Capacity: 90,000 BTU (7.5 Ton)
 -updated by Marcus Ganhao August 11, 2023', 43.8617349, -79.3757428, 'ZF090N18Z5A1AAA1A1', 'N1A8418388', 'YORK', 'Nov 03, 2018', 2018, '180,000', 7.5, 'SUITE 1');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (374, 43, 'RTU- 06 Hybrid/Dual Fuel Heat Pump', 'Building: 56 Leek Crescent
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (374, 43, 'RTU- 06 Hybrid', 'Building: 56 Leek Crescent
 System: Roof Top Units
 Description: RTU 06 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 1
@@ -695,7 +695,7 @@ Make: LENNOX✓
 Date Installed: Jan 20, 2026
 Heating Capacity 140,000 BTU''s✓
 Cooling Capacity: 60,000 BTU (5 Ton)✓', 43.8615586, -79.3758229, 'LDT060H5EX1J✓', '5625L03604✓', 'LENNOX✓', 'Jan 20, 2026', 2026, '140,000', 5, 'SUITE 1');
-INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (375, 43, 'RTU- 04 Hybrid/Dual Fuel Heat Pump', 'Building: 56 Leek Crescent
+INSERT INTO rtus (id, building_id, name, description, lat, lng, model, serial, make, install_date, install_year, heating_btu, cooling_tons, suite) VALUES (375, 43, 'RTU- 04 Hybrid', 'Building: 56 Leek Crescent
 System: Roof Top Units
 Description: RTU 04 Hybrid/Dual Fuel Heat Pump
 Suite: SUITE 1
