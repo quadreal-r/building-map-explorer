@@ -9,6 +9,7 @@ supabase/seed-query.json
 *.local
 .env
 .env.local
+.wrangler/
 coverage
 .DS_Store
 *.log
