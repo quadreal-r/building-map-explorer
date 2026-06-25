@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { ImportExportButtons } from '@/features/import-export/ImportExportButtons'
 import { BulkRtuPictureImport } from '@/features/settings/BulkRtuPictureImport'
 import { RtuPricingSettings } from '@/features/settings/RtuPricingSettings'
@@ -49,11 +49,9 @@ interface SettingsFormProps {
 const ADD_MANAGER_VALUE = '__add_manager__'
 
 function PropertyManagerNamesEditor({
-  open,
   portfolio,
   onPortfolioPatch,
 }: {
-  open: boolean
   portfolio: PortfolioData
   onPortfolioPatch: (data: PortfolioData) => void
 }) {
@@ -65,14 +63,6 @@ function PropertyManagerNamesEditor({
   )
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [draftName, setDraftName] = useState(() => slots[0]?.name ?? '')
-
-  useEffect(() => {
-    if (!open) return
-    const nextSlots = managerSlotsFromPortfolio(portfolio.buildings)
-    setSlots(nextSlots)
-    setSelectedIndex(0)
-    setDraftName(nextSlots[0]?.name ?? '')
-  }, [open, portfolio.buildings])
 
   const commitDraft = (index: number, name: string, currentSlots: ManagerSlot[]): ManagerSlot[] => {
     if (index < 0 || index >= currentSlots.length) return currentSlots
@@ -190,6 +180,13 @@ function SettingsForm({
   const [uploadBusy, setUploadBusy] = useState(false)
   const [pricingOpen, setPricingOpen] = useState(false)
 
+  const managerEditorKey = useMemo(() => {
+    if (!open) return 'closed'
+    return managerSlotsFromPortfolio(portfolio.buildings)
+      .map((slot) => `${slot.original}\t${slot.name}`)
+      .join('|')
+  }, [open, portfolio.buildings])
+
   const handleClose = useCallback(() => {
     if (uploadBusy) return
     onClose()
@@ -286,7 +283,7 @@ function SettingsForm({
             className={`${tooltipStyles.wrapBlock} ${styles.toolBtnWrap}`}
           >
             <PropertyManagerNamesEditor
-              open={open}
+              key={managerEditorKey}
               portfolio={portfolio}
               onPortfolioPatch={onPortfolioPatch}
             />

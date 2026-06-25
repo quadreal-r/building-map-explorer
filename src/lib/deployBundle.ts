@@ -168,7 +168,7 @@ async function requestSaveFileHandle(fileName: string): Promise<FileSystemFileHa
     })
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new Error('Export cancelled')
+      throw new Error('Export cancelled', { cause: error })
     }
     return null
   }
