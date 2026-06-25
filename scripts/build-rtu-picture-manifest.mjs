@@ -100,6 +100,10 @@ async function main() {
     sourceLabel = `folder ${fromFolder}`
   } else {
     if (!isR2Configured()) {
+      if (process.env.CI) {
+        console.log('R2 not configured in CI — skipping manifest rebuild from R2.')
+        return
+      }
       console.error(
         'R2 is not configured. Set credentials in .env.local or pass a local folder:\n' +
           '  node scripts/build-rtu-picture-manifest.mjs --from-folder "C:/Users/Robert/Pictures/RTU-Pictures"',

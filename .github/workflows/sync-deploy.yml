@@ -26,6 +26,8 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
         with:
@@ -128,6 +130,8 @@ jobs:
         run: node scripts/upload-json-to-r2.mjs
 
       - name: Commit and push
+        env:
+          BME_SYNC_PAT: ${{ secrets.BME_SYNC_PAT }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -137,7 +141,12 @@ jobs:
             exit 0
           fi
           git commit -m "chore: sync portfolio and RTU pictures from Settings"
-          git push
+          if [ -z "${BME_SYNC_PAT}" ]; then
+            echo "::error::BME_SYNC_PAT is required to push commits."
+            exit 1
+          fi
+          git remote set-url origin "https://x-access-token:${BME_SYNC_PAT}@github.com/${GITHUB_REPOSITORY}.git"
+          git push origin HEAD:main
 
       - name: Delete temporary gist
         if: always()
