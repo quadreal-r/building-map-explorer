@@ -90,6 +90,40 @@
   opacity: 0.9;
 }
 
+.githubSync {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.syncDeployBtn {
+  margin-top: 4px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent, #7db8ff);
+  color: #fff;
+  border: 1px solid var(--accent, #7db8ff);
+  width: 100%;
+  text-align: left;
+}
+
+.syncDeployBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.syncDeployBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.inlineCode {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+}
+
 .hint {
   font-size: 10px;
   color: var(--text-muted, #90b8e0);

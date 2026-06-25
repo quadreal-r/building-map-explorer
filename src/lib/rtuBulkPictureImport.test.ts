@@ -12,64 +12,78 @@ import {
 
 describe('parseBulkRtuPictureFileName', () => {
   it('parses dashed index format', () => {
-    expect(parseBulkRtuPictureFileName('150-RT-01-1.jpg')).toEqual({
+    expect(parseBulkRtuPictureFileName('150-RT-01-1.jpg')).toMatchObject({
       buildingNum: '150',
       rtuToken: 'RT-01',
       unitId: '01',
+      unitCore: '1',
       pictureIndex: 1,
+      requiresReview: false,
     })
   })
 
   it('parses RTU with parentheses index', () => {
-    expect(parseBulkRtuPictureFileName('150-RTU-02 (3).png')).toEqual({
+    expect(parseBulkRtuPictureFileName('150-RTU-02 (3).png')).toMatchObject({
       buildingNum: '150',
       rtuToken: 'RTU-02',
       unitId: '02',
+      unitCore: '2',
       pictureIndex: 3,
+      requiresReview: false,
     })
   })
 
   it('parses building-RTU-unit without picture index', () => {
-    expect(parseBulkRtuPictureFileName('20-RTU-03.jpg')).toEqual({
+    expect(parseBulkRtuPictureFileName('20-RTU-03.jpg')).toMatchObject({
       buildingNum: '20',
       rtuToken: 'RTU-03',
       unitId: '03',
+      unitCore: '3',
       pictureIndex: 1,
+      requiresReview: false,
     })
   })
 
   it('parses install year suffix', () => {
-    expect(parseBulkRtuPictureFileName('20-RTU-01-2015.jpg')).toEqual({
+    expect(parseBulkRtuPictureFileName('20-RTU-01-2015.jpg')).toMatchObject({
       buildingNum: '20',
       rtuToken: 'RTU-01',
       unitId: '01',
+      unitCore: '1',
       pictureIndex: 1,
       installYear: 2015,
+      requiresReview: false,
     })
-    expect(parseBulkRtuPictureFileName('20-RTU-01-1 (2015).jpg')).toEqual({
+    expect(parseBulkRtuPictureFileName('20-RTU-01-1 (2015).jpg')).toMatchObject({
       buildingNum: '20',
       rtuToken: 'RTU-01',
       unitId: '01',
+      unitCore: '1',
       pictureIndex: 1,
       installYear: 2015,
+      requiresReview: false,
     })
   })
 
   it('parses alphanumeric unit ids', () => {
-    expect(parseBulkRtuPictureFileName('150-RT-3W-1.jpeg')).toEqual({
+    expect(parseBulkRtuPictureFileName('150-RT-3W-1.jpeg')).toMatchObject({
       buildingNum: '150',
       rtuToken: 'RT-3W',
       unitId: '3W',
+      unitCore: '3W',
       pictureIndex: 1,
+      requiresReview: false,
     })
   })
 
   it('parses full street numbers', () => {
-    expect(parseBulkRtuPictureFileName('1590-RTU-04-2.jpg')).toEqual({
+    expect(parseBulkRtuPictureFileName('1590-RTU-04-2.jpg')).toMatchObject({
       buildingNum: '1590',
       rtuToken: 'RTU-04',
       unitId: '04',
+      unitCore: '4',
       pictureIndex: 2,
+      requiresReview: false,
     })
   })
 })

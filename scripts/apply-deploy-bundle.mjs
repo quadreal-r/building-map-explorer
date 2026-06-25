@@ -19,6 +19,8 @@ import {
   isR2Configured,
   uploadRtuPictureToR2,
 } from './lib/r2-client.mjs'
+import { parseBulkRtuPictureFileName } from './lib/rtu-picture-filename.mjs'
+import { uploadPortfolioJsonToR2 } from './upload-json-to-r2.mjs'
 import {
   RTU_GPS_MATCH_FEET,
   findRtuInPortfolio,
@@ -34,8 +36,10 @@ const PICS_DIR = join(ROOT, 'public', 'database', 'rtu-pictures')
 const buildingsPath = join(DATA_DIR, 'buildings.json')
 
 function parsePictureIndex(fileName) {
-  const match = fileName.match(/_\((\d+)\)\.[^.]+$/i)
-  return match ? Number(match[1]) : null
+  const stored = fileName.match(/_\((\d+)\)\.[^.]+$/i)
+  if (stored) return Number(stored[1])
+  const bulk = parseBulkRtuPictureFileName(fileName)
+  return bulk?.pictureIndex ?? null
 }
 
 function resolveBundlePath() {
@@ -212,6 +216,11 @@ if (isR2Configured()) {
   console.log(`RTU pictures: wrote ${localWrites} file(s) to ${PICS_DIR} (R2 not configured)`)
 } else {
   console.log('RTU pictures: no picture files in bundle')
+}
+
+const jsonUpload = await uploadPortfolioJsonToR2()
+if (jsonUpload.uploaded > 0) {
+  console.log(`Portfolio JSON: uploaded ${jsonUpload.uploaded} file(s) to R2 JSON bucket`)
 }
 
 console.log('\nDone. Review changes, then commit and push to update GitHub Pages.')

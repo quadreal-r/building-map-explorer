@@ -3,6 +3,7 @@ import {
   DEFAULT_RTU_PRICING_ROWS,
   DEFAULT_RTU_PRICING_VERSION,
 } from '@/lib/rtuPricing.defaults'
+import { fetchRemoteJson, usesRemoteJsonData } from '@/lib/jsonDataUrls'
 import bundledPricing from '../../supabase/data/rtu-pricing-rows.json'
 import {
   DEFAULT_RCB_PRICING,
@@ -65,26 +66,44 @@ export const useRtuPricingStore = create<RtuPricingState>((set, get) => ({
   loaded: false,
 
   load: async () => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
+    const loadFromStorage = (): boolean => {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (!stored) return false
       try {
         const parsed = JSON.parse(stored) as StoredRtuPricing
-        if (parsed.rows?.length) {
-          const rows = cloneRows(parsed.rows)
-          set({
-            rows,
-            version: parsed.version ?? null,
-            sourceFile: parsed.sourceFile ?? null,
-            pricingTable: buildPricingTable(rows),
-            revision: get().revision + 1,
-            loaded: true,
-          })
-          return
-        }
+        if (!parsed.rows?.length) return false
+        const rows = cloneRows(parsed.rows)
+        set({
+          rows,
+          version: parsed.version ?? null,
+          sourceFile: parsed.sourceFile ?? null,
+          pricingTable: buildPricingTable(rows),
+          revision: get().revision + 1,
+          loaded: true,
+        })
+        return true
       } catch {
-        /* use defaults */
+        return false
       }
     }
+
+    if (!usesRemoteJsonData() && loadFromStorage()) return
+
+    const remote = await fetchRemoteJson<StoredRtuPricing>('rtu-pricing-rows.json')
+    if (remote?.rows?.length) {
+      const rows = cloneRows(remote.rows)
+      set({
+        rows,
+        version: remote.version ?? null,
+        sourceFile: remote.sourceFile ?? null,
+        pricingTable: buildPricingTable(rows),
+        revision: get().revision + 1,
+        loaded: true,
+      })
+      return
+    }
+
+    if (usesRemoteJsonData() && loadFromStorage()) return
 
     const rows = cloneRows(
       bundledPricing.rows?.length ? bundledPricing.rows : DEFAULT_RTU_PRICING_ROWS,

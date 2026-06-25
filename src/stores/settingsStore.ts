@@ -4,9 +4,13 @@ import { applyThemeVars } from '@/lib/themes'
 interface SettingsState {
   themeIndex: number
   managerRenames: Record<string, string>
+  githubPat: string
+  githubRepo: string
   loaded: boolean
   setThemeIndex: (index: number) => void
   setManagerRename: (original: string, name: string) => void
+  setGitHubPat: (pat: string) => void
+  setGitHubRepo: (repo: string) => void
   applyTheme: (index: number) => void
   loadSettings: () => Promise<void>
   saveSettings: () => Promise<void>
@@ -26,6 +30,8 @@ declare global {
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   themeIndex: 0,
   managerRenames: {},
+  githubPat: '',
+  githubRepo: '',
   loaded: false,
 
   setThemeIndex: (index) => set({ themeIndex: index }),
@@ -34,6 +40,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set((state) => ({
       managerRenames: { ...state.managerRenames, [original]: name },
     })),
+
+  setGitHubPat: (pat) => set({ githubPat: pat }),
+
+  setGitHubRepo: (repo) => set({ githubRepo: repo }),
 
   applyTheme: (index) => {
     applyThemeVars(index)
@@ -48,6 +58,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       set({
         themeIndex,
         managerRenames: embedded.managerRenames ?? {},
+        githubPat: '',
+        githubRepo: '',
         loaded: true,
       })
       return
@@ -59,12 +71,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         const parsed = JSON.parse(stored) as {
           themeIndex?: number
           managerRenames?: Record<string, string>
+          githubPat?: string
+          githubRepo?: string
         }
         const themeIndex = parsed.themeIndex ?? 0
         get().applyTheme(themeIndex)
         set({
           themeIndex,
           managerRenames: parsed.managerRenames ?? {},
+          githubPat: parsed.githubPat ?? '',
+          githubRepo: parsed.githubRepo ?? '',
           loaded: true,
         })
         return
@@ -78,7 +94,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   saveSettings: async () => {
-    const { themeIndex, managerRenames } = get()
+    const { themeIndex, managerRenames, githubPat, githubRepo } = get()
     localStorage.setItem(
       SETTINGS_KEY,
       JSON.stringify({
@@ -86,6 +102,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         theme: { name: String(themeIndex) },
         managers: Object.values(managerRenames),
         managerRenames,
+        githubPat,
+        githubRepo,
       }),
     )
   },

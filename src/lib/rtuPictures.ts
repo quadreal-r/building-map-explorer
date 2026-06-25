@@ -1,6 +1,6 @@
 /** RTU picture storage: Cloudflare R2 (production) or same-origin static files, plus IndexedDB uploads. */
 
-import { parseBulkRtuPictureFileName } from '@/lib/rtuPictureFilename'
+import { parseBulkRtuPictureFileName } from '@/lib/rtuPictureMatch'
 import {
   getRtuPictureManifestUrl,
   rtuPictureFileUrl,
@@ -184,7 +184,7 @@ export async function loadRtuPictureManifest(): Promise<RtuPictureManifest> {
   if (manifestPromise) return manifestPromise
   manifestPromise = (async () => {
     try {
-      const res = await fetch(MANIFEST_URL)
+      const res = await fetch(MANIFEST_URL, { cache: 'no-store' })
       if (!res.ok) return { entries: {} }
       const data = (await res.json()) as RtuPictureManifest
       manifestCache = { entries: data.entries ?? {} }

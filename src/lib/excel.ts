@@ -13,6 +13,8 @@ import {
   polygonCentroid,
   tenantPolygonCount,
 } from '@/lib/polygonBuildings'
+import { loadRtuPictureManifest, rtuPictureKey } from '@/lib/rtuPictures'
+import { buildRtuPictureExportBundle } from '@/lib/rtuPictureExport'
 import type { RcbComputeResult } from '@/lib/costEstimator'
 import {
   rcbBuildScheduledExport,
@@ -31,7 +33,8 @@ const POLYGON_SHEET_ALIASES = ['Tenant Polygons', 'Polygons'] as const
 /** Column widths from QuadReal_Industrial_Portfolio.xlsx sample export. */
 const COL_WIDTHS = {
   buildings: [32.875, 12.875, 28.875, 24.875, 18.875, 10.875, 12.875, 11.875, 16.125, 14.875, 14.875],
-  rtus: [32.875, 28.875, 20.875, 18.875, 23.375, 28.875, 16.875, 12.875, 16.875, 22.875, 22.875, 14.875, 18, 44.875, 10],
+  rtus: [32.875, 28.875, 20.875, 18.875, 23.375, 28.875, 16.875, 12.875, 16.875, 22.875, 22.875, 14.875, 18, 44.875, 10, 12, 48, 72],
+  rtuPictures: [32.875, 28.875, 20.875, 18.875, 23.375, 36.875, 40.875, 12.875, 28.875, 16, 48, 72],
   polygons: [32.875, 12.875, 28.875, 16.875, 36.875, 36.875, 12.125, 8.875, 14.875, 14.875, 14.875],
   utilities: [20.875, 38.875, 40.875, 14.875, 14.875],
 } as const
@@ -242,10 +245,23 @@ function resolvePolygonSheetName(sheetNames: string[]): string | null {
   return null
 }
 
-/** Export portfolio data to an Excel workbook (legacy-compatible sheets). */
-export function exportPortfolioExcel(data: PortfolioData, filename = 'QuadReal_Industrial_Portfolio.xlsx'): void {
+/** `QuadReal_Industrial_DB_Export_2026.06.25.xlsx` using local calendar date. */
+export function exportDatabaseExcelFilename(date = new Date()): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `QuadReal_Industrial_DB_Export_${year}.${month}.${day}.xlsx`
+}
+
+/** Export portfolio data to an Excel workbook (legacy-compatible sheets + RTU pictures). */
+export async function exportPortfolioExcel(
+  data: PortfolioData,
+  filename = exportDatabaseExcelFilename(),
+): Promise<void> {
   const { buildings, utilities, polygons } = data
   const polygonIndex = buildPolygonBuildingIndex(buildings, polygons)
+  const manifest = await loadRtuPictureManifest()
+  const pictureExport = buildRtuPictureExportBundle(data, manifest)
 
   const buildingsRows: unknown[][] = []
   const rtusRows: unknown[][] = []
@@ -269,6 +285,11 @@ export function exportPortfolioExcel(data: PortfolioData, filename = 'QuadReal_I
     for (const r of b.rtus ?? []) {
       rtuCount += 1
       const fields = parseInstallFields(r.description)
+      const pictureSummary = pictureExport.summaryByKey.get(rtuPictureKey(b.address, r.name)) ?? {
+        count: 0,
+        fileNames: '',
+        pictureUrls: '',
+      }
       rtusRows.push([
         b.address,
         b.park,
@@ -285,6 +306,9 @@ export function exportPortfolioExcel(data: PortfolioData, filename = 'QuadReal_I
         parseFloat(r.lng.toFixed(7)),
         rtuNotesForExport(r.description),
         rtuCount,
+        pictureSummary.count,
+        pictureSummary.fileNames,
+        pictureSummary.pictureUrls,
       ])
     }
   }
@@ -314,6 +338,44 @@ export function exportPortfolioExcel(data: PortfolioData, filename = 'QuadReal_I
     parseFloat(u.lat.toFixed(7)),
     parseFloat(u.lng.toFixed(7)),
   ])
+
+  const rtuPictureDetailRows = pictureExport.rows.map((row) => [
+    row.buildingAddress,
+    row.park,
+    row.cluster,
+    row.manager,
+    row.rtuName,
+    row.manifestKey,
+    row.pictureIndex,
+    row.fileName,
+    row.storage,
+    row.pictureUrl,
+  ])
+
+  const rtuPictureSheetRows: unknown[][] = [
+    ['RTU picture references (Cloudflare R2)'],
+    ['Pictures base URL', pictureExport.picturesBaseUrl],
+    ['Manifest JSON URL', pictureExport.manifestUrl],
+    ['Picture rows', pictureExport.rows.length],
+    [
+      'RTUs with pictures',
+      [...pictureExport.summaryByKey.values()].filter((summary) => summary.count > 0).length,
+    ],
+    [],
+    [
+      'Building Address',
+      'Portfolio',
+      'Cluster',
+      'Manager',
+      'RTU Name',
+      'Manifest Key',
+      'Picture Index',
+      'File Name',
+      'Storage',
+      'Picture URL (Cloudflare)',
+    ],
+    ...rtuPictureDetailRows,
+  ]
 
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(
@@ -357,16 +419,37 @@ export function exportPortfolioExcel(data: PortfolioData, filename = 'QuadReal_I
         'Longitude',
         'Notes',
         'Count',
+        'Picture Count',
+        'Picture Files',
+        'Picture URLs (Cloudflare)',
       ],
       rtusRows,
       COL_WIDTHS.rtus,
       {
         numFmtMap: { 11: FMT_COORD, 12: FMT_COORD },
         freezeHeader: true,
-        autofilterCols: 14,
+        autofilterCols: 18,
       },
     ),
     'RTUs',
+  )
+  XLSX.utils.book_append_sheet(
+    wb,
+    (() => {
+      const ws = XLSX.utils.aoa_to_sheet(rtuPictureSheetRows)
+      ws['!cols'] = COL_WIDTHS.rtuPictures.map((wch) => ({ wch }))
+      ws['!freeze'] = {
+        xSplit: 0,
+        ySplit: 7,
+        topLeftCell: 'A8',
+        activePane: 'bottomLeft',
+        state: 'frozen',
+      }
+      const lastRow = rtuPictureSheetRows.length
+      ws['!autofilter'] = { ref: `A7:J${lastRow}` }
+      return ws
+    })(),
+    'RTU Pictures',
   )
   XLSX.utils.book_append_sheet(
     wb,

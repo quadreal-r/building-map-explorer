@@ -14,6 +14,7 @@ import {
   normalizeLegacyUtility,
   normalizePortfolioData,
 } from '@/types/domain'
+import { getJsonDataBaseUrl, usesRemoteJsonData } from '@/lib/jsonDataUrls'
 
 import staticBuildings from '../../supabase/data/buildings.json'
 import staticUtilities from '../../supabase/data/utilities.json'
@@ -58,6 +59,31 @@ function loadStaticPortfolio(): PortfolioData {
   })
 }
 
+async function loadRemotePortfolio(baseUrl: string): Promise<PortfolioData | null> {
+  try {
+    const fetchOpts: RequestInit = { cache: 'no-store' }
+    const [buildingsRes, utilitiesRes, polygonsRes] = await Promise.all([
+      fetch(`${baseUrl}buildings.json`, fetchOpts),
+      fetch(`${baseUrl}utilities.json`, fetchOpts),
+      fetch(`${baseUrl}polygons.json`, fetchOpts),
+    ])
+    if (!buildingsRes.ok || !utilitiesRes.ok || !polygonsRes.ok) return null
+
+    const buildings = (await buildingsRes.json()) as LegacyBuildingJson[]
+    const utilities = (await utilitiesRes.json()) as LegacyUtilityJson[]
+    const polygons = (await polygonsRes.json()) as LegacyPolygonJson[]
+
+    const portfolio = normalizePortfolioData({
+      buildings: buildings.map(normalizeLegacyBuilding),
+      utilities: utilities.map(normalizeLegacyUtility),
+      polygons: polygons.map(normalizeLegacyPolygon),
+    })
+    return isValidStoredPortfolio(portfolio) ? portfolio : null
+  } catch {
+    return null
+  }
+}
+
 function loadStoredPortfolio(): PortfolioData | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -77,6 +103,12 @@ export async function loadPortfolioData(): Promise<PortfolioData> {
   const embedded = loadEmbeddedPortfolio()
   if (embedded) return normalizePortfolioData(embedded)
 
+  const jsonBase = getJsonDataBaseUrl()
+  if (jsonBase) {
+    const remote = await loadRemotePortfolio(jsonBase)
+    if (remote) return remote
+  }
+
   const stored = loadStoredPortfolio()
   if (stored) return normalizePortfolioData(stored)
 
@@ -84,10 +116,12 @@ export async function loadPortfolioData(): Promise<PortfolioData> {
 }
 
 export function usePortfolioData() {
+  const remoteJson = usesRemoteJsonData()
   return useQuery({
     queryKey: ['portfolio'],
     queryFn: loadPortfolioData,
-    staleTime: Infinity,
+    staleTime: remoteJson ? 60_000 : Infinity,
+    refetchOnWindowFocus: remoteJson,
   })
 }
 

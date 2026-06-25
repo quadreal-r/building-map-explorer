@@ -8,8 +8,9 @@
  *   R2_BUCKET_NAME or R2_BUCKET or CLOUDFLARE_R2_BUCKET
  *   R2_PUBLIC_URL or VITE_RTU_PICTURES_BASE_URL (public CDN base, trailing slash optional)
  *   R2_KEY_PREFIX (optional object key prefix, e.g. rtu-pictures/)
+ *   R2_JSON_BUCKET or R2_JSON_BUCKET_NAME (portfolio JSON bucket, default json)
  */
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 function readEnv(...keys) {
   for (const key of keys) {
@@ -41,6 +42,14 @@ export function createR2Client() {
 
 export function getR2Bucket() {
   return readEnv('R2_BUCKET_NAME', 'R2_BUCKET', 'CLOUDFLARE_R2_BUCKET')
+}
+
+export function getR2JsonBucket() {
+  return readEnv('R2_JSON_BUCKET', 'R2_JSON_BUCKET_NAME', 'CLOUDFLARE_R2_JSON_BUCKET') ?? 'json'
+}
+
+export function isR2JsonConfigured() {
+  return Boolean(createR2Client() && getR2JsonBucket())
 }
 
 export function getR2PublicBaseUrl() {
@@ -75,7 +84,46 @@ export function guessPictureContentType(fileName) {
   return map[ext] ?? 'application/octet-stream'
 }
 
-/** Upload one RTU picture buffer to R2. Overwrites existing object at the same key. */
+/** List image basenames in the R2 bucket (strips optional key prefix). */
+export async function listR2PictureFileNames() {
+  const client = createR2Client()
+  const bucket = getR2Bucket()
+  if (!client || !bucket) {
+    throw new Error(
+      'R2 is not configured. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_BUCKET_NAME.',
+    )
+  }
+
+  const prefix = getR2KeyPrefix()
+  const names = []
+  let continuationToken
+
+  do {
+    const response = await client.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: prefix || undefined,
+        ContinuationToken: continuationToken,
+      }),
+    )
+
+    for (const item of response.Contents ?? []) {
+      const key = item.Key
+      if (!key) continue
+      const baseName = key.includes('/')
+        ? key.slice(key.lastIndexOf('/') + 1)
+        : prefix && key.startsWith(prefix)
+          ? key.slice(prefix.length)
+          : key
+      if (baseName) names.push(baseName)
+    }
+
+    continuationToken = response.IsTruncated ? response.NextContinuationToken : undefined
+  } while (continuationToken)
+
+  return [...new Set(names)].sort()
+}
+
 export async function uploadRtuPictureToR2(fileName, body, contentType) {
   const client = createR2Client()
   const bucket = getR2Bucket()
@@ -92,6 +140,26 @@ export async function uploadRtuPictureToR2(fileName, body, contentType) {
       Body: body,
       ContentType: contentType ?? guessPictureContentType(fileName),
       CacheControl: 'public, max-age=31536000, immutable',
+    }),
+  )
+}
+
+export async function uploadJsonFileToR2(fileName, body) {
+  const client = createR2Client()
+  const bucket = getR2JsonBucket()
+  if (!client || !bucket) {
+    throw new Error(
+      'R2 JSON bucket is not configured. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_JSON_BUCKET.',
+    )
+  }
+
+  await client.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: fileName,
+      Body: body,
+      ContentType: 'application/json',
+      CacheControl: 'public, max-age=60',
     }),
   )
 }

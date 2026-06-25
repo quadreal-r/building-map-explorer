@@ -2,9 +2,11 @@ import { distanceFeet, RTU_GPS_MATCH_FEET } from '@/lib/geo'
 import { readImageGps } from '@/lib/imageGps'
 import {
   extractRtuUnitId,
+  findRtuCandidates,
+  normalizeRtuUnitCore,
   parseBulkRtuPictureFileName,
   type ParsedBulkRtuFileName,
-} from '@/lib/rtuPictureFilename'
+} from '@/lib/rtuPictureMatch'
 import {
   buildingStreetNumber,
   importRtuPictureAtIndex,
@@ -12,7 +14,21 @@ import {
 import type { Building, Rtu } from '@/types/domain'
 
 export type { ParsedBulkRtuFileName }
-export { extractRtuUnitId, parseBulkRtuPictureFileName }
+export {
+  extractRtuUnitId,
+  findRtuCandidates,
+  matchFileToRtu,
+  normalizeRtuUnitCore,
+  parseBulkRtuPictureFileName,
+} from '@/lib/rtuPictureMatch'
+
+export interface RtuCatalogEntry {
+  building: Building
+  rtu: Rtu
+  streetNumber: string
+  unitId: string
+  unitCore: string | null
+}
 
 const IMAGE_FILE_RE = /\.(jpe?g|png|webp|heif|heic|tif{1,2})$/i
 
@@ -64,28 +80,11 @@ export function buildRtuCatalog(buildings: Building[]): RtuCatalogEntry[] {
         rtu,
         streetNumber,
         unitId: extractRtuUnitId(rtu.name),
+        unitCore: normalizeRtuUnitCore(rtu.name),
       })
     }
   }
   return entries
-}
-
-function unitIdsMatch(fileUnitId: string, markerUnitId: string): boolean {
-  if (fileUnitId === markerUnitId) return true
-  if (/^\d+$/.test(fileUnitId) && /^\d+$/.test(markerUnitId)) {
-    return Number(fileUnitId) === Number(markerUnitId)
-  }
-  return false
-}
-
-export function findRtuCandidates(
-  catalog: RtuCatalogEntry[],
-  parsed: ParsedBulkRtuFileName,
-): RtuCatalogEntry[] {
-  return catalog.filter(
-    (entry) =>
-      entry.streetNumber === parsed.buildingNum && unitIdsMatch(parsed.unitId, entry.unitId),
-  )
 }
 
 export function pickRtuMatch(

@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { ImportExportButtons } from '@/features/import-export/ImportExportButtons'
 import { BulkRtuPictureImport } from '@/features/settings/BulkRtuPictureImport'
+import { GitHubDeploySync } from '@/features/settings/GitHubDeploySync'
 import { RtuPricingSettings } from '@/features/settings/RtuPricingSettings'
 import { SettingsToolButton } from '@/features/settings/SettingsToolButton'
 import { Modal } from '@/components/Modal/Modal'
@@ -300,6 +301,15 @@ function SettingsForm({
               Edit RTU&apos;s Pricing
             </SettingsToolButton>
           </div>
+        </section>
+
+        <section>
+          <div className={styles.sectionLabel}>Cloudflare &amp; GitHub sync</div>
+          <GitHubDeploySync
+            portfolio={portfolio}
+            disabled={uploadBusy}
+            onBusyChange={setUploadBusy}
+          />
         </section>
 
         <section>

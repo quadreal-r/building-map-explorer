@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { rcbReplacementYearKey } from '@/lib/costEstimator'
+import { fetchRemoteJson, usesRemoteJsonData } from '@/lib/jsonDataUrls'
 import { importEquipmentSchedule } from '@/lib/equipmentSheet'
 import type { Building } from '@/types/domain'
 import bundledSchedule from '../../supabase/data/rtu-schedule.json'
@@ -40,8 +41,9 @@ export const useRtuScheduleStore = create<RtuScheduleState>((set, get) => ({
   loaded: false,
 
   load: async () => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
+    const loadFromStorage = (): boolean => {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (!stored) return false
       try {
         const parsed = JSON.parse(stored) as StoredRtuSchedule
         set({
@@ -50,11 +52,26 @@ export const useRtuScheduleStore = create<RtuScheduleState>((set, get) => ({
           sourceFile: parsed.sourceFile ?? null,
           loaded: true,
         })
-        return
+        return true
       } catch {
-        /* fall through to bundled defaults */
+        return false
       }
     }
+
+    if (!usesRemoteJsonData() && loadFromStorage()) return
+
+    const remote = await fetchRemoteJson<StoredRtuSchedule>('rtu-schedule.json')
+    if (remote) {
+      set({
+        replacementYears: remote.replacementYears ?? {},
+        notes: remote.notes ?? {},
+        sourceFile: remote.sourceFile ?? null,
+        loaded: true,
+      })
+      return
+    }
+
+    if (usesRemoteJsonData() && loadFromStorage()) return
 
     const bundled = bundledSchedule as StoredRtuSchedule
     set({

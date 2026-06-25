@@ -31,10 +31,17 @@ export function ImportExportButtons({
   const applyEquipmentImport = useRtuScheduleStore((s) => s.applyEquipmentImport)
   const applyPricingImport = useRtuPricingStore((s) => s.applyPricingImport)
 
-  const handleExport = () => {
-    exportPortfolioExcel(portfolio)
-    showToastSuccess('✓ Excel exported')
-    onExportComplete?.()
+  const handleExport = async () => {
+    setBusy(true)
+    try {
+      await exportPortfolioExcel(portfolio)
+      showToastSuccess('✓ Excel exported')
+      onExportComplete?.()
+    } catch (e) {
+      showToastError(e instanceof Error ? e.message : 'Export failed')
+    } finally {
+      setBusy(false)
+    }
   }
 
   const handleCapitalImport = async (buffer: ArrayBuffer, file: File) => {
@@ -87,10 +94,11 @@ export function ImportExportButtons({
     <>
       <SettingsToolButton
         variant="export"
-        tooltip="Export buildings, RTUs, tenant polygons, and utilities with lat/lng to an Excel workbook."
-        onClick={handleExport}
+        tooltip="Export buildings, RTUs, tenant polygons, utilities, and Cloudflare RTU picture references to Excel."
+        onClick={() => void handleExport()}
+        disabled={busy}
       >
-        Export Equipment to Excel
+        {busy ? 'Exporting…' : 'Export Database to Excel'}
       </SettingsToolButton>
       <SettingsToolButton
         tooltip={

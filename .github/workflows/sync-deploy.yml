@@ -1,0 +1,125 @@
+name: Sync deploy bundle to Cloudflare and GitHub
+
+on:
+  workflow_dispatch:
+    inputs:
+      gist_id:
+        description: Gist ID containing deploy-bundle.json
+        required: true
+        type: string
+      rebuild_manifest:
+        description: Rebuild manifest.json from R2 after applying bundle
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-deploy
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.BME_SYNC_PAT }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Download deploy bundle from gist
+        env:
+          GIST_ID: ${{ inputs.gist_id }}
+          BME_SYNC_PAT: ${{ secrets.BME_SYNC_PAT }}
+        run: |
+          if [ -z "${BME_SYNC_PAT}" ]; then
+            echo "::error::Repository secret BME_SYNC_PAT is missing. Add a personal access token with repo, workflow, and gist scopes (same token as in Settings)."
+            exit 1
+          fi
+          curl -fsSL \
+            -H "Authorization: Bearer ${BME_SYNC_PAT}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/gists/${GIST_ID}/raw/deploy-bundle.json" \
+            -o deploy-bundle.json
+
+      - name: Apply bundle (R2 upload + portfolio data)
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          CLOUDFLARE_R2_BUCKET: ${{ secrets.CLOUDFLARE_R2_BUCKET }}
+          R2_PUBLIC_URL: ${{ secrets.VITE_RTU_PICTURES_BASE_URL }}
+          R2_KEY_PREFIX: ${{ secrets.R2_KEY_PREFIX }}
+        run: node scripts/apply-deploy-bundle.mjs deploy-bundle.json
+
+      - name: Rebuild RTU picture manifest from R2
+        if: inputs.rebuild_manifest == 'true'
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          CLOUDFLARE_R2_BUCKET: ${{ secrets.CLOUDFLARE_R2_BUCKET }}
+          R2_PUBLIC_URL: ${{ secrets.VITE_RTU_PICTURES_BASE_URL }}
+          R2_KEY_PREFIX: ${{ secrets.R2_KEY_PREFIX }}
+        run: node scripts/build-rtu-picture-manifest.mjs
+
+      - name: Upload portfolio JSON to Cloudflare R2
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          R2_JSON_BUCKET: ${{ secrets.R2_JSON_BUCKET }}
+        run: node scripts/upload-json-to-r2.mjs
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add supabase/data public/database/rtu-pictures/manifest.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: sync portfolio and RTU pictures from Settings"
+          git push
+
+      - name: Delete temporary gist
+        if: always()
+        env:
+          GIST_ID: ${{ inputs.gist_id }}
+          BME_SYNC_PAT: ${{ secrets.BME_SYNC_PAT }}
+        run: |
+          if [ -z "${BME_SYNC_PAT}" ] || [ -z "${GIST_ID}" ]; then
+            exit 0
+          fi
+          curl -fsSL -X DELETE \
+            -H "Authorization: Bearer ${BME_SYNC_PAT}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/gists/${GIST_ID}" || true

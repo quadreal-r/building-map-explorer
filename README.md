@@ -61,6 +61,7 @@ Aliases `CLOUDFLARE_*` are also supported in scripts and CI.
 | `npm run typecheck` | TypeScript check |
 | `npm run extract` | Parse legacy HTML → `supabase/seed.sql` + JSON |
 | `npm run apply-deploy-bundle` | Apply deploy bundle → data JSON + R2 pictures + manifest |
+| `npm run build-rtu-picture-manifest` | Build `manifest.json` from files already on R2 (links RTUs → filenames) |
 | `npm run upload-rtu-pictures-r2` | Upload local RTU images to Cloudflare R2 (GPS check at 100 ft) |
 | `node scripts/apply-seed-chunks.mjs` | Split `seed.sql` into MCP-sized chunks under `supabase/.seed-chunks/` |
 
@@ -74,7 +75,15 @@ Production RTU photos are stored in **Cloudflare R2**, not in the git repo. The 
 2. Settings → **Export data for GitHub deploy** → `deploy-bundle.json`.
 3. `npm run apply-deploy-bundle` — writes portfolio JSON, uploads pictures to R2, updates `manifest.json`.
 4. Commit `manifest.json` + data changes (not image binaries).
-5. Push to `main` — GitHub Actions builds with `VITE_RTU_PICTURES_BASE_URL` and syncs any local images to R2.
+5. **Upload images to R2** from your local picture folder (images are not stored in git):
+
+   ```bash
+   node scripts/upload-rtu-pictures-r2.mjs --from-folder "C:/Users/Robert/Pictures/RTU-Pictures"
+   ```
+
+   Requires R2 credentials in `.env.local` (see `.env.example`). This uploads every file listed in `manifest.json`.
+
+6. Push to `main` — GitHub Actions builds with `VITE_RTU_PICTURES_BASE_URL` and syncs any images in `public/database/rtu-pictures/` (usually none).
 
 Without `VITE_RTU_PICTURES_BASE_URL`, the app falls back to same-origin `public/database/rtu-pictures/` (local dev only).
 
