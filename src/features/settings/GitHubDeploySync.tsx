@@ -109,8 +109,8 @@ export function GitHubDeploySync({
       </div>
       <p className={styles.hint}>
         One-time setup: add the same token as repository secret{' '}
-        <code className={styles.inlineCode}>BME_SYNC_PAT</code> (scopes: repo, workflow,
-        gist). Every git push to main also uploads JSON to Cloudflare R2 for the live site.
+        <code className={styles.inlineCode}>BME_SYNC_PAT</code> (Contents + Actions + Gists).
+        Repository must match this repo exactly. Every git push to main also uploads JSON to R2.
       </p>
       <button
         type="button"
