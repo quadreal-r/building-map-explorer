@@ -29,5 +29,9 @@ describe('rtuPictures naming', () => {
 
   it('parses index from filename', () => {
     expect(parseRtuPictureIndex('1590_RTU-04_(3).jpg')).toBe(3)
+    expect(parseRtuPictureIndex('100-RTU-01-1.jpg')).toBe(1)
+    expect(parseRtuPictureIndex('20-RTU-01-1 (2015).jpg')).toBe(1)
+    expect(parseRtuPictureIndex('6325-RTU-1 (2).JPG')).toBe(2)
+    expect(parseRtuPictureIndex('1590-RTU-04-2.jpg')).toBe(2)
   })
 })

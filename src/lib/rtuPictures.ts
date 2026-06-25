@@ -1,5 +1,6 @@
 /** RTU picture storage: Cloudflare R2 (production) or same-origin static files, plus IndexedDB uploads. */
 
+import { parseBulkRtuPictureFileName } from '@/lib/rtuPictureFilename'
 import {
   getRtuPictureManifestUrl,
   rtuPictureFileUrl,
@@ -78,8 +79,11 @@ export function rtuPictureFileName(
 }
 
 export function parseRtuPictureIndex(fileName: string): number | null {
-  const match = fileName.match(/_\((\d+)\)\.[^.]+$/i)
-  return match ? Number(match[1]) : null
+  const stored = fileName.match(/_\((\d+)\)\.[^.]+$/i)
+  if (stored) return Number(stored[1])
+
+  const bulk = parseBulkRtuPictureFileName(fileName)
+  return bulk?.pictureIndex ?? null
 }
 
 function openDb(): Promise<IDBDatabase> {
