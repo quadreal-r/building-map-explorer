@@ -24,7 +24,7 @@ export interface RtuPicture {
 const DB_NAME = 'building-map-explorer'
 const DB_VERSION = 2
 const STORE = 'rtuPictures'
-const MANIFEST_URL = getRtuPictureManifestUrl()
+const BUNDLED_MANIFEST_URL = `${import.meta.env.BASE_URL}database/rtu-pictures/manifest.json`
 
 let manifestCache: RtuPictureManifest | null = null
 let manifestPromise: Promise<RtuPictureManifest> | null = null
@@ -179,18 +179,34 @@ export async function getRtuPictureCountMap(): Promise<Map<string, number>> {
   return new Map([...indexByKey.entries()].map(([key, indices]) => [key, indices.size]))
 }
 
+async function fetchManifestFromUrl(url: string): Promise<RtuPictureManifest | null> {
+  try {
+    const res = await fetch(url, { cache: 'no-store' })
+    if (!res.ok) return null
+    const data = (await res.json()) as RtuPictureManifest
+    const entries = data.entries ?? {}
+    if (Object.keys(entries).length === 0) return null
+    return { entries }
+  } catch {
+    return null
+  }
+}
+
 export async function loadRtuPictureManifest(): Promise<RtuPictureManifest> {
   if (manifestCache) return manifestCache
   if (manifestPromise) return manifestPromise
   manifestPromise = (async () => {
     try {
-      const res = await fetch(MANIFEST_URL, { cache: 'no-store' })
-      if (!res.ok) return { entries: {} }
-      const data = (await res.json()) as RtuPictureManifest
-      manifestCache = { entries: data.entries ?? {} }
+      const remoteUrl = getRtuPictureManifestUrl()
+      let manifest =
+        remoteUrl !== BUNDLED_MANIFEST_URL
+          ? await fetchManifestFromUrl(remoteUrl)
+          : null
+      if (!manifest) {
+        manifest = await fetchManifestFromUrl(BUNDLED_MANIFEST_URL)
+      }
+      manifestCache = manifest ?? { entries: {} }
       return manifestCache
-    } catch {
-      return { entries: {} }
     } finally {
       manifestPromise = null
     }
