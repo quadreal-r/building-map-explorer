@@ -19,6 +19,7 @@ describe('rtuPictureUrls', () => {
   })
 
   it('falls back to same-origin static path when R2 URL is unset', () => {
+    vi.stubEnv('VITE_RTU_PICTURES_BASE_URL', '')
     vi.stubEnv('BASE_URL', '/building-map-explorer/')
     expect(getRtuPicturesBaseUrl()).toBe('/building-map-explorer/database/rtu-pictures/')
     expect(getRtuPictureManifestUrl()).toBe(
