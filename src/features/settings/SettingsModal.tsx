@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { ImportExportButtons } from '@/features/import-export/ImportExportButtons'
 import { BulkRtuPictureImport } from '@/features/settings/BulkRtuPictureImport'
+import { RtuPictureGpsAssign } from '@/features/settings/RtuPictureGpsAssign'
 import { GitHubDeploySync } from '@/features/settings/GitHubDeploySync'
 import { RtuPricingSettings } from '@/features/settings/RtuPricingSettings'
 import { SettingsToolButton } from '@/features/settings/SettingsToolButton'
@@ -375,6 +376,7 @@ function SettingsForm({
               onExportComplete={handleClose}
             />
             <BulkRtuPictureImport portfolio={portfolio} onBusyChange={setUploadBusy} />
+            <RtuPictureGpsAssign onBusyChange={setUploadBusy} />
           </div>
         </section>
       </div>

@@ -1,6 +1,7 @@
 /** One-click Settings sync: gist deploy bundle → GitHub Actions → R2 + commit + deploy. */
 
-import { collectDeployBundle, serializeDeployBundle } from '@/lib/deployBundle'
+import { collectDeployBundleWithMeta } from '@/lib/deployBundle'
+import { markRtuPicturesDeployed } from '@/lib/rtuPictures'
 import type { PortfolioData } from '@/types/domain'
 
 export const DEFAULT_GITHUB_REPO = 'quadreal-r/building-map-explorer'
@@ -13,7 +14,12 @@ const GITHUB_API = 'https://api.github.com'
 export interface GitHubSyncOptions {
   token: string
   repo?: string
-  onProgress?: (message: string) => void
+  onProgress?: (progress: GitHubSyncProgress) => void
+}
+
+export interface GitHubSyncProgress {
+  message: string
+  percent: number
 }
 
 export interface GitHubSyncResult {
@@ -21,6 +27,20 @@ export interface GitHubSyncResult {
   workflowRunUrl: string | null
   picturesOmitted: boolean
   pictureCount: number
+  pictureExportFailed: string[]
+  pendingPictureCount: number
+  exportedAt: string
+  deployedFileNames: string[]
+}
+
+export const SYNC_COOLDOWN_MS = 5 * 60 * 1000
+
+function reportProgress(
+  onProgress: GitHubSyncOptions['onProgress'],
+  message: string,
+  percent: number,
+): void {
+  onProgress?.({ message, percent: Math.min(100, Math.max(0, percent)) })
 }
 
 interface WorkflowRun {
@@ -70,19 +90,25 @@ export function resolveGitHubRepo(repo?: string): string {
 }
 
 export async function createDeployBundleGist(
-  json: string,
+  leanJson: string,
+  picturesJson: string | null,
   exportedAt: string,
   token: string,
 ): Promise<string> {
+  const files: Record<string, { content: string }> = {
+    'deploy-bundle.json': { content: leanJson },
+  }
+  if (picturesJson) {
+    files['deploy-pictures.json'] = { content: picturesJson }
+  }
+
   const gist = await githubFetch<{ id: string }>('/gists', token, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       description: `BME deploy bundle ${exportedAt}`,
       public: false,
-      files: {
-        'deploy-bundle.json': { content: json },
-      },
+      files,
     }),
   })
   return gist.id
@@ -115,11 +141,17 @@ export async function waitForSyncWorkflowRun(
   startedAfterMs: number,
   token: string,
   repo: string,
+  onProgress?: GitHubSyncOptions['onProgress'],
   timeoutMs = 10 * 60 * 1000,
   pollMs = 5000,
 ): Promise<{ status: string; html_url: string } | null> {
   const deadline = Date.now() + timeoutMs
+  const waitStart = Date.now()
   while (Date.now() < deadline) {
+    const elapsed = Date.now() - waitStart
+    const waitPercent = 55 + Math.min(40, Math.floor((elapsed / timeoutMs) * 40))
+    reportProgress(onProgress, 'Waiting for Cloudflare & GitHub workflow…', waitPercent)
+
     await sleep(pollMs)
     const data = await githubFetch<{ workflow_runs: WorkflowRun[] }>(
       `/repos/${repo}/actions/workflows/${SYNC_DEPLOY_WORKFLOW}/runs?per_page=10&event=workflow_dispatch`,
@@ -153,36 +185,62 @@ export async function syncDeployToGitHub(
   const repo = resolveGitHubRepo(options.repo)
   const { onProgress } = options
 
-  onProgress?.('Collecting local data…')
-  const bundle = await collectDeployBundle(portfolio)
-  let { json, picturesOmitted } = serializeDeployBundle(bundle)
-
-  if (json.length > MAX_GIST_BYTES && bundle.pictures.length > 0) {
-    const lean = { ...bundle, pictures: [] }
-    json = serializeDeployBundle(lean).json
-    picturesOmitted = true
+  reportProgress(onProgress, 'Collecting local data…', 8)
+  const { bundle, pictureExport } = await collectDeployBundleWithMeta(portfolio)
+  if (pictureExport.failedFileNames.length) {
+    throw new Error(
+      `${pictureExport.failedFileNames.length} local picture(s) could not be read for sync. Re-add them from the map and try again.`,
+    )
   }
-  if (json.length > MAX_GIST_BYTES) {
+
+  reportProgress(onProgress, 'Preparing deploy bundle…', 18)
+  const leanBundle = { ...bundle, pictures: [] as typeof bundle.pictures }
+  let picturesJson = JSON.stringify(bundle.pictures)
+  let leanJson = JSON.stringify(leanBundle)
+  let picturesOmitted = false
+
+  const gistBudget = MAX_GIST_BYTES
+  if (leanJson.length + picturesJson.length > gistBudget) {
+    if (bundle.pictures.length > 0) {
+      picturesJson = ''
+      picturesOmitted = true
+    }
+  }
+  if (leanJson.length > gistBudget) {
     throw new Error(
       'Deploy bundle is too large for one-click sync. Use Export data for GitHub deploy and run apply-deploy-bundle locally.',
     )
   }
 
-  onProgress?.('Uploading bundle to GitHub…')
-  const gistId = await createDeployBundleGist(json, bundle.exportedAt, token)
+  reportProgress(onProgress, 'Uploading bundle to GitHub…', 32)
+  const gistId = await createDeployBundleGist(
+    leanJson,
+    picturesOmitted ? null : picturesJson,
+    bundle.exportedAt,
+    token,
+  )
 
-  const rebuildManifest = picturesOmitted || bundle.pictures.length === 0
+  const transferredPictureCount = picturesOmitted ? 0 : bundle.pictures.length
+  const rebuildManifest = picturesOmitted || transferredPictureCount === 0
   const startedAt = Date.now()
-  onProgress?.('Starting Cloudflare & GitHub sync…')
+  reportProgress(onProgress, 'Starting Cloudflare & GitHub sync…', 48)
   await triggerSyncDeployWorkflow(gistId, rebuildManifest, token, repo)
 
-  onProgress?.('Waiting for workflow to finish (may take a few minutes)…')
-  const run = await waitForSyncWorkflowRun(startedAt, token, repo)
+  const run = await waitForSyncWorkflowRun(startedAt, token, repo, onProgress)
+  reportProgress(onProgress, 'Upload complete', 100)
+
+  if (!picturesOmitted && bundle.pictures.length > 0) {
+    await markRtuPicturesDeployed(bundle.pictures.map((pic) => pic.fileName))
+  }
 
   return {
     gistId,
     workflowRunUrl: run?.html_url ?? null,
     picturesOmitted,
-    pictureCount: bundle.pictures.length,
+    pictureCount: transferredPictureCount,
+    pictureExportFailed: pictureExport.failedFileNames,
+    pendingPictureCount: pictureExport.pendingCount,
+    exportedAt: bundle.exportedAt,
+    deployedFileNames: picturesOmitted ? [] : bundle.pictures.map((pic) => pic.fileName),
   }
 }

@@ -59,7 +59,7 @@ function loadStaticPortfolio(): PortfolioData {
   })
 }
 
-async function loadRemotePortfolio(baseUrl: string): Promise<PortfolioData | null> {
+export async function loadRemotePortfolio(baseUrl: string): Promise<PortfolioData | null> {
   try {
     const fetchOpts: RequestInit = { cache: 'no-store' }
     const [buildingsRes, utilitiesRes, polygonsRes] = await Promise.all([

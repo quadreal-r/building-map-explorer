@@ -9,6 +9,11 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import {
+  buildSyncMetaFromDataDir,
+  SYNC_META_FILE,
+  writeSyncMetaFile,
+} from './lib/sync-meta.mjs'
 import { getR2JsonBucket, isR2JsonConfigured, uploadJsonFileToR2 } from './lib/r2-client.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -30,12 +35,26 @@ export const PORTFOLIO_JSON_FILES = [
     localPath: join(ROOT, 'public', 'database', 'rtu-pictures', 'manifest.json'),
     objectKey: 'manifest.json',
   },
+  {
+    localPath: join(ROOT, 'supabase', 'data', 'sync-meta.json'),
+    objectKey: 'sync-meta.json',
+  },
 ]
+
+const DATA_DIR = join(ROOT, 'supabase', 'data')
+const PICS_DIR = join(ROOT, 'public', 'database', 'rtu-pictures')
 
 export async function uploadPortfolioJsonToR2() {
   if (!isR2JsonConfigured()) {
     console.log('R2 JSON bucket not configured — skipping portfolio JSON upload.')
     return { uploaded: 0, skipped: PORTFOLIO_JSON_FILES.length }
+  }
+
+  const syncMetaPath = join(DATA_DIR, SYNC_META_FILE)
+  if (!existsSync(syncMetaPath)) {
+    const meta = buildSyncMetaFromDataDir(DATA_DIR, PICS_DIR, { preserveExportedAt: false })
+    writeSyncMetaFile(syncMetaPath, meta)
+    console.log(`Wrote ${SYNC_META_FILE} from current data files`)
   }
 
   const bucket = getR2JsonBucket()

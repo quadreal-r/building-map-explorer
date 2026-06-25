@@ -18,6 +18,8 @@ export interface DeployBundleExportResult {
   bundle: DeployBundle
   picturesOmitted: boolean
   pictureCount: number
+  pictureExportFailed: string[]
+  pendingPictureCount: number
 }
 
 function readPortfolioFromStorage(fallback: PortfolioData): PortfolioData {
@@ -32,36 +34,22 @@ function readPortfolioFromStorage(fallback: PortfolioData): PortfolioData {
   return fallback
 }
 
-async function blobToBase64(blob: Blob): Promise<string> {
-  const buffer = await blob.arrayBuffer()
-  const bytes = new Uint8Array(buffer)
-  let binary = ''
-  for (let i = 0; i < bytes.length; i++) {
-    binary += String.fromCharCode(bytes[i]!)
-  }
-  return btoa(binary)
+/** Read pending IndexedDB RTU pictures for deploy (map upload / bulk import). */
+export async function exportIndexedDbPicturesForDeploy(): Promise<DeployPictureEntry[]> {
+  const { exportPendingPicturesForDeploy } = await import('@/lib/rtuPictures')
+  const { pictures } = await exportPendingPicturesForDeploy()
+  return pictures
 }
 
-/** Read all IndexedDB RTU picture rows for deploy (static/manifest files are already in the repo). */
-export async function exportIndexedDbPicturesForDeploy(): Promise<DeployPictureEntry[]> {
-  const { exportIndexedDbPictureRows } = await import('@/lib/rtuPictures')
-  const rows = await exportIndexedDbPictureRows()
-  const out: DeployPictureEntry[] = []
-  for (const row of rows) {
-    try {
-      const blob = row.fullBlob ?? row.thumbBlob
-      out.push({
-        fileName: row.fileName,
-        rtuKey: row.rtuKey,
-        index: row.index,
-        mimeType: row.mimeType,
-        base64: await blobToBase64(blob),
-      })
-    } catch {
-      /* skip unreadable picture rows */
-    }
-  }
-  return out
+export interface DeployPictureExportSummary {
+  pictures: DeployPictureEntry[]
+  failedFileNames: string[]
+  pendingCount: number
+}
+
+export async function exportIndexedDbPicturesForDeployWithMeta(): Promise<DeployPictureExportSummary> {
+  const { exportPendingPicturesForDeploy } = await import('@/lib/rtuPictures')
+  return exportPendingPicturesForDeploy()
 }
 
 function readScheduleFromStorage(): DeployBundle['schedule'] {
@@ -101,14 +89,36 @@ function readPricingFromStorage(): DeployBundle['pricing'] {
 
 /** Collect a deploy bundle from the current browser state (local dev is source of truth). */
 export async function collectDeployBundle(portfolio: PortfolioData): Promise<DeployBundle> {
+  const pictureExport = await exportIndexedDbPicturesForDeployWithMeta()
+  if (pictureExport.failedFileNames.length) {
+    console.warn(
+      'Some local RTU pictures could not be read for sync:',
+      pictureExport.failedFileNames,
+    )
+  }
   return {
     version: DEPLOY_BUNDLE_VERSION,
     exportedAt: new Date().toISOString(),
     portfolio: readPortfolioFromStorage(portfolio),
     schedule: readScheduleFromStorage(),
     pricing: readPricingFromStorage(),
-    pictures: await exportIndexedDbPicturesForDeploy(),
+    pictures: pictureExport.pictures,
   }
+}
+
+export async function collectDeployBundleWithMeta(
+  portfolio: PortfolioData,
+): Promise<{ bundle: DeployBundle; pictureExport: DeployPictureExportSummary }> {
+  const pictureExport = await exportIndexedDbPicturesForDeployWithMeta()
+  const bundle: DeployBundle = {
+    version: DEPLOY_BUNDLE_VERSION,
+    exportedAt: new Date().toISOString(),
+    portfolio: readPortfolioFromStorage(portfolio),
+    schedule: readScheduleFromStorage(),
+    pricing: readPricingFromStorage(),
+    pictures: pictureExport.pictures,
+  }
+  return { bundle, pictureExport }
 }
 
 export function bundleFileName(bundle: DeployBundle): string {
@@ -191,7 +201,7 @@ export async function exportDeployBundleToDisk(
   })
   const fileHandle = await requestSaveFileHandle(placeholderName)
 
-  const bundle = await collectDeployBundle(portfolio)
+  const { bundle, pictureExport } = await collectDeployBundleWithMeta(portfolio)
   const fileName = bundleFileName(bundle)
   const { json, picturesOmitted } = serializeDeployBundle(bundle)
   const blob = new Blob([json], { type: 'application/json' })
@@ -208,6 +218,8 @@ export async function exportDeployBundleToDisk(
     bundle,
     picturesOmitted,
     pictureCount: bundle.pictures.length,
+    pictureExportFailed: pictureExport.failedFileNames,
+    pendingPictureCount: pictureExport.pendingCount,
   }
 }
 

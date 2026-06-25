@@ -1,5 +1,6 @@
 /**
  * Download deploy-bundle.json from a private GitHub gist (used by sync-deploy CI).
+ * Merges optional deploy-pictures.json into the bundle before writing.
  *
  * Env: GIST_ID, BME_SYNC_PAT
  * Usage: node scripts/download-gist-bundle.mjs [output-path]
@@ -41,20 +42,27 @@ if (!gistRes.ok) {
 }
 
 const gist = await gistRes.json()
-const file = gist.files?.['deploy-bundle.json']
-if (!file?.raw_url) {
+const bundleFile = gist.files?.['deploy-bundle.json']
+if (!bundleFile?.content && !bundleFile?.raw_url) {
   fail('deploy-bundle.json not found in gist.')
 }
 
-const rawRes = await fetch(file.raw_url, { headers })
-if (!rawRes.ok) {
-  fail(`Failed to download deploy-bundle.json (HTTP ${rawRes.status}).`)
+async function readGistFile(file) {
+  if (file.content != null) return file.content
+  if (!file.raw_url) return null
+  const rawRes = await fetch(file.raw_url, { headers })
+  if (!rawRes.ok) return null
+  return rawRes.text()
 }
 
-const text = await rawRes.text()
+const bundleText = await readGistFile(bundleFile)
+if (!bundleText) {
+  fail('Failed to read deploy-bundle.json from gist.')
+}
+
 let bundle
 try {
-  bundle = JSON.parse(text)
+  bundle = JSON.parse(bundleText)
 } catch {
   fail('Gist file is not valid JSON.')
 }
@@ -63,5 +71,25 @@ if (!bundle.portfolio?.buildings?.length) {
   fail('Deploy bundle is missing portfolio.buildings.')
 }
 
-writeFileSync(outPath, text)
-console.log(`Deploy bundle OK: ${bundle.portfolio.buildings.length} buildings → ${outPath}`)
+const picturesFile = gist.files?.['deploy-pictures.json']
+if (picturesFile) {
+  const picturesText = await readGistFile(picturesFile)
+  if (!picturesText) {
+    fail('Failed to read deploy-pictures.json from gist.')
+  }
+  try {
+    bundle.pictures = JSON.parse(picturesText)
+  } catch {
+    fail('deploy-pictures.json is not valid JSON.')
+  }
+}
+
+if (!Array.isArray(bundle.pictures)) {
+  bundle.pictures = []
+}
+
+const merged = `${JSON.stringify(bundle)}\n`
+writeFileSync(outPath, merged)
+console.log(
+  `Deploy bundle OK: ${bundle.portfolio.buildings.length} buildings, ${bundle.pictures.length} picture(s) → ${outPath}`,
+)

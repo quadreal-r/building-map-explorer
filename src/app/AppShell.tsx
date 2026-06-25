@@ -8,7 +8,10 @@ import { SettingsModal } from '@/features/settings/SettingsModal'
 import { Sidebar } from '@/features/sidebar/Sidebar'
 import { useFilteredBuildings } from '@/hooks/useFilteredBuildings'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { RemoteSyncUpdateModal } from '@/features/sync/RemoteSyncUpdateModal'
+import { useRemoteSyncUpdateCheck } from '@/hooks/useRemoteSyncUpdateCheck'
 import { usePortfolioData, persistPortfolio, type PortfolioData } from '@/hooks/usePortfolioData'
+import { showToastSuccess } from '@/lib/toast'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { useRtuPricingStore } from '@/stores/rtuPricingStore'
 import { useRtuScheduleStore } from '@/stores/rtuScheduleStore'
@@ -74,6 +77,22 @@ export function AppShell() {
     },
     [queryClient],
   )
+
+  const remoteSync = useRemoteSyncUpdateCheck(portfolio, handlePortfolioImport)
+  const {
+    open: remoteSyncOpen,
+    meta: remoteSyncMeta,
+    localSummary: remoteSyncLocalSummary,
+    loading: remoteSyncLoading,
+    dismiss: dismissRemoteSync,
+    loadUpdates: loadRemoteUpdates,
+  } = remoteSync
+
+  const handleLoadRemoteUpdates = useCallback(() => {
+    void loadRemoteUpdates().then((next) => {
+      if (next) showToastSuccess('✓ Loaded latest data from Cloudflare on this PC')
+    })
+  }, [loadRemoteUpdates])
 
   const handleAddMarkerClose = useCallback(() => {
     closeAddMarker('addMarker')
@@ -150,6 +169,14 @@ export function AppShell() {
           onIndexChange={setRtuPictureViewerIndex}
         />
       ) : null}
+      <RemoteSyncUpdateModal
+        open={remoteSyncOpen}
+        meta={remoteSyncMeta}
+        localSummary={remoteSyncLocalSummary}
+        loading={remoteSyncLoading}
+        onDismiss={dismissRemoteSync}
+        onLoadUpdates={handleLoadRemoteUpdates}
+      />
     </div>
   )
 }

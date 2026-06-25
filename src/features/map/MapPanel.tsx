@@ -3,6 +3,7 @@ import { AddMarkerPanel } from '@/features/map/AddMarkerPanel'
 import { VersionStamp } from '@/components/VersionStamp/VersionStamp'
 import { PolygonDrawPanel } from '@/features/polygons/PolygonDrawPanel'
 import { useMapMarkers } from '@/features/map/useMapMarkers'
+import { usePendingPictureMarkers } from '@/features/map/usePendingPictureMarkers'
 import { usePolygons } from '@/features/polygons/usePolygons'
 import { useMapRotation } from '@/hooks/useMapRotation'
 import { useMapMarqueeSelect } from '@/hooks/useMapMarqueeSelect'
@@ -11,13 +12,14 @@ import { IMAGERY_MODES, MAP_MAX_ZOOM } from '@/lib/constants'
 import { matchesUtility } from '@/lib/dragSelection'
 import { tenantPolygonCount, buildPolygonBuildingIndex } from '@/lib/polygonBuildings'
 import { installMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
-import { panToPreserveRotation } from '@/lib/mapRotation'
+import { fitBoundsPreserveRotation, panToPreserveRotation } from '@/lib/mapRotation'
 import type { Building, LayerKey, Polygon, PortfolioData, Rtu, Utility } from '@/types/domain'
 import type { ImageryMode } from '@/types/domain'
 import { useFilterStore } from '@/stores/filterStore'
 import { usePortfolioStore } from '@/stores/portfolioStore'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useUiStore } from '@/stores/uiStore'
+import { usePendingRtuPictureStore } from '@/stores/pendingRtuPictureStore'
 import styles from './MapPanel.module.css'
 
 export interface MapPanelProps {
@@ -187,6 +189,20 @@ export function MapPanel({
     onDeleteDetail: handleDeleteDetail,
     onGroupMoved: handleGroupMoved,
   })
+
+  usePendingPictureMarkers(map, portfolio.buildings)
+
+  const pendingStageRevision = usePendingRtuPictureStore((s) => s.stageRevision)
+  const pendingPictures = usePendingRtuPictureStore((s) => s.items)
+
+  useEffect(() => {
+    if (!map || pendingPictures.length === 0) return
+    const bounds = new google.maps.LatLngBounds()
+    for (const item of pendingPictures) {
+      bounds.extend({ lat: item.lat, lng: item.lng })
+    }
+    fitBoundsPreserveRotation(map, bounds, 80)
+  }, [map, pendingStageRevision, pendingPictures])
 
   usePolygons({
     map,

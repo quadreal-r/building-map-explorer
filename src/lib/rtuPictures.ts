@@ -109,6 +109,8 @@ interface StoredRtuPictureRow {
   thumbBlob: Blob
   /** Original upload; older rows may only have thumbBlob */
   fullBlob?: Blob
+  /** False after a successful Settings sync uploaded this file to Cloudflare */
+  pendingDeploy?: boolean
 }
 
 async function idbGetAllForRtu(rtuKey: string): Promise<StoredRtuPictureRow[]> {
@@ -152,6 +154,72 @@ export async function exportIndexedDbPictureRows(): Promise<StoredRtuPictureRow[
   return idbGetAllRows()
 }
 
+export interface DeployPictureExportResult {
+  pictures: import('@/types/deployBundle').DeployPictureEntry[]
+  failedFileNames: string[]
+  pendingCount: number
+}
+
+/** IndexedDB pictures pending Cloudflare deploy (map upload / bulk import). */
+export async function exportPendingPicturesForDeploy(): Promise<DeployPictureExportResult> {
+  const rows = await idbGetAllRows()
+  const pendingRows = rows.filter((row) => row.pendingDeploy !== false)
+  const pictures: DeployPictureExportResult['pictures'] = []
+  const failedFileNames: string[] = []
+
+  for (const row of pendingRows) {
+    try {
+      const blob = row.fullBlob ?? row.thumbBlob
+      if (!blob || blob.size === 0) {
+        failedFileNames.push(row.fileName)
+        continue
+      }
+      const buffer = await blob.arrayBuffer()
+      const bytes = new Uint8Array(buffer)
+      let binary = ''
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]!)
+      }
+      pictures.push({
+        fileName: row.fileName,
+        rtuKey: row.rtuKey,
+        index: row.index,
+        mimeType: row.mimeType,
+        base64: btoa(binary),
+      })
+    } catch {
+      failedFileNames.push(row.fileName)
+    }
+  }
+
+  return { pictures, failedFileNames, pendingCount: pendingRows.length }
+}
+
+/** Mark map/import pictures as deployed after a successful Settings sync. */
+export async function markRtuPicturesDeployed(fileNames: string[]): Promise<void> {
+  if (!fileNames.length) return
+  const wanted = new Set(fileNames)
+  const db = await openDb()
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite')
+    const store = tx.objectStore(STORE)
+    const req = store.getAll()
+    req.onerror = () => reject(req.error ?? new Error('IndexedDB read failed'))
+    req.onsuccess = () => {
+      const rows = (req.result as StoredRtuPictureRow[]) ?? []
+      for (const row of rows) {
+        if (!wanted.has(row.fileName)) continue
+        store.put({ ...row, pendingDeploy: false })
+      }
+    }
+    tx.oncomplete = () => {
+      db.close()
+      resolve()
+    }
+    tx.onerror = () => reject(tx.error ?? new Error('IndexedDB write failed'))
+  })
+}
+
 /** Picture count per RTU key (`buildingAddress|rtuName`), merging manifest + IndexedDB by index. */
 export async function getRtuPictureCountMap(): Promise<Map<string, number>> {
   const manifest = await loadRtuPictureManifest()
@@ -190,6 +258,10 @@ async function fetchManifestFromUrl(url: string): Promise<RtuPictureManifest | n
   } catch {
     return null
   }
+}
+
+export function clearRtuPictureManifestCache(): void {
+  manifestCache = null
 }
 
 export async function loadRtuPictureManifest(): Promise<RtuPictureManifest> {
@@ -310,6 +382,7 @@ export async function importRtuPictureAtIndex(
   rtuName: string,
   file: File,
   index: number,
+  options?: { fileName?: string },
 ): Promise<string> {
   if (!file.type.startsWith('image/') && !/\.(jpe?g|png|webp|heif|heic|tif{1,2})$/i.test(file.name)) {
     throw new Error('Not an image file')
@@ -321,7 +394,7 @@ export async function importRtuPictureAtIndex(
   await idbDeleteByRtuAndIndex(key, index)
 
   const ext = fileExtension(file)
-  const fileName = rtuPictureFileName(buildingAddress, rtuName, index, ext)
+  const fileName = options?.fileName ?? rtuPictureFileName(buildingAddress, rtuName, index, ext)
   const thumbBlob = await createThumbnail(file)
   await idbPut({
     fileName,
@@ -330,6 +403,7 @@ export async function importRtuPictureAtIndex(
     mimeType: file.type || 'image/jpeg',
     thumbBlob,
     fullBlob: file,
+    pendingDeploy: true,
   })
   notifyRtuPicturesChanged()
   return fileName
