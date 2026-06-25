@@ -196,7 +196,7 @@ export async function syncDeployToGitHub(
   reportProgress(onProgress, 'Preparing deploy bundle…', 18)
   const leanBundle = { ...bundle, pictures: [] as typeof bundle.pictures }
   let picturesJson = JSON.stringify(bundle.pictures)
-  let leanJson = JSON.stringify(leanBundle)
+  const leanJson = JSON.stringify(leanBundle)
   let picturesOmitted = false
 
   const gistBudget = MAX_GIST_BYTES

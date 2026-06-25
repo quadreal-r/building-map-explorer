@@ -44,15 +44,16 @@ export function GitHubDeploySync({
   }, [onBusyChange, syncing])
 
   useEffect(() => {
-    if (!completed || cooldownSec > 0) return
-    setCompleted(false)
-    setProgress({ message: '', percent: 0 })
-  }, [completed, cooldownSec])
-
-  useEffect(() => {
     if (!completed || cooldownSec <= 0) return
     const timer = window.setInterval(() => {
-      setCooldownSec((value) => Math.max(0, value - 1))
+      setCooldownSec((value) => {
+        const next = Math.max(0, value - 1)
+        if (next === 0) {
+          setCompleted(false)
+          setProgress({ message: '', percent: 0 })
+        }
+        return next
+      })
     }, 1000)
     return () => window.clearInterval(timer)
   }, [completed, cooldownSec])
