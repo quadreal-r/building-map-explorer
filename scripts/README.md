@@ -20,3 +20,10 @@ npm run extract -- "C:\path\to\legacy.html"
 ## extract-css.mjs
 
 Extracts the app stylesheet block into `src/styles/legacy.css`.
+
+## RTU pictures on Cloudflare R2
+
+- `upload-rtu-pictures-r2.mjs` — upload images from `public/database/rtu-pictures/` to R2; warns when EXIF GPS is >100 ft from the linked RTU marker.
+- `lib/rtu-gps-validate.mjs` — shared GPS distance helpers for upload/audit scripts.
+- `apply-deploy-bundle.mjs` — when R2 env vars are set, uploads bundle pictures to R2 instead of writing large files into `public/`.
+- Shared client: `lib/r2-client.mjs` (S3-compatible API).

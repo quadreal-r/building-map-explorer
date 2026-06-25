@@ -12,6 +12,7 @@ import {
   normalizeLegacyBuilding,
   normalizeLegacyPolygon,
   normalizeLegacyUtility,
+  normalizePortfolioData,
 } from '@/types/domain'
 
 import staticBuildings from '../../supabase/data/buildings.json'
@@ -50,11 +51,11 @@ export function isValidStoredPortfolio(data: unknown): data is PortfolioData {
 }
 
 function loadStaticPortfolio(): PortfolioData {
-  return {
+  return normalizePortfolioData({
     buildings: (staticBuildings as LegacyBuildingJson[]).map(normalizeLegacyBuilding),
     utilities: (staticUtilities as LegacyUtilityJson[]).map(normalizeLegacyUtility),
     polygons: (staticPolygons as LegacyPolygonJson[]).map(normalizeLegacyPolygon),
-  }
+  })
 }
 
 function loadStoredPortfolio(): PortfolioData | null {
@@ -73,7 +74,13 @@ function loadStoredPortfolio(): PortfolioData | null {
 }
 
 export async function loadPortfolioData(): Promise<PortfolioData> {
-  return loadEmbeddedPortfolio() ?? loadStoredPortfolio() ?? loadStaticPortfolio()
+  const embedded = loadEmbeddedPortfolio()
+  if (embedded) return normalizePortfolioData(embedded)
+
+  const stored = loadStoredPortfolio()
+  if (stored) return normalizePortfolioData(stored)
+
+  return loadStaticPortfolio()
 }
 
 export function usePortfolioData() {

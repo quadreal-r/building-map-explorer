@@ -223,6 +223,15 @@ describe('applyCostScopeFilters', () => {
 })
 
 describe('applyFilters', () => {
+  it('filters by exact property manager name', () => {
+    const filtered = applyFilters(buildings, {
+      ...DEFAULT_FILTER_STATE,
+      manager: 'Josh Starkey',
+    })
+    expect(filtered.length).toBeGreaterThan(0)
+    expect(filtered.every((b) => b.manager === 'Josh Starkey')).toBe(true)
+  })
+
   it('returns subset for park filter', () => {
     const filtered = applyFilters(buildings, {
       ...DEFAULT_FILTER_STATE,

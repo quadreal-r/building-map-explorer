@@ -1,7 +1,7 @@
 import { RTU_AGE_CRITICAL, RTU_AGE_WARN } from '@/lib/constants'
 import { getColor } from '@/lib/colors'
-import { hasPlaceholderGps } from '@/lib/dataQuality'
-import { getRtuAge, getRtuYear } from '@/lib/rtu'
+import { hasPlaceholderGps, hasVacant, mlCount } from '@/lib/dataQuality'
+import { getRtuAge, getRtuYear, oldestRtuAge } from '@/lib/rtu'
 import type { RtuPicture } from '@/lib/rtuPictures'
 import { showToastSuccess } from '@/lib/toast'
 import type { Building, LayerKey, Polygon, Rtu, Utility } from '@/types/domain'
@@ -160,6 +160,24 @@ function isTenantVacant(polygon: Polygon): boolean {
   return isPolygonVacant(polygon)
 }
 
+function buildingStatusBadges(building: Building, tenantPolygons: Polygon[]): string {
+  let badges = ''
+  const oldest = oldestRtuAge(building)
+  if (oldest >= RTU_AGE_CRITICAL) {
+    badges += ` <span class="iw-badge" style="background:rgba(255,80,80,.22);color:#ff6060;border:1px solid rgba(255,80,80,.5)">🔥 ${oldest} yr RTU</span>`
+  } else if (oldest >= RTU_AGE_WARN) {
+    badges += ` <span class="iw-badge" style="background:rgba(251,191,36,.22);color:#fbbf24;border:1px solid rgba(251,191,36,.5)">${oldest} yr RTU</span>`
+  }
+  if (hasVacant(building, tenantPolygons)) {
+    badges += ` <span class="iw-badge" style="background:rgba(251,146,60,.2);color:#fb923c;border:1px solid rgba(251,146,60,.4)">VACANT</span>`
+  }
+  const ml = mlCount(building)
+  if (ml) {
+    badges += ` <span class="iw-badge" style="background:rgba(167,139,250,.2);color:#a78bfa;border:1px solid rgba(167,139,250,.4)">ML×${ml}</span>`
+  }
+  return badges
+}
+
 export function buildBuildingInfoHtml(
   building: Building,
   tenantPolygons: Polygon[] = [],
@@ -170,6 +188,7 @@ export function buildBuildingInfoHtml(
   if (building.cluster?.trim()) {
     badges += ` <span class="iw-badge" style="background:rgba(125,184,255,.12);color:#7db8ff;border:1px solid rgba(125,184,255,.3)">${escapeHtml(building.cluster)}</span>`
   }
+  badges += buildingStatusBadges(building, tenantPolygons)
 
   const stats = [
     `<div class="iw-row"><strong>BU #</strong>${escapeHtml(building.bu || '—')}</div>`,

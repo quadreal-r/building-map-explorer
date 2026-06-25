@@ -13,7 +13,7 @@ export function distanceFeet(lat1: number, lng1: number, lat2: number, lng2: num
   return meters * FEET_PER_METER
 }
 
-export const RTU_GPS_MATCH_FEET = 20
+export const RTU_GPS_MATCH_FEET = 100
 
 export function isWithinFeet(
   lat1: number,

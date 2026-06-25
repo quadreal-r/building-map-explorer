@@ -20,6 +20,26 @@
   cursor: pointer;
 }
 
+.filterText {
+  width: 100%;
+  background: var(--surface2, #143d78);
+  border: 1px solid var(--border, #2e6ec0);
+  border-radius: 5px;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  padding: 6px 9px;
+  outline: none;
+}
+
+.filterText:focus {
+  border-color: var(--accent, #7db8ff);
+}
+
+.filterText::placeholder {
+  color: var(--text-muted, #90b8e0);
+}
+
 .collapseBtn {
   position: absolute;
   right: 8px;

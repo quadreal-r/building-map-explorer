@@ -1,13 +1,22 @@
-import { useMemo, useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { ImportExportButtons } from '@/features/import-export/ImportExportButtons'
 import { BulkRtuPictureImport } from '@/features/settings/BulkRtuPictureImport'
-import { ImportRtuSchedule } from '@/features/cost-estimator/ImportRtuSchedule'
 import { RtuPricingSettings } from '@/features/settings/RtuPricingSettings'
+import { SettingsToolButton } from '@/features/settings/SettingsToolButton'
 import { Modal } from '@/components/Modal/Modal'
+import { Tooltip } from '@/components/Tooltip/Tooltip'
+import tooltipStyles from '@/components/Tooltip/Tooltip.module.css'
 import { APP_THEMES } from '@/lib/themes'
-import { collectFilterOptions } from '@/lib/filters'
+import selectStyles from '@/components/Select/Select.module.css'
+import {
+  addManagerSlot,
+  applyManagerSlots,
+  managerSlotLabel,
+  managerSlotsFromPortfolio,
+  type ManagerSlot,
+} from '@/lib/managerNames'
 import { saveDatabase } from '@/lib/saveDatabase'
-import { collectDeployBundle, downloadDeployBundle } from '@/lib/deployBundle'
+import { exportDeployBundleToDisk } from '@/lib/deployBundle'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
@@ -37,6 +46,127 @@ interface SettingsFormProps {
   onSaved?: () => void
 }
 
+const ADD_MANAGER_VALUE = '__add_manager__'
+
+function PropertyManagerNamesEditor({
+  open,
+  portfolio,
+  onPortfolioPatch,
+}: {
+  open: boolean
+  portfolio: PortfolioData
+  onPortfolioPatch: (data: PortfolioData) => void
+}) {
+  const setManagerRename = useSettingsStore((s) => s.setManagerRename)
+  const saveSettings = useSettingsStore((s) => s.saveSettings)
+
+  const [slots, setSlots] = useState<ManagerSlot[]>(() =>
+    managerSlotsFromPortfolio(portfolio.buildings),
+  )
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [draftName, setDraftName] = useState(() => slots[0]?.name ?? '')
+
+  useEffect(() => {
+    if (!open) return
+    const nextSlots = managerSlotsFromPortfolio(portfolio.buildings)
+    setSlots(nextSlots)
+    setSelectedIndex(0)
+    setDraftName(nextSlots[0]?.name ?? '')
+  }, [open, portfolio.buildings])
+
+  const commitDraft = (index: number, name: string, currentSlots: ManagerSlot[]): ManagerSlot[] => {
+    if (index < 0 || index >= currentSlots.length) return currentSlots
+    const next = [...currentSlots]
+    next[index] = { ...next[index]!, name }
+    return next
+  }
+
+  const handleSlotPickerChange = (value: string) => {
+    const nextIndex = Number.parseInt(value, 10)
+    if (Number.isNaN(nextIndex)) return
+    const committed = commitDraft(selectedIndex, draftName, slots)
+    setSlots(committed)
+    setSelectedIndex(nextIndex)
+    setDraftName(committed[nextIndex]?.name ?? '')
+  }
+
+  const handleAddManager = () => {
+    const committed = commitDraft(selectedIndex, draftName, slots)
+    const nextSlots = addManagerSlot(committed)
+    const newIndex = nextSlots.length - 1
+    setSlots(nextSlots)
+    setSelectedIndex(newIndex)
+    setDraftName('')
+  }
+
+  const handleApply = () => {
+    const committed = commitDraft(selectedIndex, draftName, slots)
+    const { portfolio: nextPortfolio, changed, managerRenames: appliedRenames } =
+      applyManagerSlots(portfolio, committed)
+
+    for (const [original, name] of Object.entries(appliedRenames)) {
+      setManagerRename(original, name)
+    }
+    void saveSettings()
+
+    if (changed) {
+      onPortfolioPatch(nextPortfolio)
+      const nextSlots = managerSlotsFromPortfolio(nextPortfolio.buildings)
+      setSlots(nextSlots)
+      setSelectedIndex(Math.min(selectedIndex, nextSlots.length - 1))
+      setDraftName(nextSlots[Math.min(selectedIndex, nextSlots.length - 1)]?.name ?? '')
+      showToastSuccess('✓ Manager names updated — save to HTML to keep changes.')
+      return
+    }
+
+    showToastSuccess('✓ Manager names saved.')
+  }
+
+  return (
+    <>
+      <div className={styles.mgrFieldList}>
+        <select
+          className={selectStyles.select}
+          value={String(selectedIndex)}
+          onChange={(e) => handleSlotPickerChange(e.target.value)}
+          aria-label="Select manager to edit"
+        >
+          {slots.map((slot, index) => (
+            <option key={`${slot.original}-${index}`} value={String(index)}>
+              {slot.name || managerSlotLabel(index)}
+            </option>
+          ))}
+        </select>
+        <input
+          type="text"
+          className={`${selectStyles.select} ${styles.mgrNameInput}`}
+          value={draftName}
+          onChange={(e) => setDraftName(e.target.value)}
+          placeholder={managerSlotLabel(selectedIndex)}
+          aria-label={`Edit ${managerSlotLabel(selectedIndex)}`}
+        />
+        <select
+          className={selectStyles.select}
+          value=""
+          onChange={(e) => {
+            if (e.target.value === ADD_MANAGER_VALUE) handleAddManager()
+          }}
+          aria-label="Add manager slot"
+        >
+          <option value="">Add Manager</option>
+          <option value={ADD_MANAGER_VALUE}>Add Manager</option>
+        </select>
+      </div>
+      <p className={styles.hint}>
+        Pick a manager above, edit the name, then apply. Add Manager stays available for extra slots.
+      </p>
+      <button type="button" className={styles.mgrApplyBtn} onClick={handleApply}>
+        Apply manager names
+      </button>
+    </>
+  )
+}
+
 function SettingsForm({
   open,
   portfolio,
@@ -57,18 +187,6 @@ function SettingsForm({
   const setDragMode = useSelectionStore((s) => s.setDragMode)
   const clearDragSelect = useSelectionStore((s) => s.clearDragSelect)
 
-  const managers = useMemo(
-    () => collectFilterOptions(portfolio.buildings).managers,
-    [portfolio.buildings],
-  )
-
-  const [draftManagers, setDraftManagers] = useState<Record<string, string>>(() => {
-    const initial: Record<string, string> = {}
-    for (const manager of managers) {
-      initial[manager] = manager
-    }
-    return initial
-  })
   const [uploadBusy, setUploadBusy] = useState(false)
   const [pricingOpen, setPricingOpen] = useState(false)
 
@@ -76,18 +194,6 @@ function SettingsForm({
     if (uploadBusy) return
     onClose()
   }, [onClose, uploadBusy])
-
-  const applyManagerRename = (original: string, nextName: string) => {
-    const trimmed = nextName.trim() || original
-    if (trimmed === original) return
-    onPortfolioPatch({
-      ...portfolio,
-      buildings: portfolio.buildings.map((b) =>
-        b.manager === original ? { ...b, manager: trimmed } : b,
-      ),
-    })
-    showToastSuccess('✓ Manager name updated')
-  }
 
   const handleThemeSelect = (index: number) => {
     applyTheme(index)
@@ -125,12 +231,21 @@ function SettingsForm({
 
   const handleExportDeployBundle = () => {
     setUploadBusy(true)
-    void collectDeployBundle(portfolio)
-      .then((bundle) => {
-        downloadDeployBundle(bundle)
-        showToastSuccess('✓ Deploy bundle downloaded')
+    void exportDeployBundleToDisk(portfolio)
+      .then((result) => {
+        const mb = (result.bundle.pictures.reduce((n, p) => n + p.base64.length, 0) / (1024 * 1024)).toFixed(1)
+        if (result.picturesOmitted) {
+          showToastError(
+            `Bundle saved without ${result.pictureCount} pictures (file too large). Re-export pictures separately or use Bulk RTU Picture Import on GitHub deploy.`,
+          )
+          return
+        }
+        showToastSuccess(
+          `✓ Deploy bundle saved (${result.pictureCount} pictures, ~${mb} MB image data)`,
+        )
       })
       .catch((e) => {
+        if (e instanceof Error && e.message === 'Export cancelled') return
         showToastError(e instanceof Error ? e.message : 'Export failed')
       })
       .finally(() => setUploadBusy(false))
@@ -148,86 +263,62 @@ function SettingsForm({
       <div className={styles.body}>
         <section>
           <div className={styles.sectionLabel}>Colour theme</div>
-          <div className={styles.themeGrid}>
+          <select
+            className={selectStyles.select}
+            value={String(themeIndex)}
+            onChange={(e) => handleThemeSelect(Number.parseInt(e.target.value, 10))}
+            aria-label="Colour theme"
+          >
             {APP_THEMES.map((theme, index) => (
-              <button
-                key={theme.name}
-                type="button"
-                className={`${styles.themeSwatch}${themeIndex === index ? ` ${styles.active}` : ''}`}
-                onClick={() => handleThemeSelect(index)}
-              >
-                <div className={styles.themeName}>{theme.name}</div>
-                <div className={styles.themePalette}>
-                  {theme.palette.map((color) => (
-                    <span key={color} style={{ background: color }} />
-                  ))}
-                </div>
-              </button>
+              <option key={theme.name} value={String(index)}>
+                {theme.name}
+              </option>
             ))}
-          </div>
+          </select>
         </section>
 
         <section>
           <div className={styles.sectionLabel}>Property manager names</div>
-          {managers.map((manager) => (
-            <div key={manager} className={styles.mgrRow}>
-              <span className={styles.mgrLabel} title={manager}>
-                {manager}
-              </span>
-              <input
-                className={styles.mgrInput}
-                data-original={manager}
-                value={draftManagers[manager] ?? manager}
-                onChange={(e) =>
-                  setDraftManagers((prev) => ({ ...prev, [manager]: e.target.value }))
-                }
-                onBlur={(e) => applyManagerRename(manager, e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') e.currentTarget.blur()
-                }}
-              />
-            </div>
-          ))}
-          <p className={styles.hint}>Renames apply when you leave each field.</p>
+          <Tooltip
+            content="Edit manager names shown in the sidebar All property managers filter."
+            position="left"
+            wide
+            className={`${tooltipStyles.wrapBlock} ${styles.toolBtnWrap}`}
+          >
+            <PropertyManagerNamesEditor
+              open={open}
+              portfolio={portfolio}
+              onPortfolioPatch={onPortfolioPatch}
+            />
+          </Tooltip>
         </section>
 
         <section>
           <div className={styles.sectionLabel}>RTU replacement pricing</div>
           <div className={styles.tools}>
-            <button
-              type="button"
-              className="btn-action"
-              style={{ width: '100%', justifyContent: 'flex-start' }}
+            <SettingsToolButton
+              tooltip="Edit supply, install, and other per-tonnage replacement costs used by the cost estimator."
               onClick={() => setPricingOpen(true)}
             >
               Edit RTU&apos;s Pricing
-            </button>
-            <p className={styles.hint}>
-              Use <strong>Import RTU cost</strong> below for replacement years, notes, and tonnage
-              pricing from the Capital workbook, or edit supply/install columns per tier here.
-            </p>
-            <ImportRtuSchedule buildings={portfolio.buildings} />
+            </SettingsToolButton>
           </div>
         </section>
 
         <section>
           <div className={styles.sectionLabel}>Tools</div>
           <div className={styles.tools}>
-            <button
-              type="button"
-              className="btn-action"
-              style={{ width: '100%', justifyContent: 'flex-start' }}
+            <SettingsToolButton
+              tooltip="Turn on map edit mode: drag a box to select markers and polygons, then drag any selected item to move the group. Ctrl/Shift+click or drag to add to selection."
               onClick={handleEditPositions}
             >
               {dragMode
                 ? `✓ Edit Multiple Positions (on${dragSelectedCount ? ` · ${dragSelectedCount} selected` : ''})`
                 : 'Edit Multiple Positions'}
-            </button>
+            </SettingsToolButton>
             {dragMode ? (
-              <button
-                type="button"
-                className="btn-action"
-                style={{ width: '100%', justifyContent: 'flex-start' }}
+              <SettingsToolButton
+                tooltip="Clear the current map selection without turning off edit mode."
                 onClick={() => {
                   clearDragSelect()
                   handleClose()
@@ -235,64 +326,44 @@ function SettingsForm({
                 disabled={dragSelectedCount === 0}
               >
                 Clear map selection
-              </button>
+              </SettingsToolButton>
             ) : null}
-            <p className={styles.hint}>
-              Drag a box on the map to select markers and polygons, or click to toggle selection (Ctrl/Shift+click or Ctrl/Shift+drag to add). Drag any selected item to move the group.
-            </p>
-            <button
-              type="button"
-              className="btn-action"
-              style={{ width: '100%', justifyContent: 'flex-start' }}
+            <SettingsToolButton
+              tooltip="Place a new building, RTU, or utility marker on the map."
               onClick={() => {
                 handleClose()
                 onOpenAddMarker()
               }}
             >
               Add marker
-            </button>
-            <button
-              type="button"
-              className="btn-action"
-              style={{ width: '100%', justifyContent: 'flex-start' }}
+            </SettingsToolButton>
+            <SettingsToolButton
+              tooltip="Draw a new tenant polygon by clicking points on the map."
               onClick={() => {
                 handleClose()
                 onOpenPolygonDraw()
               }}
-              title="Add a new polygon by clicking points on the map"
             >
               Add polygon
-            </button>
-            <button
-              type="button"
-              className="btn-action btn-save"
-              style={{ width: '100%', justifyContent: 'flex-start' }}
+            </SettingsToolButton>
+            <SettingsToolButton
+              variant="export"
+              tooltip="Save portfolio, RTU schedule, pricing, and IndexedDB pictures as deploy-bundle.json. Run npm run apply-deploy-bundle, then commit and push to update GitHub Pages."
               onClick={handleExportDeployBundle}
               disabled={uploadBusy}
-              title="Download portfolio, RTU schedule, pricing, and IndexedDB pictures for GitHub deploy"
             >
               Export data for GitHub deploy
-            </button>
-            <p className={styles.hint}>
-              Downloads <code>deploy-bundle.json</code> from this browser (local dev is source of
-              truth). Copy it into the project and run{' '}
-              <code>npm run apply-deploy-bundle</code>, then commit and push.
-            </p>
-            <button
-              type="button"
-              className="btn-action btn-save"
-              style={{ width: '100%', justifyContent: 'flex-start' }}
+            </SettingsToolButton>
+            <SettingsToolButton
+              variant="export"
+              tooltip="Download a self-contained HTML file with the map, filters, cost estimator, and all portfolio data. Opens offline; Ctrl+S works from the map too."
               onClick={handleExportHtml}
-              title="Download a self-contained HTML file with map, filters, cost estimator, and all portfolio data"
             >
               Export Application to HTML
-            </button>
-            <p className={styles.hint}>
-              Saves the full app into one file you can open offline (double-click or file://). Ctrl+S
-              works from the map too.
-            </p>
+            </SettingsToolButton>
             <ImportExportButtons
               portfolio={portfolio}
+              buildings={portfolio.buildings}
               onImport={handleImport}
               onExportComplete={handleClose}
             />
@@ -321,7 +392,6 @@ export function SettingsModal({
 
   return (
     <SettingsForm
-      key={themeIndex}
       open={open}
       portfolio={portfolio}
       themeIndex={themeIndex}

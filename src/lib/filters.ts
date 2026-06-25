@@ -19,6 +19,11 @@ function normalizeSearch(search: string): string {
   return search.trim().toLowerCase()
 }
 
+function matchesManagerFilter(building: Building, managerFilter: string): boolean {
+  if (!managerFilter) return true
+  return building.manager === managerFilter
+}
+
 /** Building-level search (address, BU, cluster, manager) — not RTU/tenant detail fields. */
 export function matchesBuildingMetadata(building: Building, search: string): boolean {
   const q = normalizeSearch(search)
@@ -131,7 +136,7 @@ export function reconcileFilterDropdowns(
     if (next.cluster && !searchMatches.some((b) => b.cluster === next.cluster)) {
       next.cluster = ''
     }
-    if (next.manager && !searchMatches.some((b) => b.manager === next.manager)) {
+    if (next.manager && !searchMatches.some((b) => matchesManagerFilter(b, next.manager))) {
       next.manager = ''
     }
   }
@@ -147,7 +152,9 @@ export function reconcileFilterDropdowns(
   }
   if (
     next.manager &&
-    !buildingsForFilterOptions(buildings, next, 'manager').some((b) => b.manager === next.manager)
+    !buildingsForFilterOptions(buildings, next, 'manager', polygonIndex).some((b) =>
+      matchesManagerFilter(b, next.manager),
+    )
   ) {
     next.manager = ''
   }
@@ -220,7 +227,7 @@ export function applyPrimaryFilters(
     if (!matchesSearch(building, search, polygonIndex)) return false
     if (reconciled.park && building.park !== reconciled.park) return false
     if (reconciled.cluster && building.cluster !== reconciled.cluster) return false
-    if (reconciled.manager && building.manager !== reconciled.manager) return false
+    if (reconciled.manager && !matchesManagerFilter(building, reconciled.manager)) return false
     if (!passAdvFilter(building, reconciled.adv, polygonIndex)) return false
     return true
   })
@@ -267,7 +274,7 @@ function buildingsForFilterOptions(
     if (exclude !== 'cluster' && filters.cluster && building.cluster !== filters.cluster) {
       return false
     }
-    if (exclude !== 'manager' && filters.manager && building.manager !== filters.manager) {
+    if (exclude !== 'manager' && filters.manager && !matchesManagerFilter(building, filters.manager)) {
       return false
     }
     return true

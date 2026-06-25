@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { getColor } from '@/lib/colors'
+import { isLegacySuiteMarkerName } from '@/lib/legacySuiteMarkers'
 import {
   ESRI_TILE_URL,
   IMAGERY_MODES,
@@ -26,7 +27,7 @@ import { buildPolygonBuildingIndex, polygonsForBuilding } from '@/lib/polygonBui
 import { consumeMapClickClearSuppression, registerMarqueeTarget, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
 import { tryConsumeMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
 import { afterMapViewChange, fitBoundsPreserveRotation, panToPreserveRotation } from '@/lib/mapRotation'
-import { closeAllMapPopups, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
+import { closeAllMapPopups, ensureInfoWindowVisible, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
 import { collectSearchHits } from '@/lib/searchHits'
 import { getDetailMarkerIcon, getMarkerIcon } from '@/lib/markerStyles'
 import { buildBuildingInfoHtml, buildDetailInfoHtml, buildRtuPicturesHtml, copyPopupText } from '@/lib/mapInfoWindow'
@@ -332,6 +333,7 @@ export function useMapMarkers({
       const tenantPolygons = polygonsForBuilding(polygonIndexRef.current, building.address)
       infoWindowRef.current.setContent(buildBuildingInfoHtml(building, tenantPolygons))
       infoWindowRef.current.open({ map, anchor: marker })
+      ensureInfoWindowVisible(map, infoWindowRef.current)
       activeInfoMarkerRef.current = marker
       afterMapViewChange(map)
     },
@@ -353,6 +355,7 @@ export function useMapMarkers({
         buildDetailInfoHtml(type, data, { buildingAddress: building?.address }),
       )
       infoWindowRef.current.open({ map, anchor: marker })
+      ensureInfoWindowVisible(map, infoWindowRef.current)
       activeInfoMarkerRef.current = marker
       marker.setVisible(true)
       entry.label?.setVisible(true)
@@ -543,7 +546,7 @@ export function useMapMarkers({
           if (!buildingAddress || !fileName) return
 
           if (isStatic) {
-            showToastError('Bundled images must be removed from public/database/rtu-pictures/')
+            showToastError('Deployed images are stored on Cloudflare R2 — remove via apply-deploy-bundle / R2, not from the map.')
             return
           }
 
@@ -941,6 +944,7 @@ export function useMapMarkers({
 
     for (const b of buildings) {
       for (const r of b.rtus ?? []) {
+        if (isLegacySuiteMarkerName(r.name)) continue
         makeDetailMarker(r.lat, r.lng, 'rtu', r, b)
       }
     }

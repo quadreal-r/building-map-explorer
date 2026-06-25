@@ -7,6 +7,7 @@ import {
 } from '@/lib/rtuBulkPictureImport'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import type { PortfolioData } from '@/types/domain'
+import { SettingsToolButton } from '@/features/settings/SettingsToolButton'
 import styles from './SettingsModal.module.css'
 
 export interface BulkRtuPictureImportProps {
@@ -115,27 +116,35 @@ export function BulkRtuPictureImport({ portfolio, onBusyChange }: BulkRtuPicture
   return (
     <div className={styles.bulkImport}>
       <div className={styles.bulkImportRow}>
-        <button
-          type="button"
-          className={`btn-action ${styles.bulkImportBtn}`}
-          disabled={busy}
+        <SettingsToolButton
+          tooltip={
+            <>
+              Select a folder of RTU photos. Filenames like 1590-RTU-04-1.jpg, 20-RTU-03.jpg, or
+              150-RTU-02 (3).jpg match RTU markers by building number and unit id. When GPS is in
+              the photo, it should be within 100 ft of the RTU marker; farther photos still import
+              with a warning. Files or folders with &quot;old&quot; in the name are skipped.
+            </>
+          }
           onClick={() => inputRef.current?.click()}
+          disabled={busy}
         >
-          {busy ? (
-            <span
-              className={styles.bulkImportBtnFill}
-              style={{ width: `${progressPct}%` }}
-              aria-hidden="true"
-            />
-          ) : null}
-          <span className={styles.bulkImportBtnText}>
-            {busy
-              ? progress
-                ? `Importing ${progress.processed} / ${progress.total} (${progressPct}%)`
-                : 'Importing pictures…'
-              : 'Upload RTU Pictures in Bulk'}
+          <span className={styles.bulkImportBtnInner}>
+            {busy ? (
+              <span
+                className={styles.bulkImportBtnFill}
+                style={{ width: `${progressPct}%` }}
+                aria-hidden="true"
+              />
+            ) : null}
+            <span className={styles.bulkImportBtnText}>
+              {busy
+                ? progress
+                  ? `Importing ${progress.processed} / ${progress.total} (${progressPct}%)`
+                  : 'Importing pictures…'
+                : 'Upload RTU Pictures in Bulk'}
+            </span>
           </span>
-        </button>
+        </SettingsToolButton>
         {busy ? (
           <button type="button" className={styles.bulkImportCancel} onClick={handleCancel}>
             Cancel
@@ -152,18 +161,11 @@ export function BulkRtuPictureImport({ portfolio, onBusyChange }: BulkRtuPicture
         type="file"
         accept="image/*"
         multiple
-        hidden
+        className={styles.hiddenFile}
         // @ts-expect-error webkitdirectory is supported in Chromium browsers
         webkitdirectory=""
         onChange={handleFolderChange}
       />
-      <p className={styles.hint}>
-        Select a folder of RTU photos. Filenames like{' '}
-        <strong>1590-RTU-04-1.jpg</strong>, <strong>150-RT-01-2.png</strong>, or{' '}
-        <strong>150-RTU-02 (3).jpg</strong> are matched to RTU markers by building number and unit.
-        When GPS is embedded in the photo, it must be within 20 ft of the RTU marker.
-        Files in folders named with &quot;old&quot; and filenames containing &quot;old&quot; are skipped.
-      </p>
       {report ? (
         <div className={styles.importReport}>
           <div className={styles.importReportHeader}>

@@ -18,7 +18,8 @@
     "test:coverage": "vitest run --coverage",
     "extract": "tsx scripts/extract.ts",
     "version:bump": "node scripts/bump-version.mjs",
-    "apply-deploy-bundle": "node scripts/apply-deploy-bundle.mjs"
+    "apply-deploy-bundle": "node scripts/apply-deploy-bundle.mjs",
+    "upload-rtu-pictures-r2": "node scripts/upload-rtu-pictures-r2.mjs"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",
@@ -31,6 +32,7 @@
     "zustand": "^5.0.5"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1075.0",
     "@eslint/js": "^10.0.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",

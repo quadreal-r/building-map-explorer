@@ -29,6 +29,32 @@ describe('parseBulkRtuPictureFileName', () => {
     })
   })
 
+  it('parses building-RTU-unit without picture index', () => {
+    expect(parseBulkRtuPictureFileName('20-RTU-03.jpg')).toEqual({
+      buildingNum: '20',
+      rtuToken: 'RTU-03',
+      unitId: '03',
+      pictureIndex: 1,
+    })
+  })
+
+  it('parses install year suffix', () => {
+    expect(parseBulkRtuPictureFileName('20-RTU-01-2015.jpg')).toEqual({
+      buildingNum: '20',
+      rtuToken: 'RTU-01',
+      unitId: '01',
+      pictureIndex: 1,
+      installYear: 2015,
+    })
+    expect(parseBulkRtuPictureFileName('20-RTU-01-1 (2015).jpg')).toEqual({
+      buildingNum: '20',
+      rtuToken: 'RTU-01',
+      unitId: '01',
+      pictureIndex: 1,
+      installYear: 2015,
+    })
+  })
+
   it('parses alphanumeric unit ids', () => {
     expect(parseBulkRtuPictureFileName('150-RT-3W-1.jpeg')).toEqual({
       buildingNum: '150',
@@ -74,7 +100,7 @@ describe('RTU bulk matching', () => {
     expect(candidates[0]!.rtu.name).toBe('RTU- 04')
   })
 
-  it('accepts GPS within 20 feet', () => {
+  it('accepts GPS within 100 feet', () => {
     const catalog = buildRtuCatalog(buildings)
     const parsed = parseBulkRtuPictureFileName('1590-RTU-04-1.jpg')!
     const candidates = findRtuCandidates(catalog, parsed)
@@ -82,13 +108,13 @@ describe('RTU bulk matching', () => {
     expect(entry?.rtu.name).toBe('RTU- 04')
   })
 
-  it('rejects GPS too far from marker', () => {
+  it('still matches but warns when GPS is beyond 100 feet', () => {
     const catalog = buildRtuCatalog(buildings)
     const parsed = parseBulkRtuPictureFileName('1590-RTU-04-1.jpg')!
     const candidates = findRtuCandidates(catalog, parsed)
-    const { entry, reason } = pickRtuMatch(candidates, { lat: 43.64, lng: -79.62 })
-    expect(entry).toBeNull()
-    expect(reason).toMatch(/GPS/)
+    const { entry, gpsWarning } = pickRtuMatch(candidates, { lat: 43.64, lng: -79.62 })
+    expect(entry?.rtu.name).toBe('RTU- 04')
+    expect(gpsWarning).toMatch(/GPS is \d+ ft/)
   })
 
   it('normalizes RT and RTU unit ids', () => {

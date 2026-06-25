@@ -1,4 +1,9 @@
-/** RTU picture storage: static files under public/database/rtu-pictures/ plus IndexedDB uploads. */
+/** RTU picture storage: Cloudflare R2 (production) or same-origin static files, plus IndexedDB uploads. */
+
+import {
+  getRtuPictureManifestUrl,
+  rtuPictureFileUrl,
+} from '@/lib/rtuPictureUrls'
 
 export interface RtuPictureManifest {
   /** Keys: `${buildingAddress}|${rtuName}` → filenames in rtu-pictures folder */
@@ -18,8 +23,7 @@ export interface RtuPicture {
 const DB_NAME = 'building-map-explorer'
 const DB_VERSION = 2
 const STORE = 'rtuPictures'
-const MANIFEST_URL = `${import.meta.env.BASE_URL}database/rtu-pictures/manifest.json`
-const STATIC_BASE = `${import.meta.env.BASE_URL}database/rtu-pictures/`
+const MANIFEST_URL = getRtuPictureManifestUrl()
 
 let manifestCache: RtuPictureManifest | null = null
 let manifestPromise: Promise<RtuPictureManifest> | null = null
@@ -236,7 +240,7 @@ export async function listRtuPictures(
   for (const fileName of staticNames) {
     const index = parseRtuPictureIndex(fileName)
     if (index == null || index < 1) continue
-    const url = `${STATIC_BASE}${encodeURIComponent(fileName)}`
+    const url = rtuPictureFileUrl(fileName)
     byIndex.set(index, {
       fileName,
       index,

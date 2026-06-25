@@ -13,43 +13,19 @@
   margin-bottom: 8px;
 }
 
-.themeGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.themeSwatch {
-  border: 2px solid transparent;
-  border-radius: 8px;
-  padding: 8px;
-  cursor: pointer;
-  background: var(--surface2, #143d78);
-  text-align: left;
-}
-
-.themeSwatch:hover,
-.active {
-  border-color: var(--accent, #7db8ff);
-}
-
-.themeName {
-  font-size: 10px;
-  color: var(--text-secondary, #c8dff8);
-  margin-bottom: 5px;
-  font-weight: 600;
-}
-
-.themePalette {
+.mgrFieldList {
   display: flex;
-  gap: 3px;
-  height: 14px;
-  border-radius: 3px;
-  overflow: hidden;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
 }
 
-.themePalette span {
-  flex: 1;
+.mgrNameInput {
+  cursor: text;
+}
+
+.mgrNameInput::placeholder {
+  color: var(--text-muted, #90b8e0);
 }
 
 .mgrRow {
@@ -71,12 +47,47 @@
 
 .mgrInput {
   flex: 1;
+  min-width: 0;
   background: var(--surface2, #143d78);
   border: 1px solid var(--border, #2e6ec0);
   border-radius: 5px;
   color: var(--text-primary, #fff);
   font-size: 12px;
-  padding: 5px 8px;
+  padding: 6px 9px;
+  box-sizing: border-box;
+}
+
+.mgrSlotRow {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.mgrSlotSelect {
+  flex-shrink: 0;
+  min-width: 118px;
+  background: var(--surface2, #143d78);
+  border: 1px solid var(--border, #2e6ec0);
+  border-radius: 5px;
+  color: var(--text-primary, #fff);
+  font-size: 12px;
+  padding: 6px 8px;
+}
+
+.mgrApplyBtn {
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent, #7db8ff);
+  color: #fff;
+  border: 1px solid var(--accent, #7db8ff);
+}
+
+.mgrApplyBtn:hover {
+  opacity: 0.9;
 }
 
 .hint {
@@ -89,6 +100,10 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.toolBtnWrap {
+  width: 100%;
 }
 
 .footer {
@@ -141,6 +156,13 @@
   flex: 1;
   overflow: hidden;
   justify-content: flex-start !important;
+}
+
+.bulkImportBtnInner {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
 }
 
 .bulkImportBtnFill {

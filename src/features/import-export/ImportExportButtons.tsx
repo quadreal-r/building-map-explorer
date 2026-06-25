@@ -1,22 +1,35 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import * as XLSX from 'xlsx'
+import { importCapitalRtuWorkbook } from '@/lib/capitalRtuWorkbook'
+import { detectExcelWorkbookKind } from '@/lib/excelWorkbookType'
 import { exportPortfolioExcel, importPortfolioExcel } from '@/lib/excel'
+import { importEquipmentSchedule } from '@/lib/equipmentSheet'
 import { showToastError, showToastSuccess } from '@/lib/toast'
-import type { PortfolioData } from '@/types/domain'
+import { useRtuPricingStore } from '@/stores/rtuPricingStore'
+import { useRtuScheduleStore } from '@/stores/rtuScheduleStore'
+import type { Building, PortfolioData } from '@/types/domain'
+import { SettingsToolButton } from '@/features/settings/SettingsToolButton'
+import styles from '@/features/settings/SettingsModal.module.css'
 
 export interface ImportExportButtonsProps {
   portfolio: PortfolioData
+  buildings: Building[]
   onImport: (data: PortfolioData) => void
   onExportComplete?: () => void
-  compact?: boolean
 }
 
 export function ImportExportButtons({
   portfolio,
+  buildings,
   onImport,
   onExportComplete,
-  compact,
 }: ImportExportButtonsProps) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const [busy, setBusy] = useState(false)
+  const sourceFile = useRtuScheduleStore((s) => s.sourceFile)
+  const pricingTiers = useRtuPricingStore((s) => s.rows.length)
+  const applyEquipmentImport = useRtuScheduleStore((s) => s.applyEquipmentImport)
+  const applyPricingImport = useRtuPricingStore((s) => s.applyPricingImport)
 
   const handleExport = () => {
     exportPortfolioExcel(portfolio)
@@ -24,45 +37,90 @@ export function ImportExportButtons({
     onExportComplete?.()
   }
 
+  const handleCapitalImport = async (buffer: ArrayBuffer, file: File) => {
+    const sheetNames = XLSX.read(buffer, { type: 'array', bookSheets: true }).SheetNames
+    const hasPricing = sheetNames.some((name) => /^rtu pricing$/i.test(name.trim()))
+
+    if (hasPricing) {
+      const result = importCapitalRtuWorkbook(buffer, buildings)
+      applyEquipmentImport(result.equipment, file.name)
+      applyPricingImport(result.pricing.rows, result.pricing.version, file.name)
+      const { stats } = result.equipment
+      showToastSuccess(
+        `Imported ${stats.matchedYears} replacement years, ${stats.matchedNotes} notes, and ${result.pricing.rowCount} pricing tiers`,
+      )
+      return
+    }
+
+    const equipment = importEquipmentSchedule(buffer, buildings)
+    applyEquipmentImport(equipment, file.name)
+    const { stats } = equipment
+    showToastSuccess(
+      `Imported ${stats.matchedYears} replacement years and ${stats.matchedNotes} notes`,
+    )
+  }
+
   const handleFile = async (file: File) => {
+    setBusy(true)
     try {
       const buffer = await file.arrayBuffer()
-      const data = importPortfolioExcel(buffer)
-      onImport(data)
+      const kind = detectExcelWorkbookKind(
+        XLSX.read(buffer, { type: 'array', bookSheets: true }).SheetNames,
+      )
+
+      if (kind === 'portfolio') {
+        const data = importPortfolioExcel(buffer)
+        onImport(data)
+        return
+      }
+
+      await handleCapitalImport(buffer, file)
     } catch (e) {
       showToastError(e instanceof Error ? e.message : 'Import failed')
+    } finally {
+      setBusy(false)
+      if (inputRef.current) inputRef.current.value = ''
     }
   }
 
   return (
     <>
-      <button
-        type="button"
-        className={`btn-action${compact ? '' : ' primary'}`}
+      <SettingsToolButton
+        variant="export"
+        tooltip="Export buildings, RTUs, tenant polygons, and utilities with lat/lng to an Excel workbook."
         onClick={handleExport}
-        title="Export equipment portfolio to Excel"
       >
         Export Equipment to Excel
-      </button>
-      <button
-        type="button"
-        className="btn-action"
+      </SettingsToolButton>
+      <SettingsToolButton
+        tooltip={
+          <>
+            Import from Excel: portfolio export (Buildings, RTUs, Tenant Polygons, Utilities) updates
+            map positions and equipment, or Capital RTU Replacement workbook (Equipment + RTU Pricing)
+            updates replacement years, notes, and tonnage pricing.
+          </>
+        }
         onClick={() => inputRef.current?.click()}
-        title="Import equipment from Excel (Buildings, RTUs, Tenant Polygons, Utilities)"
+        disabled={busy}
       >
-        Import Equipment to Excel
-      </button>
+        {busy ? 'Importing…' : 'Import from Excel'}
+      </SettingsToolButton>
       <input
         ref={inputRef}
         type="file"
-        accept=".xlsx"
-        style={{ display: 'none' }}
+        accept=".xlsx,.xls"
+        className={styles.hiddenFile}
         onChange={(e) => {
           const file = e.target.files?.[0]
-          e.target.value = ''
           if (file) void handleFile(file)
         }}
       />
+      {sourceFile ? (
+        <p className={styles.bulkImportFile}>
+          Last workbook: {sourceFile}
+          {pricingTiers ? ` · ${pricingTiers} tonnage tiers` : ''}
+        </p>
+      ) : null}
     </>
   )
 }

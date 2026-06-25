@@ -14,11 +14,24 @@ import {
 } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import {
+  guessPictureContentType,
+  isR2Configured,
+  uploadRtuPictureToR2,
+} from './lib/r2-client.mjs'
+import {
+  RTU_GPS_MATCH_FEET,
+  findRtuInPortfolio,
+  gpsWarningForRtu,
+  parseRtuPictureKey,
+  readImageGpsFromBuffer,
+} from './lib/rtu-gps-validate.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
 const DATA_DIR = join(ROOT, 'supabase', 'data')
 const PICS_DIR = join(ROOT, 'public', 'database', 'rtu-pictures')
+const buildingsPath = join(DATA_DIR, 'buildings.json')
 
 function parsePictureIndex(fileName) {
   const match = fileName.match(/_\((\d+)\)\.[^.]+$/i)
@@ -48,14 +61,7 @@ function resolveBundlePath() {
   process.exit(1)
 }
 
-function portfolioToLegacyFiles(portfolio, existingBuildings) {
-  const tenantsByAddress = new Map()
-  for (const building of existingBuildings ?? []) {
-    if (building.tenants?.length) {
-      tenantsByAddress.set(building.address, building.tenants)
-    }
-  }
-
+function portfolioToLegacyFiles(portfolio) {
   const buildings = portfolio.buildings.map((b) => ({
     park: b.park,
     address: b.address,
@@ -73,9 +79,6 @@ function portfolioToLegacyFiles(portfolio, existingBuildings) {
       lat: r.lat,
       lng: r.lng,
     })),
-    ...(tenantsByAddress.has(b.address)
-      ? { tenants: tenantsByAddress.get(b.address) }
-      : {}),
   }))
 
   const utilities = portfolio.utilities.map((u) => ({
@@ -114,13 +117,7 @@ if (!bundle.portfolio?.buildings?.length) {
   process.exit(1)
 }
 
-let existingBuildings = []
-const buildingsPath = join(DATA_DIR, 'buildings.json')
-if (existsSync(buildingsPath)) {
-  existingBuildings = JSON.parse(readFileSync(buildingsPath, 'utf8'))
-}
-
-const legacy = portfolioToLegacyFiles(bundle.portfolio, existingBuildings)
+const legacy = portfolioToLegacyFiles(bundle.portfolio)
 writeJson(buildingsPath, legacy.buildings)
 writeJson(join(DATA_DIR, 'utilities.json'), legacy.utilities)
 writeJson(join(DATA_DIR, 'polygons.json'), legacy.polygons)
@@ -158,10 +155,44 @@ if (existsSync(manifestPath)) {
 }
 
 const pictures = bundle.pictures ?? []
+let r2Uploads = 0
+let localWrites = 0
+let gpsWarnings = 0
+
 for (const pic of pictures) {
   if (!pic.fileName || !pic.base64) continue
-  const filePath = join(PICS_DIR, pic.fileName)
-  writeFileSync(filePath, Buffer.from(pic.base64, 'base64'))
+  const buffer = Buffer.from(pic.base64, 'base64')
+
+  if (pic.rtuKey) {
+    const parsed = parseRtuPictureKey(pic.rtuKey)
+    const match = parsed
+      ? findRtuInPortfolio(legacy.buildings, parsed.buildingAddress, parsed.rtuName)
+      : null
+    if (!match) {
+      console.warn(`Warning: bundle RTU not in portfolio — ${pic.fileName} → ${pic.rtuKey}`)
+    } else {
+      const photoGps = await readImageGpsFromBuffer(buffer)
+      const warning = gpsWarningForRtu(photoGps, match.rtu)
+      if (warning) {
+        gpsWarnings += 1
+        console.warn(`GPS warning: ${pic.fileName} @ ${parsed.buildingAddress} — ${warning}`)
+      }
+    }
+  }
+
+  if (isR2Configured()) {
+    await uploadRtuPictureToR2(
+      pic.fileName,
+      buffer,
+      guessPictureContentType(pic.fileName),
+    )
+    r2Uploads += 1
+  } else {
+    const filePath = join(PICS_DIR, pic.fileName)
+    writeFileSync(filePath, buffer)
+    localWrites += 1
+  }
+
   const key = pic.rtuKey
   if (!key) continue
   let files = manifest.entries[key] ?? []
@@ -171,6 +202,16 @@ for (const pic of pictures) {
   manifest.entries[key] = files
 }
 writeJson(manifestPath, manifest)
-console.log(`RTU pictures: wrote ${pictures.length} IndexedDB uploads to ${PICS_DIR}`)
+
+if (isR2Configured()) {
+  console.log(
+    `RTU pictures: uploaded ${r2Uploads} file(s) to Cloudflare R2` +
+      (gpsWarnings ? ` (${gpsWarnings} GPS warning(s) beyond ${RTU_GPS_MATCH_FEET} ft)` : ''),
+  )
+} else if (localWrites) {
+  console.log(`RTU pictures: wrote ${localWrites} file(s) to ${PICS_DIR} (R2 not configured)`)
+} else {
+  console.log('RTU pictures: no picture files in bundle')
+}
 
 console.log('\nDone. Review changes, then commit and push to update GitHub Pages.')

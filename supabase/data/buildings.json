@@ -46,14 +46,6 @@
         "lng": -79.6656702
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1850",
-        "desc": "National Energy Equipment Inc.",
-        "lat": 43.6813921,
-        "lng": -79.665512
-      }
-    ],
     "sold": false
   },
   {
@@ -137,56 +129,6 @@
         "desc": "Building: 1645 Bonhill Road\r\nSystem: Roof Top Units\r\nDescription: RTU-12\r\nSuite: -\r\nModel: KGA060S4DH4J\r\nSerial: 5615K03129\r\nMake: LENNOX\r\nDate Installed: Nov 18, 2015\r\nHeating Capacity 125,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)",
         "lat": 43.666535,
         "lng": -79.6525565
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 3,4",
-        "desc": "Snowdon HVAC",
-        "lat": 43.6659246,
-        "lng": -79.6531249
-      },
-      {
-        "name": "Suite 5,6",
-        "desc": "Odel Business Solutions Inc.",
-        "lat": 43.6660925,
-        "lng": -79.6529365
-      },
-      {
-        "name": "Suite 7",
-        "desc": "Universal Field Supplies",
-        "lat": 43.6661492,
-        "lng": -79.6528674
-      },
-      {
-        "name": "Suite 14",
-        "desc": "Canuck Doors",
-        "lat": 43.6667255,
-        "lng": -79.6527816
-      },
-      {
-        "name": "Suite 12,13",
-        "desc": "Capture Logistics Inc.",
-        "lat": 43.6664457,
-        "lng": -79.6525327
-      },
-      {
-        "name": "Suite 9,10,11",
-        "desc": "No Information",
-        "lat": 43.6665193,
-        "lng": -79.6530166
-      },
-      {
-        "name": "Suite 8",
-        "desc": "Chocolate Smet Canada",
-        "lat": 43.6663913,
-        "lng": -79.6531595
-      },
-      {
-        "name": "Suite 1,2",
-        "desc": "Universal Field Supplies",
-        "lat": 43.6658767,
-        "lng": -79.6537484
       }
     ],
     "sold": false
@@ -280,56 +222,6 @@
         "lng": -79.6534187
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1,2",
-        "desc": "Wuxly Movement",
-        "lat": 43.6661262,
-        "lng": -79.6540004
-      },
-      {
-        "name": "Suite 3",
-        "desc": "B Town Carrier Inc.",
-        "lat": 43.6663291,
-        "lng": -79.6543333
-      },
-      {
-        "name": "Suite 4",
-        "desc": "Atlantic and Pacific International Global Logistics Canada Inc.",
-        "lat": 43.6663959,
-        "lng": -79.6542584
-      },
-      {
-        "name": "Suite 12,13,14",
-        "desc": "Furniture Village Canada Inc.",
-        "lat": 43.6669172,
-        "lng": -79.653107
-      },
-      {
-        "name": "Suite 5,6,7",
-        "desc": "Vulcan Automotive Equipment",
-        "lat": 43.6662513,
-        "lng": -79.6538536
-      },
-      {
-        "name": "Suite 11",
-        "desc": "Spier and McKay",
-        "lat": 43.6669196,
-        "lng": -79.6536662
-      },
-      {
-        "name": "Suite 9-10",
-        "desc": "13931072 Canada Inc. and 2417588 Ontario Corp.",
-        "lat": 43.6668483,
-        "lng": -79.6537471
-      },
-      {
-        "name": "Suite 8",
-        "desc": "MWS HVAC",
-        "lat": 43.6667228,
-        "lng": -79.6538834
-      }
-    ],
     "sold": false
   },
   {
@@ -347,14 +239,6 @@
         "desc": "Building: 1695 Bonhill Road\r\nSystem: Roof Top Units\r\nDescription: RTU-01\r\nSuite: Single Tenant\r\nModel: DF090N15N5AAA4B\r\nSerial: N0F8019975\r\nMake: YORK\r\nDate Installed: Nov 18, 2008\r\nHeating Capacity 180,000 BTU's\r\nCooling Capacity: 90,000 BTU (7.5 Ton)",
         "lat": 43.6668866,
         "lng": -79.6520367
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Main Suite",
-        "desc": "I.O.F, Business Furniture Manufacturing Inc.",
-        "lat": 43.6668088,
-        "lng": -79.6525799
       }
     ],
     "sold": false
@@ -392,20 +276,6 @@
         "desc": "Building: 1700 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-04\r\nSuite: -\r\nModel: PCG4A240752X1A\r\nSerial: W1M6191334\r\nMake: YORK\r\nDate Installed: Nov 19, 2016\r\nHeating Input: 75,000 BTU's\r\nCooling Capacity: 24,000 BTU (2 Ton)",
         "lat": 43.6675234,
         "lng": -79.6528067
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Power Battery Sales Ltd",
-        "lat": 43.6675198,
-        "lng": -79.6530554
-      },
-      {
-        "name": "Suite 2",
-        "desc": "Footprint Products",
-        "lat": 43.6672659,
-        "lng": -79.652622
       }
     ],
     "sold": false
@@ -457,38 +327,6 @@
         "lng": -79.6508883
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1,2,3",
-        "desc": "Mayekawa Canada Inc.",
-        "lat": 43.6674324,
-        "lng": -79.6518787
-      },
-      {
-        "name": "Suite 4",
-        "desc": "Unicorn Enterprises Corp.",
-        "lat": 43.6674951,
-        "lng": -79.6512638
-      },
-      {
-        "name": "Suite 5",
-        "desc": "33 Logistics Inc.",
-        "lat": 43.6677664,
-        "lng": -79.6514931
-      },
-      {
-        "name": "Suite 6,7",
-        "desc": "Raven Force Couriers Inc.",
-        "lat": 43.6678573,
-        "lng": -79.6513945
-      },
-      {
-        "name": "Suite 8",
-        "desc": "Drennan Refrigeration Inc.",
-        "lat": 43.6680198,
-        "lng": -79.6512036
-      }
-    ],
     "sold": false
   },
   {
@@ -536,26 +374,6 @@
         "desc": "Building: 1750 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-01\r\nSuite: -\r\nModel: KGA048S4DH2P\r\nSerial: 5614E05387\r\nMake: LENNOX\r\nDate Installed: Nov 19, 2014\r\nHeating Capacity 150,000 BTU's\r\nCooling Capacity: 48,000 BTU (4 Ton)",
         "lat": 43.6678937,
         "lng": -79.6525557
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1, 2,3, 4",
-        "desc": "Spier and Mckay",
-        "lat": 43.6681687,
-        "lng": -79.6523411
-      },
-      {
-        "name": "Suite 5",
-        "desc": "D.K. International Group",
-        "lat": 43.6679674,
-        "lng": -79.6518265
-      },
-      {
-        "name": "Suite 6,7,8",
-        "desc": "Hercules SLr Inc.",
-        "lat": 43.6680538,
-        "lng": -79.6517322
       }
     ],
     "sold": false
@@ -607,14 +425,6 @@
         "lng": -79.6506069
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1,2,3,4,5,6,7",
-        "desc": "Desco Plumbing and Heating Supply Inc.",
-        "lat": 43.6682302,
-        "lng": -79.6510035
-      }
-    ],
     "sold": false
   },
   {
@@ -656,26 +466,6 @@
         "desc": "Building: 1800 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-01\r\nSuite: -\r\nModel: KGB024S4DW1P\r\nSerial: 5615F09907\r\nMake: LENNOX\r\nDate Installed: Nov 19, 2015\r\nHeating Capacity 65,000 BTU's\r\nCooling Capacity: 24,000 BTU (2 Ton)",
         "lat": 43.668653,
         "lng": -79.6516163
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Sunstar LED Solution",
-        "lat": 43.6687562,
-        "lng": -79.6516779
-      },
-      {
-        "name": "Suite 2, 3, 4",
-        "desc": "CANUSA Automotive Warehousing Inc.",
-        "lat": 43.6684926,
-        "lng": -79.6512305
-      },
-      {
-        "name": "Suite 5, 6,7",
-        "desc": "Vulcan Automotive Equipment",
-        "lat": 43.668757,
-        "lng": -79.6509291
       }
     ],
     "sold": false
@@ -733,14 +523,6 @@
         "lng": -79.6503534
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite Main",
-        "desc": "Ultra-Fit Manufacturing",
-        "lat": 43.6698139,
-        "lng": -79.6502057
-      }
-    ],
     "sold": false
   },
   {
@@ -782,14 +564,6 @@
         "desc": "Building: 1840 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-04\r\nSuite: Single Tenant\r\nModel: D2NZ036D07206A\r\nSerial: N0N8523390\r\nMake: YORK\r\nDate Installed: Nov 19, 2008\r\nHeating Capacity 72,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)",
         "lat": 43.6703265,
         "lng": -79.6497472
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1840",
-        "desc": "Ultra-Fit Manufacturing",
-        "lat": 43.6701315,
-        "lng": -79.6501544
       }
     ],
     "sold": false
@@ -881,20 +655,6 @@
         "desc": "Building: 1870 & 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-13\r\nSuite: 1880\r\nModel: KGA060S4DH4J\r\nSerial: 5615F03633\r\nMake: LENNOX\r\nDate Installed: Nov 19, 2015\r\nHeating Capacity 150,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)",
         "lat": 43.6713019,
         "lng": -79.6485977
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1870",
-        "desc": "Van Houtte Coffe Services",
-        "lat": 43.6706889,
-        "lng": -79.6484339
-      },
-      {
-        "name": "Suite 1880",
-        "desc": "ULT Powertrain",
-        "lat": 43.6706906,
-        "lng": -79.6484361
       }
     ],
     "sold": false
@@ -1004,62 +764,6 @@
         "desc": "Building: 1495 Bonhill Road\r\nSystem: Roof Top Units\r\nDescription: RTU-06 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 4, 5, 6, 7, 8\r\nModel: LDT036H5EB1P\r\nSerial: 5625A02961\r\nMake: LENNOX\r\nDate Installed: Mar 19, 2025\r\nHeating capacity: 60,000 BTU's\r\n(2 ton)\r\n$30,618 Replaced by Springbank in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.6616514,
         "lng": -79.654432
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1,2",
-        "desc": "MedX Health Corp.",
-        "lat": 43.6619515,
-        "lng": -79.6541663
-      },
-      {
-        "name": "Suite 3",
-        "desc": "Metallurgical Sensors Inc.",
-        "lat": 43.6619515,
-        "lng": -79.6541663
-      },
-      {
-        "name": "Suite 4,5,6,7,8",
-        "desc": "No Information",
-        "lat": 43.6618815,
-        "lng": -79.6542447
-      },
-      {
-        "name": "Suite 9, 10",
-        "desc": "Fillware Technologies",
-        "lat": 43.6621302,
-        "lng": -79.6543991
-      },
-      {
-        "name": "Suite 11",
-        "desc": "HVAC Dimensions",
-        "lat": 43.662129,
-        "lng": -79.6543995
-      },
-      {
-        "name": "Suite 12, 13",
-        "desc": "Sibwest Inc.",
-        "lat": 43.6620631,
-        "lng": -79.6544757
-      },
-      {
-        "name": "Suite 14",
-        "desc": "ProTech Garage",
-        "lat": 43.6618912,
-        "lng": -79.6546661
-      },
-      {
-        "name": "Suite 16",
-        "desc": "Directrade",
-        "lat": 43.6618352,
-        "lng": -79.6547284
-      },
-      {
-        "name": "Suite 15",
-        "desc": "Coba Auto Group Ltd.",
-        "lat": 43.6617042,
-        "lng": -79.6545073
       }
     ],
     "sold": false
@@ -1219,98 +923,6 @@
         "lng": -79.6546508
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Adorable Kids Canada",
-        "lat": 43.6618078,
-        "lng": -79.653543
-      },
-      {
-        "name": "Suite 2",
-        "desc": "A.N.N. HORECA Supplies Inc.",
-        "lat": 43.6617291,
-        "lng": -79.6536317
-      },
-      {
-        "name": "Suite 3",
-        "desc": "Alumalco",
-        "lat": 43.6615231,
-        "lng": -79.653472
-      },
-      {
-        "name": "Suite 4",
-        "desc": "Process Heaters Inc.",
-        "lat": 43.661476,
-        "lng": -79.6535263
-      },
-      {
-        "name": "Suite 5",
-        "desc": "Delta Facilities Maintenance, Inc.",
-        "lat": 43.6614171,
-        "lng": -79.6535901
-      },
-      {
-        "name": "Suite 7,8",
-        "desc": "Paterson Group Inc.",
-        "lat": 43.66132,
-        "lng": -79.654084
-      },
-      {
-        "name": "Suite 6",
-        "desc": "Ufly Simulator Inc.",
-        "lat": 43.6612867,
-        "lng": -79.6537334
-      },
-      {
-        "name": "Suite 9",
-        "desc": "CGK Industrial",
-        "lat": 43.66132,
-        "lng": -79.6540825
-      },
-      {
-        "name": "Suite 10",
-        "desc": "Alex Veka",
-        "lat": 43.6611087,
-        "lng": -79.6539344
-      },
-      {
-        "name": "Suite 13,14",
-        "desc": "Ivan Fasteners Canada",
-        "lat": 43.6610866,
-        "lng": -79.6545484
-      },
-      {
-        "name": "Suite 15,16",
-        "desc": "Premium Wholesale Home & Leisure",
-        "lat": 43.6612005,
-        "lng": -79.6547006
-      },
-      {
-        "name": "Suite 17",
-        "desc": "Too Fast Motors",
-        "lat": 43.6613142,
-        "lng": -79.6548614
-      },
-      {
-        "name": "Suite 18",
-        "desc": "WDS Express Inc.",
-        "lat": 43.6615212,
-        "lng": -79.6547262
-      },
-      {
-        "name": "Suite 19, 20",
-        "desc": "D.K International Group",
-        "lat": 43.6615787,
-        "lng": -79.6548052
-      },
-      {
-        "name": "Suite 11, 12",
-        "desc": "IPS Invoice Payment System Corp.",
-        "lat": 43.6609808,
-        "lng": -79.6542604
-      }
-    ],
     "sold": false
   },
   {
@@ -1364,14 +976,6 @@
         "desc": "Building: 1577 Meyerside & 1500 Bonhill\r\nSystem: Roof Top Units\r\nDescription: RTU-03\r\nSuite: -\r\nModel: ZF090N1805A1AAA1A1\r\nSerial: N1M6198781\r\nMake: YORK\r\nDate Installed: Nov 19, 2016\r\nHeating Capacity 180,000 BTU's\r\nCooling Capacity: 90,000 BTU (7.5 Ton)",
         "lat": 43.6632096,
         "lng": -79.6517108
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1577",
-        "desc": "DGN Marketing Services",
-        "lat": 43.6624062,
-        "lng": -79.6524286
       }
     ],
     "sold": false
@@ -1485,14 +1089,6 @@
         "lng": -79.6494779
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1675, 1695,1705",
-        "desc": "DGN Marketing Services",
-        "lat": 43.6645832,
-        "lng": -79.6510507
-      }
-    ],
     "sold": false
   },
   {
@@ -1522,38 +1118,6 @@
         "desc": "Building: 1715 Meyerside\r\nSystem: Roof Top Units\r\nDescription: RTU-07\r\nSuite: -\r\nModel: KGA060S4DH3J\r\nSerial: 5612H00779\r\nMake: LENNOX\r\nDate Installed: Nov 24, 2012\r\nHeating Capacity 150,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)",
         "lat": 43.6658849,
         "lng": -79.6496574
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1,2",
-        "desc": "Airbase Services, Inc.",
-        "lat": 43.6649793,
-        "lng": -79.6492828
-      },
-      {
-        "name": "Suite 5",
-        "desc": "Tradewinds International Sales Co. Inc.",
-        "lat": 43.6652277,
-        "lng": -79.6495165
-      },
-      {
-        "name": "Suite 3,4",
-        "desc": "Taff-Guard Filtration",
-        "lat": 43.6652288,
-        "lng": -79.6495134
-      },
-      {
-        "name": "Suite 7,8,9",
-        "desc": "UBC-Cool Canada Inc.",
-        "lat": 43.6659983,
-        "lng": -79.6497508
-      },
-      {
-        "name": "Suite 6",
-        "desc": "Berlet Electronics",
-        "lat": 43.6654264,
-        "lng": -79.6498528
       }
     ],
     "sold": false
@@ -1641,32 +1205,6 @@
         "lng": -79.6495682
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1,2,3",
-        "desc": "Voestalphine Bohler Welding",
-        "lat": 43.6656886,
-        "lng": -79.6487831
-      },
-      {
-        "name": "Suite 4,5,6",
-        "desc": "Felder Group Canada",
-        "lat": 43.6660037,
-        "lng": -79.6484209
-      },
-      {
-        "name": "Suite 7,8",
-        "desc": "Geonics Limited",
-        "lat": 43.6660928,
-        "lng": -79.649306
-      },
-      {
-        "name": "Suite 9, 10",
-        "desc": "The Mover's Choice Inc.",
-        "lat": 43.6664698,
-        "lng": -79.6492292
-      }
-    ],
     "sold": false
   },
   {
@@ -1746,56 +1284,6 @@
         "lng": -79.648621
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1,2,3",
-        "desc": "Imagine It 3D",
-        "lat": 43.6661033,
-        "lng": -79.6478352
-      },
-      {
-        "name": "Suite 4,5",
-        "desc": "Tyger Group Inc.",
-        "lat": 43.666258,
-        "lng": -79.6481105
-      },
-      {
-        "name": "Suite 6",
-        "desc": "Pantechnology Engineered Services LTD.",
-        "lat": 43.6665798,
-        "lng": -79.6480414
-      },
-      {
-        "name": "Suite 7",
-        "desc": "Magic Touch Decal Removal Systems Inc.",
-        "lat": 43.6664513,
-        "lng": -79.6484399
-      },
-      {
-        "name": "Suite 8",
-        "desc": "Urban Images",
-        "lat": 43.6667051,
-        "lng": -79.6482555
-      },
-      {
-        "name": "Suite 9",
-        "desc": "XO Decors Inc.",
-        "lat": 43.6667575,
-        "lng": -79.6483498
-      },
-      {
-        "name": "Suite 10",
-        "desc": "Brother's Glass and Mirror Ltd.",
-        "lat": 43.6668107,
-        "lng": -79.6484333
-      },
-      {
-        "name": "Suite 11,12",
-        "desc": "Safetek Emergency Vehicles",
-        "lat": 43.6667433,
-        "lng": -79.6489425
-      }
-    ],
     "sold": false
   },
   {
@@ -1849,44 +1337,6 @@
         "desc": "Building: 1795 Meyerside\r\nSystem: Roof Top Units\r\nDescription: RTU-07\r\nSuite: -\r\nModel: ZJ048N10P5AAA1A\r\nSerial: NOE7733077\r\nMake: YORK\r\nDate Installed: Nov 24, 2007\r\nHeating Capacity 100,000 BTU's\r\nCooling Capacity: 48,000 BTU (4 Ton)",
         "lat": 43.6670994,
         "lng": -79.6483933
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1,2,3",
-        "desc": "Xemar Industries Inc.",
-        "lat": 43.6667683,
-        "lng": -79.6470904
-      },
-      {
-        "name": "Suite 4,5",
-        "desc": "Footprint Products",
-        "lat": 43.6669463,
-        "lng": -79.6474011
-      },
-      {
-        "name": "Suite 6",
-        "desc": "Smartriver Industrial",
-        "lat": 43.6670327,
-        "lng": -79.6476456
-      },
-      {
-        "name": "Suite 7",
-        "desc": "Green Circle Salons Ontario",
-        "lat": 43.667126,
-        "lng": -79.6477054
-      },
-      {
-        "name": "Suite 8,9",
-        "desc": "Premium Aluminum Products",
-        "lat": 43.6671656,
-        "lng": -79.6477757
-      },
-      {
-        "name": "Suite 10,11",
-        "desc": "WRI Supply",
-        "lat": 43.6672737,
-        "lng": -79.6479525
       }
     ],
     "sold": false
@@ -1974,62 +1424,6 @@
         "lng": -79.6476282
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1,2,3",
-        "desc": "NLYTN INC.",
-        "lat": 43.6672057,
-        "lng": -79.6470727
-      },
-      {
-        "name": "Suite 4",
-        "desc": "Felder Group Canada",
-        "lat": 43.667421,
-        "lng": -79.6468308
-      },
-      {
-        "name": "Suite 5",
-        "desc": "Star Pro Chemicals Inc.",
-        "lat": 43.6674822,
-        "lng": -79.6469339
-      },
-      {
-        "name": "Suite 6",
-        "desc": "Jaks Micro Inc.",
-        "lat": 43.6673366,
-        "lng": -79.6472993
-      },
-      {
-        "name": "Suite 7",
-        "desc": "Metalex Trading Ltd.",
-        "lat": 43.6673929,
-        "lng": -79.6473129
-      },
-      {
-        "name": "Suite 8,9",
-        "desc": "Korber Supply Chain Ltd.",
-        "lat": 43.6676373,
-        "lng": -79.6472029
-      },
-      {
-        "name": "Suite 10",
-        "desc": "Metalex Trading Ltd.",
-        "lat": 43.6677398,
-        "lng": -79.6473869
-      },
-      {
-        "name": "Suite 11",
-        "desc": "HomeMind Corporation",
-        "lat": 43.6677935,
-        "lng": -79.6474747
-      },
-      {
-        "name": "Suite 12",
-        "desc": "Metro Bound Inc.",
-        "lat": 43.6678396,
-        "lng": -79.6475589
-      }
-    ],
     "sold": false
   },
   {
@@ -2083,44 +1477,6 @@
         "desc": "Building: 1835 Meyerside\r\nSystem: Roof Top Units\r\nDescription: RTU-01\r\nSuite: -\r\nModel: KGB036S4DM3Y\r\nSerial: 5623J08395\r\nMake: LENNOX\r\nDate Installed: Oct 12, 2023\r\nHeating Capacity 108,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)",
         "lat": 43.6674804,
         "lng": -79.6463691
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1,2",
-        "desc": "Natusoy Foods Ltd.",
-        "lat": 43.6675409,
-        "lng": -79.6465788
-      },
-      {
-        "name": "Suite 3,4",
-        "desc": "United Abrasives Canada",
-        "lat": 43.6678266,
-        "lng": -79.6462703
-      },
-      {
-        "name": "Suite 5,6,7",
-        "desc": "No Information",
-        "lat": 43.6676683,
-        "lng": -79.6467825
-      },
-      {
-        "name": "Suite 8",
-        "desc": "KMC Distribution",
-        "lat": 43.6681242,
-        "lng": -79.646774
-      },
-      {
-        "name": "Suite 9",
-        "desc": "Helix Impressions Inc.",
-        "lat": 43.6681633,
-        "lng": -79.6468356
-      },
-      {
-        "name": "Suite 10,11",
-        "desc": "Eztrans Logistics Ltd.",
-        "lat": 43.668346,
-        "lng": -79.6471617
       }
     ],
     "sold": false
@@ -2196,14 +1552,6 @@
         "lng": -79.6457268
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite Main",
-        "desc": "No Information",
-        "lat": 43.6686224,
-        "lng": -79.646841
-      }
-    ],
     "sold": false
   },
   {
@@ -2271,26 +1619,6 @@
         "lng": -79.6452422
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 3,4,5,6,7,8,9,10",
-        "desc": "Newrest Toronto Corp",
-        "lat": 43.6691681,
-        "lng": -79.6462411
-      },
-      {
-        "name": "Suite 1",
-        "desc": "Sabri Contracting Inc.",
-        "lat": 43.668567,
-        "lng": -79.6451869
-      },
-      {
-        "name": "Suite 2",
-        "desc": "Conxcorp",
-        "lat": 43.6686336,
-        "lng": -79.6452995
-      }
-    ],
     "sold": false
   },
   {
@@ -2320,14 +1648,6 @@
         "desc": "Building: 1550 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-03 Electric only, Heat Pump\r\nSuite: Single Tenant\r\nModel: LHT060H4EG1J\r\nSerial: 5624G04388\r\nMake: LENNOX\r\nDate Installed: Mar 19, 2025\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\n$39,784 ? Replaced by Springbank in 2024\r\n(Full Electric) changed to Hybrid/Dual Fuel Heat Pump",
         "lat": 43.6649926,
         "lng": -79.6559058
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite Main",
-        "desc": "Binex Line Corporation",
-        "lat": 43.6648998,
-        "lng": -79.6561908
       }
     ],
     "sold": false
@@ -2403,14 +1723,6 @@
         "lng": -79.65542
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1-12",
-        "desc": "Helix Impressions Inc.",
-        "lat": 43.6622127,
-        "lng": -79.6547352
-      }
-    ],
     "sold": false
   },
   {
@@ -2452,14 +1764,6 @@
         "desc": "Building: 1600 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-05\r\nSuite: Single Tenant\r\nModel: LGH036H4EU5J\r\nSerial: 5620G03509\r\nMake: LENNOX\r\nDate Installed: Nov 18, 2020\r\nHeating Capacity 108,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)",
         "lat": 43.6653641,
         "lng": -79.6541855
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1, 2",
-        "desc": "Farm Boy Company Inc.",
-        "lat": 43.6652533,
-        "lng": -79.6552408
       }
     ],
     "sold": false
@@ -2565,38 +1869,6 @@
         "lng": -79.656131
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Premium Wholesalte Home & Leisure",
-        "lat": 43.6618565,
-        "lng": -79.6554017
-      },
-      {
-        "name": "Suite 2",
-        "desc": "No information",
-        "lat": 43.6620344,
-        "lng": -79.6551356
-      },
-      {
-        "name": "Suite 3,4,5",
-        "desc": "B2B Freightway Inc.",
-        "lat": 43.6622815,
-        "lng": -79.6554689
-      },
-      {
-        "name": "Suite 6,7,8",
-        "desc": "Rubenstein RB Digital",
-        "lat": 43.6622804,
-        "lng": -79.6554735
-      },
-      {
-        "name": "Suite 9,10,11,12",
-        "desc": "Home Reno Direct",
-        "lat": 43.662675,
-        "lng": -79.6560035
-      }
-    ],
     "sold": false
   },
   {
@@ -2657,20 +1929,6 @@
         "desc": "Building: 7311 Kimbel St.\r\nSystem: Roof Top Units\r\nDescription: RTU 06 Hybrid/Dual Fuel Heat Pump\r\nSuite: -\r\nModel: LDT048H5EX1J\r\nSerial: 5625A02922\r\nMake: LENNOX\r\nDate Installed: Feb 27, 2025\r\nCooling Capacity: 48,000 BTU (4 Ton)\r\nHeating Capacity: 150,000 BTU\r\nTo be replaced in 2024 by S.Bank at $24,000\r\nHybrid/Dual Fuel Heat Pump",
         "lat": 43.7031851,
         "lng": -79.6570351
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Midland Transport Limited/Transport Midland Limitee",
-        "lat": 43.703915,
-        "lng": -79.6583244
-      },
-      {
-        "name": "Suite 2",
-        "desc": "Integral Transportation Networks Corp.",
-        "lat": 43.7032699,
-        "lng": -79.6575365
       }
     ],
     "sold": false
@@ -2750,14 +2008,6 @@
         "desc": "Building: 1590 South Gateway Rd.\r\nSystem: Roof Top Units\r\nDescription: RTU 05\r\nSuite: -\r\nModel: DF120N20N5AAA3C\r\nSerial: NON6298186\r\nMake: YORK\r\nDate Installed: Dec 01, 2006\r\nHeating Capacity: 240,000 BTU\r\nCooling Capacity: 120,000 BTU (10 Ton)",
         "lat": 43.6339741,
         "lng": -79.6120842
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1590",
-        "desc": "Revlon Canada Inc./ Kitchen Stuff Plus",
-        "lat": 43.6352647,
-        "lng": -79.610079
       }
     ],
     "sold": false
@@ -2872,26 +2122,6 @@
         "lng": -79.5281034
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "WRI Supply",
-        "lat": 43.7893782,
-        "lng": -79.5281528
-      },
-      {
-        "name": "Suite 2",
-        "desc": "TCE Trading",
-        "lat": 43.7894825,
-        "lng": -79.5276603
-      },
-      {
-        "name": "Suite 3,4",
-        "desc": "Staples Canada Inc.",
-        "lat": 43.7895632,
-        "lng": -79.5272768
-      }
-    ],
     "sold": false
   },
   {
@@ -2959,14 +2189,6 @@
         "lng": -79.524484
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite OFF, WHS",
-        "desc": "Mobile Climate Control Industries Inc",
-        "lat": 43.7906196,
-        "lng": -79.5254682
-      }
-    ],
     "sold": false
   },
   {
@@ -3008,14 +2230,6 @@
         "desc": "Building: 101 Exchange Way\r\nSystem: Roof Top Units\r\nDescription: RTU-05\r\nSuite: Single Tenant\r\nModel: 48TFE008---101KB\r\nSerial: 1401G30085\r\nMake: CARRIER\r\nDate Installed: Nov 01, 2001\r\nHeating Capacity 180,000 BTU's\r\nCooling Capacity: 84,000 BTU (7 Ton)\r\n-updated by Marcus Ganhao August 14, 2023",
         "lat": 43.7862052,
         "lng": -79.532657
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 100-1 & 100-2",
-        "desc": "Toronto and Region Conservation Authority (TRCA)",
-        "lat": 43.7866147,
-        "lng": -79.532976
       }
     ],
     "sold": false
@@ -3187,80 +2401,6 @@
         "lng": -79.3803765
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1,2",
-        "desc": "Dynamix Professional Vido",
-        "lat": 43.8604323,
-        "lng": -79.3807797
-      },
-      {
-        "name": "Suite 3",
-        "desc": "Gigabyte Canada Inc.",
-        "lat": 43.8604856,
-        "lng": -79.380945
-      },
-      {
-        "name": "Suite 4",
-        "desc": "Devine & Associates Ltd",
-        "lat": 43.8608166,
-        "lng": -79.3809679
-      },
-      {
-        "name": "Suite 5",
-        "desc": "3Z Dental Supplies",
-        "lat": 43.8608896,
-        "lng": -79.3811257
-      },
-      {
-        "name": "Suite 6",
-        "desc": "Invincible Garage Inc",
-        "lat": 43.8609396,
-        "lng": -79.3811624
-      },
-      {
-        "name": "Suite 7",
-        "desc": "POS King Ontario Inc.",
-        "lat": 43.8609449,
-        "lng": -79.3815144
-      },
-      {
-        "name": "Suite 8",
-        "desc": "Heyday Kitchen Inc.",
-        "lat": 43.8609909,
-        "lng": -79.3816115
-      },
-      {
-        "name": "Suite 9",
-        "desc": "Enviroair Industries Inc.",
-        "lat": 43.8608667,
-        "lng": -79.3817596
-      },
-      {
-        "name": "Suite 13, 14, 15",
-        "desc": "Invasix Corp.",
-        "lat": 43.8613423,
-        "lng": -79.3828598
-      },
-      {
-        "name": "Suite 12",
-        "desc": "Mineral Medix Corp",
-        "lat": 43.8611282,
-        "lng": -79.3823251
-      },
-      {
-        "name": "Suite 11",
-        "desc": "Hytera Communications",
-        "lat": 43.8610137,
-        "lng": -79.3819928
-      },
-      {
-        "name": "Suite 10",
-        "desc": "CTC/Canadian Test Centre Inc.",
-        "lat": 43.8610147,
-        "lng": -79.3819899
-      }
-    ],
     "sold": false
   },
   {
@@ -3376,14 +2516,6 @@
         "lng": -79.3795471
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite Main",
-        "desc": "Olympus Canada Inc.",
-        "lat": 43.8617327,
-        "lng": -79.3797441
-      }
-    ],
     "sold": false
   },
   {
@@ -3431,14 +2563,6 @@
         "desc": "Building: 35 Leek Crescent\r\nSystem: Roof Top Units\r\nDescription: RTU 06\r\nSuite: Single Tenant\r\nModel: ZF048N10N5AAA2A\r\nSerial: NIL3170508\r\nMake: YORK\r\nDate Installed: Nov 09, 2013\r\nHeating Capacity: 125,000 BTU\r\nCooling Capacity: 48,000 BTU (4 Ton)",
         "lat": 43.8625096,
         "lng": -79.3782259
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Wittmann Canada Inc.",
-        "lat": 43.8622013,
-        "lng": -79.3776532
       }
     ],
     "sold": false
@@ -3526,44 +2650,6 @@
         "lng": -79.3838605
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Light Harvesting Shading Solutioins Inc.",
-        "lat": 43.8596933,
-        "lng": -79.3831266
-      },
-      {
-        "name": "Suite 2,3",
-        "desc": "LLLOIS Shipping Limited",
-        "lat": 43.8596983,
-        "lng": -79.3833882
-      },
-      {
-        "name": "Suite 4",
-        "desc": "UAP Inc.",
-        "lat": 43.8602602,
-        "lng": -79.383228
-      },
-      {
-        "name": "Suite 5",
-        "desc": "CKMax Technology Inc.",
-        "lat": 43.860354,
-        "lng": -79.3834145
-      },
-      {
-        "name": "Suite 6",
-        "desc": "Flatline Spraybooth Specialist Inc.",
-        "lat": 43.8604445,
-        "lng": -79.3835813
-      },
-      {
-        "name": "Suite 7",
-        "desc": "Formula Brands",
-        "lat": 43.8605301,
-        "lng": -79.3837465
-      }
-    ],
     "sold": false
   },
   {
@@ -3635,14 +2721,6 @@
         "desc": "Building: 50 Leek Crescent\r\nSystem: Roof Top Units\r\nDescription: RTU 09\r\nSuite: Single Tenant\r\nModel: 48TCEM12A2A1A0B0A0\r\nSerial: 3222P35767\r\nMake: CARRIER\r\nDate Installed: Mar 02, 2022\r\nHeating Capacity 224,000 BTU's\r\nCooling Capacity: 120,000 BTU (10 Ton)\r\nInstalled by: Applied Systems Technologies Inc.",
         "lat": 43.862788,
         "lng": -79.3762897
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Centennial Foods / Maximum Seafood",
-        "desc": "Centennial Foods / Maximum Seafood",
-        "lat": 43.8621801,
-        "lng": -79.3760632
       }
     ],
     "sold": false
@@ -3766,20 +2844,6 @@
         "lng": -79.3759083
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 2",
-        "desc": "General Products Inc.",
-        "lat": 43.8617285,
-        "lng": -79.3763217
-      },
-      {
-        "name": "Suite 1",
-        "desc": "Johnson Controls",
-        "lat": 43.8614286,
-        "lng": -79.3761852
-      }
-    ],
     "sold": false
   },
   {
@@ -3877,14 +2941,6 @@
         "lng": -79.3802308
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite main",
-        "desc": "Applanix Corporation",
-        "lat": 43.861023,
-        "lng": -79.3799226
-      }
-    ],
     "sold": false
   },
   {
@@ -3936,14 +2992,6 @@
     "cluster": "The Carrier (x 1)",
     "manager": "Sylvia Zwierkowski",
     "rtus": [],
-    "tenants": [
-      {
-        "name": "Suite 145",
-        "desc": "Hudson's Bay Company ULC",
-        "lat": 43.740759,
-        "lng": -79.6162941
-      }
-    ],
     "sold": false
   },
   {
@@ -4049,26 +3097,6 @@
         "lng": -79.3424384
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 130",
-        "desc": "OHO NOVA International Trading Corp.",
-        "lat": 43.8077539,
-        "lng": -79.3434486
-      },
-      {
-        "name": "Suite 136",
-        "desc": "Innova Medical Ophthalmics Inc.",
-        "lat": 43.8078355,
-        "lng": -79.3430766
-      },
-      {
-        "name": "Suite 146",
-        "desc": "Quantec Geoscience Limited",
-        "lat": 43.8083109,
-        "lng": -79.3432897
-      }
-    ],
     "sold": false
   },
   {
@@ -4124,20 +3152,6 @@
         "lng": -79.3418813
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 200",
-        "desc": "Kasican, Inc.",
-        "lat": 43.808645,
-        "lng": -79.3420095
-      },
-      {
-        "name": "Suite 202-206",
-        "desc": "Uni Express Inc.",
-        "lat": 43.8086439,
-        "lng": -79.3420064
-      }
-    ],
     "sold": false
   },
   {
@@ -4167,14 +3181,6 @@
         "desc": "Building: 250-256 Sparks Avenue\r\nSystem: Roof Top Units\r\nDescription: RTU-01\r\nSuite: Suite 250\r\nModel: 48HJE006151\r\nSerial: 2006G40409\r\nMake: CARRIER\r\nDate Installed: Nov 09, 2006\r\nHeating Capacity 115,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)",
         "lat": 43.8083142,
         "lng": -79.3410659
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 250-256",
-        "desc": "S.A.N. Steel Fabricating",
-        "lat": 43.8087871,
-        "lng": -79.3414119
       }
     ],
     "sold": false
@@ -4214,14 +3220,6 @@
         "lng": -79.5012069
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 60",
-        "desc": "No Information",
-        "lat": 43.6045918,
-        "lng": -79.5017634
-      }
-    ],
     "sold": false
   },
   {
@@ -4257,20 +3255,6 @@
         "desc": "Building: 160 Dwight Street\r\nSystem: Roof Top Units\r\nDescription: RTU-04\r\nSuite: -\r\nModel: S800\r\nSerial: 221115G2238\r\nMake: Cambridge\r\nDate Installed: Jan 01, 2022\r\nMax Input 708,000BTU\r\nMin Input 35,000BTU\r\nHeating only\r\n(0 Ton)",
         "lat": 43.606296,
         "lng": -79.5020843
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 2",
-        "desc": "The Hospital for Sick Children",
-        "lat": 43.6060209,
-        "lng": -79.5008074
-      },
-      {
-        "name": "Suite 1",
-        "desc": "Wiseacre Inc.",
-        "lat": 43.6060119,
-        "lng": -79.500795
       }
     ],
     "sold": false
@@ -4310,14 +3294,6 @@
         "lng": -79.5024119
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "JP Logistics Corp.",
-        "lat": 43.607773,
-        "lng": -79.5006586
-      }
-    ],
     "sold": false
   },
   {
@@ -4330,14 +3306,6 @@
     "cluster": "Halton Hills (x 3)",
     "manager": "Maia Krasowski",
     "rtus": [],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Childventures Early Learning Academy Inc.",
-        "lat": 43.6085773,
-        "lng": -79.7491331
-      }
-    ],
     "sold": false
   },
   {
@@ -4385,14 +3353,6 @@
         "desc": "Building: 20 Westbridge Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-6\r\nSuite: Single Tenant\r\nModel: KGB036S4BQ3J\r\nSerial: 5623C05785\r\nMake: LENNOX\r\nDate Installed: Nov 01, 2023\r\nHeating capacity 108,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\nInstalled by tenant",
         "lat": 43.556126,
         "lng": -79.8543688
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Kraft Heinz Canada ULC",
-        "lat": 43.5550623,
-        "lng": -79.8541741
       }
     ],
     "sold": false
@@ -4480,14 +3440,6 @@
         "lng": -79.8511481
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 7951",
-        "desc": "Kraft Heinz Canada ULC",
-        "lat": 43.5536814,
-        "lng": -79.8511093
-      }
-    ],
     "sold": false
   },
   {
@@ -4529,14 +3481,6 @@
         "desc": "Building: 6100 Kenway Drive\r\nSystem: Roof Top Units\r\nDescription: RTU 3\r\nSuite: -\r\nModel: ZE036H10B1A1AAA1A2\r\nSerial: N1H9196812\r\nMake: YORK\r\nDate Installed: Nov 04, 2019\r\nHeating Capacity: BTU'S:100,000\r\nCooling Capacity: 36,000 BTU (3 Ton)",
         "lat": 43.6373548,
         "lng": -79.6714122
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Single Tenant",
-        "desc": "The Authentic T-Shirt Co/SanMar Canada",
-        "lat": 43.6373847,
-        "lng": -79.6712932
       }
     ],
     "sold": false
@@ -4660,62 +3604,6 @@
         "lng": -79.6738625
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "House of Electrical Supplies\r\n8475 SQFT",
-        "lat": 43.6380658,
-        "lng": -79.6726674
-      },
-      {
-        "name": "Suite 2",
-        "desc": "XeMODeX Inc.\r\n8565 SQFT",
-        "lat": 43.6379955,
-        "lng": -79.6727483
-      },
-      {
-        "name": "Suite 3",
-        "desc": "Diversey Canada Inc.\r\n15632 SQFT",
-        "lat": 43.6378828,
-        "lng": -79.6725564
-      },
-      {
-        "name": "Suite 4",
-        "desc": "Orbis Express Ltd.\r\n9422 SQFT",
-        "lat": 43.6374863,
-        "lng": -79.6727461
-      },
-      {
-        "name": "Suite 5, 6",
-        "desc": "Panex Courier & Branding Ltd\r\n14934 SQFT\r\n7281 SQFT",
-        "lat": 43.6377505,
-        "lng": -79.6731935
-      },
-      {
-        "name": "Suite 7",
-        "desc": "Rebel Apparel Inc.\r\n6316 SQFT",
-        "lat": 43.6374734,
-        "lng": -79.6735092
-      },
-      {
-        "name": "Suite 8",
-        "desc": "Day to Day Logistics Inc\r\n5346 SQFT",
-        "lat": 43.6373806,
-        "lng": -79.6736121
-      },
-      {
-        "name": "Suite 10, 11",
-        "desc": "Canada Welding Supply Inc.\r\n11671 SQFT",
-        "lat": 43.6370635,
-        "lng": -79.6735988
-      },
-      {
-        "name": "Suite 9",
-        "desc": "Rack-A-Tiers Manufacturing Inc.\r\n3916 SQFT",
-        "lat": 43.6371702,
-        "lng": -79.6737753
-      }
-    ],
     "sold": false
   },
   {
@@ -4819,20 +3707,6 @@
         "lng": -79.6727909
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "JW Fulfillment YVR Inc.",
-        "lat": 43.6362801,
-        "lng": -79.6726799
-      },
-      {
-        "name": "Suite 2",
-        "desc": "Hain-Celestial Canada",
-        "lat": 43.6362178,
-        "lng": -79.6743841
-      }
-    ],
     "sold": false
   },
   {
@@ -4906,14 +3780,6 @@
         "lng": -79.674662
       }
     ],
-    "tenants": [
-      {
-        "name": "Single Tenant",
-        "desc": "Vacant",
-        "lat": 43.637243,
-        "lng": -79.6746276
-      }
-    ],
     "sold": false
   },
   {
@@ -4975,14 +3841,6 @@
         "lng": -79.6754436
       }
     ],
-    "tenants": [
-      {
-        "name": "Single Tenant",
-        "desc": "API Group",
-        "lat": 43.6354133,
-        "lng": -79.6747755
-      }
-    ],
     "sold": false
   },
   {
@@ -5026,14 +3884,6 @@
         "lng": -79.6768816
       }
     ],
-    "tenants": [
-      {
-        "name": "Single Tenant",
-        "desc": "Farm Boy Company Inc./Colabor Limited Partnership",
-        "lat": 43.6351664,
-        "lng": -79.6761227
-      }
-    ],
     "sold": false
   },
   {
@@ -5057,14 +3907,6 @@
         "desc": "Building: 6300 Kenway Drive\r\nSystem: Roof Top Units\r\nDescription: RTU 2\r\nSuite: Single Tenant\r\nModel: KGA092S4BH1J\r\nSerial: 5611G01941\r\nMake: LENNOX\r\nDate Installed: Nov 15, 2011\r\nHeating Capacity: BTU'S:240,000\r\nCooling Capacity: 92,000 BTU (7.5 Ton)",
         "lat": 43.6352167,
         "lng": -79.6781868
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Single Tenant",
-        "desc": "J.Ennis Fabrics Ltd.",
-        "lat": 43.6351133,
-        "lng": -79.6792093
       }
     ],
     "sold": false
@@ -5140,26 +3982,6 @@
         "lng": -79.6952003
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Vacant",
-        "lat": 43.6311358,
-        "lng": -79.6942601
-      },
-      {
-        "name": "Suite 3",
-        "desc": "Neovia Logistics Services",
-        "lat": 43.6333747,
-        "lng": -79.6956179
-      },
-      {
-        "name": "Suite 2",
-        "desc": "National Logistics Services",
-        "lat": 43.6333708,
-        "lng": -79.6956227
-      }
-    ],
     "sold": false
   },
   {
@@ -5227,14 +4049,6 @@
         "lng": -79.6985194
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Gracious Living",
-        "lat": 43.6336487,
-        "lng": -79.6989835
-      }
-    ],
     "sold": false
   },
   {
@@ -5276,14 +4090,6 @@
         "desc": "Building: 320 Superior Blvd\r\nSystem: Roof Top Units\r\nDescription: RTU-1 Roof Top Unit\r\nSuite: Single Tenant\r\nModel: 48TCED08A2A1A0B0A0\r\nSerial: 4218P39058\r\nMake: CARRIER\r\nDate Installed: Jul 28, 2018\r\nHeating Capacity BTU 180,000\r\nCooling Capacity: 84,000 BTU (7 Ton)\r\nR410 Refrigerant",
         "lat": 43.6471577,
         "lng": -79.692036
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Regal Beloit Holdings",
-        "lat": 43.6466386,
-        "lng": -79.6915634
       }
     ],
     "sold": false
@@ -5351,14 +4157,6 @@
         "desc": "Building: 326 Superior Blvd\r\nSystem: Roof Top Units\r\nDescription: RTU-7 Roof Top Unit\r\nSuite: Single Tenant\r\nModel: ZF240N32J5AAA1B\r\nSerial: N1H2114273\r\nMake: YORK\r\nDate Installed: Aug 04, 2012\r\nHeating Capacity BTU 400,000\r\nCooling Capacity: 240,000 BTU (20 Ton)\r\nR-410 Refrigerant",
         "lat": 43.6475704,
         "lng": -79.6903338
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 326",
-        "desc": "Vacant",
-        "lat": 43.6479979,
-        "lng": -79.691156
       }
     ],
     "sold": false
@@ -5542,14 +4340,6 @@
         "lng": -79.6858631
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Arterra Wines",
-        "lat": 43.6470928,
-        "lng": -79.6857431
-      }
-    ],
     "sold": false
   },
   {
@@ -5675,32 +4465,6 @@
         "desc": "Building: 6950 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU 17\r\nSuite: SUITE 4\r\nModel: TGA060S2BH1J\r\nSerial: 5608C06290\r\nMake: LENNOX\r\nDate Installed: Nov 05, 2008\r\nApprox. BTU'S: 125,000\r\n- Cooling Capacity: 60,000 BTU (5 Ton)\r\n- THIS UNIT SERVES UNIT 3\r\n- FILTER SIZE 16X20X2 (4)\r\n- BELT A39",
         "lat": 43.611922,
         "lng": -79.7414901
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Audmet Canada Ltd.",
-        "lat": 43.6117059,
-        "lng": -79.7400828
-      },
-      {
-        "name": "Suite 2",
-        "desc": "Rational Canada Inc.",
-        "lat": 43.6120355,
-        "lng": -79.739744
-      },
-      {
-        "name": "Suite 3",
-        "desc": "Pet Science Ltd.",
-        "lat": 43.6123339,
-        "lng": -79.7403014
-      },
-      {
-        "name": "Suite 4",
-        "desc": "Hill-Rom Canada",
-        "lat": 43.6122262,
-        "lng": -79.741182
       }
     ],
     "sold": false
@@ -5890,32 +4654,6 @@
         "lng": -79.7430706
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Abbott Medical Canada",
-        "lat": 43.6147359,
-        "lng": -79.7420267
-      },
-      {
-        "name": "Suite 2",
-        "desc": "Hino Motors Canada Ltd.",
-        "lat": 43.615186,
-        "lng": -79.7427957
-      },
-      {
-        "name": "Suite 3",
-        "desc": "Baxter Corporation",
-        "lat": 43.6148434,
-        "lng": -79.743174
-      },
-      {
-        "name": "Suite 4",
-        "desc": "Macdonald, Dettwiler and Associates Inc.",
-        "lat": 43.6145285,
-        "lng": -79.7433847
-      }
-    ],
     "sold": false
   },
   {
@@ -6085,44 +4823,6 @@
         "lng": -79.7450617
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Accent Fairchild",
-        "lat": 43.6132263,
-        "lng": -79.7442197
-      },
-      {
-        "name": "Suite 2",
-        "desc": "R.J. Burnside & Associates Limited",
-        "lat": 43.6132252,
-        "lng": -79.7442179
-      },
-      {
-        "name": "Suite 3",
-        "desc": "Pella Windows & Doors Ontario, Corp.",
-        "lat": 43.6129042,
-        "lng": -79.7443097
-      },
-      {
-        "name": "Suite 4",
-        "desc": "RX Connect Specialty Pharmacy Inc. or Morris National Inc.",
-        "lat": 43.6126767,
-        "lng": -79.7457678
-      },
-      {
-        "name": "Suite 5",
-        "desc": "Masco Canada Limited",
-        "lat": 43.6121034,
-        "lng": -79.745795
-      },
-      {
-        "name": "Suite 6",
-        "desc": "Vitalaire Canada Inc.",
-        "lat": 43.6124818,
-        "lng": -79.7453991
-      }
-    ],
     "sold": false
   },
   {
@@ -6158,14 +4858,6 @@
         "desc": "Building: 6774 Financial Dr.\r\nSystem: Roof Top Units\r\nDescription: RTU-01\r\nSuite: Single Tenant\r\nModel: KGB120S4BH2J\r\nSerial: 5619E12935\r\nMake: LENNOX\r\nDate Installed: Apr 01, 2019\r\nHeating Data: 240000 BTU\r\nCooling Data: 120,000 BTU (10 Ton)",
         "lat": 43.6084202,
         "lng": -79.7415001
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 100",
-        "desc": "F-H Welding Machines Limited",
-        "lat": 43.6088823,
-        "lng": -79.7422718
       }
     ],
     "sold": false
@@ -6253,14 +4945,6 @@
         "lng": -79.7361553
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite Main, 2",
-        "desc": "Creation Technologies LP",
-        "lat": 43.612573,
-        "lng": -79.7362787
-      }
-    ],
     "sold": false
   },
   {
@@ -6334,14 +5018,6 @@
         "lng": -79.7406724
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite",
-        "desc": "Tech Data",
-        "lat": 43.6129446,
-        "lng": -79.7408575
-      }
-    ],
     "sold": false
   },
   {
@@ -6407,14 +5083,6 @@
         "desc": "Building: 6901 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU-7\r\nSuite: Single Tenant\r\nModel: ZXG12F5C3AA1B111A3\r\nSerial: N2C2154478\r\nMake: Johnson Controls/York\r\nDate Installed: Mar 01, 2022\r\nHeating Data: 250000 BTU?\r\nCooling Capacity: 120,000 BTU (10 Ton)",
         "lat": 43.6141297,
         "lng": -79.738128
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite",
-        "desc": "Tech Data",
-        "lat": 43.6132135,
-        "lng": -79.7392847
       }
     ],
     "sold": false
@@ -6512,14 +5180,6 @@
         "desc": "Building: 6955 Creditview Road\r\nSystem: Roof Top Units\r\nDescription: RTU-13\r\nSuite: Single Tenant\r\nModel: D1NA018N03606C\r\nSerial: N0B5633969\r\nMake: YORK\r\nDate Installed: Feb 01, 2005\r\nYear of Manufacture: 2005\r\nHeating Data: 45,000 BTU\r\nCooling Capacity: 18,000 BTU (3 Ton)",
         "lat": 43.6158887,
         "lng": -79.7418997
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite",
-        "desc": "Bosch",
-        "lat": 43.6153579,
-        "lng": -79.7411976
       }
     ],
     "sold": false
@@ -6685,14 +5345,6 @@
         "lng": -79.742598
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1,2",
-        "desc": "Caldic",
-        "lat": 43.6115682,
-        "lng": -79.7433176
-      }
-    ],
     "sold": false
   },
   {
@@ -6752,26 +5404,6 @@
         "desc": "Building: 2300 Bristol Circle\r\nSystem: Roof Top Units\r\nDescription: RT-08 DX Cooling Gas Fired Htg\r\nSuite: SUITE 5-6\r\nModel: KGB060S4BH4J\r\nSerial: 5623A04534\r\nMake: LENNOX\r\nDate Installed: May 11, 2023\r\nHeating Capacity:150,000 BTU\r\nCooling Capacity: 60,000 BTU (5 TON)",
         "lat": 43.5159647,
         "lng": -79.6763474
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Pineberry Manufacturing Inc.",
-        "lat": 43.5152481,
-        "lng": -79.6761851
-      },
-      {
-        "name": "Suite 4, 5,6",
-        "desc": "MDM Business Solutions Inc",
-        "lat": 43.5155866,
-        "lng": -79.6759333
-      },
-      {
-        "name": "Suite 2 , 3",
-        "desc": "Zebra Pen Corp.",
-        "lat": 43.5155714,
-        "lng": -79.675977
       }
     ],
     "sold": false
@@ -6877,56 +5509,6 @@
         "lng": -79.6764078
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Everest Automation Inc.\r\nActive: 03/23/2026",
-        "lat": 43.5162114,
-        "lng": -79.6767561
-      },
-      {
-        "name": "Suite 2",
-        "desc": "Everest Automation Inc.\r\nActive: 03/23/2026",
-        "lat": 43.5162372,
-        "lng": -79.6766045
-      },
-      {
-        "name": "Suite 3",
-        "desc": "Previously: Bar Capital (Entripy Custom Clothing)\r\nExpired",
-        "lat": 43.5163154,
-        "lng": -79.6768413
-      },
-      {
-        "name": "Suite 4",
-        "desc": "Previously: Bar Capital (Entripy Custom Clothing)\r\nExpired",
-        "lat": 43.516242,
-        "lng": -79.6769704
-      },
-      {
-        "name": "Suite 5",
-        "desc": "Previously: Bar Capital (Entripy Custom Clothing)\r\nExpired",
-        "lat": 43.5164244,
-        "lng": -79.6774706
-      },
-      {
-        "name": "Suite 6",
-        "desc": "Network Power Solutions Inc\r\nActive: 03/23/2026",
-        "lat": 43.5161052,
-        "lng": -79.6773449
-      },
-      {
-        "name": "Suite 7",
-        "desc": "Network Power Solutions Inc\r\nActive: 03/23/2026",
-        "lat": 43.516031,
-        "lng": -79.6774724
-      },
-      {
-        "name": "Suite 8",
-        "desc": "MCS Facility Support (K&S Services)\r\nActive: 03/23/2026",
-        "lat": 43.5162254,
-        "lng": -79.6778155
-      }
-    ],
     "sold": false
   },
   {
@@ -6956,20 +5538,6 @@
         "desc": "Building: 2880 Brighton Road\r\nSystem: Roof Top Units\r\nDescription: RT-03 DX Cooling Gas Fired Htg\r\nSuite: SUITE 3\r\nModel: DM090N15N5AAA4A\r\nSerial: N0M6200157\r\nMake: YORK\r\nDate Installed: Oct 10, 2006\r\nHeating Capacity BTU 180,000\r\nCooling Capacity: 90,000 BTU (7.5 Ton)",
         "lat": 43.5152804,
         "lng": -79.6787303
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Advanced Presentation Products Inc.",
-        "lat": 43.5152819,
-        "lng": -79.6785558
-      },
-      {
-        "name": "Suite 2",
-        "desc": "Premier Brands",
-        "lat": 43.5152849,
-        "lng": -79.6785544
       }
     ],
     "sold": false
@@ -7031,14 +5599,6 @@
         "desc": "Building: 2910 Brighton Road\r\nSystem: Roof Top Units\r\nDescription: RT08 DX Cooling Gas Fired Htg\r\nSuite: SUITE 1\r\nModel: ZF048H12B5A1ABA1A1A\r\nSerial: N1M6141605\r\nMake: YORK\r\nDate Installed: Oct 12, 2016\r\nHeating Capacity BTU 125,000\r\nCooling Capacity: 48,000 BTU (4 Ton)",
         "lat": 43.5156425,
         "lng": -79.6784832
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Aco Systems Ltd",
-        "lat": 43.5156562,
-        "lng": -79.6777462
       }
     ],
     "sold": false
@@ -7252,158 +5812,6 @@
         "lng": -79.708222
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Unity Pro Auto Service",
-        "lat": 43.5391983,
-        "lng": -79.7097239
-      },
-      {
-        "name": "Suite 2",
-        "desc": "Fortco",
-        "lat": 43.5392494,
-        "lng": -79.7096632
-      },
-      {
-        "name": "Suite 3-4",
-        "desc": "Fiesta Wholesale",
-        "lat": 43.5393542,
-        "lng": -79.7095404
-      },
-      {
-        "name": "Suite 7, 8, 9",
-        "desc": "Cansec Systems Ltd",
-        "lat": 43.5394526,
-        "lng": -79.7094067
-      },
-      {
-        "name": "Suite 5 & 6",
-        "desc": "Gourmet Craft & Catering",
-        "lat": 43.5392556,
-        "lng": -79.7093826
-      },
-      {
-        "name": "Suite 11",
-        "desc": "MLY Construction Ltd.",
-        "lat": 43.5393277,
-        "lng": -79.7089324
-      },
-      {
-        "name": "Suite 12",
-        "desc": "Mobileyez Inc.",
-        "lat": 43.5393264,
-        "lng": -79.7089318
-      },
-      {
-        "name": "Suite 10",
-        "desc": "Fiesta Wholesale",
-        "lat": 43.5393121,
-        "lng": -79.7091901
-      },
-      {
-        "name": "Suite 13 & 14",
-        "desc": "Fiesta Wholesale Inc.",
-        "lat": 43.5392824,
-        "lng": -79.7088673
-      },
-      {
-        "name": "Suite 15 & 16",
-        "desc": "High Octane Training Inc.",
-        "lat": 43.5388956,
-        "lng": -79.709041
-      },
-      {
-        "name": "Suite 17 & 18",
-        "desc": "Granite Edge Ltd.",
-        "lat": 43.5387961,
-        "lng": -79.7088716
-      },
-      {
-        "name": "Suite 19",
-        "desc": "Viasox Limited",
-        "lat": 43.5386923,
-        "lng": -79.7087135
-      },
-      {
-        "name": "Suite 20",
-        "desc": "Tour Experience Golf Inc.",
-        "lat": 43.5386123,
-        "lng": -79.7086464
-      },
-      {
-        "name": "Suite 21",
-        "desc": "Your Flags Ltd.",
-        "lat": 43.5385568,
-        "lng": -79.7085609
-      },
-      {
-        "name": "Suite 22",
-        "desc": "Century 21 Active Realty",
-        "lat": 43.5386731,
-        "lng": -79.7081168
-      },
-      {
-        "name": "Suite 23 & 24",
-        "desc": "Graphic Dimensions Inc.",
-        "lat": 43.5383711,
-        "lng": -79.7084817
-      },
-      {
-        "name": "Suite 25",
-        "desc": "Graphic Dimensions Inc.",
-        "lat": 43.5382463,
-        "lng": -79.7083431
-      },
-      {
-        "name": "Suite 26",
-        "desc": "Nailed It Roofing Ltd.",
-        "lat": 43.5382197,
-        "lng": -79.7082186
-      },
-      {
-        "name": "Suite 27",
-        "desc": "Denmar Dental Inc.",
-        "lat": 43.5381935,
-        "lng": -79.7081044
-      },
-      {
-        "name": "Suite 28 & 29",
-        "desc": "Robert G. McEwen & Associates Ltd.",
-        "lat": 43.5381732,
-        "lng": -79.7079788
-      },
-      {
-        "name": "Suite 30 & 31",
-        "desc": "Authentic Stitch Inc.",
-        "lat": 43.5380275,
-        "lng": -79.7080258
-      },
-      {
-        "name": "Suite 32",
-        "desc": "Fisherman's Place",
-        "lat": 43.5380041,
-        "lng": -79.7081235
-      },
-      {
-        "name": "Suite 33",
-        "desc": "Vacant",
-        "lat": 43.5379701,
-        "lng": -79.7082308
-      },
-      {
-        "name": "Suite 34",
-        "desc": "Absolutely Dentures",
-        "lat": 43.5379704,
-        "lng": -79.7082322
-      },
-      {
-        "name": "Suite 35",
-        "desc": "Alfa Smile Inc.",
-        "lat": 43.5379201,
-        "lng": -79.7082906
-      }
-    ],
     "sold": false
   },
   {
@@ -7451,38 +5859,6 @@
         "desc": "Building: 3135 Unity Drive\r\nSystem: Roof Top Units\r\nDescription: RT01 DX Cooling Gas Fired Htg\r\nSuite: SUITE 01\r\nModel: KGB060S4BH4J\r\nSerial: 5623A04962\r\nMake: LENNOX\r\nDate Installed: May 03, 2023\r\nHeating Capacity 150,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)",
         "lat": 43.5373879,
         "lng": -79.7091079
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Flying Fresh Air Freight",
-        "lat": 43.5377924,
-        "lng": -79.7093859
-      },
-      {
-        "name": "Suite 2",
-        "desc": "Paint & Flooring Warehouse",
-        "lat": 43.5373617,
-        "lng": -79.7090577
-      },
-      {
-        "name": "Suite 4",
-        "desc": "Erin Mills Soccer Club",
-        "lat": 43.5374278,
-        "lng": -79.7088868
-      },
-      {
-        "name": "Suite 5",
-        "desc": "Disaster RX",
-        "lat": 43.5376325,
-        "lng": -79.708377
-      },
-      {
-        "name": "Suite 3",
-        "desc": "Vacant",
-        "lat": 43.5374899,
-        "lng": -79.7087232
       }
     ],
     "sold": false
@@ -7624,86 +6000,6 @@
         "lng": -79.6934037
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 25",
-        "desc": "Mass Liquidation Inc.",
-        "lat": 43.5180491,
-        "lng": -79.6926922
-      },
-      {
-        "name": "Suite 26",
-        "desc": "Centre For Islamic Knowledge",
-        "lat": 43.5180449,
-        "lng": -79.6930086
-      },
-      {
-        "name": "Suite 27 & 28",
-        "desc": "Signs & Graphics Land",
-        "lat": 43.5179728,
-        "lng": -79.6930101
-      },
-      {
-        "name": "Suite 29 & 30",
-        "desc": "CTS Auto Inc.",
-        "lat": 43.5178423,
-        "lng": -79.6930337
-      },
-      {
-        "name": "Suite 31",
-        "desc": "Pool Man Group Mississauga",
-        "lat": 43.5177315,
-        "lng": -79.693037
-      },
-      {
-        "name": "Suite 32, 33",
-        "desc": "QuadReal Property Group LP",
-        "lat": 43.5176378,
-        "lng": -79.6930123
-      },
-      {
-        "name": "Suite 34",
-        "desc": "Tormac Mechanical Contractors Ltd.",
-        "lat": 43.5174841,
-        "lng": -79.6930181
-      },
-      {
-        "name": "Suite 36 & 37",
-        "desc": "The Delgada Group Inc.",
-        "lat": 43.5172736,
-        "lng": -79.6932339
-      },
-      {
-        "name": "Suite 35",
-        "desc": "Seasonal Home Comfort Heating & A/C Inc.",
-        "lat": 43.5172401,
-        "lng": -79.6929242
-      },
-      {
-        "name": "Suite 38-40",
-        "desc": "Bass Curtainwalls Inc.",
-        "lat": 43.517117,
-        "lng": -79.6934368
-      },
-      {
-        "name": "Suite 41",
-        "desc": "Marhaba Book Store & Hijab Fashion",
-        "lat": 43.5171173,
-        "lng": -79.6934384
-      },
-      {
-        "name": "Suite 42",
-        "desc": "Telecon Inc.",
-        "lat": 43.5170554,
-        "lng": -79.6934583
-      },
-      {
-        "name": "Suite 43 & 44",
-        "desc": "Branch Audiovisual",
-        "lat": 43.5169891,
-        "lng": -79.6934895
-      }
-    ],
     "sold": false
   },
   {
@@ -7763,26 +6059,6 @@
         "desc": "Building: 3165 Unity Drive\r\nSystem: Roof Top Units\r\nDescription: RT05 DX Cooling Gas Fired Htg\r\nSuite: SUITE 05\r\nModel: KGB048S4BH2J\r\nSerial: 5623A05184\r\nMake: LENNOX\r\nDate Installed: May 03, 2023\r\nHeating Capacity 150,000 BTU's\r\nCooling Capacity: 48,000 BTU (4 Ton)",
         "lat": 43.5372303,
         "lng": -79.7094999
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 1,2",
-        "desc": "Vital Biosciences Inc.",
-        "lat": 43.5369656,
-        "lng": -79.7100567
-      },
-      {
-        "name": "Suite 3",
-        "desc": "Pace Sensors Limited",
-        "lat": 43.5374686,
-        "lng": -79.7100894
-      },
-      {
-        "name": "Suite 4, 5",
-        "desc": "Windmill Power Equipment Ltd.",
-        "lat": 43.5371239,
-        "lng": -79.7096661
       }
     ],
     "sold": false
@@ -7936,110 +6212,6 @@
         "lng": -79.6938776
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "Glasswork4You Ltd.",
-        "lat": 43.5165842,
-        "lng": -79.6940958
-      },
-      {
-        "name": "Suite 2",
-        "desc": "Transpark Systems Inc.",
-        "lat": 43.5165847,
-        "lng": -79.6937951
-      },
-      {
-        "name": "Suite 3 & 4",
-        "desc": "Seguin Morris Inc.",
-        "lat": 43.5166683,
-        "lng": -79.6937976
-      },
-      {
-        "name": "Suite 5",
-        "desc": "Serve Kings Oakville Inc.",
-        "lat": 43.5167916,
-        "lng": -79.6937953
-      },
-      {
-        "name": "Suite 6",
-        "desc": "Jump Network Telecommunications Ltd.",
-        "lat": 43.516857,
-        "lng": -79.6937913
-      },
-      {
-        "name": "Suite 7",
-        "desc": "Ayad Electric",
-        "lat": 43.5169112,
-        "lng": -79.6940864
-      },
-      {
-        "name": "Suite 8",
-        "desc": "Aerowood Stairs",
-        "lat": 43.5170385,
-        "lng": -79.6940878
-      },
-      {
-        "name": "Suite 9",
-        "desc": "Tsgitsam Technology Ltd.",
-        "lat": 43.5170385,
-        "lng": -79.6940878
-      },
-      {
-        "name": "Suite 10",
-        "desc": "Tobii Dynavox Canada inc.",
-        "lat": 43.5171901,
-        "lng": -79.6938341
-      },
-      {
-        "name": "Suite 11 & 12",
-        "desc": "IndusControl Incorporated",
-        "lat": 43.517193,
-        "lng": -79.6940805
-      },
-      {
-        "name": "Suite 13 & 14",
-        "desc": "AM Tuning",
-        "lat": 43.5173078,
-        "lng": -79.6940859
-      },
-      {
-        "name": "Suite 15",
-        "desc": "ISA of Canada Ltd.",
-        "lat": 43.5174432,
-        "lng": -79.6940789
-      },
-      {
-        "name": "Suite 1 16-20",
-        "desc": "B & M Garage Door Inc.",
-        "lat": 43.5175174,
-        "lng": -79.6940779
-      },
-      {
-        "name": "Suite 21",
-        "desc": "Hides Global Inc.",
-        "lat": 43.517874,
-        "lng": -79.6937683
-      },
-      {
-        "name": "Suite 22",
-        "desc": "Cankopy Document Solutions",
-        "lat": 43.5179806,
-        "lng": -79.6937696
-      },
-      {
-        "name": "Suite 23",
-        "desc": "Floor Coverings International",
-        "lat": 43.5179845,
-        "lng": -79.6937922
-      },
-      {
-        "name": "Suite 24",
-        "desc": "Get Set Home",
-        "lat": 43.5180497,
-        "lng": -79.6938147
-      }
-    ],
     "sold": false
   },
   {
@@ -8173,116 +6345,6 @@
         "lng": -79.694549
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 66",
-        "desc": "Shish Mahal Indian Cuisine",
-        "lat": 43.5180476,
-        "lng": -79.6943638
-      },
-      {
-        "name": "Suite 64 & 65",
-        "desc": "Kingsmen Kustoms Ltd.",
-        "lat": 43.5179148,
-        "lng": -79.6943736
-      },
-      {
-        "name": "Suite 63",
-        "desc": "Payless Sign & Printing",
-        "lat": 43.5179188,
-        "lng": -79.6946777
-      },
-      {
-        "name": "Suite 47",
-        "desc": "Tasteworks Inc.",
-        "lat": 43.5168349,
-        "lng": -79.6946513
-      },
-      {
-        "name": "Suite 48",
-        "desc": "White Gold Sweets",
-        "lat": 43.5168376,
-        "lng": -79.6946771
-      },
-      {
-        "name": "Suite 49",
-        "desc": "BLUE OASIS: THE WATER TAP SERVICES INC.",
-        "lat": 43.516909,
-        "lng": -79.6943906
-      },
-      {
-        "name": "Suite 50",
-        "desc": "SanTrupt Inc.",
-        "lat": 43.5169696,
-        "lng": -79.6946963
-      },
-      {
-        "name": "Suite 51",
-        "desc": "Hyperfit Tools Inc.",
-        "lat": 43.5170371,
-        "lng": -79.6943881
-      },
-      {
-        "name": "Suite 52",
-        "desc": "Jericho Trading",
-        "lat": 43.5171109,
-        "lng": -79.6943895
-      },
-      {
-        "name": "Suite 53 & 54",
-        "desc": "Well Dressed Home",
-        "lat": 43.5171794,
-        "lng": -79.6943868
-      },
-      {
-        "name": "Suite 55",
-        "desc": "Wilson Air & Equipment Ltd.",
-        "lat": 43.5173036,
-        "lng": -79.6943855
-      },
-      {
-        "name": "Suite 58",
-        "desc": "Pearl Medical Group Inc.",
-        "lat": 43.5175107,
-        "lng": -79.694685
-      },
-      {
-        "name": "Suite 59",
-        "desc": "",
-        "lat": 43.5175794,
-        "lng": -79.6943823
-      },
-      {
-        "name": "Suite 62",
-        "desc": "MySolar Group Ltd.",
-        "lat": 43.5178463,
-        "lng": -79.6946781
-      },
-      {
-        "name": "Suite 61",
-        "desc": "MySolar Ltd.",
-        "lat": 43.5177803,
-        "lng": -79.6946679
-      },
-      {
-        "name": "Suite 60",
-        "desc": "MySolar Group Ltd.",
-        "lat": 43.5177186,
-        "lng": -79.6946649
-      },
-      {
-        "name": "Suite 57",
-        "desc": "5042376 ONTARIO INC.\r\n(t/a A to Z Decks and Struxure\")",
-        "lat": 43.5175111,
-        "lng": -79.6946742
-      },
-      {
-        "name": "Suite 56",
-        "desc": "Tekmor Systems Inc.",
-        "lat": 43.5173776,
-        "lng": -79.694384
-      }
-    ],
     "sold": false
   },
   {
@@ -8324,26 +6386,6 @@
         "desc": "Building: 3180 Ridgeway Drive\r\nSystem: Roof Top Units\r\nDescription: RT36 DX Cooling Gas Fired Htg\r\nSuite: SUITE 36\r\nModel: GCS16-060-120-5J\r\nSerial: 5605F 01838\r\nMake: LENNOX\r\nDate Installed: Oct 28, 2005\r\nHeating capacity 120,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)",
         "lat": 43.5176864,
         "lng": -79.6953016
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 36 & 37",
-        "desc": "KINGSWAY REAL ESTATE INC",
-        "lat": 43.5175592,
-        "lng": -79.6951679
-      },
-      {
-        "name": "Suite 38",
-        "desc": "Intelligent Health Group",
-        "lat": 43.5175594,
-        "lng": -79.695168
-      },
-      {
-        "name": "Suite 39 & 40",
-        "desc": "Mortgage-Free Inc.",
-        "lat": 43.5177596,
-        "lng": -79.695074
       }
     ],
     "sold": false
@@ -8393,38 +6435,6 @@
         "desc": "Building: 3184 Ridgeway Drive\r\nSystem: Roof Top Units\r\nDescription: RT41 DX Cooling Gas Fired Htg\r\nSuite: SUITE 41\r\nModel: 48FCGEA06A2A1A0B0A0\r\nSerial: 2622C05918\r\nMake: CARRIER\r\nDate Installed: Aug 02, 2022\r\nHeating capacity 110,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\n410A",
         "lat": 43.5172035,
         "lng": -79.6953946
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 41",
-        "desc": "Iqra Khalid MPP",
-        "lat": 43.5171349,
-        "lng": -79.695462
-      },
-      {
-        "name": "Suite 42",
-        "desc": "Smart-Pot Coffee Timers Inc.",
-        "lat": 43.5171358,
-        "lng": -79.6953612
-      },
-      {
-        "name": "Suite 43 & 44",
-        "desc": "Image Monitoring Inc.",
-        "lat": 43.5173203,
-        "lng": -79.6952713
-      },
-      {
-        "name": "Suite 45",
-        "desc": "Ridge Tech Dental Lab",
-        "lat": 43.5171124,
-        "lng": -79.6950913
-      },
-      {
-        "name": "Suite 46",
-        "desc": "Corlan Electric Inc.",
-        "lat": 43.5173439,
-        "lng": -79.6949957
       }
     ],
     "sold": false
@@ -8632,164 +6642,6 @@
         "lng": -79.6955518
       }
     ],
-    "tenants": [
-      {
-        "name": "Suite 1",
-        "desc": "CMJ Precision Machining Inc.",
-        "lat": 43.5162621,
-        "lng": -79.6946298
-      },
-      {
-        "name": "Suite 2",
-        "desc": "Buckingham Steel Design Inc.",
-        "lat": 43.5164376,
-        "lng": -79.6944696
-      },
-      {
-        "name": "Suite 3",
-        "desc": "Enfaze Medical Technologies Inc./ Alma Lasers, Inc.",
-        "lat": 43.5165195,
-        "lng": -79.6946229
-      },
-      {
-        "name": "Suite 4",
-        "desc": "Rexstone",
-        "lat": 43.5165208,
-        "lng": -79.6946254
-      },
-      {
-        "name": "Suite 5",
-        "desc": "Custom Window Designs Ltd.",
-        "lat": 43.516546,
-        "lng": -79.6947015
-      },
-      {
-        "name": "Suite 6",
-        "desc": "VIA Canada Holding Group Inc.",
-        "lat": 43.5165856,
-        "lng": -79.6947832
-      },
-      {
-        "name": "Suite 7 & 8",
-        "desc": "Solid Fabrications",
-        "lat": 43.5166254,
-        "lng": -79.694853
-      },
-      {
-        "name": "Suite 9, 10,11",
-        "desc": "VC Control Inc.",
-        "lat": 43.5166946,
-        "lng": -79.6950216
-      },
-      {
-        "name": "Suite 12",
-        "desc": "Emesa Dental Laboratory Inc.",
-        "lat": 43.5168079,
-        "lng": -79.6952396
-      },
-      {
-        "name": "Suite 13",
-        "desc": "HireUp Inc.",
-        "lat": 43.5168373,
-        "lng": -79.695328
-      },
-      {
-        "name": "Suite 14",
-        "desc": "Wesecure",
-        "lat": 43.5168762,
-        "lng": -79.6954074
-      },
-      {
-        "name": "Suite 15",
-        "desc": "Medpro Respiratory Care",
-        "lat": 43.5169223,
-        "lng": -79.6954765
-      },
-      {
-        "name": "Suite 16, 17",
-        "desc": "Bisan Trading and Industrial Services Inc.",
-        "lat": 43.5169963,
-        "lng": -79.695631
-      },
-      {
-        "name": "Suite 18",
-        "desc": "Ker Studio",
-        "lat": 43.5170219,
-        "lng": -79.695715
-      },
-      {
-        "name": "Suite 19, 20",
-        "desc": "MAC Energy Inc.",
-        "lat": 43.5170545,
-        "lng": -79.6958015
-      },
-      {
-        "name": "Suite 21",
-        "desc": "RoCryst Inc.",
-        "lat": 43.5171253,
-        "lng": -79.695956
-      },
-      {
-        "name": "Suite 22-23",
-        "desc": "Starlight Shutter",
-        "lat": 43.517184,
-        "lng": -79.6958984
-      },
-      {
-        "name": "Suite 24",
-        "desc": "Fine Details Systems",
-        "lat": 43.5173451,
-        "lng": -79.6960433
-      },
-      {
-        "name": "Suite 25",
-        "desc": "CityGate Developments",
-        "lat": 43.5174235,
-        "lng": -79.6956968
-      },
-      {
-        "name": "Suite 26",
-        "desc": "Canadian Metal Wood Inc.",
-        "lat": 43.5174853,
-        "lng": -79.695668
-      },
-      {
-        "name": "Suite 27, 28, 29",
-        "desc": "Exoparts",
-        "lat": 43.5175489,
-        "lng": -79.6959572
-      },
-      {
-        "name": "Suite 30, 31",
-        "desc": "June Lawrence School of Dance",
-        "lat": 43.5177663,
-        "lng": -79.6958687
-      },
-      {
-        "name": "Suite 32",
-        "desc": "The Best Deals Inc.",
-        "lat": 43.5178747,
-        "lng": -79.6958228
-      },
-      {
-        "name": "Suite 33",
-        "desc": "INGENUITY DEVELOPMENT INC",
-        "lat": 43.5179477,
-        "lng": -79.6957931
-      },
-      {
-        "name": "Suite 34",
-        "desc": "TBS BUILDING SERVICES INC",
-        "lat": 43.5179999,
-        "lng": -79.6954552
-      },
-      {
-        "name": "Suite 35",
-        "desc": "Kore-Energy Wellness",
-        "lat": 43.5180076,
-        "lng": -79.6954759
-      }
-    ],
     "sold": false
   },
   {
@@ -8867,30 +6719,6 @@
         "desc": "Building: 3345 Laird Road\r\nSystem: Roof Top Units\r\nDescription: RTU-04 DX COOLING GAS FIRE HTG\r\nSuite: SUITE 04\r\nModel: KGB060S4BH4J\r\nSerial: 5623A05113\r\nMake: LENNOX\r\nDate Installed: Nov 21, 2023\r\nHeating Capacity 150,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nR22",
         "lat": 43.5171197,
         "lng": -79.691724
-      },
-      {
-        "name": "Suite # 1",
-        "desc": "",
-        "lat": 43.5166433,
-        "lng": -79.6920438
-      },
-      {
-        "name": "Suite # 2",
-        "desc": "",
-        "lat": 43.51668,
-        "lng": -79.6921028
-      },
-      {
-        "name": "Suite # 3",
-        "desc": "",
-        "lat": 43.5168411,
-        "lng": -79.6919231
-      },
-      {
-        "name": "Suite # 4",
-        "desc": "",
-        "lat": 43.5169954,
-        "lng": -79.6917562
       }
     ],
     "tenants": [],
@@ -8935,30 +6763,6 @@
         "desc": "Building: 3375 Laird Road\r\nSystem: Roof Top Units\r\nDescription: RTU-4B\r\nSuite: SUITE 04\r\nModel: DBG1027VH00001SAA\r\nSerial: 2209355068\r\nMake: DAIKIN\r\nDate Installed: Dec 13, 2023\r\nHeating Input: 210,000 BTU\r\nOutput Capacity: 168,000 BTU\r\nTenant Installed RTU\r\n(0 Ton)",
         "lat": 43.516534,
         "lng": -79.6927284
-      },
-      {
-        "name": "Suite # 1",
-        "desc": "",
-        "lat": 43.5164643,
-        "lng": -79.6931793
-      },
-      {
-        "name": "Suite # 2",
-        "desc": "",
-        "lat": 43.516168,
-        "lng": -79.6926466
-      },
-      {
-        "name": "Suite # 3",
-        "desc": "",
-        "lat": 43.5162549,
-        "lng": -79.6925546
-      },
-      {
-        "name": "Suite # 4",
-        "desc": "",
-        "lat": 43.5163364,
-        "lng": -79.6924654
       }
     ],
     "tenants": [],
@@ -9039,54 +6843,6 @@
         "desc": "Building: 3425 Laird Road\r\nSystem: Roof Top Units\r\nDescription: RTU 08 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 08\r\nModel: LDT048H5EX1J✓\r\nSerial: 5625K03031✓\r\nMake: LENNOX\r\nDate Installed: Nov 11, 2025\r\nHeating Capacity 150,000 BTU's\r\nCooling Capacity: 48,000 BTU (4 Ton)",
         "lat": 43.5159146,
         "lng": -79.6930345
-      },
-      {
-        "name": "Suite # 1",
-        "desc": "",
-        "lat": 43.5157123,
-        "lng": -79.6945658
-      },
-      {
-        "name": "Suite # 2",
-        "desc": "",
-        "lat": 43.5155548,
-        "lng": -79.6941394
-      },
-      {
-        "name": "Suite # 3",
-        "desc": "",
-        "lat": 43.5155271,
-        "lng": -79.6939469
-      },
-      {
-        "name": "Suite # 4",
-        "desc": "",
-        "lat": 43.515554,
-        "lng": -79.6936939
-      },
-      {
-        "name": "Suite # 5",
-        "desc": "",
-        "lat": 43.5156174,
-        "lng": -79.6934965
-      },
-      {
-        "name": "Suite # 6",
-        "desc": "",
-        "lat": 43.5156787,
-        "lng": -79.693304
-      },
-      {
-        "name": "Suite # 7",
-        "desc": "",
-        "lat": 43.515869,
-        "lng": -79.6930399
-      },
-      {
-        "name": "Suite # 8",
-        "desc": "",
-        "lat": 43.515846,
-        "lng": -79.6929979
       }
     ],
     "tenants": [],
@@ -9251,96 +7007,6 @@
         "desc": "Building: 3495 Laird Road\r\nSystem: Roof Top Units\r\nDescription: RT23B DX Cooling Gas Fired Htg\r\nSuite: SUITE 23\r\nModel: 48TCEA06A2A1A0A0A0\r\nSerial: 3309G20289\r\nMake: CARRIER\r\nDate Installed: Oct 28, 2009\r\nHeating Capacity 115,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)",
         "lat": 43.5157993,
         "lng": -79.6949037
-      },
-      {
-        "name": "Suite # 1,2,3,4",
-        "desc": "",
-        "lat": 43.5164602,
-        "lng": -79.6966891
-      },
-      {
-        "name": "Suite # 5",
-        "desc": "",
-        "lat": 43.5163534,
-        "lng": -79.6964293
-      },
-      {
-        "name": "Suite # 6",
-        "desc": "",
-        "lat": 43.5163188,
-        "lng": -79.6963582
-      },
-      {
-        "name": "Suite # 7 & 8",
-        "desc": "",
-        "lat": 43.5165301,
-        "lng": -79.6960692
-      },
-      {
-        "name": "Suite # 9",
-        "desc": "",
-        "lat": 43.5162077,
-        "lng": -79.6961474
-      },
-      {
-        "name": "Suite # 10",
-        "desc": "",
-        "lat": 43.5161515,
-        "lng": -79.6959625
-      },
-      {
-        "name": "Suite # 11",
-        "desc": "",
-        "lat": 43.5161509,
-        "lng": -79.695963
-      },
-      {
-        "name": "Suite # 12",
-        "desc": "",
-        "lat": 43.5161184,
-        "lng": -79.6958928
-      },
-      {
-        "name": "Suite # 13,14,15",
-        "desc": "",
-        "lat": 43.5160423,
-        "lng": -79.695733
-      },
-      {
-        "name": "Suite # 16, 17",
-        "desc": "",
-        "lat": 43.5159562,
-        "lng": -79.6955834
-      },
-      {
-        "name": "Suite # 18",
-        "desc": "",
-        "lat": 43.5158434,
-        "lng": -79.6953495
-      },
-      {
-        "name": "Suite # 19",
-        "desc": "",
-        "lat": 43.5158434,
-        "lng": -79.6953468
-      },
-      {
-        "name": "Suite # 20",
-        "desc": "",
-        "lat": 43.515761,
-        "lng": -79.6952022
-      },
-      {
-        "name": "Suite # 21",
-        "desc": "",
-        "lat": 43.515761,
-        "lng": -79.6952022
-      },
-      {
-        "name": "Suite # 22, 23",
-        "desc": "",
-        "lat": 43.5156787,
-        "lng": -79.6949582
       }
     ],
     "tenants": [],
@@ -9433,36 +7099,6 @@
         "desc": "Building: 4085 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RT14 DX Cooling Gas Fired Htg\r\nSuite: SUITE 14\r\nModel: ZF036N08N5AAA2\r\nSerial: N1M4272733\r\nMake: YORK\r\nDate Installed: Oct 29, 2014\r\nHeating Capacity 80,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)",
         "lat": 43.5282105,
         "lng": -79.7187545
-      },
-      {
-        "name": "Suite # 1,2, 3, 4",
-        "desc": "",
-        "lat": 43.5276481,
-        "lng": -79.7177719
-      },
-      {
-        "name": "Suite # 5 & 6",
-        "desc": "",
-        "lat": 43.5279908,
-        "lng": -79.7177109
-      },
-      {
-        "name": "Suite # 7 & 8",
-        "desc": "",
-        "lat": 43.5280996,
-        "lng": -79.7178981
-      },
-      {
-        "name": "Suite # 9 & 10",
-        "desc": "",
-        "lat": 43.5282093,
-        "lng": -79.7180855
-      },
-      {
-        "name": "Suite # 11,12,13,14",
-        "desc": "",
-        "lat": 43.5282109,
-        "lng": -79.7180882
       }
     ],
     "tenants": [],
@@ -9633,96 +7269,6 @@
         "desc": "Building: 4120 Ridgeway Drive\r\nSystem: Roof Top Units\r\nDescription: RT39B DX Cooling Gas Fired Htg\r\nSuite: SUITE 39\r\nModel: KGA060S4BH2J\r\nSerial: 5611D 02039\r\nMake: LENNOX\r\nDate Installed: Oct 28, 2011\r\nHeating capacity 150,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)",
         "lat": 43.5303375,
         "lng": -79.7173328
-      },
-      {
-        "name": "Suite # 23",
-        "desc": "",
-        "lat": 43.5296215,
-        "lng": -79.7168167
-      },
-      {
-        "name": "Suite # 24",
-        "desc": "",
-        "lat": 43.5295824,
-        "lng": -79.7167879
-      },
-      {
-        "name": "Suite # 25",
-        "desc": "",
-        "lat": 43.5294945,
-        "lng": -79.7168638
-      },
-      {
-        "name": "Suite # 26",
-        "desc": "",
-        "lat": 43.52924,
-        "lng": -79.717377
-      },
-      {
-        "name": "Suite # 27",
-        "desc": "",
-        "lat": 43.5294526,
-        "lng": -79.717105
-      },
-      {
-        "name": "Suite # 28 & 29",
-        "desc": "",
-        "lat": 43.5293215,
-        "lng": -79.7174337
-      },
-      {
-        "name": "Suite # 30,31,32,33",
-        "desc": "",
-        "lat": 43.5296305,
-        "lng": -79.7171719
-      },
-      {
-        "name": "Suite # 34 & 35",
-        "desc": "",
-        "lat": 43.5299303,
-        "lng": -79.7174467
-      },
-      {
-        "name": "Suite # 36",
-        "desc": "",
-        "lat": 43.5301236,
-        "lng": -79.7174923
-      },
-      {
-        "name": "Suite # 37",
-        "desc": "",
-        "lat": 43.5302592,
-        "lng": -79.7175938
-      },
-      {
-        "name": "Suite # 38",
-        "desc": "",
-        "lat": 43.530304,
-        "lng": -79.7174814
-      },
-      {
-        "name": "Suite # 39",
-        "desc": "",
-        "lat": 43.5301407,
-        "lng": -79.7170719
-      },
-      {
-        "name": "Suite # 40",
-        "desc": "",
-        "lat": 43.5301448,
-        "lng": -79.7170733
-      },
-      {
-        "name": "Suite # 41",
-        "desc": "",
-        "lat": 43.5301881,
-        "lng": -79.7169598
-      },
-      {
-        "name": "Suite # 42 & 43",
-        "desc": "",
-        "lat": 43.530535,
-        "lng": -79.7170955
       }
     ],
     "tenants": [],
@@ -9899,114 +7445,6 @@
         "desc": "Building: 4141 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RT22 DX Cooling Gas Fired Htg\r\nSuite: SUITE 22\r\nModel: ZF048N10N5AAA1A\r\nSerial: NIG0165304\r\nMake: YORK\r\nDate Installed: Oct 29, 2010\r\nHeating Capacity 125,000 BTU's\r\nCooling Capacity: 48,000 BTU (4 Ton)",
         "lat": 43.529253,
         "lng": -79.7190372
-      },
-      {
-        "name": "Suite #12",
-        "desc": "",
-        "lat": 43.5291787,
-        "lng": -79.7182598
-      },
-      {
-        "name": "Suite # 13",
-        "desc": "",
-        "lat": 43.5293862,
-        "lng": -79.7179955
-      },
-      {
-        "name": "Suite # 1,2,3",
-        "desc": "",
-        "lat": 43.52871,
-        "lng": -79.7190957
-      },
-      {
-        "name": "Suite # 4",
-        "desc": "",
-        "lat": 43.5285909,
-        "lng": -79.7185657
-      },
-      {
-        "name": "Suite # 5 & 6",
-        "desc": "",
-        "lat": 43.5288903,
-        "lng": -79.7186626
-      },
-      {
-        "name": "Suite # 7",
-        "desc": "",
-        "lat": 43.5287295,
-        "lng": -79.7182316
-      },
-      {
-        "name": "Suite # 9",
-        "desc": "",
-        "lat": 43.5288149,
-        "lng": -79.718013
-      },
-      {
-        "name": "Suite # 10",
-        "desc": "",
-        "lat": 43.5288574,
-        "lng": -79.7179164
-      },
-      {
-        "name": "Suite #11",
-        "desc": "",
-        "lat": 43.5292304,
-        "lng": -79.7178742
-      },
-      {
-        "name": "Suite # 20",
-        "desc": "",
-        "lat": 43.5295756,
-        "lng": -79.7189096
-      },
-      {
-        "name": "Suite # 18",
-        "desc": "",
-        "lat": 43.5296623,
-        "lng": -79.7186954
-      },
-      {
-        "name": "Suite # 16",
-        "desc": "",
-        "lat": 43.529519,
-        "lng": -79.7184438
-      },
-      {
-        "name": "Suite # 21",
-        "desc": "",
-        "lat": 43.5294468,
-        "lng": -79.7189555
-      },
-      {
-        "name": "Suite # 22",
-        "desc": "",
-        "lat": 43.5293565,
-        "lng": -79.7190244
-      },
-      {
-        "name": "Suite # 19",
-        "desc": "",
-        "lat": 43.5293887,
-        "lng": -79.7187593
-      },
-      {
-        "name": "Suite # 17",
-        "desc": "",
-        "lat": 43.5296901,
-        "lng": -79.7187117
-      },
-      {
-        "name": "Suite # 15",
-        "desc": "",
-        "lat": 43.5294306,
-        "lng": -79.7184039
-      },
-      {
-        "name": "Suite # 14",
-        "desc": "",
-        "lat": 43.5293422,
-        "lng": -79.718363
       }
     ],
     "tenants": [],
@@ -10147,108 +7585,6 @@
         "desc": "Building: 4161 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RTU 10 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 10\r\nModel: DHC036HWRMB2FD0E\r\nSerial: 244913499L\r\nMake: TRANE\r\nDate Installed: Nov 29, 2024\r\nHeating Capacity: 80,000 BTU\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\n$39,084 New Installation by LPI in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.530565,
         "lng": -79.7187178
-      },
-      {
-        "name": "Suite # 1",
-        "desc": "",
-        "lat": 43.5298671,
-        "lng": -79.7188957
-      },
-      {
-        "name": "Suite # 2",
-        "desc": "",
-        "lat": 43.5300048,
-        "lng": -79.7188516
-      },
-      {
-        "name": "Suite # 3",
-        "desc": "",
-        "lat": 43.5300236,
-        "lng": -79.7185355
-      },
-      {
-        "name": "Suite # 4",
-        "desc": "",
-        "lat": 43.5301019,
-        "lng": -79.7185122
-      },
-      {
-        "name": "Suite # 5",
-        "desc": "",
-        "lat": 43.5301782,
-        "lng": -79.7184892
-      },
-      {
-        "name": "Suite # 6",
-        "desc": "",
-        "lat": 43.530271,
-        "lng": -79.7187713
-      },
-      {
-        "name": "Suite # 7 & 8",
-        "desc": "",
-        "lat": 43.5302944,
-        "lng": -79.7184978
-      },
-      {
-        "name": "Suite # 9",
-        "desc": "",
-        "lat": 43.5304703,
-        "lng": -79.7187859
-      },
-      {
-        "name": "Suite # 10",
-        "desc": "",
-        "lat": 43.5305095,
-        "lng": -79.7185587
-      },
-      {
-        "name": "Suite # 11,12,13",
-        "desc": "",
-        "lat": 43.530584,
-        "lng": -79.7185709
-      },
-      {
-        "name": "Suite # 14",
-        "desc": "",
-        "lat": 43.5307804,
-        "lng": -79.7184443
-      },
-      {
-        "name": "Suite # 15",
-        "desc": "",
-        "lat": 43.5307429,
-        "lng": -79.7184084
-      },
-      {
-        "name": "Suite # 20",
-        "desc": "",
-        "lat": 43.5303557,
-        "lng": -79.7182029
-      },
-      {
-        "name": "Suite # 18 & 19",
-        "desc": "",
-        "lat": 43.5305489,
-        "lng": -79.718013
-      },
-      {
-        "name": "Suite # 17",
-        "desc": "",
-        "lat": 43.5306666,
-        "lng": -79.7180996
-      },
-      {
-        "name": "Suite # 16",
-        "desc": "",
-        "lat": 43.5307233,
-        "lng": -79.7181534
-      },
-      {
-        "name": "Suite # 21 & 22",
-        "desc": "",
-        "lat": 43.5302383,
-        "lng": -79.7181217
       }
     ],
     "tenants": [],
@@ -10421,162 +7757,10 @@
         "lng": -79.7176077
       },
       {
-        "name": "Suite # 23, 24, 25",
-        "desc": "",
-        "lat": 43.5306472,
-        "lng": -79.7173406
-      },
-      {
-        "name": "Suite # 26",
-        "desc": "",
-        "lat": 43.5308132,
-        "lng": -79.7175066
-      },
-      {
-        "name": "Suite # 27",
-        "desc": "",
-        "lat": 43.53087,
-        "lng": -79.7175633
-      },
-      {
-        "name": "Suite # 28",
-        "desc": "",
-        "lat": 43.5308091,
-        "lng": -79.7178441
-      },
-      {
-        "name": "Suite # 51",
-        "desc": "",
-        "lat": 43.5308189,
-        "lng": -79.7171773
-      },
-      {
-        "name": "Suite # 50",
-        "desc": "",
-        "lat": 43.5308196,
-        "lng": -79.717179
-      },
-      {
-        "name": "Suite # 49",
-        "desc": "",
-        "lat": 43.5308732,
-        "lng": -79.7172313
-      },
-      {
-        "name": "Suite # 48",
-        "desc": "",
-        "lat": 43.5310694,
-        "lng": -79.7170145
-      },
-      {
-        "name": "Suite # 46, 47",
-        "desc": "",
-        "lat": 43.5309826,
-        "lng": -79.7173394
-      },
-      {
-        "name": "Suite # 43",
-        "desc": "",
-        "lat": 43.5314194,
-        "lng": -79.7172977
-      },
-      {
-        "name": "Suite # 44",
-        "desc": "",
-        "lat": 43.5312088,
-        "lng": -79.7175398
-      },
-      {
-        "name": "Suite # 41 & 42",
-        "desc": "",
-        "lat": 43.5314207,
-        "lng": -79.717298
-      },
-      {
-        "name": "Suite # 40",
-        "desc": "",
-        "lat": 43.5315182,
-        "lng": -79.7174261
-      },
-      {
-        "name": "Suite # 39",
-        "desc": "",
-        "lat": 43.5314272,
-        "lng": -79.7175928
-      },
-      {
-        "name": "Suite # 38",
-        "desc": "",
-        "lat": 43.5315287,
-        "lng": -79.7177637
-      },
-      {
-        "name": "Suite # 37",
-        "desc": "",
-        "lat": 43.5314502,
-        "lng": -79.7179124
-      },
-      {
-        "name": "Suite # 35",
-        "desc": "",
-        "lat": 43.5313718,
-        "lng": -79.7180695
-      },
-      {
-        "name": "Suite # 33",
-        "desc": "",
-        "lat": 43.5312127,
-        "lng": -79.7180164
-      },
-      {
-        "name": "Suite # 32",
-        "desc": "",
-        "lat": 43.5310127,
-        "lng": -79.718074
-      },
-      {
-        "name": "Suite #29",
-        "desc": "",
-        "lat": 43.530912,
-        "lng": -79.7179454
-      },
-      {
-        "name": "Suite # 31",
-        "desc": "",
-        "lat": 43.5309568,
-        "lng": -79.718021
-      },
-      {
-        "name": "Suite # 30",
-        "desc": "",
-        "lat": 43.5309987,
-        "lng": -79.7177842
-      },
-      {
-        "name": "Suite # 45",
-        "desc": "",
-        "lat": 43.5312548,
-        "lng": -79.717165
-      },
-      {
-        "name": "Suite # 34",
-        "desc": "",
-        "lat": 43.5312125,
-        "lng": -79.7180163
-      },
-      {
         "name": "RTU-39 dual-fuel hybrid heat pump",
         "desc": "Building: 4181 Sladeview Cres\r\nSystem: Roof Top Units\r\nDescription: RT39 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 39\r\nModel: DHC036HWRHB2FD0E\r\nSerial: 244913487L\r\nMake: TRANE\r\nDate Installed: Nov 29, 2024\r\nHeating Capacity: 100,000 BTU\r\nCooling Capacity: 36,000 BTU/hr (3 ton)\r\n$46,244 new installation by LPI in 2024\r\n(dual-fuel hybrid heat pump)",
         "lat": 43.5315168,
         "lng": -79.717699
-      }
-    ],
-    "tenants": [
-      {
-        "name": "Suite 36",
-        "desc": "MS CHUGHTAI PROFESSIONAL CORPORATION",
-        "lat": 43.5314164,
-        "lng": -79.7179832
       }
     ],
     "sold": false

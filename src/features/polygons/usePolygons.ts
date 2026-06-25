@@ -12,7 +12,7 @@ import { MAP_DETAIL_ZOOM } from '@/lib/constants'
 import { afterMapViewChange, panToPreserveRotation } from '@/lib/mapRotation'
 import { consumeMapClickClearSuppression, registerMarqueeTarget, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
 import { tryConsumeMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
-import { closeAllMapPopups, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
+import { closeAllMapPopups, ensureInfoWindowVisible, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
 import { showToastSuccess } from '@/lib/toast'
 import { useLayerStore } from '@/stores/layerStore'
 import { useSelectionStore } from '@/stores/selectionStore'
@@ -251,6 +251,7 @@ export function usePolygons({
       })
       infoPolyRef.current = poly
       infoWindowRef.current.open({ map, shouldFocus: false })
+      ensureInfoWindowVisible(map, infoWindowRef.current)
       afterMapViewChange(map)
 
       google.maps.event.addListenerOnce(infoWindowRef.current, 'domready', () => {

@@ -208,8 +208,8 @@ select option{background:#1f2436}
 .gm-style .gm-style-iw-d{overflow:hidden!important;padding:0!important}
 .gm-style button.gm-ui-hover-effect{display:none!important}
 .gm-style .gm-style-iw-t::after{display:none!important}
-.iw{font-family:'Inter',sans-serif;min-width:260px;max-width:340px;font-size:13px;display:flex;flex-direction:column;max-height:460px}
-.iw-head{position:relative;padding:12px 14px 10px;padding-right:36px;border-bottom:1px solid #2a3040}
+.iw{font-family:'Inter',sans-serif;position:relative;min-width:260px;max-width:340px;font-size:13px;display:flex;flex-direction:column;max-height:460px}
+.iw-head{position:relative;flex-shrink:0;padding:12px 14px 10px;padding-right:36px;border-bottom:1px solid #2a3040}
 .iw-name{font-weight:500;font-size:11px;font-family:Inter,sans-serif;color:#f0f4ff;margin-bottom:5px}
 .iw-badges{display:flex;flex-wrap:wrap;gap:4px}
 .iw-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:3px;font-family:'DM Mono',monospace}

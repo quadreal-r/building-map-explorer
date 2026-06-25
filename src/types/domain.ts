@@ -1,5 +1,7 @@
 /** Application domain types (normalized from DB rows or legacy JSON). */
 
+import { isLegacySuiteMarkerName } from '@/lib/legacySuiteMarkers'
+
 export type LayerKey =
   | 'rtu'
   | 'polygons'
@@ -162,8 +164,21 @@ export interface LegacyPolygonJson {
   paths: LatLng[]
 }
 
-export function normalizeLegacyBuilding(raw: LegacyBuildingJson): Building {
+export function normalizeBuilding(building: Building): Building {
+  if (!building.rtus?.length) return building
+  const rtus = building.rtus.filter((r) => !isLegacySuiteMarkerName(r.name))
+  return { ...building, rtus }
+}
+
+export function normalizePortfolioData(portfolio: PortfolioData): PortfolioData {
   return {
+    ...portfolio,
+    buildings: portfolio.buildings.map(normalizeBuilding),
+  }
+}
+
+export function normalizeLegacyBuilding(raw: LegacyBuildingJson): Building {
+  return normalizeBuilding({
     park: raw.park,
     address: raw.address,
     bu: raw.bu,
@@ -174,13 +189,15 @@ export function normalizeLegacyBuilding(raw: LegacyBuildingJson): Building {
     manager: raw.manager,
     notes: raw.notes ?? null,
     sold: raw.sold,
-    rtus: (raw.rtus ?? []).map((r) => ({
-      name: r.name,
-      description: r.desc,
-      lat: r.lat,
-      lng: r.lng,
-    })),
-  }
+    rtus: (raw.rtus ?? [])
+      .filter((r) => !isLegacySuiteMarkerName(r.name))
+      .map((r) => ({
+        name: r.name,
+        description: r.desc,
+        lat: r.lat,
+        lng: r.lng,
+      })),
+  })
 }
 
 export function normalizeLegacyUtility(raw: LegacyUtilityJson): Utility {

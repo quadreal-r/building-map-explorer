@@ -1,4 +1,5 @@
 import { MAP_DETAIL_ZOOM } from '@/lib/constants'
+import { isLegacySuiteMarkerName } from '@/lib/legacySuiteMarkers'
 import type { Building, Polygon } from '@/types/domain'
 
 export type SearchHitKind = 'rtu' | 'polygon' | 'building'
@@ -50,6 +51,7 @@ export function collectSearchHits(
   if (!anyBuildingMeta) {
     for (const building of buildings) {
       for (const rtu of building.rtus ?? []) {
+        if (isLegacySuiteMarkerName(rtu.name)) continue
         if (
           rtu.name.toLowerCase().includes(q) ||
           (rtu.description ?? '').toLowerCase().includes(q)

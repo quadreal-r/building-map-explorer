@@ -55,6 +55,30 @@ const rtuWithBuilding: Rtu = {
 }
 
 describe('mapInfoWindow', () => {
+  it('includes status badges in building popup header', () => {
+    const oldRtuBuilding: Building = {
+      ...building,
+      rtus: [
+        {
+          name: 'RTU-01',
+          description: 'Date Installed: January 1, 2000\nModel: ABC\nMake: TRANE',
+          lat: 43.651,
+          lng: -79.621,
+        },
+      ],
+    }
+    const vacantPolygons: Polygon[] = [
+      {
+        name: 'Unit 9',
+        description: 'Vacant',
+        color: '#60a5fa',
+        paths: tenantPolygons[0]!.paths,
+      },
+    ]
+    const html = buildBuildingInfoHtml(oldRtuBuilding, vacantPolygons)
+    expect(html).toContain('yr RTU</span>')
+    expect(html).toContain('VACANT</span>')
+  })
   it('includes Copy and Move in building popup', () => {
     const html = buildBuildingInfoHtml(building, tenantPolygons)
     expect(html).toContain('data-iw-action="copy-all"')

@@ -3,12 +3,14 @@
   display: inline-flex;
 }
 
+.wrapBlock {
+  width: 100%;
+  display: block;
+}
+
 .tip {
   visibility: visible;
   opacity: 1;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   background: #0d1117;
   border: 1px solid var(--border, #2e6ec0);
   border-radius: 7px;
@@ -19,17 +21,49 @@
   color: var(--text-secondary, #c8dff8);
   line-height: 1.6;
   white-space: normal;
-  z-index: 9999;
+  z-index: 10001;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
 
-.tip[data-position='top'] {
-  bottom: calc(100% + 7px);
+.tipFixed {
+  position: fixed;
 }
 
-.tip[data-position='bottom'] {
-  top: calc(100% + 7px);
+.tipFixed[data-position='top'] {
+  transform: translate(-50%, -100%);
+}
+
+.tipFixed[data-position='bottom'] {
+  transform: translate(-50%, 0);
+}
+
+.tipFixed[data-position='left'] {
+  transform: translate(-100%, -50%);
+}
+
+.wide {
+  max-width: 300px;
+}
+
+.tip[data-position='left']::before {
+  top: 50%;
+  left: 100%;
+  right: auto;
+  bottom: auto;
+  transform: translateY(-50%);
+  border-left-color: var(--border, #2e6ec0);
+  border-top-color: transparent;
+}
+
+.tip[data-position='left']::after {
+  top: 50%;
+  left: calc(100% - 1px);
+  right: auto;
+  bottom: auto;
+  transform: translateY(-50%);
+  border-left-color: #0d1117;
+  border-top-color: transparent;
 }
 
 .tip::before {

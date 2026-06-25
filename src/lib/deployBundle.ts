@@ -14,6 +14,12 @@ const SCHEDULE_KEY = 'bme-rtu-schedule'
 const PRICING_KEY = 'bme-rtu-pricing'
 const PORTFOLIO_KEY = 'bme-portfolio'
 
+export interface DeployBundleExportResult {
+  bundle: DeployBundle
+  picturesOmitted: boolean
+  pictureCount: number
+}
+
 function readPortfolioFromStorage(fallback: PortfolioData): PortfolioData {
   const raw = localStorage.getItem(PORTFOLIO_KEY)
   if (!raw) return fallback
@@ -42,14 +48,18 @@ export async function exportIndexedDbPicturesForDeploy(): Promise<DeployPictureE
   const rows = await exportIndexedDbPictureRows()
   const out: DeployPictureEntry[] = []
   for (const row of rows) {
-    const blob = row.fullBlob ?? row.thumbBlob
-    out.push({
-      fileName: row.fileName,
-      rtuKey: row.rtuKey,
-      index: row.index,
-      mimeType: row.mimeType,
-      base64: await blobToBase64(blob),
-    })
+    try {
+      const blob = row.fullBlob ?? row.thumbBlob
+      out.push({
+        fileName: row.fileName,
+        rtuKey: row.rtuKey,
+        index: row.index,
+        mimeType: row.mimeType,
+        base64: await blobToBase64(blob),
+      })
+    } catch {
+      /* skip unreadable picture rows */
+    }
   }
   return out
 }
@@ -101,14 +111,108 @@ export async function collectDeployBundle(portfolio: PortfolioData): Promise<Dep
   }
 }
 
-export function downloadDeployBundle(bundle: DeployBundle): void {
-  const json = JSON.stringify(bundle)
-  const blob = new Blob([json], { type: 'application/json' })
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
+export function bundleFileName(bundle: DeployBundle): string {
   const d = new Date(bundle.exportedAt)
   const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-  a.download = `deploy-bundle-${stamp}.json`
-  a.click()
-  URL.revokeObjectURL(a.href)
+  return `deploy-bundle-${stamp}.json`
+}
+
+/** Serialize bundle; omit pictures if JSON would exceed engine limits. */
+export function serializeDeployBundle(bundle: DeployBundle): {
+  json: string
+  picturesOmitted: boolean
+} {
+  try {
+    return { json: JSON.stringify(bundle), picturesOmitted: false }
+  } catch {
+    if (bundle.pictures.length === 0) {
+      throw new Error('Deploy bundle is too large to serialize.')
+    }
+    const lean: DeployBundle = { ...bundle, pictures: [] }
+    return { json: JSON.stringify(lean), picturesOmitted: true }
+  }
+}
+
+function downloadBlobAsFile(blob: Blob, fileName: string): void {
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = fileName
+  anchor.rel = 'noopener'
+  anchor.style.display = 'none'
+  document.body.appendChild(anchor)
+  anchor.click()
+  window.setTimeout(() => {
+    anchor.remove()
+    URL.revokeObjectURL(url)
+  }, 2000)
+}
+
+async function requestSaveFileHandle(fileName: string): Promise<FileSystemFileHandle | null> {
+  const picker = (window as Window & {
+    showSaveFilePicker?: (options: {
+      suggestedName?: string
+      types?: Array<{ description?: string; accept: Record<string, string[]> }>
+    }) => Promise<FileSystemFileHandle>
+  }).showSaveFilePicker
+  if (!picker) return null
+  try {
+    return await picker({
+      suggestedName: fileName,
+      types: [
+        {
+          description: 'Deploy bundle',
+          accept: { 'application/json': ['.json'] },
+        },
+      ],
+    })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('Export cancelled')
+    }
+    return null
+  }
+}
+
+/**
+ * Export deploy bundle to disk.
+ * Opens the save dialog immediately (while the click gesture is active), then collects data.
+ */
+export async function exportDeployBundleToDisk(
+  portfolio: PortfolioData,
+): Promise<DeployBundleExportResult> {
+  const placeholderName = bundleFileName({
+    version: DEPLOY_BUNDLE_VERSION,
+    exportedAt: new Date().toISOString(),
+    portfolio: readPortfolioFromStorage(portfolio),
+    schedule: {},
+    pricing: { rows: [] },
+    pictures: [],
+  })
+  const fileHandle = await requestSaveFileHandle(placeholderName)
+
+  const bundle = await collectDeployBundle(portfolio)
+  const fileName = bundleFileName(bundle)
+  const { json, picturesOmitted } = serializeDeployBundle(bundle)
+  const blob = new Blob([json], { type: 'application/json' })
+
+  if (fileHandle) {
+    const writable = await fileHandle.createWritable()
+    await writable.write(blob)
+    await writable.close()
+  } else {
+    downloadBlobAsFile(blob, fileName)
+  }
+
+  return {
+    bundle,
+    picturesOmitted,
+    pictureCount: bundle.pictures.length,
+  }
+}
+
+/** @deprecated Use exportDeployBundleToDisk — kept for tests. */
+export function downloadDeployBundle(bundle: DeployBundle): void {
+  const { json } = serializeDeployBundle(bundle)
+  downloadBlobAsFile(new Blob([json], { type: 'application/json' }), bundleFileName(bundle))
 }

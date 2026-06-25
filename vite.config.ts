@@ -47,7 +47,7 @@ export default defineConfig(({ command }) => ({
   server: {
     open: '/',
     watch: {
-      // OneDrive can touch .env / config files and trigger restart storms.
+      // OneDrive / sync folders can touch .env and config files and trigger restart storms.
       ignored: [
         '**/vite.config.ts',
         '**/.env*',
