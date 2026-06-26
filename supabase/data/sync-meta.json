@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "exportedAt": "2026-06-26T02:12:54.412Z",
-  "syncedAt": "2026-06-26T02:13:12.570Z",
+  "exportedAt": "2026-06-26T02:27:56.080Z",
+  "syncedAt": "2026-06-26T02:28:17.355Z",
   "source": "settings-sync",
   "summary": {
     "buildingCount": 102,
-    "rtuCount": 1072,
+    "rtuCount": 1073,
     "utilityCount": 257,
     "polygonCount": 447,
-    "scheduleYearCount": 0,
-    "scheduleNoteCount": 0,
+    "scheduleYearCount": 463,
+    "scheduleNoteCount": 348,
     "pricingRowCount": 25,
-    "manifestPictureCount": 1246,
-    "picturesUploaded": 0
+    "manifestPictureCount": 1247,
+    "picturesUploaded": 7
   }
 }
