@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "exportedAt": "2026-06-26T02:48:50.704Z",
+  "syncedAt": "2026-06-26T02:49:10.250Z",
+  "source": "settings-sync",
+  "summary": {
+    "buildingCount": 102,
+    "rtuCount": 1072,
+    "utilityCount": 257,
+    "polygonCount": 447,
+    "scheduleYearCount": 463,
+    "scheduleNoteCount": 348,
+    "pricingRowCount": 25,
+    "manifestPictureCount": 1247,
+    "picturesUploaded": 7
+  }
+}
