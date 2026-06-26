@@ -1,6 +1,15 @@
 {
   "points": [
     {
+      "id": "2026-06-26T000046Z",
+      "commit": "505d5ba91d43d7538c394221bd472559567cbfed",
+      "tag": "restore/2026-06-26T000046Z-committed-feature-rtu-viewer-sync-advanced-marke",
+      "description": "Committed feature/rtu-viewer-sync-advanced-markers",
+      "createdAt": "2026-06-26T00:00:46.333Z",
+      "branch": "feature/rtu-viewer-sync-advanced-markers",
+      "filesChanged": 0
+    },
+    {
       "id": "2026-06-25T234912Z",
       "commit": "21b0b13c86b5b66047500cd34939bd0ef2edf3d5",
       "tag": "restore/2026-06-25T234912Z-post-audit-restore-point-script-gitignore-test-e",
