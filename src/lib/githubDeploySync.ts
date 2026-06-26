@@ -1,6 +1,7 @@
 /** One-click Settings sync: staging branch → GitHub Actions → R2 + commit + deploy. */
 
 import { collectDeployBundleLean } from '@/lib/deployBundle'
+import { repairStoredPortfolioRtuNames } from '@/hooks/usePortfolioData'
 import {
   encodeDeployPictureEntry,
   estimateDeployPictureJsonBytes,
@@ -338,7 +339,7 @@ export async function waitForSyncWorkflowRun(
 
 /** Upload bundle to staging branch, run sync-deploy workflow, wait for completion. */
 export async function syncDeployToGitHub(
-  portfolio: PortfolioData,
+  portfolioIn: PortfolioData,
   options: GitHubSyncOptions,
 ): Promise<GitHubSyncResult> {
   const token = options.token?.trim()
@@ -347,6 +348,10 @@ export async function syncDeployToGitHub(
   }
   const repo = resolveGitHubRepo(options.repo)
   const { onProgress } = options
+
+  reportProgress(onProgress, 'Checking RTU names…', 4)
+  const repaired = await repairStoredPortfolioRtuNames(portfolioIn, { notify: false })
+  const portfolio = repaired.portfolio
 
   reportProgress(onProgress, 'Collecting local data…', 8)
   const leanCore = collectDeployBundleLean(portfolio)

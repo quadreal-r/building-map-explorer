@@ -30,4 +30,6 @@ export interface DeployBundle {
   schedule: DeploySchedulePayload
   pricing: DeployPricingPayload
   pictures: DeployPictureEntry[]
+  /** `rtuKey|fileName` entries hidden from the map (manifest/R2 pictures). */
+  hiddenRtuPictures?: string[]
 }

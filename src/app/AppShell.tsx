@@ -11,6 +11,8 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { RemoteSyncUpdateModal } from '@/features/sync/RemoteSyncUpdateModal'
 import { useRemoteSyncUpdateCheck } from '@/hooks/useRemoteSyncUpdateCheck'
 import { usePortfolioData, persistPortfolio, type PortfolioData } from '@/hooks/usePortfolioData'
+import { loadBundledHiddenRtuPictures } from '@/lib/hiddenRtuPictures'
+import { notifyRtuPicturesChanged } from '@/lib/rtuPictures'
 import { showToastSuccess } from '@/lib/toast'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { useRtuPricingStore } from '@/stores/rtuPricingStore'
@@ -45,6 +47,9 @@ export function AppShell() {
   const markSaved = usePortfolioStore((s) => s.markSaved)
 
   useEffect(() => {
+    void loadBundledHiddenRtuPictures().then((changed) => {
+      if (changed) notifyRtuPicturesChanged()
+    })
     void loadSettings()
     void loadRtuPricing()
     void loadRtuSchedule()

@@ -108,6 +108,42 @@ function writeJson(path, data) {
   writeFileSync(path, `${JSON.stringify(data, null, 2)}\n`, 'utf8')
 }
 
+function parsePictureHideKey(hideKey) {
+  const sep = hideKey.lastIndexOf('|')
+  if (sep <= 0) return null
+  const fileName = hideKey.slice(sep + 1)
+  const rtuKey = hideKey.slice(0, sep)
+  if (!rtuKey || !fileName) return null
+  return { rtuKey, fileName }
+}
+
+function applyHiddenPicturesToManifest(manifest, hiddenKeys) {
+  let removed = 0
+  for (const hideKey of hiddenKeys) {
+    const parsed = parsePictureHideKey(hideKey)
+    if (!parsed) continue
+    const files = manifest.entries[parsed.rtuKey]
+    if (!Array.isArray(files)) continue
+    const next = files.filter((name) => name !== parsed.fileName)
+    if (next.length === files.length) continue
+    removed += 1
+    if (next.length) manifest.entries[parsed.rtuKey] = next
+    else delete manifest.entries[parsed.rtuKey]
+  }
+  return removed
+}
+
+function readHiddenJson(path) {
+  if (!existsSync(path)) return []
+  try {
+    const parsed = JSON.parse(readFileSync(path, 'utf8'))
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter((item) => typeof item === 'string')
+  } catch {
+    return []
+  }
+}
+
 const bundlePath = resolveBundlePath()
 console.log(`Reading ${bundlePath}`)
 const bundle = JSON.parse(readFileSync(bundlePath, 'utf8'))
@@ -206,6 +242,19 @@ for (const pic of pictures) {
   files.sort((a, b) => (parsePictureIndex(a) ?? 0) - (parsePictureIndex(b) ?? 0))
   manifest.entries[key] = files
 }
+
+const hiddenPath = join(PICS_DIR, 'hidden.json')
+const bundleHidden = (bundle.hiddenRtuPictures ?? []).filter((item) => typeof item === 'string')
+const mergedHidden = [...new Set([...readHiddenJson(hiddenPath), ...bundleHidden])]
+writeJson(hiddenPath, mergedHidden)
+if (mergedHidden.length) {
+  const removed = applyHiddenPicturesToManifest(manifest, mergedHidden)
+  console.log(
+    `RTU pictures: ${mergedHidden.length} hidden in hidden.json` +
+      (removed ? ` (${removed} removed from manifest)` : ''),
+  )
+}
+
 writeJson(manifestPath, manifest)
 
 const syncMeta = buildSyncMetaFromBundle(bundle, {

@@ -3,6 +3,7 @@ import {
   buildingStreetNumber,
   estimateDeployPictureJsonBytes,
   parseRtuPictureIndex,
+  resolveManifestRtuKey,
   rtuPictureFileBase,
   rtuPictureFileName,
   rtuPictureKey,
@@ -38,5 +39,20 @@ describe('rtuPictures naming', () => {
 
   it('estimates deploy JSON size from blob bytes', () => {
     expect(estimateDeployPictureJsonBytes(3_000_000)).toBeGreaterThan(4_000_000)
+  })
+
+  it('resolves manifest keys when RTU name has a long description suffix', () => {
+    const manifest = {
+      entries: {
+        '2320 Bristol Circle|RTU-04 Hybrid': ['2320-RTU-04 Hybrid (1).jpg'],
+      },
+    }
+    expect(
+      resolveManifestRtuKey(
+        '2320 Bristol Circle',
+        'RTU-04 Hybrid/Dual Fuel Heat Pump',
+        manifest,
+      ),
+    ).toBe('2320 Bristol Circle|RTU-04 Hybrid')
   })
 })

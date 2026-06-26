@@ -341,7 +341,7 @@ export function buildRtuPicturesHtml(
       <div class="iw-pictures-frame">
         <button type="button" class="iw-pictures-link" data-iw-action="picture-open-viewer" title="Open full size in viewer">
           <img class="iw-pictures-img" src="${escapeHtml(current!.thumbUrl)}" alt="${escapeHtml(current!.fileName)}" onload="${RTU_PICTURE_IMG_ONLOAD}" onerror="${RTU_PICTURE_IMG_ONERROR}" />
-          <div class="iw-pictures-missing" style="display:none">Image not found on server. Use Add pictures to upload a replacement, or Delete to hide this entry.</div>
+          <div class="iw-pictures-missing" style="display:none">Image not found on server. Use Add pictures to upload a replacement, or Hide to remove this entry.</div>
         </button>
       </div>
       <button type="button" class="iw-pictures-nav" data-iw-action="picture-next" title="Next picture"${total <= 1 ? ' disabled' : ''}>›</button>
@@ -355,7 +355,9 @@ export function buildRtuPicturesHtml(
   const backBtn = `<button type="button" class="iw-back-btn" data-iw-action="pictures-back" title="Back to RTU details">← Details</button>`
   const deletePicBtn =
     total && current
-      ? `<button type="button" class="iw-del-btn" data-iw-action="picture-delete" data-iw-picture-file="${escapeHtml(current.fileName)}" data-iw-picture-static="${current.source === 'static' ? '1' : '0'}" title="${current.source === 'static' ? 'Hide manifest picture on this device' : 'Delete this picture'}">🗑 Delete</button>`
+      ? current.source === 'static'
+        ? `<button type="button" class="iw-del-btn" data-iw-action="picture-delete" data-iw-picture-file="${escapeHtml(current.fileName)}" data-iw-picture-static="1" title="Hide this picture on the map">🗑 Hide</button>`
+        : `<button type="button" class="iw-del-btn" data-iw-action="picture-delete" data-iw-picture-file="${escapeHtml(current.fileName)}" data-iw-picture-static="0" title="Delete this picture">🗑 Delete</button>`
       : ''
 
   return `<div class="iw iw-pictures" data-iw-building="${escapeHtml(buildingAddress)}" data-iw-rtu="${escapeHtml(name)}" data-iw-picture-index="${safeIndex}">

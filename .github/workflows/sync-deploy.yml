@@ -107,7 +107,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add supabase/data public/database/rtu-pictures/manifest.json
+          git add supabase/data public/database/rtu-pictures/manifest.json public/database/rtu-pictures/hidden.json
           if git diff --staged --quiet; then
             echo "No changes to commit."
             exit 0

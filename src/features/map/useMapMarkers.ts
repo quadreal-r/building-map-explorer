@@ -56,6 +56,7 @@ import {
   loadRtuPictureManifest,
   notifyRtuPicturesChanged,
   onRtuPicturesChanged,
+  resolveManifestRtuKey,
   revokeRtuPictureUrls,
   rtuPictureKey,
   type RtuPicture,
@@ -553,19 +554,14 @@ export function useMapMarkers({
           if (!buildingAddress || !fileName) return
 
           if (isStatic) {
-            if (
-              !window.confirm(
-                'This picture is listed in the deploy manifest (Cloudflare R2). The file may be missing from the server.\n\nHide it on this browser? To remove it permanently, delete the entry from manifest.json and redeploy.',
-              )
-            ) {
-              return
-            }
             hideRtuManifestPicture(
               rtuPictureKey(buildingAddress, ctx.entry.data.name),
               fileName,
             )
             notifyRtuPicturesChanged()
-            showToastSuccess('✓ Picture hidden on this device')
+            showToastSuccess(
+              '✓ Picture hidden — use Settings → Sync to Cloudflare & GitHub to hide for everyone.',
+            )
             await refreshRtuPicturesView()
             return
           }
@@ -607,7 +603,10 @@ export function useMapMarkers({
 
   const refreshRtuPictureBadges = useCallback(async () => {
     if (!map) return
-    const counts = await getRtuPictureCountMap()
+    const [counts, manifest] = await Promise.all([
+      getRtuPictureCountMap(),
+      loadRtuPictureManifest(),
+    ])
 
     detailMarkersRef.current = detailMarkersRef.current.map((dm) => {
       if (dm.type !== 'rtu' || !dm.building) {
@@ -615,7 +614,8 @@ export function useMapMarkers({
       }
 
       const key = rtuPictureKey(dm.building.address, dm.data.name)
-      const count = counts.get(key) ?? 0
+      const manifestKey = resolveManifestRtuKey(dm.building.address, dm.data.name, manifest)
+      const count = Math.max(counts.get(key) ?? 0, counts.get(manifestKey) ?? 0)
       const updated = { ...dm, pictureCount: count }
       syncDetailMarkerAppearance(updated)
       return updated

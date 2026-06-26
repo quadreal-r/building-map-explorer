@@ -6,6 +6,7 @@ import {
   type DeployPictureEntry,
 } from '@/types/deployBundle'
 import type { PortfolioData } from '@/types/domain'
+import { exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
 import { isValidStoredPortfolio } from '@/hooks/usePortfolioData'
 import { useRtuPricingStore } from '@/stores/rtuPricingStore'
 import { useRtuScheduleStore } from '@/stores/rtuScheduleStore'
@@ -94,6 +95,7 @@ function collectDeployBundleCore(portfolio: PortfolioData): Omit<DeployBundle, '
     portfolio: readPortfolioFromStorage(portfolio),
     schedule: readScheduleFromStorage(),
     pricing: readPricingFromStorage(),
+    hiddenRtuPictures: exportHiddenRtuPicturesForDeploy(),
   }
 }
 

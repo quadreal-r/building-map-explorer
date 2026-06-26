@@ -14,6 +14,8 @@ import {
   normalizeLegacyUtility,
   normalizePortfolioData,
 } from '@/types/domain'
+import { repairPortfolioRtuNames } from '@/lib/rtuNameRepair'
+import { migrateIndexedDbRtuKeys } from '@/lib/rtuPictures'
 import { getJsonDataBaseUrl, usesRemoteJsonData } from '@/lib/jsonDataUrls'
 
 import staticBuildings from '../../supabase/data/buildings.json'
@@ -110,7 +112,10 @@ export async function loadPortfolioData(): Promise<PortfolioData> {
   }
 
   const stored = loadStoredPortfolio()
-  if (stored) return normalizePortfolioData(stored)
+  if (stored) {
+    const { portfolio } = await repairStoredPortfolioRtuNames(stored, { notify: true })
+    return portfolio
+  }
 
   return loadStaticPortfolio()
 }
@@ -127,6 +132,38 @@ export function usePortfolioData() {
 
 export function persistPortfolio(data: PortfolioData): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+}
+
+/** Shorten mistaken long RTU names and re-link IndexedDB pictures before sync. */
+export async function repairStoredPortfolioRtuNames(
+  portfolio: PortfolioData,
+  options?: { persist?: boolean; notify?: boolean },
+): Promise<{
+  portfolio: PortfolioData
+  renamed: number
+  picturesMigrated: number
+}> {
+  const { portfolio: repaired, renames } = repairPortfolioRtuNames(normalizePortfolioData(portfolio))
+  if (!renames.length) {
+    return { portfolio: repaired, renamed: 0, picturesMigrated: 0 }
+  }
+
+  const picturesMigrated = await migrateIndexedDbRtuKeys(renames)
+  if (options?.persist !== false) persistPortfolio(repaired)
+
+  if (options?.notify) {
+    const { showToastSuccess } = await import('@/lib/toast')
+    const sample = renames
+      .slice(0, 2)
+      .map((r) => r.newName)
+      .join(', ')
+    const more = renames.length > 2 ? ` +${renames.length - 2} more` : ''
+    const pics =
+      picturesMigrated > 0 ? ` · ${picturesMigrated} picture(s) re-linked` : ''
+    showToastSuccess(`✓ Fixed RTU name(s): ${sample}${more}${pics}. Use Sync to publish.`)
+  }
+
+  return { portfolio: repaired, renamed: renames.length, picturesMigrated }
 }
 
 export type { Building, Utility, Polygon }

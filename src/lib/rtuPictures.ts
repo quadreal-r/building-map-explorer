@@ -1,7 +1,7 @@
 /** RTU picture storage: Cloudflare R2 (production) or same-origin static files, plus IndexedDB uploads. */
 
-import { parseBulkRtuPictureFileName } from '@/lib/rtuPictureMatch'
-import { buildBulkRtuPictureFileName } from '@/lib/rtuPictureAssignNaming'
+import { parseBulkRtuPictureFileName, normalizeRtuUnitCore } from '@/lib/rtuPictureMatch'
+import { buildBulkRtuPictureFileName, pictureFileRtuLabel } from '@/lib/rtuPictureAssignNaming'
 import { isRtuManifestPictureHidden } from '@/lib/hiddenRtuPictures'
 import {
   getRtuPictureManifestUrl,
@@ -50,6 +50,33 @@ export function notifyRtuPicturesChanged(): void {
 
 export function rtuPictureKey(buildingAddress: string, rtuName: string): string {
   return `${buildingAddress}|${rtuName}`
+}
+
+/**
+ * Match manifest entries when the portfolio RTU name differs slightly from the manifest key
+ * (e.g. `RTU-04 Hybrid/Dual Fuel Heat Pump` vs `RTU-04 Hybrid`).
+ */
+export function resolveManifestRtuKey(
+  buildingAddress: string,
+  rtuName: string,
+  manifest: RtuPictureManifest,
+): string {
+  const exact = rtuPictureKey(buildingAddress, rtuName)
+  const entries = manifest.entries ?? {}
+  if (entries[exact]?.length) return exact
+
+  const rtuLabel = pictureFileRtuLabel(rtuName)
+  const unitCore = normalizeRtuUnitCore(rtuName)
+  const prefix = `${buildingAddress}|`
+
+  for (const key of Object.keys(entries)) {
+    if (!key.startsWith(prefix) || !entries[key]?.length) continue
+    const manifestRtuName = key.slice(prefix.length)
+    if (pictureFileRtuLabel(manifestRtuName) === rtuLabel) return key
+    if (unitCore && normalizeRtuUnitCore(manifestRtuName) === unitCore) return key
+  }
+
+  return exact
 }
 
 /** First street number from a building address, e.g. "1590 South Gateway Rd." → "1590". */
@@ -125,6 +152,40 @@ async function idbGetAllForRtu(rtuKey: string): Promise<StoredRtuPictureRow[]> {
     req.onsuccess = () => resolve((req.result as StoredRtuPictureRow[]) ?? [])
     tx.oncomplete = () => db.close()
   })
+}
+
+/** Re-key IndexedDB pictures when portfolio RTU names are shortened to match the manifest. */
+export async function migrateIndexedDbRtuKeys(
+  renames: Array<{ buildingAddress: string; oldName: string; newName: string }>,
+): Promise<number> {
+  if (!renames.length) return 0
+  const db = await openDb()
+  let updated = 0
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite')
+    const store = tx.objectStore(STORE)
+    const req = store.getAll()
+    req.onerror = () => reject(req.error ?? new Error('IndexedDB read failed'))
+    req.onsuccess = () => {
+      const rows = (req.result as StoredRtuPictureRow[]) ?? []
+      for (const { buildingAddress, oldName, newName } of renames) {
+        const oldKey = rtuPictureKey(buildingAddress, oldName)
+        const newKey = rtuPictureKey(buildingAddress, newName)
+        for (const row of rows) {
+          if (row.rtuKey !== oldKey) continue
+          store.put({ ...row, rtuKey: newKey })
+          updated += 1
+        }
+      }
+    }
+    tx.oncomplete = () => {
+      db.close()
+      resolve()
+    }
+    tx.onerror = () => reject(tx.error ?? new Error('IndexedDB write failed'))
+  })
+  if (updated) notifyRtuPicturesChanged()
+  return updated
 }
 
 async function idbPut(row: StoredRtuPictureRow): Promise<void> {
@@ -285,6 +346,7 @@ export async function getRtuPictureCountMap(): Promise<Map<string, number>> {
   for (const [key, files] of Object.entries(manifest.entries ?? {})) {
     const indices = new Set<number>()
     for (const fileName of files) {
+      if (isRtuManifestPictureHidden(key, fileName)) continue
       const index = parseRtuPictureIndex(fileName)
       if (index != null && index >= 1) indices.add(index)
     }
@@ -379,14 +441,18 @@ export async function listRtuPictures(
 ): Promise<RtuPicture[]> {
   const key = rtuPictureKey(buildingAddress, rtuName)
   const manifest = await loadRtuPictureManifest()
-  const staticNames = manifest.entries[key] ?? []
-  const idbRows = await idbGetAllForRtu(key)
+  const manifestKey = resolveManifestRtuKey(buildingAddress, rtuName, manifest)
+  const staticNames = manifest.entries[manifestKey] ?? []
+  const idbRows = [
+    ...(await idbGetAllForRtu(key)),
+    ...(manifestKey !== key ? await idbGetAllForRtu(manifestKey) : []),
+  ]
 
   /** One picture per index — IndexedDB uploads replace static/manifest entries at the same slot. */
   const byIndex = new Map<number, RtuPicture>()
 
   for (const fileName of staticNames) {
-    if (isRtuManifestPictureHidden(key, fileName)) continue
+    if (isRtuManifestPictureHidden(manifestKey, fileName)) continue
     const index = parseRtuPictureIndex(fileName)
     if (index == null || index < 1) continue
     const url = rtuPictureFileUrl(fileName)

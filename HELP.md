@@ -66,6 +66,18 @@ git commit -m "chore: update portfolio data and RTU picture manifest"
 git push origin main
 ```
 
+### RTU pictures missing online (local shows them)
+
+Local uploads live in **IndexedDB** until you **Settings → Sync to Cloudflare & GitHub**. Git push alone does not upload pictures.
+
+If RTU names on the map include a long description (e.g. `RTU-04 Hybrid/Dual Fuel Heat Pump`), pictures may not match the manifest key (`RTU-04 Hybrid`). On load, the app now shortens those names and re-links local pictures automatically. Then:
+
+1. Open the site where your pictures exist (local dev or deployed, same browser)
+2. Refresh once (watch for a toast: “Fixed RTU name(s)…”)
+3. Open **2320 Bristol Circle** → **RTU-04 Hybrid** — confirm pictures show (1/2 if you have two)
+4. **Settings → Sync to Cloudflare & GitHub**
+5. Wait for the sync-deploy workflow, then hard-refresh the live site
+
 ### Before you push
 
 - Never commit `.env.local` (secrets) — it is gitignored

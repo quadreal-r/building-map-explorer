@@ -1,6 +1,7 @@
-/** Per-browser hides for manifest (R2/static) RTU pictures the user dismisses. */
+/** Per-browser and deployed hides for manifest (R2/static) RTU pictures the user dismisses. */
 
 const STORAGE_KEY = 'bme-hidden-rtu-pictures'
+const BUNDLED_HIDDEN_URL = `${import.meta.env.BASE_URL}database/rtu-pictures/hidden.json`
 
 function pictureHideKey(rtuKey: string, fileName: string): string {
   return `${rtuKey}|${fileName}`
@@ -23,12 +24,53 @@ function writeHidden(hidden: Set<string>): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify([...hidden]))
 }
 
+let bundledHidden: Set<string> | null = null
+let bundledHiddenLoad: Promise<boolean> | null = null
+
+function allHiddenKeys(): Set<string> {
+  const merged = new Set(readHidden())
+  if (bundledHidden) {
+    for (const key of bundledHidden) merged.add(key)
+  }
+  return merged
+}
+
+/** Load server-deployed hidden.json (merged with localStorage at read time). */
+export function loadBundledHiddenRtuPictures(): Promise<boolean> {
+  if (bundledHiddenLoad) return bundledHiddenLoad
+  bundledHiddenLoad = (async () => {
+    try {
+      const res = await fetch(BUNDLED_HIDDEN_URL)
+      if (!res.ok) {
+        bundledHidden = new Set()
+        return false
+      }
+      const parsed = (await res.json()) as unknown
+      if (!Array.isArray(parsed)) {
+        bundledHidden = new Set()
+        return false
+      }
+      bundledHidden = new Set(parsed.filter((item): item is string => typeof item === 'string'))
+      return bundledHidden.size > 0
+    } catch {
+      bundledHidden = new Set()
+      return false
+    }
+  })()
+  return bundledHiddenLoad
+}
+
 export function isRtuManifestPictureHidden(rtuKey: string, fileName: string): boolean {
-  return readHidden().has(pictureHideKey(rtuKey, fileName))
+  return allHiddenKeys().has(pictureHideKey(rtuKey, fileName))
 }
 
 export function hideRtuManifestPicture(rtuKey: string, fileName: string): void {
   const hidden = readHidden()
   hidden.add(pictureHideKey(rtuKey, fileName))
   writeHidden(hidden)
+}
+
+/** Keys for Settings sync — local hides plus any already deployed from hidden.json. */
+export function exportHiddenRtuPicturesForDeploy(): string[] {
+  return [...allHiddenKeys()]
 }
