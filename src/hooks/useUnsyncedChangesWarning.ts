@@ -14,20 +14,27 @@ export function useUnsyncedChangesWarning() {
   const stageRevision = usePendingRtuPictureStore((state) => state.stageRevision)
   const [lines, setLines] = useState<UnsyncedChangeLine[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshEpoch, setRefreshEpoch] = useState(0)
 
-  const refresh = useCallback(async () => {
-    const next = await collectUnsyncedChangesSummary()
-    setLines(next)
-    setLoading(false)
+  const refresh = useCallback(() => {
+    setRefreshEpoch((epoch) => epoch + 1)
   }, [])
 
+  useEffect(() => onRtuPicturesChanged(refresh), [refresh])
+
+  useEffect(() => onUnsyncedChangesInvalidate(refresh), [refresh])
+
   useEffect(() => {
-    void refresh()
-  }, [refresh, portfolioUnsaved, pendingGpsCount, stageRevision])
-
-  useEffect(() => onRtuPicturesChanged(() => void refresh()), [refresh])
-
-  useEffect(() => onUnsyncedChangesInvalidate(() => void refresh()), [refresh])
+    let cancelled = false
+    void collectUnsyncedChangesSummary().then((next) => {
+      if (cancelled) return
+      setLines(next)
+      setLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [refreshEpoch, portfolioUnsaved, pendingGpsCount, stageRevision])
 
   const hasUnsynced = lines.length > 0
 

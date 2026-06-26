@@ -92,7 +92,7 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
     if (reconciled.park !== park) setPark(reconciled.park)
     if (reconciled.cluster !== cluster) setCluster(reconciled.cluster)
     if (reconciled.manager !== manager) setManager(reconciled.manager)
-  }, [baseFilters, allBuildings, polygonIndex, park, cluster, manager, setPark, setCluster, setManager])
+  }, [baseFilters, allBuildings, polygonIndex, managerRenames, park, cluster, manager, setPark, setCluster, setManager])
 
   return (
     <>
