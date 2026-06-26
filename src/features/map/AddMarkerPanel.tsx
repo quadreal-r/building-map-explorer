@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  addAppMarkerListener,
+  createAppMarker,
+  getAppMarkerPosition,
+  setAppMarkerCursor,
+  setAppMarkerIcon,
+  setAppMarkerMap,
+  setAppMarkerPosition,
+  type AppMapMarker,
+} from '@/lib/appMapMarker'
+import {
   getDetailMarkerIcon,
   getMarkerScale,
   getMarkerShapeIndex,
@@ -83,7 +93,7 @@ function AddMarkerForm({
   const [shapeIdx, setShapeIdx] = useState(getMarkerShapeIndex())
   const [scale, setScale] = useState(getMarkerScale())
   const [error, setError] = useState<string | null>(null)
-  const previewMarkerRef = useRef<google.maps.Marker | null>(null)
+  const previewMarkerRef = useRef<AppMapMarker | null>(null)
   const dragListenerRef = useRef<google.maps.MapsEventListener | null>(null)
 
   const needsBuilding = category === 'rtu'
@@ -93,7 +103,7 @@ function AddMarkerForm({
   const removePreviewMarker = useCallback(() => {
     dragListenerRef.current?.remove()
     dragListenerRef.current = null
-    previewMarkerRef.current?.setMap(null)
+    if (previewMarkerRef.current) setAppMarkerMap(previewMarkerRef.current, null)
     previewMarkerRef.current = null
   }, [])
 
@@ -158,27 +168,28 @@ function AddMarkerForm({
     }
 
     if (!previewMarkerRef.current) {
-      previewMarkerRef.current = new google.maps.Marker({
+      previewMarkerRef.current = createAppMarker({
         map,
         position,
         draggable: true,
         zIndex: 1000,
-        cursor: 'grab',
       })
-      dragListenerRef.current = previewMarkerRef.current.addListener('dragend', () => {
-        const pos = previewMarkerRef.current?.getPosition()
+      setAppMarkerCursor(previewMarkerRef.current, 'grab')
+      dragListenerRef.current = addAppMarkerListener(previewMarkerRef.current, 'dragend', () => {
+        const pos = getAppMarkerPosition(previewMarkerRef.current!)
         if (!pos) return
         setPosition({ lat: pos.lat(), lng: pos.lng() })
       })
     } else {
-      previewMarkerRef.current.setPosition(position)
-      previewMarkerRef.current.setMap(map)
+      setAppMarkerPosition(previewMarkerRef.current, position.lat, position.lng)
+      setAppMarkerMap(previewMarkerRef.current, map)
     }
   }, [map, phase, position, removePreviewMarker])
 
   useEffect(() => {
     if (!previewMarkerRef.current || phase !== 'placing') return
-    previewMarkerRef.current.setIcon(
+    setAppMarkerIcon(
+      previewMarkerRef.current,
       getDetailMarkerIcon(layerCfg.fill, layerCfg.stroke, {
         shapeIndex: shapeIdx,
         scale,

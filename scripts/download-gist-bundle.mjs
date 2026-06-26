@@ -48,11 +48,13 @@ if (!bundleFile?.content && !bundleFile?.raw_url) {
 }
 
 async function readGistFile(file) {
-  if (file.content != null) return file.content
-  if (!file.raw_url) return null
-  const rawRes = await fetch(file.raw_url, { headers })
-  if (!rawRes.ok) return null
-  return rawRes.text()
+  // Gist GET responses truncate large files in `content`; raw_url has the full payload.
+  if (file.raw_url) {
+    const rawRes = await fetch(file.raw_url, { headers })
+    if (rawRes.ok) return rawRes.text()
+  }
+  if (file.content != null && file.content !== '') return file.content
+  return null
 }
 
 const bundleText = await readGistFile(bundleFile)
@@ -74,13 +76,16 @@ if (!bundle.portfolio?.buildings?.length) {
 const picturesFile = gist.files?.['deploy-pictures.json']
 if (picturesFile) {
   const picturesText = await readGistFile(picturesFile)
-  if (!picturesText) {
+  if (!picturesText?.trim()) {
     fail('Failed to read deploy-pictures.json from gist.')
   }
   try {
     bundle.pictures = JSON.parse(picturesText)
   } catch {
-    fail('deploy-pictures.json is not valid JSON.')
+    const preview = picturesText.slice(0, 80).replace(/\s+/g, ' ')
+    fail(
+      `deploy-pictures.json is not valid JSON (${picturesText.length} bytes; starts with "${preview}").`,
+    )
   }
 }
 

@@ -20,9 +20,11 @@
     "version:bump": "node scripts/bump-version.mjs",
     "apply-deploy-bundle": "node scripts/apply-deploy-bundle.mjs",
     "upload-rtu-pictures-r2": "node scripts/upload-rtu-pictures-r2.mjs",
+    "sync-rtu-pictures-r2": "node scripts/sync-rtu-pictures-r2.mjs",
     "upload-json-to-r2": "node scripts/upload-json-to-r2.mjs",
     "build-rtu-picture-manifest": "node scripts/build-rtu-picture-manifest.mjs",
-    "report-rtu-picture-gaps": "node scripts/report-rtu-picture-manifest-gaps.mjs"
+    "report-rtu-picture-gaps": "node scripts/report-rtu-picture-manifest-gaps.mjs",
+    "restore-point": "node scripts/restore-point.mjs"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",

@@ -1,4 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  createAppMarker,
+  setAppMarkerIcon,
+  setAppMarkerMap,
+  setAppMarkerPosition,
+  type AppMapMarker,
+} from '@/lib/appMapMarker'
 import type { LatLng } from '@/types/domain'
 
 export interface UsePolygonDrawOptions {
@@ -23,7 +30,7 @@ export function usePolygonDraw({ map, color }: UsePolygonDrawOptions) {
   const polylineRef = useRef<google.maps.Polyline | null>(null)
   const closingLineRef = useRef<google.maps.Polyline | null>(null)
   const fillPreviewRef = useRef<google.maps.Polygon | null>(null)
-  const pointMarkersRef = useRef<google.maps.Marker[]>([])
+  const pointMarkersRef = useRef<AppMapMarker[]>([])
   const clickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
 
   const clearPreviewLines = useCallback(() => {
@@ -37,7 +44,7 @@ export function usePolygonDraw({ map, color }: UsePolygonDrawOptions) {
 
   const clearPointMarkers = useCallback(() => {
     for (const marker of pointMarkersRef.current) {
-      marker.setMap(null)
+      setAppMarkerMap(marker, null)
     }
     pointMarkersRef.current = []
   }, [])
@@ -46,12 +53,13 @@ export function usePolygonDraw({ map, color }: UsePolygonDrawOptions) {
     (nextPoints: LatLng[]) => {
       if (!map) return
       while (pointMarkersRef.current.length > nextPoints.length) {
-        pointMarkersRef.current.pop()?.setMap(null)
+        const removed = pointMarkersRef.current.pop()
+        if (removed) setAppMarkerMap(removed, null)
       }
       nextPoints.forEach((point, index) => {
         let marker = pointMarkersRef.current[index]
         if (!marker) {
-          marker = new google.maps.Marker({
+          marker = createAppMarker({
             map,
             position: point,
             zIndex: 55,
@@ -61,9 +69,9 @@ export function usePolygonDraw({ map, color }: UsePolygonDrawOptions) {
           pointMarkersRef.current[index] = marker
           return
         }
-        marker.setPosition(point)
-        marker.setIcon(pointMarkerIcon(color))
-        marker.setMap(map)
+        setAppMarkerPosition(marker, point.lat, point.lng)
+        setAppMarkerIcon(marker, pointMarkerIcon(color))
+        setAppMarkerMap(marker, map)
       })
     },
     [color, map],

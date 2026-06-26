@@ -1,4 +1,20 @@
 import { useCallback, useEffect, useRef } from 'react'
+import {
+  addAppMarkerListener,
+  buildDetailMarkerContent,
+  createAppMarker,
+  getAppMarkerPosition,
+  setAppMarkerDraggable,
+  setAppMarkerClickable,
+  setAppMarkerCursor,
+  setAppMarkerIcon,
+  setAppMarkerMap,
+  setAppMarkerPosition,
+  setAppMarkerVisible,
+  setAppMarkerZIndex,
+  setDetailMarkerContent,
+  type AppMapMarker,
+} from '@/lib/appMapMarker'
 import { getColor } from '@/lib/colors'
 import { isLegacySuiteMarkerName } from '@/lib/legacySuiteMarkers'
 import {
@@ -24,89 +40,92 @@ import {
   registerGroupDragVisuals,
 } from '@/lib/mapGroupDragSession'
 import { buildPolygonBuildingIndex, polygonsForBuilding } from '@/lib/polygonBuildings'
-import { consumeMapClickClearSuppression, registerMarqueeTarget, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
+import { consumeMapClickClearSuppression, registerMarqueeTarget, suppressMapClickClearOnce, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
 import { tryConsumeMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
 import { afterMapViewChange, fitBoundsPreserveRotation, panToPreserveRotation } from '@/lib/mapRotation'
 import { closeAllMapPopups, ensureInfoWindowVisible, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
 import { collectSearchHits } from '@/lib/searchHits'
 import { getDetailMarkerIcon, getMarkerIcon } from '@/lib/markerStyles'
 import { buildBuildingInfoHtml, buildDetailInfoHtml, buildRtuPicturesHtml, copyPopupText } from '@/lib/mapInfoWindow'
+import { hideRtuManifestPicture } from '@/lib/hiddenRtuPictures'
 import {
   addRtuPicturesFromFiles,
   deleteRtuPicture,
   getRtuPictureCountMap,
   listRtuPictures,
   loadRtuPictureManifest,
+  notifyRtuPicturesChanged,
   onRtuPicturesChanged,
   revokeRtuPictureUrls,
   rtuPictureKey,
   type RtuPicture,
 } from '@/lib/rtuPictures'
-import { showToastError, showToastSuccess } from '@/lib/toast'
+import { showToastSuccess } from '@/lib/toast'
 import { useLayerStore } from '@/stores/layerStore'
 import { useFilterStore } from '@/stores/filterStore'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useUiStore } from '@/stores/uiStore'
 import type { Building, LayerKey, Polygon, Rtu, Utility } from '@/types/domain'
 
-const TRANSPARENT_ICON =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
-
 interface BuildingMarkerEntry {
   building: Building
-  marker: google.maps.Marker
-  label: google.maps.Marker
+  marker: AppMapMarker
+  label: AppMapMarker
 }
 
 interface DetailMarkerEntry {
   type: LayerKey
   building: Building | null
   data: Rtu | Utility
-  marker: google.maps.Marker
-  label?: google.maps.Marker
-  picBadge?: google.maps.Marker
+  marker: AppMapMarker
   pictureCount?: number
   dragKey: string
 }
 
-function formatPicBadgeCount(count: number): string {
-  return count > 99 ? '99+' : String(count)
+function detailLabelFor(entry: DetailMarkerEntry): google.maps.MarkerLabel | undefined {
+  const { type: layerKey, data } = entry
+  if (!data.name) return undefined
+  const cfg = LAYER_COLORS[layerKey]
+  return {
+    text: layerKey === 'hydrant' ? 'Hydrant' : layerKey === 'gas' ? 'Gas Meter' : data.name,
+    color: cfg.fill,
+    fontSize: layerKey === 'rtu' ? '11px' : '9px',
+    fontWeight: layerKey === 'rtu' ? '500' : '700',
+    fontFamily: 'Inter,sans-serif',
+    className: layerKey === 'rtu' ? 'rtu-marker-label' : 'rtu-label',
+  }
 }
 
-function createRtuPicBadgeMarker(
-  map: google.maps.Map,
-  lat: number,
-  lng: number,
-  count: number,
-): google.maps.Marker {
-  return new google.maps.Marker({
-    position: { lat, lng },
-    map,
-    icon: {
-      url: TRANSPARENT_ICON,
-      scaledSize: new google.maps.Size(1, 1),
-      anchor: new google.maps.Point(0.5, 0.5),
-      labelOrigin: new google.maps.Point(0.5, 0.5),
-    },
-    label: {
-      text: formatPicBadgeCount(count),
-      color: '#ffffff',
-      fontSize: '11px',
-      fontWeight: '700',
-      fontFamily: 'Inter,sans-serif',
-      className: 'rtu-pic-badge',
-    },
-    zIndex: 21,
-    visible: false,
-    clickable: false,
-    optimized: false,
+function detailIconFor(entry: DetailMarkerEntry, isSelected: boolean): google.maps.Symbol {
+  const cfg = LAYER_COLORS[entry.type]
+  if (isSelected) {
+    return {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillColor: cfg.fill,
+      fillOpacity: 0.9,
+      strokeColor: '#ffffff',
+      strokeWeight: 3,
+      scale: cfg.scale + 2,
+    }
+  }
+  return getDetailMarkerIcon(cfg.fill, cfg.stroke, {
+    shapeIndex: entry.data.marker_shape,
+    scale: entry.data.marker_scale,
+    defaultScale: cfg.scale,
+  })
+}
+
+function syncDetailMarkerAppearance(entry: DetailMarkerEntry, isSelected = false): void {
+  setDetailMarkerContent(entry.marker, {
+    icon: detailIconFor(entry, isSelected),
+    label: detailLabelFor(entry),
+    labelOffsetY: entry.type === 'rtu' ? -7 : -4,
+    pictureCount: entry.type === 'rtu' ? (entry.pictureCount ?? 0) : 0,
   })
 }
 
 function syncDetailMarkerPositions(entry: DetailMarkerEntry, lat: number, lng: number): void {
-  entry.marker.setPosition({ lat, lng })
-  entry.label?.setPosition({ lat, lng })
-  entry.picBadge?.setPosition({ lat, lng })
+  setAppMarkerPosition(entry.marker, lat, lng)
 }
 
 interface ActiveDetailInfo {
@@ -162,12 +181,12 @@ export function useMapMarkers({
   const buildingMarkersRef = useRef<BuildingMarkerEntry[]>([])
   const detailMarkersRef = useRef<DetailMarkerEntry[]>([])
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null)
-  const activeInfoMarkerRef = useRef<google.maps.Marker | null>(null)
+  const activeInfoMarkerRef = useRef<AppMapMarker | null>(null)
   const activeDetailInfoRef = useRef<ActiveDetailInfo | null>(null)
   const activeRtuPicturesRef = useRef<RtuPicture[]>([])
   const imageryModeRef = useRef(0)
   const imageryOverlayRef = useRef<google.maps.ImageMapType | null>(null)
-  const soloMoveRef = useRef<{ marker: google.maps.Marker; label?: google.maps.Marker } | null>(null)
+  const soloMoveRef = useRef<{ marker: AppMapMarker; label?: AppMapMarker } | null>(null)
   const soloMoveListenerRef = useRef<google.maps.MapsEventListener | null>(null)
 
   const callbacksRef = useRef({
@@ -220,18 +239,16 @@ export function useMapMarkers({
       setBuildingPosition: (address, lat, lng) => {
         const entry = buildingMarkersRef.current.find((m) => m.building.address === address)
         if (!entry) return
-        entry.marker.setPosition({ lat, lng })
-        entry.label.setPosition({ lat, lng })
-        entry.marker.setVisible(true)
-        entry.label.setVisible(true)
+        setAppMarkerPosition(entry.marker, lat, lng)
+        setAppMarkerPosition(entry.label, lat, lng)
+        setAppMarkerVisible(entry.marker, true)
+        setAppMarkerVisible(entry.label, true)
       },
       setDetailPosition: (key, lat, lng) => {
         const entry = detailMarkersRef.current.find((m) => m.dragKey === key)
         if (!entry) return
         syncDetailMarkerPositions(entry, lat, lng)
-        entry.marker.setVisible(true)
-        entry.label?.setVisible(true)
-        if (entry.picBadge && (entry.pictureCount ?? 0) > 0) entry.picBadge.setVisible(true)
+        setAppMarkerVisible(entry.marker, true)
       },
     })
     return () => {
@@ -247,20 +264,12 @@ export function useMapMarkers({
     for (const entry of buildingMarkersRef.current) {
       const color = getColor(entry.building.park)
       const isSelected = selected.has(buildingDragKey(entry.building.address))
-      entry.marker.setIcon(getMarkerIcon(color, isSelected))
-      entry.marker.setZIndex(isSelected ? 999 : 10)
+      setAppMarkerIcon(entry.marker, getMarkerIcon(color, isSelected))
+      setAppMarkerZIndex(entry.marker, isSelected ? 999 : 10)
     }
     for (const entry of detailMarkersRef.current) {
-      const cfg = LAYER_COLORS[entry.type]
       const isSelected = selected.has(entry.dragKey)
-      entry.marker.setIcon({
-        path: google.maps.SymbolPath.CIRCLE,
-        fillColor: cfg.fill,
-        fillOpacity: 0.9,
-        strokeColor: isSelected ? '#ffffff' : cfg.stroke,
-        strokeWeight: isSelected ? 3 : 1,
-        scale: isSelected ? cfg.scale + 2 : cfg.scale,
-      })
+      syncDetailMarkerAppearance(entry, isSelected)
     }
   }, [])
 
@@ -271,8 +280,8 @@ export function useMapMarkers({
   const resetBuildingIcons = useCallback(() => {
     for (const entry of buildingMarkersRef.current) {
       const color = getColor(entry.building.park)
-      entry.marker.setIcon(getMarkerIcon(color, false))
-      entry.marker.setZIndex(10)
+      setAppMarkerIcon(entry.marker, getMarkerIcon(color, false))
+      setAppMarkerZIndex(entry.marker, 10)
     }
   }, [])
 
@@ -282,8 +291,8 @@ export function useMapMarkers({
       const entry = buildingMarkersRef.current.find((m) => m.building.address === building.address)
       if (!entry) return
       const color = getColor(building.park)
-      entry.marker.setIcon(getMarkerIcon(color, true))
-      entry.marker.setZIndex(999)
+      setAppMarkerIcon(entry.marker, getMarkerIcon(color, true))
+      setAppMarkerZIndex(entry.marker, 999)
     },
     [resetBuildingIcons],
   )
@@ -321,7 +330,7 @@ export function useMapMarkers({
   }, [clearActiveRtuPictures])
 
   const openBuildingInfo = useCallback(
-    (building: Building, marker: google.maps.Marker) => {
+    (building: Building, marker: AppMapMarker) => {
       if (!map || !infoWindowRef.current) return
       if (activeInfoMarkerRef.current === marker) {
         closeAllMapPopups()
@@ -357,9 +366,7 @@ export function useMapMarkers({
       infoWindowRef.current.open({ map, anchor: marker })
       ensureInfoWindowVisible(map, infoWindowRef.current)
       activeInfoMarkerRef.current = marker
-      marker.setVisible(true)
-      entry.label?.setVisible(true)
-      if (entry.picBadge && (entry.pictureCount ?? 0) > 0) entry.picBadge.setVisible(true)
+      setAppMarkerVisible(marker, true)
       afterMapViewChange(map)
     },
     [map, clearActiveRtuPictures],
@@ -369,8 +376,8 @@ export function useMapMarkers({
     const solo = soloMoveRef.current
     if (!solo) return
     const globalDrag = useSelectionStore.getState().dragMode
-    solo.marker.setDraggable(globalDrag)
-    solo.marker.setCursor(globalDrag ? 'grab' : null)
+    setAppMarkerDraggable(solo.marker, globalDrag)
+    setAppMarkerCursor(solo.marker, globalDrag ? 'grab' : null)
     if (soloMoveListenerRef.current) {
       google.maps.event.removeListener(soloMoveListenerRef.current)
       soloMoveListenerRef.current = null
@@ -379,15 +386,15 @@ export function useMapMarkers({
   }, [])
 
   const startSoloMove = useCallback(
-    (marker: google.maps.Marker, label?: google.maps.Marker) => {
+    (marker: AppMapMarker, label?: AppMapMarker) => {
       stopSoloMove()
       infoWindowRef.current?.close()
       activeInfoMarkerRef.current = null
       soloMoveRef.current = { marker, label }
-      marker.setDraggable(true)
-      marker.setCursor('grab')
+      setAppMarkerDraggable(marker, true)
+      setAppMarkerCursor(marker, 'grab')
       showToastSuccess('↔ Drag marker to reposition.')
-      soloMoveListenerRef.current = marker.addListener('dragend', () => {
+      soloMoveListenerRef.current = addAppMarkerListener(marker, 'dragend', () => {
         stopSoloMove()
         showToastSuccess('✓ Position updated — save to HTML to keep changes.')
       })
@@ -432,7 +439,7 @@ export function useMapMarkers({
               (buildingAddr ? dm.building?.address === buildingAddr : !dm.building),
           )
           if (!entry) return
-          startSoloMove(entry.marker, entry.label)
+          startSoloMove(entry.marker)
         }
       })
       const delBtn = container.querySelector('[data-iw-action="delete"]')
@@ -546,7 +553,20 @@ export function useMapMarkers({
           if (!buildingAddress || !fileName) return
 
           if (isStatic) {
-            showToastError('Deployed images are stored on Cloudflare R2 — remove via apply-deploy-bundle / R2, not from the map.')
+            if (
+              !window.confirm(
+                'This picture is listed in the deploy manifest (Cloudflare R2). The file may be missing from the server.\n\nHide it on this browser? To remove it permanently, delete the entry from manifest.json and redeploy.',
+              )
+            ) {
+              return
+            }
+            hideRtuManifestPicture(
+              rtuPictureKey(buildingAddress, ctx.entry.data.name),
+              fileName,
+            )
+            notifyRtuPicturesChanged()
+            showToastSuccess('✓ Picture hidden on this device')
+            await refreshRtuPicturesView()
             return
           }
 
@@ -573,7 +593,7 @@ export function useMapMarkers({
     const selected = new Set(useSelectionStore.getState().dragSelectedKeys)
 
     for (const dm of detailMarkersRef.current) {
-      const pos = dm.marker.getPosition()
+      const pos = getAppMarkerPosition(dm.marker)
       const layerOn = activeLayers[dm.type]
       const zoomOk = zoom >= 16
       const inBounds = Boolean(bounds && pos && bounds.contains(pos))
@@ -581,11 +601,7 @@ export function useMapMarkers({
         layerOn &&
         zoomOk &&
         (editMode && selected.has(dm.dragKey) ? true : inBounds)
-      dm.marker.setVisible(show)
-      dm.label?.setVisible(show)
-      if (dm.picBadge) {
-        dm.picBadge.setVisible(show && (dm.pictureCount ?? 0) > 0)
-      }
+      setAppMarkerVisible(dm.marker, show)
     }
   }, [map])
 
@@ -595,41 +611,14 @@ export function useMapMarkers({
 
     detailMarkersRef.current = detailMarkersRef.current.map((dm) => {
       if (dm.type !== 'rtu' || !dm.building) {
-        if (dm.picBadge) dm.picBadge.setMap(null)
-        return { ...dm, picBadge: undefined, pictureCount: 0 }
+        return { ...dm, pictureCount: 0 }
       }
 
       const key = rtuPictureKey(dm.building.address, dm.data.name)
       const count = counts.get(key) ?? 0
-
-      if (count <= 0) {
-        if (dm.picBadge) dm.picBadge.setMap(null)
-        return { ...dm, pictureCount: count, picBadge: undefined }
-      }
-
-      const pos = dm.marker.getPosition()
-      if (!pos) return { ...dm, pictureCount: count }
-
-      const lat = pos.lat()
-      const lng = pos.lng()
-
-      if (dm.picBadge) {
-        dm.picBadge.setLabel({
-          text: formatPicBadgeCount(count),
-          color: '#ffffff',
-          fontSize: '11px',
-          fontWeight: '700',
-          fontFamily: 'Inter,sans-serif',
-          className: 'rtu-pic-badge',
-        })
-        return { ...dm, pictureCount: count }
-      }
-
-      return {
-        ...dm,
-        pictureCount: count,
-        picBadge: createRtuPicBadgeMarker(map, lat, lng, count),
-      }
+      const updated = { ...dm, pictureCount: count }
+      syncDetailMarkerAppearance(updated)
+      return updated
     })
 
     refreshDetailVisibility()
@@ -642,13 +631,13 @@ export function useMapMarkers({
     const visibleSet = new Set(mapBuildings.map((b) => b.address))
     for (const entry of buildingMarkersRef.current) {
       if (!editMode && !visibleSet.has(entry.building.address)) {
-        entry.marker.setVisible(false)
-        entry.label.setVisible(false)
+        setAppMarkerVisible(entry.marker, false)
+        setAppMarkerVisible(entry.label, false)
         continue
       }
-      entry.marker.setVisible(true)
-      entry.label.setVisible(true)
-      const pos = entry.marker.getPosition()
+      setAppMarkerVisible(entry.marker, true)
+      setAppMarkerVisible(entry.label, true)
+      const pos = getAppMarkerPosition(entry.marker)
       if (pos) bounds.extend(pos)
     }
     if (!bounds.isEmpty()) {
@@ -660,12 +649,12 @@ export function useMapMarkers({
   const showAllMarkers = useCallback(() => {
     if (!map) return
     for (const entry of buildingMarkersRef.current) {
-      entry.marker.setVisible(true)
-      entry.label.setVisible(true)
+      setAppMarkerVisible(entry.marker, true)
+      setAppMarkerVisible(entry.label, true)
     }
     const bounds = new google.maps.LatLngBounds()
     for (const entry of buildingMarkersRef.current) {
-      const pos = entry.marker.getPosition()
+      const pos = getAppMarkerPosition(entry.marker)
       if (pos) bounds.extend(pos)
     }
     if (!bounds.isEmpty()) {
@@ -736,16 +725,17 @@ export function useMapMarkers({
 
     for (const b of buildings) {
       const color = getColor(b.park)
-      const marker = new google.maps.Marker({
-        position: { lat: b.lat, lng: b.lng },
+      const marker = createAppMarker({
         map,
+        position: { lat: b.lat, lng: b.lng },
         title: b.address,
         icon: getMarkerIcon(color, false),
         zIndex: 10,
         draggable: dragMode,
       })
 
-      marker.addListener('click', (e: google.maps.MapMouseEvent) => {
+      addAppMarkerListener(marker, 'click', (e: google.maps.MapMouseEvent) => {
+        suppressMapClickClearOnce()
         if (useUiStore.getState().addMarkerPickMode || useUiStore.getState().polygonDrawMode) return
         if (useSelectionStore.getState().dragMode) {
           const domEvent = e.domEvent as MouseEvent | undefined
@@ -759,15 +749,9 @@ export function useMapMarkers({
       })
 
       const labelText = b.address.length > 24 ? `${b.address.slice(0, 22)}…` : b.address
-      const label = new google.maps.Marker({
-        position: { lat: b.lat, lng: b.lng },
+      const label = createAppMarker({
         map,
-        icon: {
-          url: TRANSPARENT_ICON,
-          scaledSize: new google.maps.Size(1, 1),
-          anchor: new google.maps.Point(0.5, 0.5),
-          labelOrigin: new google.maps.Point(0.5, 22),
-        },
+        position: { lat: b.lat, lng: b.lng },
         label: {
           text: labelText,
           color: '#ffffff',
@@ -776,13 +760,13 @@ export function useMapMarkers({
           fontFamily: 'Inter,sans-serif',
           className: 'bldg-label',
         },
+        labelOffsetY: 21,
         zIndex: 5,
         clickable: false,
-        optimized: false,
       })
 
-      marker.addListener('dragstart', () => {
-        const startPos = marker.getPosition()
+      addAppMarkerListener(marker, 'dragstart', () => {
+        const startPos = getAppMarkerPosition(marker)
         if (!startPos) return
         const startLat = startPos.lat()
         const startLng = startPos.lng()
@@ -790,30 +774,30 @@ export function useMapMarkers({
         beginDragSession(anchorKey, startLat, startLng)
         if (!isGroupDragActive()) {
           setLastDragUndo(() => {
-            marker.setPosition({ lat: startLat, lng: startLng })
-            label.setPosition({ lat: startLat, lng: startLng })
+            setAppMarkerPosition(marker, startLat, startLng)
+            setAppMarkerPosition(label, startLat, startLng)
             callbacksRef.current.onBuildingMoved?.(b, startLat, startLng)
           })
         }
       })
 
-      marker.addListener('drag', () => {
+      addAppMarkerListener(marker, 'drag', () => {
         if (!isGroupDragActive()) return
-        const pos = marker.getPosition()
+        const pos = getAppMarkerPosition(marker)
         if (!pos) return
         applyGroupDragDelta({ lat: pos.lat(), lng: pos.lng() })
       })
 
-      marker.addListener('dragend', () => {
+      addAppMarkerListener(marker, 'dragend', () => {
         if (isGroupDragActive()) {
           commitGroupDrag()
           return
         }
-        const pos = marker.getPosition()
+        const pos = getAppMarkerPosition(marker)
         if (!pos) return
         const lat = pos.lat()
         const lng = pos.lng()
-        label.setPosition({ lat, lng })
+        setAppMarkerPosition(label, lat, lng)
         callbacksRef.current.onBuildingMoved?.(b, lat, lng)
       })
 
@@ -821,7 +805,7 @@ export function useMapMarkers({
       registerMarqueeTarget(buildingDragKey(b.address), {
         kind: 'point',
         resolve: () => {
-          const pos = marker.getPosition()
+          const pos = getAppMarkerPosition(marker)
           return pos ? { lat: pos.lat(), lng: pos.lng() } : null
         },
       })
@@ -842,51 +826,39 @@ export function useMapMarkers({
           : 'utility_type' in data
             ? utilityDragKey(data)
             : detailDragKey(layerKey, data.name ?? '', '')
-      const marker = new google.maps.Marker({
-        position: { lat, lng },
+      const marker = createAppMarker({
         map,
+        position: { lat, lng },
         title: data.name ?? '',
-        icon: getDetailMarkerIcon(cfg.fill, cfg.stroke, {
-          shapeIndex: data.marker_shape,
-          scale: data.marker_scale,
-          defaultScale: cfg.scale,
+        content: buildDetailMarkerContent({
+          icon: getDetailMarkerIcon(cfg.fill, cfg.stroke, {
+            shapeIndex: data.marker_shape,
+            scale: data.marker_scale,
+            defaultScale: cfg.scale,
+          }),
+          label: data.name
+            ? {
+                text:
+                  layerKey === 'hydrant' ? 'Hydrant' : layerKey === 'gas' ? 'Gas Meter' : data.name,
+                color: cfg.fill,
+                fontSize: layerKey === 'rtu' ? '11px' : '9px',
+                fontWeight: layerKey === 'rtu' ? '500' : '700',
+                fontFamily: 'Inter,sans-serif',
+                className: layerKey === 'rtu' ? 'rtu-marker-label' : 'rtu-label',
+              }
+            : undefined,
+          labelOffsetY: layerKey === 'rtu' ? -7 : -4,
+          pictureCount: 0,
         }),
         zIndex: 20,
-        visible: false,
         draggable: dragMode,
       })
+      setAppMarkerVisible(marker, false)
 
-      let label: google.maps.Marker | undefined
-      if (data.name) {
-        const labelText =
-          layerKey === 'hydrant' ? 'Hydrant' : layerKey === 'gas' ? 'Gas Meter' : data.name
-        label = new google.maps.Marker({
-          position: { lat, lng },
-          map,
-          icon: {
-            url: TRANSPARENT_ICON,
-            scaledSize: new google.maps.Size(1, 1),
-            anchor: new google.maps.Point(0.5, 0.5),
-            labelOrigin: new google.maps.Point(0.5, layerKey === 'rtu' ? -15 : -12),
-          },
-          label: {
-            text: labelText,
-            color: cfg.fill,
-            fontSize: layerKey === 'rtu' ? '11px' : '9px',
-            fontWeight: layerKey === 'rtu' ? '500' : '700',
-            fontFamily: 'Inter,sans-serif',
-            className: layerKey === 'rtu' ? 'rtu-marker-label' : 'rtu-label',
-          },
-          zIndex: 19,
-          visible: false,
-          clickable: false,
-          optimized: false,
-        })
-      }
+      const entry: DetailMarkerEntry = { type: layerKey, building, data, marker, dragKey }
 
-      const entry: DetailMarkerEntry = { type: layerKey, building, data, marker, label, dragKey }
-
-      marker.addListener('click', (e: google.maps.MapMouseEvent) => {
+      addAppMarkerListener(marker, 'click', (e: google.maps.MapMouseEvent) => {
+        suppressMapClickClearOnce()
         if (useUiStore.getState().addMarkerPickMode || useUiStore.getState().polygonDrawMode) return
         if (useSelectionStore.getState().dragMode) {
           const domEvent = e.domEvent as MouseEvent | undefined
@@ -898,8 +870,8 @@ export function useMapMarkers({
         openDetailInfo(entry)
       })
 
-      marker.addListener('dragstart', () => {
-        const startPos = marker.getPosition()
+      addAppMarkerListener(marker, 'dragstart', () => {
+        const startPos = getAppMarkerPosition(marker)
         if (!startPos) return
         const startLat = startPos.lat()
         const startLng = startPos.lng()
@@ -912,19 +884,19 @@ export function useMapMarkers({
         }
       })
 
-      marker.addListener('drag', () => {
+      addAppMarkerListener(marker, 'drag', () => {
         if (!isGroupDragActive()) return
-        const pos = marker.getPosition()
+        const pos = getAppMarkerPosition(marker)
         if (!pos) return
         applyGroupDragDelta({ lat: pos.lat(), lng: pos.lng() })
       })
 
-      marker.addListener('dragend', () => {
+      addAppMarkerListener(marker, 'dragend', () => {
         if (isGroupDragActive()) {
           commitGroupDrag()
           return
         }
-        const pos = marker.getPosition()
+        const pos = getAppMarkerPosition(marker)
         if (!pos) return
         const lat = pos.lat()
         const lng = pos.lng()
@@ -936,7 +908,7 @@ export function useMapMarkers({
       registerMarqueeTarget(dragKey, {
         kind: 'point',
         resolve: () => {
-          const pos = marker.getPosition()
+          const pos = getAppMarkerPosition(marker)
           return pos ? { lat: pos.lat(), lng: pos.lng() } : null
         },
       })
@@ -962,14 +934,11 @@ export function useMapMarkers({
     return () => {
       for (const entry of buildingMarkersRef.current) {
         unregisterMarqueeTarget(buildingDragKey(entry.building.address))
-        entry.marker.setMap(null)
-        entry.label.setMap(null)
+        setAppMarkerMap(entry.marker, null)
       }
       for (const entry of detailMarkersRef.current) {
         unregisterMarqueeTarget(entry.dragKey)
-        entry.marker.setMap(null)
-        entry.label?.setMap(null)
-        entry.picBadge?.setMap(null)
+        setAppMarkerMap(entry.marker, null)
       }
       buildingMarkersRef.current = []
       detailMarkersRef.current = []
@@ -1139,15 +1108,15 @@ export function useMapMarkers({
   useEffect(() => {
     for (const entry of buildingMarkersRef.current) {
       const isSolo = soloMoveRef.current?.marker === entry.marker
-      entry.marker.setDraggable(dragMode || isSolo)
-      entry.marker.setClickable(!blockMarkerClicks)
-      if (!isSolo) entry.marker.setCursor(dragMode ? 'grab' : null)
+      setAppMarkerDraggable(entry.marker, dragMode || isSolo)
+      setAppMarkerClickable(entry.marker, !blockMarkerClicks)
+      if (!isSolo) setAppMarkerCursor(entry.marker, dragMode ? 'grab' : null)
     }
     for (const entry of detailMarkersRef.current) {
       const isSolo = soloMoveRef.current?.marker === entry.marker
-      entry.marker.setDraggable(dragMode || isSolo)
-      entry.marker.setClickable(!blockMarkerClicks)
-      if (!isSolo) entry.marker.setCursor(dragMode ? 'grab' : null)
+      setAppMarkerDraggable(entry.marker, dragMode || isSolo)
+      setAppMarkerClickable(entry.marker, !blockMarkerClicks)
+      if (!isSolo) setAppMarkerCursor(entry.marker, dragMode ? 'grab' : null)
     }
   }, [dragMode, blockMarkerClicks])
 

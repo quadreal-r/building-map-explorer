@@ -81,7 +81,15 @@ Production RTU photos are stored in **Cloudflare R2**, not in the git repo. The 
    node scripts/upload-rtu-pictures-r2.mjs --from-folder "C:/Users/Robert/Pictures/RTU-Pictures"
    ```
 
-   Requires R2 credentials in `.env.local` (see `.env.example`). This uploads every file listed in `manifest.json`.
+   Or compare manifest vs R2 and upload **only missing** files:
+
+   ```bash
+   npm run sync-rtu-pictures-r2
+   npm run sync-rtu-pictures-r2 -- --verify-cdn
+   npm run sync-rtu-pictures-r2 -- --upload --from-folder "C:/Users/Robert/Pictures/RTU-Pictures"
+   ```
+
+   Requires R2 credentials in `.env.local` (see `.env.example`). Writes a report to `reports/rtu-picture-r2-sync-YYYY-MM-DD.json`.
 
 6. Push to `main` — GitHub Actions builds with `VITE_RTU_PICTURES_BASE_URL` and syncs any images in `public/database/rtu-pictures/` (usually none).
 

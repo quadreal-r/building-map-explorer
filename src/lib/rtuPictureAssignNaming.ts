@@ -4,8 +4,15 @@ import { buildingStreetNumber } from '@/lib/rtuPictures'
 export function formatRtuNameForPictureFile(rtuName: string): string {
   return rtuName
     .trim()
+    .replace(/\s*\/\s*/g, ' ')
     .replace(/\s+/g, ' ')
     .replace(/[/\\:*?"<>|]/g, '')
+}
+
+/** RTU label for picture filenames — portfolio name only, not description suffix after "/". */
+export function pictureFileRtuLabel(rtuName: string): string {
+  const primary = rtuName.split('/')[0]?.trim() ?? rtuName.trim()
+  return formatRtuNameForPictureFile(primary)
 }
 
 /**
@@ -19,7 +26,7 @@ export function buildBulkRtuPictureFileName(
   ext: string,
 ): string {
   const buildingNum = buildingStreetNumber(buildingAddress)
-  const rtuLabel = formatRtuNameForPictureFile(rtuName)
+  const rtuLabel = pictureFileRtuLabel(rtuName)
   const safeExt = ext.replace(/^\./, '').toLowerCase() || 'jpg'
   return `${buildingNum}-${rtuLabel} (${pictureIndex}).${safeExt}`
 }

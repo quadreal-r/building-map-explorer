@@ -12,6 +12,7 @@ describe('jsonDataUrls', () => {
   })
 
   it('returns undefined when env is not set', () => {
+    vi.stubEnv('VITE_JSON_DATA_BASE_URL', '')
     expect(readJsonDataBaseUrlFromEnv()).toBeUndefined()
     expect(getJsonDataBaseUrl()).toBeUndefined()
     expect(jsonDataFileUrl('buildings.json')).toBeUndefined()

@@ -10,7 +10,7 @@
  *   R2_KEY_PREFIX (optional object key prefix, e.g. rtu-pictures/)
  *   R2_JSON_BUCKET or R2_JSON_BUCKET_NAME (portfolio JSON bucket, default json)
  */
-import { ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { HeadObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 function readEnv(...keys) {
   for (const key of keys) {
@@ -122,6 +122,25 @@ export async function listR2PictureFileNames() {
   } while (continuationToken)
 
   return [...new Set(names)].sort()
+}
+
+/** True when the object exists at the manifest file name (with optional key prefix). */
+export async function r2PictureExists(fileName) {
+  const client = createR2Client()
+  const bucket = getR2Bucket()
+  if (!client || !bucket) return false
+
+  try {
+    await client.send(
+      new HeadObjectCommand({
+        Bucket: bucket,
+        Key: r2ObjectKey(fileName),
+      }),
+    )
+    return true
+  } catch {
+    return false
+  }
 }
 
 export async function uploadRtuPictureToR2(fileName, body, contentType) {

@@ -1,7 +1,13 @@
 /** One-click Settings sync: gist deploy bundle → GitHub Actions → R2 + commit + deploy. */
 
-import { collectDeployBundleWithMeta } from '@/lib/deployBundle'
-import { markRtuPicturesDeployed } from '@/lib/rtuPictures'
+import { collectDeployBundleLean } from '@/lib/deployBundle'
+import {
+  encodeDeployPictureEntry,
+  estimateDeployPictureJsonBytes,
+  listPendingDeployPictureRows,
+  markRtuPicturesDeployed,
+} from '@/lib/rtuPictures'
+import type { DeployPictureEntry } from '@/types/deployBundle'
 import type { PortfolioData } from '@/types/domain'
 
 export const DEFAULT_GITHUB_REPO = 'quadreal-r/building-map-explorer'
@@ -34,6 +40,72 @@ export interface GitHubSyncResult {
 }
 
 export const SYNC_COOLDOWN_MS = 5 * 60 * 1000
+
+/** Encode pending pictures one at a time until the JSON array fits the gist byte budget. */
+export function jsonArraySizeAfterAddingEntry(currentSize: number, entryCount: number, entryJsonLength: number): number {
+  if (entryCount === 0) return 2 + entryJsonLength
+  return currentSize + 1 + entryJsonLength
+}
+
+export async function collectDeployPicturesWithinBudget(
+  budgetBytes: number,
+  onProgress?: GitHubSyncOptions['onProgress'],
+): Promise<{
+  pictures: DeployPictureEntry[]
+  picturesOmitted: boolean
+  failedFileNames: string[]
+  pendingCount: number
+}> {
+  const { rows, failedFileNames, pendingCount } = await listPendingDeployPictureRows()
+  if (!rows.length) {
+    return { pictures: [], picturesOmitted: false, failedFileNames, pendingCount }
+  }
+
+  const included: DeployPictureEntry[] = []
+  let arrayJsonSize = 2
+  let picturesOmitted = false
+  const total = rows.length
+
+  for (let index = 0; index < rows.length; index++) {
+    const row = rows[index]!
+    reportProgress(
+      onProgress,
+      `Preparing pictures (${index + 1}/${total})…`,
+      10 + Math.floor(((index + 1) / total) * 8),
+    )
+
+    if (
+      jsonArraySizeAfterAddingEntry(
+        arrayJsonSize,
+        included.length,
+        estimateDeployPictureJsonBytes(row.blob.size),
+      ) > budgetBytes
+    ) {
+      picturesOmitted = true
+      continue
+    }
+
+    try {
+      const entry = await encodeDeployPictureEntry(row)
+      const entryJsonLength = JSON.stringify(entry).length
+      const nextSize = jsonArraySizeAfterAddingEntry(arrayJsonSize, included.length, entryJsonLength)
+      if (nextSize > budgetBytes) {
+        picturesOmitted = true
+        continue
+      }
+      arrayJsonSize = nextSize
+      included.push(entry)
+    } catch {
+      failedFileNames.push(row.fileName)
+    }
+  }
+
+  if (included.length < rows.length - failedFileNames.length) {
+    picturesOmitted = true
+  }
+
+  return { pictures: included, picturesOmitted, failedFileNames, pendingCount }
+}
 
 function reportProgress(
   onProgress: GitHubSyncOptions['onProgress'],
@@ -186,7 +258,17 @@ export async function syncDeployToGitHub(
   const { onProgress } = options
 
   reportProgress(onProgress, 'Collecting local data…', 8)
-  const { bundle, pictureExport } = await collectDeployBundleWithMeta(portfolio)
+  const leanCore = collectDeployBundleLean(portfolio)
+  const leanBundle = { ...leanCore, pictures: [] as DeployPictureEntry[] }
+  const leanJson = JSON.stringify(leanBundle)
+  if (leanJson.length > MAX_GIST_BYTES) {
+    throw new Error(
+      'Deploy bundle is too large for one-click sync. Use Export data for GitHub deploy and run apply-deploy-bundle locally.',
+    )
+  }
+
+  const pictureBudget = MAX_GIST_BYTES - leanJson.length
+  const pictureExport = await collectDeployPicturesWithinBudget(pictureBudget, onProgress)
   if (pictureExport.failedFileNames.length) {
     throw new Error(
       `${pictureExport.failedFileNames.length} local picture(s) could not be read for sync. Re-add them from the map and try again.`,
@@ -194,33 +276,20 @@ export async function syncDeployToGitHub(
   }
 
   reportProgress(onProgress, 'Preparing deploy bundle…', 18)
-  const leanBundle = { ...bundle, pictures: [] as typeof bundle.pictures }
-  let picturesJson = JSON.stringify(bundle.pictures)
-  const leanJson = JSON.stringify(leanBundle)
-  let picturesOmitted = false
-
-  const gistBudget = MAX_GIST_BYTES
-  if (leanJson.length + picturesJson.length > gistBudget) {
-    if (bundle.pictures.length > 0) {
-      picturesJson = ''
-      picturesOmitted = true
-    }
-  }
-  if (leanJson.length > gistBudget) {
-    throw new Error(
-      'Deploy bundle is too large for one-click sync. Use Export data for GitHub deploy and run apply-deploy-bundle locally.',
-    )
-  }
+  const bundle = { ...leanCore, pictures: pictureExport.pictures }
+  const picturesOmitted = pictureExport.picturesOmitted
+  const picturesJson =
+    pictureExport.pictures.length > 0 ? JSON.stringify(pictureExport.pictures) : ''
 
   reportProgress(onProgress, 'Uploading bundle to GitHub…', 32)
   const gistId = await createDeployBundleGist(
     leanJson,
-    picturesOmitted ? null : picturesJson,
+    picturesJson || null,
     bundle.exportedAt,
     token,
   )
 
-  const transferredPictureCount = picturesOmitted ? 0 : bundle.pictures.length
+  const transferredPictureCount = bundle.pictures.length
   const rebuildManifest = picturesOmitted || transferredPictureCount === 0
   const startedAt = Date.now()
   reportProgress(onProgress, 'Starting Cloudflare & GitHub sync…', 48)
@@ -229,7 +298,7 @@ export async function syncDeployToGitHub(
   const run = await waitForSyncWorkflowRun(startedAt, token, repo, onProgress)
   reportProgress(onProgress, 'Upload complete', 100)
 
-  if (!picturesOmitted && bundle.pictures.length > 0) {
+  if (bundle.pictures.length > 0) {
     await markRtuPicturesDeployed(bundle.pictures.map((pic) => pic.fileName))
   }
 
@@ -241,6 +310,6 @@ export async function syncDeployToGitHub(
     pictureExportFailed: pictureExport.failedFileNames,
     pendingPictureCount: pictureExport.pendingCount,
     exportedAt: bundle.exportedAt,
-    deployedFileNames: picturesOmitted ? [] : bundle.pictures.map((pic) => pic.fileName),
+    deployedFileNames: bundle.pictures.map((pic) => pic.fileName),
   }
 }

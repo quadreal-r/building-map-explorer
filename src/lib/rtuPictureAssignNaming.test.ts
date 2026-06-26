@@ -11,6 +11,12 @@ describe('formatRtuNameForPictureFile', () => {
     expect(formatRtuNameForPictureFile('RTU-06 Hybrid')).toBe('RTU-06 Hybrid')
     expect(formatRtuNameForPictureFile('RTU- 04')).toBe('RTU- 04')
   })
+
+  it('turns slash-separated suffixes into a space', () => {
+    expect(formatRtuNameForPictureFile('RTU-04 Hybrid/Dual Fuel Heat Pump')).toBe(
+      'RTU-04 Hybrid Dual Fuel Heat Pump',
+    )
+  })
 })
 
 describe('buildBulkRtuPictureFileName', () => {
@@ -18,6 +24,23 @@ describe('buildBulkRtuPictureFileName', () => {
     expect(buildBulkRtuPictureFileName('2320 Main St', 'RTU-06 Hybrid', 3, 'jpg')).toBe(
       '2320-RTU-06 Hybrid (3).jpg',
     )
+  })
+
+  it('keeps spacing for RTU-04 Hybrid', () => {
+    expect(buildBulkRtuPictureFileName('2320 Bristol Circle', 'RTU-04 Hybrid', 1, 'jpg')).toBe(
+      '2320-RTU-04 Hybrid (1).jpg',
+    )
+  })
+
+  it('uses only the portfolio name before a slash', () => {
+    expect(
+      buildBulkRtuPictureFileName(
+        '2320 Bristol Circle',
+        'RTU-04 Hybrid/Dual Fuel Heat Pump',
+        1,
+        'jpg',
+      ),
+    ).toBe('2320-RTU-04 Hybrid (1).jpg')
   })
 
   it('keeps spacing from portfolio RTU name', () => {
