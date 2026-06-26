@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildBulkRtuPictureFileName,
+  buildCloudRtuPictureFileName,
   formatRtuNameForPictureFile,
+  manifestEntryToCloudFileName,
 } from '@/lib/rtuPictureAssignNaming'
 import { findNearestRtuAt } from '@/lib/rtuPictureGpsAssign'
 import type { Building } from '@/types/domain'
@@ -16,6 +18,27 @@ describe('formatRtuNameForPictureFile', () => {
     expect(formatRtuNameForPictureFile('RTU-04 Hybrid/Dual Fuel Heat Pump')).toBe(
       'RTU-04 Hybrid Dual Fuel Heat Pump',
     )
+  })
+})
+
+describe('buildCloudRtuPictureFileName', () => {
+  it('uses dash format without spaces for Cloudflare R2', () => {
+    expect(buildCloudRtuPictureFileName('2320 Bristol Circle', 'RTU-04 Hybrid', 1, 'jpg')).toBe(
+      '2320-RTU-04-1.jpg',
+    )
+    expect(buildCloudRtuPictureFileName('2320 Bristol Circle', 'RTU-09', 2, 'jpg')).toBe(
+      '2320-RTU-09-2.jpg',
+    )
+  })
+
+  it('maps legacy manifest names to cloud filenames', () => {
+    expect(
+      manifestEntryToCloudFileName(
+        '2320-RTU-04 Hybrid (1).jpg',
+        '2320 Bristol Circle',
+        'RTU-04 Hybrid',
+      ),
+    ).toBe('2320-RTU-04-1.jpg')
   })
 })
 

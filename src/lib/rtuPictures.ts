@@ -1,7 +1,11 @@
 /** RTU picture storage: Cloudflare R2 (production) or same-origin static files, plus IndexedDB uploads. */
 
 import { parseBulkRtuPictureFileName, normalizeRtuUnitCore } from '@/lib/rtuPictureMatch'
-import { buildBulkRtuPictureFileName, pictureFileRtuLabel } from '@/lib/rtuPictureAssignNaming'
+import {
+  buildCloudRtuPictureFileName,
+  manifestEntryToCloudFileName,
+  pictureFileRtuLabel,
+} from '@/lib/rtuPictureAssignNaming'
 import { isRtuManifestPictureHidden } from '@/lib/hiddenRtuPictures'
 import {
   getRtuPictureManifestUrl,
@@ -186,6 +190,25 @@ export async function migrateIndexedDbRtuKeys(
   })
   if (updated) notifyRtuPicturesChanged()
   return updated
+}
+
+/** Rename legacy spaced picture files in IndexedDB to cloud-safe names before sync. */
+export async function migrateLegacyPictureFileNames(): Promise<number> {
+  const rows = await idbGetAllRows()
+  let migrated = 0
+  for (const row of rows) {
+    const sep = row.rtuKey.indexOf('|')
+    if (sep < 0) continue
+    const buildingAddress = row.rtuKey.slice(0, sep)
+    const rtuName = row.rtuKey.slice(sep + 1)
+    const canonical = manifestEntryToCloudFileName(row.fileName, buildingAddress, rtuName)
+    if (canonical === row.fileName) continue
+    await idbPut({ ...row, fileName: canonical, pendingDeploy: true })
+    await idbDelete(row.fileName)
+    migrated += 1
+  }
+  if (migrated) notifyRtuPicturesChanged()
+  return migrated
 }
 
 async function idbPut(row: StoredRtuPictureRow): Promise<void> {
@@ -455,9 +478,10 @@ export async function listRtuPictures(
     if (isRtuManifestPictureHidden(manifestKey, fileName)) continue
     const index = parseRtuPictureIndex(fileName)
     if (index == null || index < 1) continue
-    const url = rtuPictureFileUrl(fileName)
+    const cloudFileName = manifestEntryToCloudFileName(fileName, buildingAddress, rtuName)
+    const url = rtuPictureFileUrl(cloudFileName)
     byIndex.set(index, {
-      fileName,
+      fileName: cloudFileName,
       index,
       thumbUrl: url,
       fullUrl: url,
@@ -517,7 +541,13 @@ export async function importRtuPictureAtIndex(
   await idbDeleteByRtuAndIndex(key, index)
 
   const ext = fileExtension(file)
-  const fileName = options?.fileName ?? buildBulkRtuPictureFileName(buildingAddress, rtuName, index, ext)
+  const fileName = options?.fileName
+    ? manifestEntryToCloudFileName(
+        options.fileName,
+        buildingAddress,
+        rtuName,
+      )
+    : buildCloudRtuPictureFileName(buildingAddress, rtuName, index, ext)
   const thumbBlob = await createThumbnail(file)
   await idbPut({
     fileName,

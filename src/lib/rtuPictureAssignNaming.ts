@@ -15,6 +15,30 @@ export function pictureFileRtuLabel(rtuName: string): string {
   return formatRtuNameForPictureFile(primary)
 }
 
+/** Unit token for cloud filenames, e.g. RTU-04 Hybrid → `04`, RTU-09 → `09`. */
+export function rtuUnitFileSegment(rtuName: string): string {
+  const label = pictureFileRtuLabel(rtuName).replace(/\s+Hybrid\b/gi, '').trim()
+  const match = label.match(/^RTU[-\s#]*(.+)$/i)
+  const segment = (match?.[1] ?? label).replace(/\s+/g, '')
+  const cleaned = segment.replace(/[^\w.-]/g, '')
+  return cleaned || 'unknown'
+}
+
+/**
+ * Cloudflare / R2 filename (no spaces), matching bulk imports like `2320-RTU-09-1.jpg`.
+ */
+export function buildCloudRtuPictureFileName(
+  buildingAddress: string,
+  rtuName: string,
+  pictureIndex: number,
+  ext: string,
+): string {
+  const buildingNum = buildingStreetNumber(buildingAddress)
+  const unit = rtuUnitFileSegment(rtuName)
+  const safeExt = ext.replace(/^\./, '').toLowerCase() || 'jpg'
+  return `${buildingNum}-RTU-${unit}-${pictureIndex}.${safeExt}`
+}
+
 /**
  * Bulk-style filename using the displayed RTU name, e.g. `2320-RTU-06 Hybrid (3).jpg`
  * (not `2320-RTU-06HYBRID (3).jpg`).
@@ -29,4 +53,18 @@ export function buildBulkRtuPictureFileName(
   const rtuLabel = pictureFileRtuLabel(rtuName)
   const safeExt = ext.replace(/^\./, '').toLowerCase() || 'jpg'
   return `${buildingNum}-${rtuLabel} (${pictureIndex}).${safeExt}`
+}
+
+/** Map legacy spaced manifest names to the cloud filename used on R2. */
+export function manifestEntryToCloudFileName(
+  fileName: string,
+  buildingAddress: string,
+  rtuName: string,
+): string {
+  if (!/[\s()]/.test(fileName)) return fileName
+  const paren = fileName.match(/\((\d+)\)\.[^.]+$/i)
+  const dash = fileName.match(/-(\d+)\.[^.]+$/i)
+  const index = paren ? Number(paren[1]) : dash ? Number(dash[1]) : 1
+  const ext = fileName.split('.').pop() ?? 'jpg'
+  return buildCloudRtuPictureFileName(buildingAddress, rtuName, index, ext)
 }

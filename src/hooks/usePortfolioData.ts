@@ -15,7 +15,7 @@ import {
   normalizePortfolioData,
 } from '@/types/domain'
 import { repairPortfolioRtuNames } from '@/lib/rtuNameRepair'
-import { migrateIndexedDbRtuKeys } from '@/lib/rtuPictures'
+import { migrateIndexedDbRtuKeys, migrateLegacyPictureFileNames } from '@/lib/rtuPictures'
 import { getJsonDataBaseUrl, usesRemoteJsonData } from '@/lib/jsonDataUrls'
 
 import staticBuildings from '../../supabase/data/buildings.json'
@@ -144,23 +144,26 @@ export async function repairStoredPortfolioRtuNames(
   picturesMigrated: number
 }> {
   const { portfolio: repaired, renames } = repairPortfolioRtuNames(normalizePortfolioData(portfolio))
-  if (!renames.length) {
-    return { portfolio: repaired, renamed: 0, picturesMigrated: 0 }
+
+  let picturesMigrated = 0
+  if (renames.length) {
+    picturesMigrated += await migrateIndexedDbRtuKeys(renames)
   }
+  picturesMigrated += await migrateLegacyPictureFileNames()
 
-  const picturesMigrated = await migrateIndexedDbRtuKeys(renames)
-  if (options?.persist !== false) persistPortfolio(repaired)
+  if (renames.length && options?.persist !== false) persistPortfolio(repaired)
 
-  if (options?.notify) {
+  if (options?.notify && (renames.length || picturesMigrated)) {
     const { showToastSuccess } = await import('@/lib/toast')
     const sample = renames
       .slice(0, 2)
       .map((r) => r.newName)
       .join(', ')
     const more = renames.length > 2 ? ` +${renames.length - 2} more` : ''
-    const pics =
-      picturesMigrated > 0 ? ` · ${picturesMigrated} picture(s) re-linked` : ''
-    showToastSuccess(`✓ Fixed RTU name(s): ${sample}${more}${pics}. Use Sync to publish.`)
+    const pics = picturesMigrated
+    const picNote = pics > 0 ? ` · ${pics} picture(s) re-linked` : ''
+    const nameNote = renames.length ? `Fixed RTU name(s): ${sample}${more}` : 'Picture filenames fixed for cloud upload'
+    showToastSuccess(`✓ ${nameNote}${picNote}. Use Sync to publish.`)
   }
 
   return { portfolio: repaired, renamed: renames.length, picturesMigrated }

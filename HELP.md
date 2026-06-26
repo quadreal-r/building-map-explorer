@@ -23,29 +23,44 @@
 
 ## To commit and push
 
-There is no `npm run commit` or `npm run push`. Use git from the project folder:
+There is no `npm run commit` or `npm run push`. Use git from the project folder.
+
+### Git workflow (code changes)
+
+If you use **Settings → Sync**, GitHub Actions may commit to `main` while you work locally. **Pull before you push** so you do not get `rejected (fetch first)`.
 
 ```powershell
 cd C:\Users\Robert\Projects\building-map-explorer
+git pull origin main
+npm test
 git status
-git add .
-git commit -m "Describe your change here"
-git push origin main
-```
-
-Pushing to **main** triggers GitHub Actions, which builds and publishes the site to GitHub Pages.
-
-### Code changes (features, UI, fixes)
-
-After `npm test` passes:
-
-```powershell
 git add .
 git commit -m "fix: short description of what changed"
 git push origin main
 ```
 
-Or tell the agent: **"Everything is good now, push the code"**.
+Pushing to **main** triggers GitHub Actions, which builds and publishes the site to GitHub Pages.
+
+**Push rejected?** Remote has commits you do not have (often from Settings sync):
+
+```powershell
+git pull origin main
+git push origin main
+```
+
+If `git pull` reports merge conflicts, fix the listed files, then:
+
+```powershell
+git add .
+git commit -m "merge: integrate remote main"
+git push origin main
+```
+
+Or tell the agent: **"Everything is good now, push the code"** (it will pull, merge, and push when needed).
+
+### Code changes (features, UI, fixes)
+
+After `npm test` passes, use the [Git workflow](#git-workflow-code-changes) above.
 
 ### Map / portfolio data changes
 
@@ -82,7 +97,7 @@ If RTU names on the map include a long description (e.g. `RTU-04 Hybrid/Dual Fue
 
 - Never commit `.env.local` (secrets) — it is gitignored
 - Do not commit `deploy-bundle.json` (gitignored; can be very large)
-- If push is rejected: `git pull origin main`, resolve conflicts, then push again
+- After **Settings → Sync**, run `git pull origin main` before your next code push (see [Git workflow](#git-workflow-code-changes))
 
 ## Tips
 - For complex requests: When you do "/programmer do this feature" press the plus button on the left side of the chat box and select "plan" and then on the far right of the chat box where it says "auto", click that, uncheck auto, then change that to "Opus" and then send your request. It will build out a plan for your feature, the plan should open when its done and you will see a button that says "Build plan" and the agent select next to it "Auto" (leave it on auto) then press build plan. This will generally give you better results for what you want to do 

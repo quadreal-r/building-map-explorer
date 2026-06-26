@@ -44,7 +44,7 @@ describe('rtuPictures naming', () => {
   it('resolves manifest keys when RTU name has a long description suffix', () => {
     const manifest = {
       entries: {
-        '2320 Bristol Circle|RTU-04 Hybrid': ['2320-RTU-04 Hybrid (1).jpg'],
+        '2320 Bristol Circle|RTU-04 Hybrid': ['2320-RTU-04-1.jpg'],
       },
     }
     expect(
