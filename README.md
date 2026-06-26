@@ -95,6 +95,14 @@ Production RTU photos are stored in **Cloudflare R2**, not in the git repo. The 
 
 Without `VITE_RTU_PICTURES_BASE_URL`, the app falls back to same-origin `public/database/rtu-pictures/` (local dev only).
 
+## Commit and push
+
+There is no npm script for git. See [HELP.md](HELP.md#to-commit-and-push) for the full workflow.
+
+- **Code changes:** `git add` → `git commit` → `git push origin main` (triggers GitHub Pages deploy)
+- **Map data (recommended):** Settings → **Sync to Cloudflare & GitHub** (CI may commit for you)
+- **Map data (manual):** `npm run apply-deploy-bundle`, then commit `supabase/data` and `manifest.json`
+
 ## Database setup
 
 1. Apply migration: `supabase/migrations/20260620000000_initial_schema.sql` (or Supabase MCP `apply_migration`)

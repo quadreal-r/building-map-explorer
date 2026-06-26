@@ -21,6 +21,55 @@
 - You may want to run the command "npm test" after its done its work, it should say all tests pass - if it doesnt just copy the output of the terminal and give it to the agent and tell it to fix it. Then make sure npm test is all passed and continue to next step.
 - Once done, you can say "Everything is good now, push the code"
 
+## To commit and push
+
+There is no `npm run commit` or `npm run push`. Use git from the project folder:
+
+```powershell
+cd C:\Users\Robert\Projects\building-map-explorer
+git status
+git add .
+git commit -m "Describe your change here"
+git push origin main
+```
+
+Pushing to **main** triggers GitHub Actions, which builds and publishes the site to GitHub Pages.
+
+### Code changes (features, UI, fixes)
+
+After `npm test` passes:
+
+```powershell
+git add .
+git commit -m "fix: short description of what changed"
+git push origin main
+```
+
+Or tell the agent: **"Everything is good now, push the code"**.
+
+### Map / portfolio data changes
+
+**Recommended:** Settings → **Save & deploy** → **Sync to Cloudflare & GitHub**
+
+- Uploads your local changes via GitHub Actions
+- CI may commit and push for you (`chore: sync portfolio and RTU pictures from Settings`)
+- No manual git needed if sync succeeds
+
+**Manual fallback** (if sync fails or bundle is too large):
+
+```powershell
+npm run apply-deploy-bundle
+git add supabase/data public/database/rtu-pictures/manifest.json
+git commit -m "chore: update portfolio data and RTU picture manifest"
+git push origin main
+```
+
+### Before you push
+
+- Never commit `.env.local` (secrets) — it is gitignored
+- Do not commit `deploy-bundle.json` (gitignored; can be very large)
+- If push is rejected: `git pull origin main`, resolve conflicts, then push again
+
 ## Tips
 - For complex requests: When you do "/programmer do this feature" press the plus button on the left side of the chat box and select "plan" and then on the far right of the chat box where it says "auto", click that, uncheck auto, then change that to "Opus" and then send your request. It will build out a plan for your feature, the plan should open when its done and you will see a button that says "Build plan" and the agent select next to it "Auto" (leave it on auto) then press build plan. This will generally give you better results for what you want to do 
     - If the request is fairly simple, you don't have to do this whole plan process, you can just do "/programmer do this thing" directly

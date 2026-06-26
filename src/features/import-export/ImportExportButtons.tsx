@@ -16,6 +16,7 @@ export interface ImportExportButtonsProps {
   buildings: Building[]
   onImport: (data: PortfolioData) => void
   onExportComplete?: () => void
+  mode?: 'both' | 'export' | 'import'
 }
 
 export function ImportExportButtons({
@@ -23,6 +24,7 @@ export function ImportExportButtons({
   buildings,
   onImport,
   onExportComplete,
+  mode = 'both',
 }: ImportExportButtonsProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
@@ -90,40 +92,49 @@ export function ImportExportButtons({
     }
   }
 
+  const showExport = mode === 'both' || mode === 'export'
+  const showImport = mode === 'both' || mode === 'import'
+
   return (
     <>
-      <SettingsToolButton
-        variant="export"
-        tooltip="Export buildings, RTUs, tenant polygons, utilities, and Cloudflare RTU picture references to Excel."
-        onClick={() => void handleExport()}
-        disabled={busy}
-      >
-        {busy ? 'Exporting…' : 'Export Database to Excel'}
-      </SettingsToolButton>
-      <SettingsToolButton
-        tooltip={
-          <>
-            Import from Excel: portfolio export (Buildings, RTUs, Tenant Polygons, Utilities) updates
-            map positions and equipment, or Capital RTU Replacement workbook (Equipment + RTU Pricing)
-            updates replacement years, notes, and tonnage pricing.
-          </>
-        }
-        onClick={() => inputRef.current?.click()}
-        disabled={busy}
-      >
-        {busy ? 'Importing…' : 'Import from Excel'}
-      </SettingsToolButton>
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".xlsx,.xls"
-        className={styles.hiddenFile}
-        onChange={(e) => {
-          const file = e.target.files?.[0]
-          if (file) void handleFile(file)
-        }}
-      />
-      {sourceFile ? (
+      {showExport ? (
+        <SettingsToolButton
+          variant="export"
+          tooltip="Export buildings, RTUs, tenant polygons, utilities, and Cloudflare RTU picture references to Excel."
+          onClick={() => void handleExport()}
+          disabled={busy}
+        >
+          {busy ? 'Exporting…' : 'Export Database to Excel'}
+        </SettingsToolButton>
+      ) : null}
+      {showImport ? (
+        <SettingsToolButton
+          tooltip={
+            <>
+              Import from Excel: portfolio export (Buildings, RTUs, Tenant Polygons, Utilities) updates
+              map positions and equipment, or Capital RTU Replacement workbook (Equipment + RTU Pricing)
+              updates replacement years, notes, and tonnage pricing.
+            </>
+          }
+          onClick={() => inputRef.current?.click()}
+          disabled={busy}
+        >
+          {busy ? 'Importing…' : 'Import from Excel'}
+        </SettingsToolButton>
+      ) : null}
+      {showImport ? (
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".xlsx,.xls"
+          className={styles.hiddenFile}
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) void handleFile(file)
+          }}
+        />
+      ) : null}
+      {showImport && sourceFile ? (
         <p className={styles.bulkImportFile}>
           Last workbook: {sourceFile}
           {pricingTiers ? ` · ${pricingTiers} tonnage tiers` : ''}

@@ -17,6 +17,12 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;')
 }
 
+/** Google Maps InfoWindow strips `hidden`; use inline display toggles instead. */
+const RTU_PICTURE_IMG_ONLOAD =
+  "var m=this.parentElement.querySelector('.iw-pictures-missing');if(m)m.style.display='none'"
+const RTU_PICTURE_IMG_ONERROR =
+  "this.classList.add('iw-pictures-img--missing');var m=this.parentElement.querySelector('.iw-pictures-missing');if(m)m.style.display='flex'"
+
 function closeButton(): string {
   return '<button class="iw-close" data-iw-action="close" title="Close">✕</button>'
 }
@@ -334,8 +340,8 @@ export function buildRtuPicturesHtml(
       <button type="button" class="iw-pictures-nav" data-iw-action="picture-prev" title="Previous picture"${total <= 1 ? ' disabled' : ''}>‹</button>
       <div class="iw-pictures-frame">
         <button type="button" class="iw-pictures-link" data-iw-action="picture-open-viewer" title="Open full size in viewer">
-          <img class="iw-pictures-img" src="${escapeHtml(current!.thumbUrl)}" alt="${escapeHtml(current!.fileName)}" onerror="this.classList.add('iw-pictures-img--missing');var m=this.parentElement.querySelector('.iw-pictures-missing');if(m)m.hidden=false;" />
-          <div class="iw-pictures-missing" hidden>Image not found on server. Use Add pictures to upload a replacement, or Delete to hide this entry.</div>
+          <img class="iw-pictures-img" src="${escapeHtml(current!.thumbUrl)}" alt="${escapeHtml(current!.fileName)}" onload="${RTU_PICTURE_IMG_ONLOAD}" onerror="${RTU_PICTURE_IMG_ONERROR}" />
+          <div class="iw-pictures-missing" style="display:none">Image not found on server. Use Add pictures to upload a replacement, or Delete to hide this entry.</div>
         </button>
       </div>
       <button type="button" class="iw-pictures-nav" data-iw-action="picture-next" title="Next picture"${total <= 1 ? ' disabled' : ''}>›</button>

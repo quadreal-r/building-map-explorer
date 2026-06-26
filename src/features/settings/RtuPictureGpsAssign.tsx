@@ -36,7 +36,7 @@ export function RtuPictureGpsAssign({ onBusyChange }: RtuPictureGpsAssignProps) 
           closeSettings()
         }
         if (result.skipped.length && !result.staged.length) {
-          showToastError('No photos had GPS — enable location in your camera or use bulk filename import')
+          showToastError('No photos had GPS — enable location in your camera settings')
         } else if (result.skipped.length) {
           showToastSuccess(
             `${result.skipped.length} file${result.skipped.length === 1 ? '' : 's'} skipped (no GPS or not an image)`,
@@ -56,14 +56,16 @@ export function RtuPictureGpsAssign({ onBusyChange }: RtuPictureGpsAssignProps) 
       <SettingsToolButton
         tooltip={
           <>
-            Select photos with GPS. Each appears as a purple marker where the photo was taken. Drag
-            the marker onto the correct RTU — the picture is saved and renamed like 2320-RTU-06 Hybrid (3).jpg.
+            Select RTU photos from your device. Photos with GPS appear as purple markers on the map
+            at the location they were taken. Drag each marker onto the correct RTU — the picture is
+            saved and renamed like 2320-RTU-06 Hybrid (3).jpg. Drop within 100 ft of an RTU marker
+            to assign. Photos without GPS are skipped.
           </>
         }
         onClick={() => inputRef.current?.click()}
         disabled={busy}
       >
-        {busy ? 'Reading GPS…' : 'Assign RTU Pictures by GPS (drag to RTU)'}
+        {busy ? 'Reading photos…' : 'Upload RTU Pictures'}
       </SettingsToolButton>
       {pendingCount > 0 ? (
         <p className={styles.hint}>
@@ -72,11 +74,7 @@ export function RtuPictureGpsAssign({ onBusyChange }: RtuPictureGpsAssignProps) 
             Clear all
           </button>
         </p>
-      ) : (
-        <p className={styles.hint}>
-          Purple markers appear at photo GPS. Drop within 100 ft of an RTU marker to assign.
-        </p>
-      )}
+      ) : null}
       <input
         ref={inputRef}
         type="file"

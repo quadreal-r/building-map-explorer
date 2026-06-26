@@ -1,8 +1,11 @@
 import { useState, useCallback, useMemo } from 'react'
 import { ImportExportButtons } from '@/features/import-export/ImportExportButtons'
-import { BulkRtuPictureImport } from '@/features/settings/BulkRtuPictureImport'
 import { RtuPictureGpsAssign } from '@/features/settings/RtuPictureGpsAssign'
-import { GitHubDeploySync } from '@/features/settings/GitHubDeploySync'
+import {
+  GitHubDeploySyncFields,
+  GitHubDeploySyncButton,
+  useGitHubDeploySync,
+} from '@/features/settings/GitHubDeploySync'
 import { RtuPricingSettings } from '@/features/settings/RtuPricingSettings'
 import { SettingsToolButton } from '@/features/settings/SettingsToolButton'
 import { Modal } from '@/components/Modal/Modal'
@@ -182,6 +185,12 @@ function SettingsForm({
   const [uploadBusy, setUploadBusy] = useState(false)
   const [pricingOpen, setPricingOpen] = useState(false)
 
+  const githubSync = useGitHubDeploySync({
+    portfolio,
+    disabled: uploadBusy,
+    onBusyChange: setUploadBusy,
+  })
+
   const managerEditorKey = useMemo(() => {
     if (!open) return 'closed'
     return managerSlotsFromPortfolio(portfolio.buildings)
@@ -277,45 +286,26 @@ function SettingsForm({
         </section>
 
         <section>
-          <div className={styles.sectionLabel}>Property manager names</div>
-          <Tooltip
-            content="Edit manager names shown in the sidebar All property managers filter."
-            position="left"
-            wide
-            className={`${tooltipStyles.wrapBlock} ${styles.toolBtnWrap}`}
-          >
-            <PropertyManagerNamesEditor
-              key={managerEditorKey}
-              portfolio={portfolio}
-              onPortfolioPatch={onPortfolioPatch}
-            />
-          </Tooltip>
-        </section>
-
-        <section>
-          <div className={styles.sectionLabel}>RTU replacement pricing</div>
+          <div className={styles.sectionLabel}>Edits</div>
           <div className={styles.tools}>
+            <Tooltip
+              content="Edit manager names shown in the sidebar All property managers filter."
+              position="left"
+              wide
+              className={`${tooltipStyles.wrapBlock} ${styles.toolBtnWrap}`}
+            >
+              <PropertyManagerNamesEditor
+                key={managerEditorKey}
+                portfolio={portfolio}
+                onPortfolioPatch={onPortfolioPatch}
+              />
+            </Tooltip>
             <SettingsToolButton
               tooltip="Edit supply, install, and other per-tonnage replacement costs used by the cost estimator."
               onClick={() => setPricingOpen(true)}
             >
               Edit RTU&apos;s Pricing
             </SettingsToolButton>
-          </div>
-        </section>
-
-        <section>
-          <div className={styles.sectionLabel}>Cloudflare &amp; GitHub sync</div>
-          <GitHubDeploySync
-            portfolio={portfolio}
-            disabled={uploadBusy}
-            onBusyChange={setUploadBusy}
-          />
-        </section>
-
-        <section>
-          <div className={styles.sectionLabel}>Tools</div>
-          <div className={styles.tools}>
             <SettingsToolButton
               tooltip="Turn on map edit mode: drag a box to select markers and polygons, then drag any selected item to move the group. Ctrl/Shift+click or drag to add to selection."
               onClick={handleEditPositions}
@@ -354,6 +344,25 @@ function SettingsForm({
             >
               Add polygon
             </SettingsToolButton>
+            <ImportExportButtons
+              portfolio={portfolio}
+              buildings={portfolio.buildings}
+              onImport={handleImport}
+              mode="import"
+            />
+            <RtuPictureGpsAssign onBusyChange={setUploadBusy} />
+          </div>
+        </section>
+
+        <section>
+          <div className={styles.sectionLabel}>Cloudflare &amp; GitHub sync</div>
+          <GitHubDeploySyncFields sync={githubSync} disabled={uploadBusy} />
+        </section>
+
+        <section>
+          <div className={styles.sectionLabel}>Save &amp; deploy</div>
+          <div className={styles.tools}>
+            <GitHubDeploySyncButton sync={githubSync} disabled={uploadBusy} />
             <SettingsToolButton
               variant="export"
               tooltip="Save portfolio, RTU schedule, pricing, and IndexedDB pictures as deploy-bundle.json. Run npm run apply-deploy-bundle, then commit and push to update GitHub Pages."
@@ -374,9 +383,8 @@ function SettingsForm({
               buildings={portfolio.buildings}
               onImport={handleImport}
               onExportComplete={handleClose}
+              mode="export"
             />
-            <BulkRtuPictureImport portfolio={portfolio} onBusyChange={setUploadBusy} />
-            <RtuPictureGpsAssign onBusyChange={setUploadBusy} />
           </div>
         </section>
       </div>
