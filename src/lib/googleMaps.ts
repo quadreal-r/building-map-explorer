@@ -30,7 +30,7 @@ export function loadGoogleMaps(): Promise<typeof google> {
     const loader = new Loader({
       apiKey,
       version: 'weekly',
-      libraries: ['drawing', 'geometry'],
+      libraries: ['drawing', 'geometry', 'marker'],
       mapIds: [mapId],
     })
     loadPromise = loader.load()

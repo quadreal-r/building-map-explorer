@@ -1,6 +1,8 @@
 /** RTU picture storage: Cloudflare R2 (production) or same-origin static files, plus IndexedDB uploads. */
 
 import { parseBulkRtuPictureFileName } from '@/lib/rtuPictureMatch'
+import { buildBulkRtuPictureFileName } from '@/lib/rtuPictureAssignNaming'
+import { isRtuManifestPictureHidden } from '@/lib/hiddenRtuPictures'
 import {
   getRtuPictureManifestUrl,
   rtuPictureFileUrl,
@@ -160,39 +162,93 @@ export interface DeployPictureExportResult {
   pendingCount: number
 }
 
-/** IndexedDB pictures pending Cloudflare deploy (map upload / bulk import). */
-export async function exportPendingPicturesForDeploy(): Promise<DeployPictureExportResult> {
+export interface PendingDeployPictureRow {
+  fileName: string
+  rtuKey: string
+  index: number
+  mimeType: string
+  blob: Blob
+}
+
+/** Encode a blob as raw base64 without building a giant intermediate binary string. */
+export async function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const dataUrl = reader.result
+      if (typeof dataUrl !== 'string') {
+        reject(new Error('Failed to read image'))
+        return
+      }
+      const comma = dataUrl.indexOf(',')
+      resolve(comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl)
+    }
+    reader.onerror = () => reject(reader.error ?? new Error('Failed to read image'))
+    reader.readAsDataURL(blob)
+  })
+}
+
+/** Rough upper bound for JSON size of one deploy picture entry (base64 + field overhead). */
+export function estimateDeployPictureJsonBytes(blobSize: number): number {
+  return Math.ceil((blobSize * 4) / 3) + 160
+}
+
+/** Pending IndexedDB rows for deploy, without loading every image into memory as base64. */
+export async function listPendingDeployPictureRows(): Promise<{
+  rows: PendingDeployPictureRow[]
+  failedFileNames: string[]
+  pendingCount: number
+}> {
   const rows = await idbGetAllRows()
   const pendingRows = rows.filter((row) => row.pendingDeploy !== false)
-  const pictures: DeployPictureExportResult['pictures'] = []
+  const deployRows: PendingDeployPictureRow[] = []
   const failedFileNames: string[] = []
 
   for (const row of pendingRows) {
+    const blob = row.fullBlob ?? row.thumbBlob
+    if (!blob || blob.size === 0) {
+      failedFileNames.push(row.fileName)
+      continue
+    }
+    deployRows.push({
+      fileName: row.fileName,
+      rtuKey: row.rtuKey,
+      index: row.index,
+      mimeType: row.mimeType,
+      blob,
+    })
+  }
+
+  return { rows: deployRows, failedFileNames, pendingCount: pendingRows.length }
+}
+
+export async function encodeDeployPictureEntry(
+  row: PendingDeployPictureRow,
+): Promise<import('@/types/deployBundle').DeployPictureEntry> {
+  const base64 = await blobToBase64(row.blob)
+  return {
+    fileName: row.fileName,
+    rtuKey: row.rtuKey,
+    index: row.index,
+    mimeType: row.mimeType,
+    base64,
+  }
+}
+
+/** IndexedDB pictures pending Cloudflare deploy (map upload / bulk import). */
+export async function exportPendingPicturesForDeploy(): Promise<DeployPictureExportResult> {
+  const { rows, failedFileNames, pendingCount } = await listPendingDeployPictureRows()
+  const pictures: DeployPictureExportResult['pictures'] = []
+
+  for (const row of rows) {
     try {
-      const blob = row.fullBlob ?? row.thumbBlob
-      if (!blob || blob.size === 0) {
-        failedFileNames.push(row.fileName)
-        continue
-      }
-      const buffer = await blob.arrayBuffer()
-      const bytes = new Uint8Array(buffer)
-      let binary = ''
-      for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]!)
-      }
-      pictures.push({
-        fileName: row.fileName,
-        rtuKey: row.rtuKey,
-        index: row.index,
-        mimeType: row.mimeType,
-        base64: btoa(binary),
-      })
+      pictures.push(await encodeDeployPictureEntry(row))
     } catch {
       failedFileNames.push(row.fileName)
     }
   }
 
-  return { pictures, failedFileNames, pendingCount: pendingRows.length }
+  return { pictures, failedFileNames, pendingCount }
 }
 
 /** Mark map/import pictures as deployed after a successful Settings sync. */
@@ -330,6 +386,7 @@ export async function listRtuPictures(
   const byIndex = new Map<number, RtuPicture>()
 
   for (const fileName of staticNames) {
+    if (isRtuManifestPictureHidden(key, fileName)) continue
     const index = parseRtuPictureIndex(fileName)
     if (index == null || index < 1) continue
     const url = rtuPictureFileUrl(fileName)
@@ -394,7 +451,7 @@ export async function importRtuPictureAtIndex(
   await idbDeleteByRtuAndIndex(key, index)
 
   const ext = fileExtension(file)
-  const fileName = options?.fileName ?? rtuPictureFileName(buildingAddress, rtuName, index, ext)
+  const fileName = options?.fileName ?? buildBulkRtuPictureFileName(buildingAddress, rtuName, index, ext)
   const thumbBlob = await createThumbnail(file)
   await idbPut({
     fileName,

@@ -14,6 +14,7 @@ describe('exportDatabaseExcelFilename', () => {
 describe('buildRtuPictureExportBundle', () => {
   it('includes Cloudflare picture URLs from manifest', () => {
     vi.stubEnv('VITE_RTU_PICTURES_BASE_URL', 'https://cdn.example.com/rtu/')
+    vi.stubEnv('VITE_JSON_DATA_BASE_URL', '')
     vi.stubEnv('BASE_URL', '/building-map-explorer/')
 
     const data: PortfolioData = {

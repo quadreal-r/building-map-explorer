@@ -1,4 +1,12 @@
 import { useEffect, useRef } from 'react'
+import {
+  addAppMarkerListener,
+  createAppMarker,
+  getAppMarkerPosition,
+  setAppMarkerMap,
+  setAppMarkerPosition,
+  type AppMapMarker,
+} from '@/lib/appMapMarker'
 import { findNearestRtuAt, RTU_PICTURE_DROP_FEET } from '@/lib/rtuPictureGpsAssign'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import { usePendingRtuPictureStore } from '@/stores/pendingRtuPictureStore'
@@ -6,7 +14,7 @@ import type { Building } from '@/types/domain'
 
 interface PictureMarkerEntry {
   id: string
-  marker: google.maps.Marker
+  marker: AppMapMarker
 }
 
 function pictureMarkerIcon(): google.maps.Symbol {
@@ -45,18 +53,17 @@ export function usePendingPictureMarkers(
       if (!marker) {
         const pendingId = item.id
         const originalName = item.originalName
-        marker = new google.maps.Marker({
-          position: { lat: item.lat, lng: item.lng },
+        marker = createAppMarker({
           map,
+          position: { lat: item.lat, lng: item.lng },
           draggable: true,
           title: `Photo: ${item.originalName} — drag onto RTU marker`,
           icon: pictureMarkerIcon(),
           zIndex: 2000,
-          optimized: false,
         })
 
-        marker.addListener('dragend', () => {
-          const pos = marker!.getPosition()
+        addAppMarkerListener(marker, 'dragend', () => {
+          const pos = getAppMarkerPosition(marker!)
           if (!pos) return
           const lat = pos.lat()
           const lng = pos.lng()
@@ -81,10 +88,10 @@ export function usePendingPictureMarkers(
             })
         })
       } else {
-        marker.setMap(map)
-        const pos = marker.getPosition()
+        setAppMarkerMap(marker, map)
+        const pos = getAppMarkerPosition(marker)
         if (!pos || pos.lat() !== item.lat || pos.lng() !== item.lng) {
-          marker.setPosition({ lat: item.lat, lng: item.lng })
+          setAppMarkerPosition(marker, item.lat, item.lng)
         }
       }
 
@@ -93,14 +100,14 @@ export function usePendingPictureMarkers(
     }
 
     for (const orphan of byId.values()) {
-      orphan.setMap(null)
+      setAppMarkerMap(orphan, null)
     }
 
     markersRef.current = next
 
     return () => {
       for (const entry of markersRef.current) {
-        entry.marker.setMap(null)
+        setAppMarkerMap(entry.marker, null)
       }
       markersRef.current = []
     }

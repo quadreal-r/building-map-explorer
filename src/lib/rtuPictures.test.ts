@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildingStreetNumber,
+  estimateDeployPictureJsonBytes,
   parseRtuPictureIndex,
   rtuPictureFileBase,
   rtuPictureFileName,
@@ -33,5 +34,9 @@ describe('rtuPictures naming', () => {
     expect(parseRtuPictureIndex('20-RTU-01-1 (2015).jpg')).toBe(1)
     expect(parseRtuPictureIndex('6325-RTU-1 (2).JPG')).toBe(2)
     expect(parseRtuPictureIndex('1590-RTU-04-2.jpg')).toBe(2)
+  })
+
+  it('estimates deploy JSON size from blob bytes', () => {
+    expect(estimateDeployPictureJsonBytes(3_000_000)).toBeGreaterThan(4_000_000)
   })
 })

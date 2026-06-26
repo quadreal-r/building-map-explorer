@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_GITHUB_REPO, MAX_GIST_BYTES, resolveGitHubRepo } from '@/lib/githubDeploySync'
+import {
+  DEFAULT_GITHUB_REPO,
+  jsonArraySizeAfterAddingEntry,
+  MAX_GIST_BYTES,
+  resolveGitHubRepo,
+} from '@/lib/githubDeploySync'
 
 describe('resolveGitHubRepo', () => {
   it('uses default when empty', () => {
@@ -15,5 +20,12 @@ describe('resolveGitHubRepo', () => {
 describe('MAX_GIST_BYTES', () => {
   it('stays under GitHub gist guidance', () => {
     expect(MAX_GIST_BYTES).toBeLessThan(10 * 1024 * 1024)
+  })
+})
+
+describe('jsonArraySizeAfterAddingEntry', () => {
+  it('tracks JSON array growth for deploy picture entries', () => {
+    expect(jsonArraySizeAfterAddingEntry(2, 0, 48)).toBe(50)
+    expect(jsonArraySizeAfterAddingEntry(50, 1, 48)).toBe(99)
   })
 })

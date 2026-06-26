@@ -1,0 +1,22 @@
+{
+  "points": [
+    {
+      "id": "2026-06-25T234912Z",
+      "commit": "21b0b13c86b5b66047500cd34939bd0ef2edf3d5",
+      "tag": "restore/2026-06-25T234912Z-post-audit-restore-point-script-gitignore-test-e",
+      "description": "Post-audit: restore-point script, gitignore, test env isolation",
+      "createdAt": "2026-06-25T23:49:12.423Z",
+      "branch": "main",
+      "filesChanged": 23
+    },
+    {
+      "id": "2026-06-25T234810Z",
+      "commit": "c97c3636745df2355766bfe78f6ed015cc307446",
+      "tag": "restore/2026-06-25T234810Z-pre-audit-snapshot-viewer-zoom-sync-oom-hidden-m",
+      "description": "Pre-audit snapshot: viewer zoom, sync OOM, hidden manifest pics",
+      "createdAt": "2026-06-25T23:48:10.132Z",
+      "branch": "main",
+      "filesChanged": 20
+    }
+  ]
+}

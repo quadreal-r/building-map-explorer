@@ -87,8 +87,11 @@ export function GitHubDeploySync({
       .then((result) => {
         const parts = ['✓ Sync complete — portfolio JSON uploaded to Cloudflare and GitHub Pages will redeploy.']
         if (result.picturesOmitted && result.pendingPictureCount > 0) {
+          const skipped = Math.max(0, result.pendingPictureCount - result.pictureCount)
           parts.push(
-            `${result.pendingPictureCount} local picture(s) were too large to include in the sync bundle — they were not uploaded to Cloudflare. Try fewer pictures per sync or export manually.`,
+            skipped > 0
+              ? `${skipped} local picture(s) were too large to include in the sync bundle — sync again later or use npm run upload-rtu-pictures-r2 locally.`
+              : `${result.pendingPictureCount} local picture(s) were too large to include in the sync bundle — they were not uploaded to Cloudflare. Try fewer pictures per sync or export manually.`,
           )
         } else if (result.pictureCount > 0) {
           parts.push(`${result.pictureCount} picture(s) uploaded to Cloudflare.`)

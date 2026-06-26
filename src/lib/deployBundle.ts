@@ -87,6 +87,21 @@ function readPricingFromStorage(): DeployBundle['pricing'] {
   }
 }
 
+function collectDeployBundleCore(portfolio: PortfolioData): Omit<DeployBundle, 'pictures'> {
+  return {
+    version: DEPLOY_BUNDLE_VERSION,
+    exportedAt: new Date().toISOString(),
+    portfolio: readPortfolioFromStorage(portfolio),
+    schedule: readScheduleFromStorage(),
+    pricing: readPricingFromStorage(),
+  }
+}
+
+/** Portfolio, schedule, and pricing only — no picture base64 (safe for one-click sync). */
+export function collectDeployBundleLean(portfolio: PortfolioData): Omit<DeployBundle, 'pictures'> {
+  return collectDeployBundleCore(portfolio)
+}
+
 /** Collect a deploy bundle from the current browser state (local dev is source of truth). */
 export async function collectDeployBundle(portfolio: PortfolioData): Promise<DeployBundle> {
   const pictureExport = await exportIndexedDbPicturesForDeployWithMeta()
@@ -97,11 +112,7 @@ export async function collectDeployBundle(portfolio: PortfolioData): Promise<Dep
     )
   }
   return {
-    version: DEPLOY_BUNDLE_VERSION,
-    exportedAt: new Date().toISOString(),
-    portfolio: readPortfolioFromStorage(portfolio),
-    schedule: readScheduleFromStorage(),
-    pricing: readPricingFromStorage(),
+    ...collectDeployBundleCore(portfolio),
     pictures: pictureExport.pictures,
   }
 }
@@ -111,11 +122,7 @@ export async function collectDeployBundleWithMeta(
 ): Promise<{ bundle: DeployBundle; pictureExport: DeployPictureExportSummary }> {
   const pictureExport = await exportIndexedDbPicturesForDeployWithMeta()
   const bundle: DeployBundle = {
-    version: DEPLOY_BUNDLE_VERSION,
-    exportedAt: new Date().toISOString(),
-    portfolio: readPortfolioFromStorage(portfolio),
-    schedule: readScheduleFromStorage(),
-    pricing: readPricingFromStorage(),
+    ...collectDeployBundleCore(portfolio),
     pictures: pictureExport.pictures,
   }
   return { bundle, pictureExport }
