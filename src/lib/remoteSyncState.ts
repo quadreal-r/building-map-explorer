@@ -5,6 +5,8 @@ export interface RemoteSyncState {
   acknowledgedExportedAt: string | null
   /** exportedAt from the last successful Settings push on this computer. */
   lastPushedExportedAt: string | null
+  /** Hidden RTU picture keys included in the last successful push on this computer. */
+  lastPushedHiddenKeys: string[] | null
   /** First remote check completed without showing a stale alert. */
   initialized: boolean
 }
@@ -12,6 +14,7 @@ export interface RemoteSyncState {
 const DEFAULT_STATE: RemoteSyncState = {
   acknowledgedExportedAt: null,
   lastPushedExportedAt: null,
+  lastPushedHiddenKeys: null,
   initialized: false,
 }
 
@@ -23,6 +26,9 @@ export function loadRemoteSyncState(): RemoteSyncState {
     return {
       acknowledgedExportedAt: parsed.acknowledgedExportedAt ?? null,
       lastPushedExportedAt: parsed.lastPushedExportedAt ?? null,
+      lastPushedHiddenKeys: Array.isArray(parsed.lastPushedHiddenKeys)
+        ? parsed.lastPushedHiddenKeys.filter((item): item is string => typeof item === 'string')
+        : null,
       initialized: parsed.initialized ?? false,
     }
   } catch {
@@ -34,12 +40,16 @@ function saveRemoteSyncState(state: RemoteSyncState): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
 }
 
-export function recordLocalSyncPush(exportedAt: string): void {
+export function recordLocalSyncPush(
+  exportedAt: string,
+  options?: { hiddenKeys?: string[] },
+): void {
   const state = loadRemoteSyncState()
   saveRemoteSyncState({
     ...state,
     lastPushedExportedAt: exportedAt,
     acknowledgedExportedAt: exportedAt,
+    lastPushedHiddenKeys: options?.hiddenKeys ?? state.lastPushedHiddenKeys,
     initialized: true,
   })
 }

@@ -14,7 +14,13 @@ import {
   SYNC_META_FILE,
   writeSyncMetaFile,
 } from './lib/sync-meta.mjs'
-import { getR2JsonBucket, isR2JsonConfigured, uploadJsonFileToR2 } from './lib/r2-client.mjs'
+import {
+  describeR2JsonConfigProblem,
+  getR2JsonBucket,
+  isR2JsonConfigured,
+  uploadJsonFileToR2,
+} from './lib/r2-client.mjs'
+import { loadDotEnvLocal } from './lib/load-dotenv-local.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
@@ -46,7 +52,10 @@ const PICS_DIR = join(ROOT, 'public', 'database', 'rtu-pictures')
 
 export async function uploadPortfolioJsonToR2() {
   if (!isR2JsonConfigured()) {
+    const problem = describeR2JsonConfigProblem()
     console.log('R2 JSON bucket not configured — skipping portfolio JSON upload.')
+    if (problem) console.log(`  ${problem}`)
+    console.log('  Scripts load credentials from .env.local in the project root.')
     return { uploaded: 0, skipped: PORTFOLIO_JSON_FILES.length }
   }
 
@@ -77,6 +86,7 @@ export async function uploadPortfolioJsonToR2() {
 }
 
 async function main() {
+  loadDotEnvLocal()
   const { uploaded, skipped } = await uploadPortfolioJsonToR2()
   if (uploaded > 0) {
     console.log(`\nDone. Uploaded ${uploaded} JSON file(s) to R2 bucket "${getR2JsonBucket()}".`)

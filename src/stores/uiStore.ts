@@ -1,4 +1,9 @@
 import { create } from 'zustand'
+import {
+  clearRtuPictureViewerHistoryFlag,
+  pushRtuPictureViewerHistory,
+  syncRtuPictureViewerHistoryOnClose,
+} from '@/lib/rtuPictureViewerHistory'
 
 export type ModalId =
   | 'addMarker'
@@ -44,7 +49,7 @@ interface UiState {
   setPolygonDrawMode: (active: boolean) => void
   clearAddMarkerPlacement: () => void
   openRtuPictureViewer: (state: RtuPictureViewerState) => void
-  closeRtuPictureViewer: () => void
+  closeRtuPictureViewer: (fromPopState?: boolean) => void
   setRtuPictureViewerIndex: (index: number) => void
   updateRtuPictureViewerPictures: (pictures: RtuPictureViewerItem[], index?: number) => void
 }
@@ -83,8 +88,22 @@ export const useUiStore = create<UiState>((set, get) => ({
   setAddMarkerClickHandler: (handler) => set({ addMarkerClickHandler: handler }),
   setPolygonDrawMode: (active) => set({ polygonDrawMode: active }),
   clearAddMarkerPlacement: () => set({ addMarkerPickMode: false, addMarkerClickHandler: null }),
-  openRtuPictureViewer: (state) => set({ rtuPictureViewer: state }),
-  closeRtuPictureViewer: () => set({ rtuPictureViewer: null }),
+  openRtuPictureViewer: (state) => {
+    const wasOpen = Boolean(get().rtuPictureViewer)
+    set({ rtuPictureViewer: state })
+    if (!wasOpen) {
+      pushRtuPictureViewerHistory()
+    }
+  },
+  closeRtuPictureViewer: (fromPopState = false) => {
+    if (!get().rtuPictureViewer) return
+    set({ rtuPictureViewer: null })
+    if (fromPopState) {
+      clearRtuPictureViewerHistoryFlag()
+      return
+    }
+    syncRtuPictureViewerHistoryOnClose()
+  },
   setRtuPictureViewerIndex: (index) =>
     set((state) =>
       state.rtuPictureViewer ? { rtuPictureViewer: { ...state.rtuPictureViewer, index } } : {},

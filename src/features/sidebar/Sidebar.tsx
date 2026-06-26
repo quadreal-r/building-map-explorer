@@ -3,10 +3,12 @@ import { SearchInput } from '@/components/SearchInput/SearchInput'
 import { Select } from '@/components/Select/Select'
 import { LAYER_COLORS } from '@/lib/constants'
 import { collectFilterOptions, reconcileFilterDropdowns, applyFilterSelection } from '@/lib/filters'
+import { resolveManagerDisplayName } from '@/lib/managerNames'
 import { buildPolygonBuildingIndex } from '@/lib/polygonBuildings'
 import { useFilterStore } from '@/stores/filterStore'
 import { useLayerStore } from '@/stores/layerStore'
 import { useSelectionStore } from '@/stores/selectionStore'
+import { useSettingsStore } from '@/stores/settingsStore'
 import { DEFAULT_DQ_FILTERS, type Building, type LayerKey, type PortfolioData } from '@/types/domain'
 import { AdvancedFilters } from './AdvancedFilters'
 import { BuildingList } from './BuildingList'
@@ -42,10 +44,13 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
   const adv = useFilterStore((s) => s.adv)
   const setSearchInput = useFilterStore((s) => s.setSearchInput)
   const applySearch = useFilterStore((s) => s.applySearch)
+  const applyRecentSearch = useFilterStore((s) => s.applyRecentSearch)
+  const recentSearches = useFilterStore((s) => s.recentSearches)
   const clearSearch = useFilterStore((s) => s.clearSearch)
   const setPark = useFilterStore((s) => s.setPark)
   const setCluster = useFilterStore((s) => s.setCluster)
   const setManager = useFilterStore((s) => s.setManager)
+  const managerRenames = useSettingsStore((s) => s.managerRenames)
 
   const layers = useLayerStore((s) => s.layers)
   const toggleLayer = useLayerStore((s) => s.toggleLayer)
@@ -64,8 +69,8 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
   )
 
   const options = useMemo(
-    () => collectFilterOptions(allBuildings, filterContext, polygonIndex),
-    [allBuildings, filterContext, polygonIndex],
+    () => collectFilterOptions(allBuildings, filterContext, polygonIndex, managerRenames),
+    [allBuildings, filterContext, polygonIndex, managerRenames],
   )
 
   const baseFilters = useMemo(
@@ -76,14 +81,14 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
   const handleFilterChange = (
     patch: Partial<Pick<typeof baseFilters, 'park' | 'cluster' | 'manager'>>,
   ) => {
-    const next = applyFilterSelection(allBuildings, baseFilters, patch, polygonIndex)
+    const next = applyFilterSelection(allBuildings, baseFilters, patch, polygonIndex, managerRenames)
     if (next.park !== park) setPark(next.park)
     if (next.cluster !== cluster) setCluster(next.cluster)
     if (next.manager !== manager) setManager(next.manager)
   }
 
   useLayoutEffect(() => {
-    const reconciled = reconcileFilterDropdowns(allBuildings, baseFilters, polygonIndex)
+    const reconciled = reconcileFilterDropdowns(allBuildings, baseFilters, polygonIndex, managerRenames)
     if (reconciled.park !== park) setPark(reconciled.park)
     if (reconciled.cluster !== cluster) setCluster(reconciled.cluster)
     if (reconciled.manager !== manager) setManager(reconciled.manager)
@@ -126,6 +131,24 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
             onApply={applySearch}
             onClear={clearSearch}
           />
+          {recentSearches.length > 0 ? (
+            <div className={styles.recentSearches}>
+              <span className={styles.recentSearchesLabel}>Recent</span>
+              <div className={styles.recentSearchesList}>
+                {recentSearches.map((query) => (
+                  <button
+                    key={query}
+                    type="button"
+                    className={styles.recentSearchBtn}
+                    onClick={() => applyRecentSearch(query)}
+                    title={`Search for ${query}`}
+                  >
+                    {query}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
           <SearchHitNav buildings={allBuildings} polygons={portfolio.polygons} />
           <Select
             id="park-filter"
@@ -143,7 +166,10 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
           />
           <Select
             id="manager-filter"
-            options={options.managers.map((m) => ({ value: m, label: m }))}
+            options={options.managers.map((m) => ({
+              value: m,
+              label: resolveManagerDisplayName(m, managerRenames),
+            }))}
             value={manager}
             onChange={(e) => handleFilterChange({ manager: e.target.value })}
             placeholder="All property managers"

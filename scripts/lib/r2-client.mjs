@@ -10,7 +10,7 @@
  *   R2_KEY_PREFIX (optional object key prefix, e.g. rtu-pictures/)
  *   R2_JSON_BUCKET or R2_JSON_BUCKET_NAME (portfolio JSON bucket, default json)
  */
-import { HeadObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { CopyObjectCommand, HeadObjectCommand, ListObjectsV2Command, PutObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 function readEnv(...keys) {
   for (const key of keys) {
@@ -50,6 +50,32 @@ export function getR2JsonBucket() {
 
 export function isR2JsonConfigured() {
   return Boolean(createR2Client() && getR2JsonBucket())
+}
+
+/** Which env vars are missing for R2 S3 API (for error messages). */
+export function missingR2CredentialKeys() {
+  const missing = []
+  if (!readEnv('R2_ACCOUNT_ID', 'CLOUDFLARE_ACCOUNT_ID')) missing.push('R2_ACCOUNT_ID')
+  if (!readEnv('R2_ACCESS_KEY_ID', 'CLOUDFLARE_R2_ACCESS_KEY_ID')) missing.push('R2_ACCESS_KEY_ID')
+  if (!readEnv('R2_SECRET_ACCESS_KEY', 'CLOUDFLARE_R2_SECRET_ACCESS_KEY')) {
+    missing.push('R2_SECRET_ACCESS_KEY')
+  }
+  return missing
+}
+
+export function describeR2JsonConfigProblem() {
+  const missing = missingR2CredentialKeys()
+  if (missing.length) {
+    return `Missing in .env.local (or shell env): ${missing.join(', ')}`
+  }
+  const accountId = readEnv('R2_ACCOUNT_ID', 'CLOUDFLARE_ACCOUNT_ID') ?? ''
+  if (accountId.startsWith('cfat_')) {
+    return 'R2_ACCOUNT_ID looks like an API token (cfat_…). Use your 32-character Account ID from Cloudflare Dashboard → Overview.'
+  }
+  if (!getR2JsonBucket()) {
+    return 'R2_JSON_BUCKET is empty'
+  }
+  return null
 }
 
 export function getR2PublicBaseUrl() {
@@ -158,6 +184,45 @@ export async function uploadRtuPictureToR2(fileName, body, contentType) {
       Key: r2ObjectKey(fileName),
       Body: body,
       ContentType: contentType ?? guessPictureContentType(fileName),
+      CacheControl: 'public, max-age=31536000, immutable',
+    }),
+  )
+}
+
+/** Read picture bytes from R2 (manifest or cloud key). */
+export async function readRtuPictureFromR2(fileName) {
+  const client = createR2Client()
+  const bucket = getR2Bucket()
+  if (!client || !bucket) {
+    throw new Error('R2 is not configured.')
+  }
+
+  const response = await client.send(
+    new GetObjectCommand({
+      Bucket: bucket,
+      Key: r2ObjectKey(fileName),
+    }),
+  )
+  if (!response.Body) throw new Error(`Empty body for ${fileName}`)
+  return Buffer.from(await response.Body.transformToByteArray())
+}
+
+/** Duplicate an existing R2 object under a new filename (cloud alias). */
+export async function copyRtuPictureOnR2(sourceFileName, destFileName) {
+  const client = createR2Client()
+  const bucket = getR2Bucket()
+  if (!client || !bucket) {
+    throw new Error('R2 is not configured.')
+  }
+
+  const sourceKey = r2ObjectKey(sourceFileName)
+  await client.send(
+    new CopyObjectCommand({
+      Bucket: bucket,
+      CopySource: `${bucket}/${encodeURIComponent(sourceKey).replace(/%2F/g, '/')}`,
+      Key: r2ObjectKey(destFileName),
+      ContentType: guessPictureContentType(destFileName),
+      MetadataDirective: 'REPLACE',
       CacheControl: 'public, max-age=31536000, immutable',
     }),
   )

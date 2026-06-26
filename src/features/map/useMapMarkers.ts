@@ -43,6 +43,12 @@ import { buildPolygonBuildingIndex, polygonsForBuilding } from '@/lib/polygonBui
 import { consumeMapClickClearSuppression, registerMarqueeTarget, suppressMapClickClearOnce, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
 import { tryConsumeMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
 import { afterMapViewChange, fitBoundsPreserveRotation, panToPreserveRotation } from '@/lib/mapRotation'
+import {
+  clearAllRtuDropTargets,
+  registerRtuDropTarget,
+  rtuDropTargetKey,
+  unregisterRtuDropTarget,
+} from '@/features/map/rtuDropTargetHighlight'
 import { closeAllMapPopups, ensureInfoWindowVisible, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
 import { collectSearchHits } from '@/lib/searchHits'
 import { getDetailMarkerIcon, getMarkerIcon } from '@/lib/markerStyles'
@@ -61,10 +67,17 @@ import {
   rtuPictureKey,
   type RtuPicture,
 } from '@/lib/rtuPictures'
-import { showToastSuccess } from '@/lib/toast'
+import { showToastError, showToastSuccess } from '@/lib/toast'
+import {
+  countPendingPicturesNearRtu,
+  findNearestPendingPictureToRtu,
+} from '@/lib/rtuPictureGpsAssign'
+import { RTU_PICTURE_DROP_FEET } from '@/lib/geo'
 import { useLayerStore } from '@/stores/layerStore'
 import { useFilterStore } from '@/stores/filterStore'
+import { usePendingRtuPictureStore } from '@/stores/pendingRtuPictureStore'
 import { useSelectionStore } from '@/stores/selectionStore'
+import { useSettingsStore } from '@/stores/settingsStore'
 import { useUiStore } from '@/stores/uiStore'
 import type { Building, LayerKey, Polygon, Rtu, Utility } from '@/types/domain'
 
@@ -72,6 +85,18 @@ interface BuildingMarkerEntry {
   building: Building
   marker: AppMapMarker
   label: AppMapMarker
+}
+
+const MAP_BUILDING_FIT_PADDING = { top: 40, right: 40, bottom: 40, left: 40 } as const
+
+function fitMapToBuildingMarkers(map: google.maps.Map, entries: BuildingMarkerEntry[]): void {
+  const bounds = new google.maps.LatLngBounds()
+  for (const entry of entries) {
+    bounds.extend({ lat: entry.building.lat, lng: entry.building.lng })
+  }
+  if (!bounds.isEmpty()) {
+    fitBoundsPreserveRotation(map, bounds, MAP_BUILDING_FIT_PADDING)
+  }
 }
 
 interface DetailMarkerEntry {
@@ -123,6 +148,13 @@ function syncDetailMarkerAppearance(entry: DetailMarkerEntry, isSelected = false
     labelOffsetY: entry.type === 'rtu' ? -7 : -4,
     pictureCount: entry.type === 'rtu' ? (entry.pictureCount ?? 0) : 0,
   })
+  if (entry.type === 'rtu' && entry.building && entry.data.name) {
+    registerRtuDropTarget(
+      rtuDropTargetKey(entry.building.address, entry.data.name),
+      entry.marker,
+      20,
+    )
+  }
 }
 
 function syncDetailMarkerPositions(entry: DetailMarkerEntry, lat: number, lng: number): void {
@@ -181,6 +213,7 @@ export function useMapMarkers({
 
   const buildingMarkersRef = useRef<BuildingMarkerEntry[]>([])
   const detailMarkersRef = useRef<DetailMarkerEntry[]>([])
+  const hasInitialBuildingFitRef = useRef(false)
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null)
   const activeInfoMarkerRef = useRef<AppMapMarker | null>(null)
   const activeDetailInfoRef = useRef<ActiveDetailInfo | null>(null)
@@ -341,7 +374,10 @@ export function useMapMarkers({
       activeDetailInfoRef.current = null
       clearActiveRtuPictures()
       const tenantPolygons = polygonsForBuilding(polygonIndexRef.current, building.address)
-      infoWindowRef.current.setContent(buildBuildingInfoHtml(building, tenantPolygons))
+      const managerRenames = useSettingsStore.getState().managerRenames
+      infoWindowRef.current.setContent(
+        buildBuildingInfoHtml(building, tenantPolygons, managerRenames),
+      )
       infoWindowRef.current.open({ map, anchor: marker })
       ensureInfoWindowVisible(map, infoWindowRef.current)
       activeInfoMarkerRef.current = marker
@@ -361,8 +397,17 @@ export function useMapMarkers({
       closeAllMapPopups()
       clearActiveRtuPictures()
       activeDetailInfoRef.current = { entry, view: 'info', pictureIndex: 0 }
+      const rtu = entry.type === 'rtu' ? (entry.data as Rtu) : null
+      const pendingItems = usePendingRtuPictureStore.getState().items
+      const pendingPictureAssignCount =
+        rtu != null
+          ? countPendingPicturesNearRtu(pendingItems, rtu.lat, rtu.lng)
+          : 0
       infoWindowRef.current.setContent(
-        buildDetailInfoHtml(type, data, { buildingAddress: building?.address }),
+        buildDetailInfoHtml(type, data, {
+          buildingAddress: building?.address,
+          pendingPictureAssignCount,
+        }),
       )
       infoWindowRef.current.open({ map, anchor: marker })
       ensureInfoWindowVisible(map, infoWindowRef.current)
@@ -471,6 +516,43 @@ export function useMapMarkers({
         void refreshRtuPicturesView()
       })
 
+      container.querySelector('[data-iw-action="picture-assign-pending"]')?.addEventListener('click', () => {
+        const ctx = activeDetailInfoRef.current
+        if (!ctx || ctx.entry.type !== 'rtu' || !ctx.entry.building) return
+        const rtu = ctx.entry.data as Rtu
+        const building = ctx.entry.building
+        const items = usePendingRtuPictureStore.getState().items
+        const nearest = findNearestPendingPictureToRtu(items, rtu.lat, rtu.lng)
+        if (!nearest) {
+          showToastError(
+            `No pending photos within ${RTU_PICTURE_DROP_FEET} ft of ${rtu.name}. Drag photo markers closer first.`,
+          )
+          return
+        }
+        void usePendingRtuPictureStore
+          .getState()
+          .assignToRtu(nearest.item.id, building, rtu)
+          .then((result) => {
+            showToastSuccess(`✓ Assigned ${nearest.item.originalName} → ${result.fileName} (${rtu.name})`)
+            const remaining = countPendingPicturesNearRtu(
+              usePendingRtuPictureStore.getState().items,
+              rtu.lat,
+              rtu.lng,
+            )
+            if (ctx.view === 'info') {
+              infoWindowRef.current?.setContent(
+                buildDetailInfoHtml('rtu', rtu, {
+                  buildingAddress: building.address,
+                  pendingPictureAssignCount: remaining,
+                }),
+              )
+            }
+          })
+          .catch((error) => {
+            showToastError(error instanceof Error ? error.message : 'Failed to assign picture')
+          })
+      })
+
       container.querySelector('[data-iw-action="pictures-back"]')?.addEventListener('click', () => {
         const ctx = activeDetailInfoRef.current
         if (!ctx) return
@@ -501,18 +583,21 @@ export function useMapMarkers({
         if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'pictures') return
         const buildingAddress = ctx.entry.building?.address
         if (!buildingAddress) return
-        const pictures = activeRtuPicturesRef.current
-        if (!pictures.length) return
-        useUiStore.getState().openRtuPictureViewer({
-          pictures: pictures.map((p) => ({
-            fileName: p.fileName,
-            fullUrl: p.fullUrl,
-            thumbUrl: p.thumbUrl,
-            index: p.index,
-          })),
-          index: ctx.pictureIndex,
-          buildingAddress,
-          rtuName: ctx.entry.data.name,
+        void listRtuPictures(buildingAddress, ctx.entry.data.name).then((pictures) => {
+          if (!pictures.length) return
+          activeRtuPicturesRef.current = pictures
+          const pictureIndex = Math.min(ctx.pictureIndex, pictures.length - 1)
+          useUiStore.getState().openRtuPictureViewer({
+            pictures: pictures.map((p) => ({
+              fileName: p.fileName,
+              fullUrl: p.fullUrl,
+              thumbUrl: p.thumbUrl,
+              index: p.index,
+            })),
+            index: pictureIndex,
+            buildingAddress,
+            rtuName: ctx.entry.data.name,
+          })
         })
       })
 
@@ -641,7 +726,7 @@ export function useMapMarkers({
       if (pos) bounds.extend(pos)
     }
     if (!bounds.isEmpty()) {
-      fitBoundsPreserveRotation(map, bounds, { top: 40, right: 40, bottom: 40, left: 40 })
+      fitBoundsPreserveRotation(map, bounds, MAP_BUILDING_FIT_PADDING)
     }
     refreshDetailVisibility()
   }, [map, mapBuildings, refreshDetailVisibility])
@@ -652,14 +737,7 @@ export function useMapMarkers({
       setAppMarkerVisible(entry.marker, true)
       setAppMarkerVisible(entry.label, true)
     }
-    const bounds = new google.maps.LatLngBounds()
-    for (const entry of buildingMarkersRef.current) {
-      const pos = getAppMarkerPosition(entry.marker)
-      if (pos) bounds.extend(pos)
-    }
-    if (!bounds.isEmpty()) {
-      fitBoundsPreserveRotation(map, bounds, { top: 40, right: 40, bottom: 40, left: 40 })
-    }
+    fitMapToBuildingMarkers(map, buildingMarkersRef.current)
     refreshDetailVisibility()
   }, [map, refreshDetailVisibility])
 
@@ -857,6 +935,10 @@ export function useMapMarkers({
 
       const entry: DetailMarkerEntry = { type: layerKey, building, data, marker, dragKey }
 
+      if (layerKey === 'rtu' && building && data.name) {
+        registerRtuDropTarget(rtuDropTargetKey(building.address, data.name), marker, 20)
+      }
+
       addAppMarkerListener(marker, 'click', (e: google.maps.MapMouseEvent) => {
         suppressMapClickClearOnce()
         if (useUiStore.getState().addMarkerPickMode || useUiStore.getState().polygonDrawMode) return
@@ -929,14 +1011,26 @@ export function useMapMarkers({
     map.addListener('zoom_changed', refreshDetailVisibility)
     map.addListener('idle', refreshDetailVisibility)
 
+    if (!hasInitialBuildingFitRef.current && buildingMarkersRef.current.length > 0) {
+      hasInitialBuildingFitRef.current = true
+      const entries = buildingMarkersRef.current
+      google.maps.event.addListenerOnce(map, 'idle', () => {
+        fitMapToBuildingMarkers(map, entries)
+      })
+    }
+
     void refreshRtuPictureBadges()
 
     return () => {
+      clearAllRtuDropTargets()
       for (const entry of buildingMarkersRef.current) {
         unregisterMarqueeTarget(buildingDragKey(entry.building.address))
         setAppMarkerMap(entry.marker, null)
       }
       for (const entry of detailMarkersRef.current) {
+        if (entry.type === 'rtu' && entry.building && entry.data.name) {
+          unregisterRtuDropTarget(rtuDropTargetKey(entry.building.address, entry.data.name))
+        }
         unregisterMarqueeTarget(entry.dragKey)
         setAppMarkerMap(entry.marker, null)
       }
@@ -1045,6 +1139,7 @@ export function useMapMarkers({
   })
 
   useEffect(() => {
+    if (!map) return
     const q = search.trim()
     if (q && collectSearchHits(buildings, polygons, q).length > 0) {
       return
@@ -1054,12 +1149,13 @@ export function useMapMarkers({
       .map((b) => b.address)
       .sort()
       .join('\n')
-    if (addressKey === visibleAddressesRef.current) {
+    const fitKey = `map:${addressKey}`
+    if (fitKey === visibleAddressesRef.current) {
       return
     }
-    visibleAddressesRef.current = addressKey
+    visibleAddressesRef.current = fitKey
     fitAllMarkers()
-  }, [mapBuildings, fitAllMarkers, buildings, polygons, search])
+  }, [map, mapBuildings, fitAllMarkers, buildings, polygons, search])
 
   useEffect(() => {
     if (

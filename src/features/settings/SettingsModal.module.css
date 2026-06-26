@@ -13,11 +13,67 @@
   margin-bottom: 8px;
 }
 
+.mgrEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.mgrSlotTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+}
+
+.mgrFieldLabel {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text-muted, #90b8e0);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mgrInput {
+  width: 100%;
+  min-width: 0;
+  background: var(--surface2, #143d78);
+  border: 1px solid var(--border, #2e6ec0);
+  border-radius: 5px;
+  color: var(--text-primary, #fff);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  padding: 6px 9px;
+  box-sizing: border-box;
+  cursor: text;
+  outline: none;
+}
+
+.mgrInput:focus {
+  border-color: var(--accent, #7db8ff);
+}
+
+.mgrInput::placeholder {
+  color: var(--text-muted, #90b8e0);
+  opacity: 0.85;
+}
+
 .mgrFieldList {
   display: flex;
   flex-direction: column;
   gap: 7px;
   width: 100%;
+}
+
+.mgrSlotTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+}
+
+.mgrSlotRow .mgrNameInput {
+  flex: 1;
+  min-width: 0;
 }
 
 .mgrNameInput {

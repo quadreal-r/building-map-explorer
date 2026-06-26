@@ -1,5 +1,7 @@
 /** Per-browser and deployed hides for manifest (R2/static) RTU pictures the user dismisses. */
 
+import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
+
 const STORAGE_KEY = 'bme-hidden-rtu-pictures'
 const BUNDLED_HIDDEN_URL = `${import.meta.env.BASE_URL}database/rtu-pictures/hidden.json`
 
@@ -68,9 +70,30 @@ export function hideRtuManifestPicture(rtuKey: string, fileName: string): void {
   const hidden = readHidden()
   hidden.add(pictureHideKey(rtuKey, fileName))
   writeHidden(hidden)
+  invalidateUnsyncedChanges()
 }
 
 /** Keys for Settings sync — local hides plus any already deployed from hidden.json. */
 export function exportHiddenRtuPicturesForDeploy(): string[] {
   return [...allHiddenKeys()]
+}
+
+/** Hide keys stored in this browser only (not yet in deployed hidden.json). */
+export function readLocalHiddenRtuPictureKeys(): string[] {
+  return [...readHidden()]
+}
+
+/** Local hides not included in the last successful Cloudflare sync on this PC. */
+export function countUnsyncedLocalHiddenRtuPictures(
+  lastPushedHiddenKeys: string[] | null,
+): number {
+  const local = readHidden()
+  if (!local.size) return 0
+  if (!lastPushedHiddenKeys) return local.size
+  const pushed = new Set(lastPushedHiddenKeys)
+  let count = 0
+  for (const key of local) {
+    if (!pushed.has(key)) count++
+  }
+  return count
 }

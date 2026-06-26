@@ -1,11 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { join, dirname } from 'node:path'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..', '..')
 
-/** Load `.env.local` from project root when present (does not override existing env). */
+/** Load `.env.local` from project root when present (scripts only). */
 export function loadDotEnvLocal() {
   const path = join(ROOT, '.env.local')
   if (!existsSync(path)) return
@@ -24,6 +24,10 @@ export function loadDotEnvLocal() {
     }
     if (!process.env[key]) process.env[key] = value
   }
+}
+
+export function getProjectRoot() {
+  return ROOT
 }
 
 export { ROOT }

@@ -9,9 +9,9 @@ on:
         default: bme-sync-staging
         type: string
       rebuild_manifest:
-        description: Rebuild manifest.json from R2 after applying bundle
+        description: Rebuild manifest.json from R2 after applying bundle (usually leave false)
         required: false
-        default: 'true'
+        default: 'false'
         type: choice
         options:
           - 'true'

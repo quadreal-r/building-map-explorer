@@ -2,10 +2,12 @@ import { getColor } from '@/lib/colors'
 import { RTU_AGE_CRITICAL, RTU_AGE_WARN } from '@/lib/constants'
 import { hasPlaceholderGps, hasVacant, mlCount } from '@/lib/dataQuality'
 import { formatSqft } from '@/lib/format'
+import { resolveManagerDisplayName } from '@/lib/managerNames'
 import { showToastSuccess } from '@/lib/toast'
 import { oldestRtuAge } from '@/lib/rtu'
 import { Tag } from '@/components/Tag/Tag'
 import { useSelectionStore } from '@/stores/selectionStore'
+import { useSettingsStore } from '@/stores/settingsStore'
 import { buildPolygonBuildingIndex, polygonsForBuilding } from '@/lib/polygonBuildings'
 import type { Building, PortfolioData } from '@/types/domain'
 
@@ -18,6 +20,7 @@ export interface BuildingListProps {
 export function BuildingList({ buildings, portfolio, onNotesChange }: BuildingListProps) {
   const currentBuilding = useSelectionStore((s) => s.currentBuilding)
   const selectBuilding = useSelectionStore((s) => s.selectBuilding)
+  const managerRenames = useSettingsStore((s) => s.managerRenames)
   const polygonIndex = buildPolygonBuildingIndex(portfolio.buildings, portfolio.polygons)
 
   const openNotesEditor = (address: string) => {
@@ -78,7 +81,7 @@ export function BuildingList({ buildings, portfolio, onNotesChange }: BuildingLi
               const tenantPolygons = polygonsForBuilding(polygonIndex, b.address)
               const vac = hasVacant(b, tenantPolygons)
               const sqftDisp = formatSqft(b.sqft)
-              const mgr = b.manager || ''
+              const mgr = resolveManagerDisplayName(b.manager ?? '', managerRenames)
               const isActive = currentBuilding?.address === b.address
 
               return (

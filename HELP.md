@@ -5,12 +5,48 @@
 - In the top bar of cursor, select view -> terminal
 - Type and enter "npm run dev", the project will then be running locally on your machine at "http://localhost:5173/"
 - Enter that url in the browser to access your site
+- **Refreshing the browser does not start or stop the server.** They are separate: the server runs in the terminal; refresh only reloads the page in the browser.
+- **Keep the dev terminal open** the whole time you work. If you close the terminal tab, close Cursor, or shut the laptop, the server stops and `http://localhost:5173/` will not load until you start it again.
 - If the page is blank or won't load:
-  - Make sure the dev server is still running in the terminal (no errors)
+  - Check the terminal — you should see `VITE ... ready`. If the terminal is gone or shows a prompt with no server, run `npm run dev` again (see [To restart the dev server](#to-restart-the-dev-server)).
   - Run `npm install` if you just pulled new code
   - Copy `.env.example` to `.env.local` and add your Google Maps API key
   - In the browser, open DevTools → Application → Local Storage and delete `bme-portfolio` if data looks corrupted, then refresh
 - Changes to the code will automatically be reflected onto the site, no need to restart the website, you can simply refresh the page
+
+## To restart the dev server
+
+Use this when `http://localhost:5173/` is blank, stuck, or the terminal shows errors after pulling new code.
+
+**Option A — restart script (recommended on Windows):**
+
+```powershell
+cd C:\Users\Robert\Projects\building-map-explorer
+npm run dev:restart
+```
+
+This stops whatever is using port 5173, then starts the dev server again.
+
+**Option B — manual restart:**
+
+1. In the terminal where `npm run dev` is running, press **Ctrl+C**
+2. Start it again:
+
+```powershell
+cd C:\Users\Robert\Projects\building-map-explorer
+npm run dev
+```
+
+**OneDrive / synced folders:** use `npm run dev:onedrive` instead of `npm run dev` if the normal dev command has file-watching issues.
+
+**Keep server running in its own window (recommended):** opens a separate Command Prompt that stays up even if you close Cursor’s terminal:
+
+```powershell
+cd C:\Users\Robert\Projects\building-map-explorer
+npm run dev:window
+```
+
+A window titled **Building Map Explorer Dev** should stay open with `VITE ... ready`. Leave it open while you use the app.
 
 
 ## To make code changes

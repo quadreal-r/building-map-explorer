@@ -5,7 +5,11 @@ import {
   type GitHubSyncProgress,
 } from '@/lib/githubDeploySync'
 import { recordLocalSyncPush } from '@/lib/remoteSyncState'
+import { exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
+import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
+import { clearRtuPictureManifestCache, reconcilePendingDeployWithCloud } from '@/lib/rtuPictures'
 import { showToastError, showToastSuccess } from '@/lib/toast'
+import { usePortfolioStore } from '@/stores/portfolioStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import type { PortfolioData } from '@/types/domain'
 
@@ -99,7 +103,14 @@ export function useGitHubDeploySync({
           parts.push(`Workflow: ${result.workflowRunUrl}`)
         }
         showToastSuccess(parts.join(' '))
-        recordLocalSyncPush(result.exportedAt)
+        recordLocalSyncPush(result.exportedAt, {
+          hiddenKeys: exportHiddenRtuPicturesForDeploy(),
+        })
+        clearRtuPictureManifestCache()
+        usePortfolioStore.getState().markSaved()
+        void reconcilePendingDeployWithCloud().finally(() => {
+          invalidateUnsyncedChanges()
+        })
         setCompleted(true)
         setCooldownSec(Math.ceil(SYNC_COOLDOWN_MS / 1000))
         setProgress({ message: 'Completed upload', percent: 100 })

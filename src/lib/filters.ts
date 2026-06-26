@@ -1,5 +1,6 @@
 import { RTU_AGE_WARN } from '@/lib/constants'
 import { hasPlaceholderGps, hasVacant, mlCount } from '@/lib/dataQuality'
+import { resolveManagerDisplayName, isManagerSlotKey } from '@/lib/managerNames'
 import {
   type PolygonBuildingIndex,
   polygonsForBuilding,
@@ -19,19 +20,41 @@ function normalizeSearch(search: string): string {
   return search.trim().toLowerCase()
 }
 
-function matchesManagerFilter(building: Building, managerFilter: string): boolean {
+function matchesManagerFilter(
+  building: Building,
+  managerFilter: string,
+  managerRenames?: Record<string, string>,
+): boolean {
   if (!managerFilter) return true
-  return building.manager === managerFilter
+  const stored = building.manager ?? ''
+  if (stored === managerFilter) return true
+
+  const storedDisplay = resolveManagerDisplayName(stored, managerRenames)
+  if (storedDisplay === managerFilter) return true
+
+  if (isManagerSlotKey(stored)) {
+    const renamed = managerRenames?.[stored]?.trim()
+    if (renamed && renamed === managerFilter) return true
+  }
+
+  return false
 }
 
 /** Building-level search (address, BU, cluster, manager) — not RTU/tenant detail fields. */
-export function matchesBuildingMetadata(building: Building, search: string): boolean {
+export function matchesBuildingMetadata(
+  building: Building,
+  search: string,
+  managerRenames?: Record<string, string>,
+): boolean {
   const q = normalizeSearch(search)
   if (!q) return true
   if (building.address.toLowerCase().includes(q)) return true
   if (building.bu?.toLowerCase().includes(q)) return true
   if (building.cluster?.toLowerCase().includes(q)) return true
   if (building.manager?.toLowerCase().includes(q)) return true
+  if (resolveManagerDisplayName(building.manager ?? '', managerRenames).toLowerCase().includes(q)) {
+    return true
+  }
   return false
 }
 
@@ -47,6 +70,7 @@ export function matchesSearch(
   building: Building,
   search: string,
   polygonIndex?: PolygonBuildingIndex,
+  managerRenames?: Record<string, string>,
 ): boolean {
   const q = normalizeSearch(search)
   if (!q) return true
@@ -55,6 +79,9 @@ export function matchesSearch(
   if (building.bu?.toLowerCase().includes(q)) return true
   if (building.cluster?.toLowerCase().includes(q)) return true
   if (building.manager?.toLowerCase().includes(q)) return true
+  if (resolveManagerDisplayName(building.manager ?? '', managerRenames).toLowerCase().includes(q)) {
+    return true
+  }
 
   const tenantPolygons = buildingPolygons(polygonIndex, building)
   if (
@@ -124,36 +151,37 @@ export function reconcileFilterDropdowns(
   buildings: Building[],
   filters: FilterState,
   polygonIndex?: PolygonBuildingIndex,
+  managerRenames?: Record<string, string>,
 ): FilterState {
   const search = normalizeSearch(filters.search)
   const next = { ...filters }
 
   if (search) {
-    const searchMatches = buildings.filter((b) => matchesSearch(b, search, polygonIndex))
+    const searchMatches = buildings.filter((b) => matchesSearch(b, search, polygonIndex, managerRenames))
     if (next.park && !searchMatches.some((b) => b.park === next.park)) {
       next.park = ''
     }
     if (next.cluster && !searchMatches.some((b) => b.cluster === next.cluster)) {
       next.cluster = ''
     }
-    if (next.manager && !searchMatches.some((b) => matchesManagerFilter(b, next.manager))) {
+    if (next.manager && !searchMatches.some((b) => matchesManagerFilter(b, next.manager, managerRenames))) {
       next.manager = ''
     }
   }
 
-  if (next.park && !buildingsForFilterOptions(buildings, next, 'park').some((b) => b.park === next.park)) {
+  if (next.park && !buildingsForFilterOptions(buildings, next, 'park', polygonIndex, managerRenames).some((b) => b.park === next.park)) {
     next.park = ''
   }
   if (
     next.cluster &&
-    !buildingsForFilterOptions(buildings, next, 'cluster').some((b) => b.cluster === next.cluster)
+    !buildingsForFilterOptions(buildings, next, 'cluster', polygonIndex, managerRenames).some((b) => b.cluster === next.cluster)
   ) {
     next.cluster = ''
   }
   if (
     next.manager &&
-    !buildingsForFilterOptions(buildings, next, 'manager', polygonIndex).some((b) =>
-      matchesManagerFilter(b, next.manager),
+    !buildingsForFilterOptions(buildings, next, 'manager', polygonIndex, managerRenames).some((b) =>
+      matchesManagerFilter(b, next.manager, managerRenames),
     )
   ) {
     next.manager = ''
@@ -168,13 +196,14 @@ export function autoFillFilterDropdowns(
   filters: Pick<FilterState, 'search' | 'park' | 'cluster' | 'manager'>,
   skipFields: ReadonlySet<string> = new Set(),
   polygonIndex?: PolygonBuildingIndex,
+  managerRenames?: Record<string, string>,
 ): Pick<FilterState, 'search' | 'park' | 'cluster' | 'manager'> {
   const next = { ...filters }
   let changed = true
 
   while (changed) {
     changed = false
-    const options = collectFilterOptions(buildings, next, polygonIndex)
+    const options = collectFilterOptions(buildings, next, polygonIndex, managerRenames)
 
     if (!next.park && !skipFields.has('park') && options.parks.length === 1) {
       next.park = options.parks[0]!
@@ -199,6 +228,7 @@ export function applyFilterSelection(
   filters: FilterState,
   patch: Partial<Pick<FilterState, 'park' | 'cluster' | 'manager'>>,
   polygonIndex?: PolygonBuildingIndex,
+  managerRenames?: Record<string, string>,
 ): Pick<FilterState, 'search' | 'park' | 'cluster' | 'manager'> {
   const expanded = { ...patch }
   if (patch.park === '') {
@@ -210,8 +240,19 @@ export function applyFilterSelection(
     expanded.cluster = ''
   }
 
-  const reconciled = reconcileFilterDropdowns(buildings, { ...filters, ...expanded }, polygonIndex)
-  return autoFillFilterDropdowns(buildings, reconciled, new Set(Object.keys(expanded)), polygonIndex)
+  const reconciled = reconcileFilterDropdowns(
+    buildings,
+    { ...filters, ...expanded },
+    polygonIndex,
+    managerRenames,
+  )
+  return autoFillFilterDropdowns(
+    buildings,
+    reconciled,
+    new Set(Object.keys(expanded)),
+    polygonIndex,
+    managerRenames,
+  )
 }
 
 /** Primary filter pass (search, park, cluster, manager, advanced). */
@@ -219,15 +260,16 @@ export function applyPrimaryFilters(
   buildings: Building[],
   filters: FilterState,
   polygonIndex?: PolygonBuildingIndex,
+  managerRenames?: Record<string, string>,
 ): Building[] {
-  const reconciled = reconcileFilterDropdowns(buildings, filters, polygonIndex)
+  const reconciled = reconcileFilterDropdowns(buildings, filters, polygonIndex, managerRenames)
   const search = normalizeSearch(reconciled.search)
 
   return buildings.filter((building) => {
-    if (!matchesSearch(building, search, polygonIndex)) return false
+    if (!matchesSearch(building, search, polygonIndex, managerRenames)) return false
     if (reconciled.park && building.park !== reconciled.park) return false
     if (reconciled.cluster && building.cluster !== reconciled.cluster) return false
-    if (reconciled.manager && !matchesManagerFilter(building, reconciled.manager)) return false
+    if (reconciled.manager && !matchesManagerFilter(building, reconciled.manager, managerRenames)) return false
     if (!passAdvFilter(building, reconciled.adv, polygonIndex)) return false
     return true
   })
@@ -238,8 +280,9 @@ export function applyFilters(
   buildings: Building[],
   filters: FilterState,
   polygonIndex?: PolygonBuildingIndex,
+  managerRenames?: Record<string, string>,
 ): Building[] {
-  return applyPrimaryFilters(buildings, filters, polygonIndex).filter((building) =>
+  return applyPrimaryFilters(buildings, filters, polygonIndex, managerRenames).filter((building) =>
     passDqFilter(building, filters.dq, polygonIndex),
   )
 }
@@ -252,11 +295,14 @@ export function applyCostScopeFilters(
   buildings: Building[],
   filters: FilterState,
   polygonIndex?: PolygonBuildingIndex,
+  managerRenames?: Record<string, string>,
 ): Building[] {
-  const filtered = applyPrimaryFilters(buildings, filters, polygonIndex)
+  const filtered = applyPrimaryFilters(buildings, filters, polygonIndex, managerRenames)
   const search = normalizeSearch(filters.search)
   if (!search) return filtered
-  const metadataHits = filtered.filter((building) => matchesBuildingMetadata(building, search))
+  const metadataHits = filtered.filter((building) =>
+    matchesBuildingMetadata(building, search, managerRenames),
+  )
   return metadataHits.length > 0 ? metadataHits : filtered
 }
 
@@ -266,15 +312,16 @@ function buildingsForFilterOptions(
   filters: Pick<FilterState, 'search' | 'park' | 'cluster' | 'manager'>,
   exclude: 'park' | 'cluster' | 'manager',
   polygonIndex?: PolygonBuildingIndex,
+  managerRenames?: Record<string, string>,
 ): Building[] {
   const search = normalizeSearch(filters.search)
   return buildings.filter((building) => {
-    if (!matchesSearch(building, search, polygonIndex)) return false
+    if (!matchesSearch(building, search, polygonIndex, managerRenames)) return false
     if (exclude !== 'park' && filters.park && building.park !== filters.park) return false
     if (exclude !== 'cluster' && filters.cluster && building.cluster !== filters.cluster) {
       return false
     }
-    if (exclude !== 'manager' && filters.manager && !matchesManagerFilter(building, filters.manager)) {
+    if (exclude !== 'manager' && filters.manager && !matchesManagerFilter(building, filters.manager, managerRenames)) {
       return false
     }
     return true
@@ -291,24 +338,27 @@ export function collectFilterOptions(
     manager: '',
   },
   polygonIndex?: PolygonBuildingIndex,
+  managerRenames?: Record<string, string>,
 ): {
   parks: string[]
   clusters: string[]
   managers: string[]
 } {
   const parks = [
-    ...new Set(buildingsForFilterOptions(buildings, filters, 'park', polygonIndex).map((b) => b.park)),
+    ...new Set(
+      buildingsForFilterOptions(buildings, filters, 'park', polygonIndex, managerRenames).map((b) => b.park),
+    ),
   ].sort()
   const clusters = [
     ...new Set(
-      buildingsForFilterOptions(buildings, filters, 'cluster', polygonIndex)
+      buildingsForFilterOptions(buildings, filters, 'cluster', polygonIndex, managerRenames)
         .map((b) => b.cluster)
         .filter(Boolean),
     ),
   ].sort()
   const managers = [
     ...new Set(
-      buildingsForFilterOptions(buildings, filters, 'manager', polygonIndex)
+      buildingsForFilterOptions(buildings, filters, 'manager', polygonIndex, managerRenames)
         .map((b) => b.manager)
         .filter(Boolean),
     ),

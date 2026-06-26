@@ -1,5 +1,6 @@
 import { RTU_AGE_CRITICAL, RTU_AGE_WARN } from '@/lib/constants'
 import { getColor } from '@/lib/colors'
+import { resolveManagerDisplayName } from '@/lib/managerNames'
 import { hasPlaceholderGps, hasVacant, mlCount } from '@/lib/dataQuality'
 import { getRtuAge, getRtuYear, oldestRtuAge } from '@/lib/rtu'
 import type { RtuPicture } from '@/lib/rtuPictures'
@@ -44,6 +45,10 @@ function copyButton(): string {
 
 function pictureButton(): string {
   return `<button class="iw-pic-btn" data-iw-action="pictures" title="View RTU pictures">🖼 Picture</button>`
+}
+
+function assignPendingPictureButton(count: number): string {
+  return `<button type="button" class="iw-pic-btn" data-iw-action="picture-assign-pending" title="Assign the closest pending photo within range">📎 Assign pending photo${count > 1 ? ` (${count} nearby)` : ''}</button>`
 }
 
 function copySource(text: string): string {
@@ -91,11 +96,14 @@ function isPolygonVacant(polygon: Polygon): boolean {
 export function buildBuildingInfoPlainText(
   building: Building,
   tenantPolygons: Polygon[] = [],
+  managerRenames: Record<string, string> = {},
 ): string {
   const lines: string[] = [building.address, buildingBadgeText(building), '']
   lines.push(plainRow('BU #', building.bu || '—'))
   lines.push(plainRow('Portfolio', building.cluster || building.park || '—'))
-  lines.push(plainRow('Manager', building.manager || '—'))
+  lines.push(
+    plainRow('Manager', resolveManagerDisplayName(building.manager ?? '', managerRenames) || '—'),
+  )
   lines.push(plainRow('Sq Ft', building.sqft || '—'))
 
   if (building.rtus?.length) {
@@ -187,8 +195,10 @@ function buildingStatusBadges(building: Building, tenantPolygons: Polygon[]): st
 export function buildBuildingInfoHtml(
   building: Building,
   tenantPolygons: Polygon[] = [],
+  managerRenames: Record<string, string> = {},
 ): string {
   const bColor = getColor(building.park)
+  const managerLabel = resolveManagerDisplayName(building.manager ?? '', managerRenames) || '—'
 
   let badges = `<span class="iw-badge" style="background:${bColor}22;color:${bColor};border:1px solid ${bColor}44">${escapeHtml(building.park.replace(/\s*\(x\s*\d+\)/, ''))}</span>`
   if (building.cluster?.trim()) {
@@ -199,7 +209,7 @@ export function buildBuildingInfoHtml(
   const stats = [
     `<div class="iw-row"><strong>BU #</strong>${escapeHtml(building.bu || '—')}</div>`,
     `<div class="iw-row"><strong>Portfolio</strong>${escapeHtml(building.cluster || building.park || '—')}</div>`,
-    `<div class="iw-row"><strong>Manager</strong>${escapeHtml(building.manager || '—')}</div>`,
+    `<div class="iw-row"><strong>Manager</strong>${escapeHtml(managerLabel)}</div>`,
     `<div class="iw-row"><strong>Sq Ft</strong>${escapeHtml(building.sqft || '—')}</div>`,
   ].join('')
 
@@ -254,7 +264,7 @@ export function buildBuildingInfoHtml(
   }
 
   const moveBtn = moveButton({ 'iw-kind': 'building', 'iw-address': building.address })
-  const plainText = buildBuildingInfoPlainText(building, tenantPolygons)
+  const plainText = buildBuildingInfoPlainText(building, tenantPolygons, managerRenames)
 
   return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(building.address)}</div><div class="iw-badges">${badges}</div>${closeButton()}</div><div class="iw-body">${stats}${rtuHtml}${tenantHtml}</div>${actionFooter(`${copyButton()}${moveBtn}`)}</div>`
 }
@@ -262,7 +272,7 @@ export function buildBuildingInfoHtml(
 export function buildDetailInfoHtml(
   layerKey: LayerKey,
   data: Rtu | Utility,
-  options?: { showDelete?: boolean; buildingAddress?: string },
+  options?: { showDelete?: boolean; buildingAddress?: string; pendingPictureAssignCount?: number },
 ): string {
   const cfg = LAYER_COLORS[layerKey]
   const name = data.name ?? ''
@@ -308,8 +318,12 @@ export function buildDetailInfoHtml(
   const plainText = buildDetailInfoPlainText(layerKey, data, options)
 
   const pictureBtn = layerKey === 'rtu' ? pictureButton() : ''
+  const assignPendingBtn =
+    layerKey === 'rtu' && (options?.pendingPictureAssignCount ?? 0) > 0
+      ? assignPendingPictureButton(options!.pendingPictureAssignCount!)
+      : ''
 
-  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${badgeHtml}${closeButton()}</div><div class="iw-body">${rows}</div>${actionFooter(`${copyButton()}${pictureBtn}${moveBtn}${deleteBtn}`)}</div>`
+  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${badgeHtml}${closeButton()}</div><div class="iw-body">${rows}</div>${actionFooter(`${copyButton()}${assignPendingBtn}${pictureBtn}${moveBtn}${deleteBtn}`)}</div>`
 }
 
 export function buildRtuPicturesHtml(

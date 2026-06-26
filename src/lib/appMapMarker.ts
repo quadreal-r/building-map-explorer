@@ -196,6 +196,9 @@ export interface CreateAppMarkerOptions {
   /** Pixels below anchor for label-only markers (building labels ≈ 22). */
   labelOffsetY?: number
   content?: HTMLElement
+  /** Advanced marker anchor offset from content top-left (default bottom-center). */
+  anchorLeft?: string
+  anchorTop?: string
 }
 
 export function createAppMarker(options: CreateAppMarkerOptions): AppMapMarker {
@@ -228,6 +231,8 @@ export function createAppMarker(options: CreateAppMarkerOptions): AppMapMarker {
     gmpDraggable: options.draggable ?? false,
     gmpClickable: clickable,
     content,
+    anchorLeft: options.anchorLeft,
+    anchorTop: options.anchorTop,
   })
 
   markerMeta.set(marker, {

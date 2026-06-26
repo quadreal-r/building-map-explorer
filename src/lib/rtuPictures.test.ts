@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildingStreetNumber,
   estimateDeployPictureJsonBytes,
+  isIndexedDbRowSatisfiedByManifest,
   parseRtuPictureIndex,
   resolveManifestRtuKey,
   rtuPictureFileBase,
@@ -54,5 +55,33 @@ describe('rtuPictures naming', () => {
         manifest,
       ),
     ).toBe('2320 Bristol Circle|RTU-04 Hybrid')
+  })
+})
+
+describe('isIndexedDbRowSatisfiedByManifest', () => {
+  const manifest = {
+    entries: {
+      '100 Leek Crescent|RTU- 01': ['100-RTU-01-1.jpg'],
+    },
+  }
+
+  it('matches legacy IndexedDB filename to cloud manifest entry at same slot', () => {
+    expect(
+      isIndexedDbRowSatisfiedByManifest(manifest, {
+        fileName: '100_RTU-01_(1).jpg',
+        rtuKey: '100 Leek Crescent|RTU- 01',
+        index: 1,
+      }),
+    ).toBe(true)
+  })
+
+  it('does not match when local row replaced the picture at that index', () => {
+    expect(
+      isIndexedDbRowSatisfiedByManifest(manifest, {
+        fileName: '100-RTU-01-2.jpg',
+        rtuKey: '100 Leek Crescent|RTU- 01',
+        index: 2,
+      }),
+    ).toBe(false)
   })
 })

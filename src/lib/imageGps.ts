@@ -5,18 +5,19 @@ export interface ImageGps {
   lng: number
 }
 
-/** Read GPS coordinates from image EXIF when present. */
+/** Read GPS coordinates from image EXIF when present (full decimal precision). */
 export async function readImageGps(file: File): Promise<ImageGps | null> {
   try {
-    const gps = await exifr.gps(file)
+    const data = await exifr.parse(file, { gps: true })
+    const lat = data?.latitude
+    const lng = data?.longitude
     if (
-      gps &&
-      typeof gps.latitude === 'number' &&
-      typeof gps.longitude === 'number' &&
-      Number.isFinite(gps.latitude) &&
-      Number.isFinite(gps.longitude)
+      typeof lat === 'number' &&
+      typeof lng === 'number' &&
+      Number.isFinite(lat) &&
+      Number.isFinite(lng)
     ) {
-      return { lat: gps.latitude, lng: gps.longitude }
+      return { lat, lng }
     }
   } catch {
     /* no EXIF or unsupported format */

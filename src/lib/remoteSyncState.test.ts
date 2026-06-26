@@ -16,6 +16,7 @@ describe('remoteSyncState', () => {
       shouldPromptForRemoteSync('2026-06-25T12:00:00.000Z', {
         acknowledgedExportedAt: null,
         lastPushedExportedAt: null,
+        lastPushedHiddenKeys: null,
         initialized: false,
       }),
     ).toBe(false)
@@ -37,10 +38,13 @@ describe('remoteSyncState', () => {
   })
 
   it('persists push and acknowledge timestamps', () => {
-    recordLocalSyncPush('2026-06-25T12:00:00.000Z')
+    recordLocalSyncPush('2026-06-25T12:00:00.000Z', {
+      hiddenKeys: ['1590 Main|RTU-01|pic.jpg'],
+    })
     const state = loadRemoteSyncState()
     expect(state.lastPushedExportedAt).toBe('2026-06-25T12:00:00.000Z')
     expect(state.acknowledgedExportedAt).toBe('2026-06-25T12:00:00.000Z')
+    expect(state.lastPushedHiddenKeys).toEqual(['1590 Main|RTU-01|pic.jpg'])
     expect(state.initialized).toBe(true)
   })
 })

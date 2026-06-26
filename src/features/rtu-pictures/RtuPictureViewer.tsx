@@ -227,14 +227,16 @@ export function RtuPictureViewer({
         >
           Reset
         </button>
-        <button
-          type="button"
-          className={styles.saveBtn}
-          disabled={!canSaveToMap || savingToMap}
-          onClick={() => void handleSaveToMap()}
-        >
-          {savingToMap ? 'Saving…' : 'Save to map'}
-        </button>
+        {buildingAddress ? (
+          <button
+            type="button"
+            className={styles.saveBtn}
+            disabled={!canSaveToMap || savingToMap}
+            onClick={() => void handleSaveToMap()}
+          >
+            {savingToMap ? 'Saving…' : 'Save to map'}
+          </button>
+        ) : null}
         <span className={styles.sep} />
         <select
           className={`${styles.select} ${styles.formatSelect}`}
@@ -383,7 +385,8 @@ export function RtuPictureViewer({
         {loading ? <p className={styles.stageMessage}>Loading…</p> : null}
         {loadError ? (
           <p className={styles.stageMessage}>
-            Image not found on server. Close and use Add pictures to upload a replacement.
+            Could not load this picture from Cloudflare. The file may be missing on the CDN — use Add
+            pictures to upload a replacement, or sync from Settings.
           </p>
         ) : null}
       </div>

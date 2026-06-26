@@ -1,4 +1,4 @@
-import { distanceFeet, RTU_GPS_MATCH_FEET } from '@/lib/geo'
+import { distanceFeet, RTU_PICTURE_DROP_FEET } from '@/lib/geo'
 import { readImageGps } from '@/lib/imageGps'
 import { isExcludedOldRtuPicture } from '@/lib/rtuBulkPictureImport'
 import {
@@ -10,7 +10,7 @@ import type { Building, Rtu } from '@/types/domain'
 const IMAGE_FILE_RE = /\.(jpe?g|png|webp|heif|heic|tif{1,2})$/i
 
 /** Max distance to accept a picture drop onto an RTU marker. */
-export const RTU_PICTURE_DROP_FEET = RTU_GPS_MATCH_FEET
+export { RTU_PICTURE_DROP_FEET } from '@/lib/geo'
 
 export interface NearestRtuMatch {
   building: Building
@@ -21,6 +21,11 @@ export interface NearestRtuMatch {
 export interface StagedGpsPicture {
   id: string
   file: File
+  /** Original EXIF latitude — marker is placed here on upload. */
+  gpsLat: number
+  /** Original EXIF longitude — marker is placed here on upload. */
+  gpsLng: number
+  /** Current map position (starts at GPS; updates only when dragged). */
   lat: number
   lng: number
   originalName: string
@@ -58,6 +63,74 @@ export function findNearestRtuAt(
   return best
 }
 
+export interface NearestPendingPictureMatch {
+  item: StagedGpsPicture
+  feet: number
+}
+
+/** Pending photo closest to an RTU pin (for click-to-assign on the RTU popup). */
+export function findNearestPendingPictureToRtu(
+  items: StagedGpsPicture[],
+  rtuLat: number,
+  rtuLng: number,
+  maxFeet = RTU_PICTURE_DROP_FEET,
+): NearestPendingPictureMatch | null {
+  let best: NearestPendingPictureMatch | null = null
+
+  for (const item of items) {
+    const feet = distanceFeet(item.lat, item.lng, rtuLat, rtuLng)
+    if (feet > maxFeet) continue
+    if (!best || feet < best.feet) {
+      best = { item, feet }
+    }
+  }
+
+  return best
+}
+
+export function countPendingPicturesNearRtu(
+  items: StagedGpsPicture[],
+  rtuLat: number,
+  rtuLng: number,
+  maxFeet = RTU_PICTURE_DROP_FEET,
+): number {
+  return items.filter((item) => distanceFeet(item.lat, item.lng, rtuLat, rtuLng) <= maxFeet).length
+}
+
+const STACK_SPREAD_METERS = 5
+
+/** Fan out markers that share identical GPS so each thumbnail can be grabbed. */
+export function spreadStackedGpsPictures(staged: StagedGpsPicture[]): StagedGpsPicture[] {
+  const groups = new Map<string, number[]>()
+
+  staged.forEach((item, index) => {
+    const key = `${item.gpsLat.toFixed(7)},${item.gpsLng.toFixed(7)}`
+    const group = groups.get(key) ?? []
+    group.push(index)
+    groups.set(key, group)
+  })
+
+  const result = staged.map((item) => ({ ...item }))
+
+  for (const indices of groups.values()) {
+    if (indices.length <= 1) continue
+    const centerLat = result[indices[0]!]!.gpsLat
+    const centerLng = result[indices[0]!]!.gpsLng
+    const lngScale = 111_320 * Math.cos((centerLat * Math.PI) / 180)
+
+    indices.forEach((index, stackIndex) => {
+      if (stackIndex === 0) return
+      const angle = (2 * Math.PI * stackIndex) / indices.length
+      const northM = STACK_SPREAD_METERS * Math.cos(angle)
+      const eastM = STACK_SPREAD_METERS * Math.sin(angle)
+      result[index]!.lat = centerLat + northM / 111_320
+      result[index]!.lng = centerLng + eastM / lngScale
+    })
+  }
+
+  return result
+}
+
 export async function stageGpsPicturesFromFiles(files: File[]): Promise<StageGpsPicturesResult> {
   const staged: StagedGpsPicture[] = []
   const skipped: { file: string; reason: string }[] = []
@@ -81,6 +154,8 @@ export async function stageGpsPicturesFromFiles(files: File[]): Promise<StageGps
     staged.push({
       id: crypto.randomUUID(),
       file,
+      gpsLat: gps.lat,
+      gpsLng: gps.lng,
       lat: gps.lat,
       lng: gps.lng,
       originalName: file.name,

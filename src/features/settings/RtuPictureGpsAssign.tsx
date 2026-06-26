@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { SettingsToolButton } from '@/features/settings/SettingsToolButton'
+import { RTU_PICTURE_DROP_FEET } from '@/lib/geo'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import { usePendingRtuPictureStore } from '@/stores/pendingRtuPictureStore'
 import { useUiStore } from '@/stores/uiStore'
@@ -21,6 +22,19 @@ export function RtuPictureGpsAssign({ onBusyChange }: RtuPictureGpsAssignProps) 
     onBusyChange?.(busy)
   }, [busy, onBusyChange])
 
+  const handleClearPending = () => {
+    if (pendingCount === 0) return
+    if (
+      !window.confirm(
+        `Remove ${pendingCount} photo marker${pendingCount === 1 ? '' : 's'} from the map and start over?`,
+      )
+    ) {
+      return
+    }
+    clearPending()
+    showToastSuccess('Photo markers cleared — choose Upload RTU Pictures when ready.')
+  }
+
   const handleFiles = () => {
     void (async () => {
       const input = inputRef.current
@@ -31,7 +45,7 @@ export function RtuPictureGpsAssign({ onBusyChange }: RtuPictureGpsAssignProps) 
         const result = await stageFromFiles([...input.files])
         if (result.staged.length) {
           showToastSuccess(
-            `✓ ${result.staged.length} photo marker${result.staged.length === 1 ? '' : 's'} placed on map — drag each onto the correct RTU`,
+            `✓ ${result.staged.length} photo marker${result.staged.length === 1 ? '' : 's'} on map — drag onto an RTU pin, or click the RTU pin → Assign pending photo`,
           )
           closeSettings()
         }
@@ -56,10 +70,12 @@ export function RtuPictureGpsAssign({ onBusyChange }: RtuPictureGpsAssignProps) 
       <SettingsToolButton
         tooltip={
           <>
-            Select RTU photos from your device. Photos with GPS appear as purple markers on the map
-            at the location they were taken. Drag each marker onto the correct RTU — the picture is
-            saved as e.g. 2320-RTU-04-1.jpg. Drop within 100 ft of an RTU marker to assign. Photos
-            without GPS are skipped. A new upload replaces any markers still waiting on the map.
+            Select RTU photos from your device. Photos with GPS are placed on the map at the
+            exact coordinates from the photo. Double-click a marker for full size. Drag onto
+            the correct RTU pin to assign, or click the RTU pin → Assign pending photo. Saved as
+            e.g. 2320-RTU-04-1.jpg (within {RTU_PICTURE_DROP_FEET} ft). Turn off Edit Multiple Positions first.
+            Photos without GPS are skipped. A new upload replaces any markers
+            still waiting on the map.
           </>
         }
         onClick={() => inputRef.current?.click()}
@@ -68,11 +84,18 @@ export function RtuPictureGpsAssign({ onBusyChange }: RtuPictureGpsAssignProps) 
         {busy ? 'Reading photos…' : 'Upload RTU Pictures'}
       </SettingsToolButton>
       {pendingCount > 0 ? (
+        <SettingsToolButton
+          tooltip="Remove all pending photo markers from the map so you can upload a fresh batch."
+          onClick={handleClearPending}
+          disabled={busy}
+        >
+          Clear photo markers ({pendingCount})
+        </SettingsToolButton>
+      ) : null}
+      {pendingCount > 0 ? (
         <p className={styles.hint}>
-          {pendingCount} photo marker{pendingCount === 1 ? '' : 's'} waiting on the map.{' '}
-          <button type="button" className={styles.linkBtn} onClick={() => clearPending()}>
-            Clear all
-          </button>
+          {pendingCount} photo marker{pendingCount === 1 ? '' : 's'} on the map. Use Clear photo markers or the map
+          banner to start over.
         </p>
       ) : null}
       <input

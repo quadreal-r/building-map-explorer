@@ -380,8 +380,10 @@ export async function syncDeployToGitHub(
   reportProgress(onProgress, 'Uploading bundle to GitHub…', 32)
   await uploadSyncStagingBundle(leanJson, picturesJson || null, bundle.exportedAt, token, repo)
 
-  const transferredPictureCount = bundle.pictures.length
-  const rebuildManifest = picturesOmitted || transferredPictureCount === 0
+  // apply-deploy-bundle already merges new pictures into manifest.json. Rebuilding from R2
+  // replaces that manifest with lossy filename matching (duplicate cloud aliases, index
+  // conflicts) and can drop ~3 of 4 photos per RTU from the cloud manifest count.
+  const rebuildManifest = false
   const startedAt = Date.now()
   reportProgress(onProgress, 'Starting Cloudflare & GitHub sync…', 48)
   await triggerSyncDeployWorkflow(rebuildManifest, token, repo)
@@ -397,7 +399,7 @@ export async function syncDeployToGitHub(
     stagingRef: SYNC_STAGING_BRANCH,
     workflowRunUrl: run?.html_url ?? null,
     picturesOmitted,
-    pictureCount: transferredPictureCount,
+    pictureCount: bundle.pictures.length,
     pictureExportFailed: pictureExport.failedFileNames,
     pendingPictureCount: pictureExport.pendingCount,
     exportedAt: bundle.exportedAt,

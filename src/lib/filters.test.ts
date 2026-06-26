@@ -11,6 +11,7 @@ import {
   passDqFilter,
   reconcileFilterDropdowns,
 } from '@/lib/filters'
+import { applyManagerSlots, managerSlotsFromPortfolio } from '@/lib/managerNames'
 import { buildPolygonBuildingIndex, polygonsForBuilding } from '@/lib/polygonBuildings'
 import { getRtuAge } from '@/lib/rtu'
 import {
@@ -156,9 +157,22 @@ describe('reconcileFilterDropdowns', () => {
   })
 
   it('auto-fills park when manager leaves only one business park', () => {
-    const next = applyFilterSelection(buildings, DEFAULT_FILTER_STATE, {
-      manager: 'Josh Starkey',
-    })
+    const managerRenames = Object.fromEntries(
+      managerSlotsFromPortfolio(buildings)
+        .filter((slot) => slot.name)
+        .map((slot) => [slot.key, slot.name]),
+    )
+    const { portfolio: migrated } = applyManagerSlots(
+      { buildings, utilities: [], polygons: [] },
+      managerSlotsFromPortfolio(buildings),
+    )
+    const next = applyFilterSelection(
+      migrated.buildings,
+      DEFAULT_FILTER_STATE,
+      { manager: 'Josh Starkey' },
+      polygonIndex,
+      managerRenames,
+    )
     expect(next.park).toBe('Western Business Park (x 22)')
   })
 
@@ -230,6 +244,26 @@ describe('applyFilters', () => {
     })
     expect(filtered.length).toBeGreaterThan(0)
     expect(filtered.every((b) => b.manager === 'Josh Starkey')).toBe(true)
+  })
+
+  it('filters by display name when buildings use manager slots', () => {
+    const managerRenames = Object.fromEntries(
+      managerSlotsFromPortfolio(buildings)
+        .filter((slot) => slot.name)
+        .map((slot) => [slot.key, slot.name]),
+    )
+    const { portfolio: migrated } = applyManagerSlots(
+      { buildings, utilities: [], polygons: [] },
+      managerSlotsFromPortfolio(buildings),
+    )
+    const filtered = applyFilters(
+      migrated.buildings,
+      { ...DEFAULT_FILTER_STATE, manager: 'Josh Starkey' },
+      polygonIndex,
+      managerRenames,
+    )
+    expect(filtered.length).toBeGreaterThan(0)
+    expect(filtered.every((b) => b.manager === 'Manager 2')).toBe(true)
   })
 
   it('returns subset for park filter', () => {

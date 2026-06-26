@@ -9,12 +9,9 @@ import { useGitHubDeploySync } from '@/features/settings/useGitHubDeploySync'
 import { RtuPricingSettings } from '@/features/settings/RtuPricingSettings'
 import { SettingsToolButton } from '@/features/settings/SettingsToolButton'
 import { Modal } from '@/components/Modal/Modal'
-import { Tooltip } from '@/components/Tooltip/Tooltip'
-import tooltipStyles from '@/components/Tooltip/Tooltip.module.css'
 import { APP_THEMES } from '@/lib/themes'
 import selectStyles from '@/components/Select/Select.module.css'
 import {
-  addManagerSlot,
   applyManagerSlots,
   managerSlotLabel,
   managerSlotsFromPortfolio,
@@ -22,6 +19,10 @@ import {
 } from '@/lib/managerNames'
 import { saveDatabase } from '@/lib/saveDatabase'
 import { exportDeployBundleToDisk } from '@/lib/deployBundle'
+import { clearStaleLocalRtuPictures } from '@/lib/rtuPictures'
+import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
+import { downloadSyncStatusExcel } from '@/lib/syncStatusReport'
+import { usesRemoteJsonData } from '@/lib/jsonDataUrls'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
@@ -51,8 +52,6 @@ interface SettingsFormProps {
   onSaved?: () => void
 }
 
-const ADD_MANAGER_VALUE = '__add_manager__'
-
 function PropertyManagerNamesEditor({
   portfolio,
   onPortfolioPatch,
@@ -60,11 +59,11 @@ function PropertyManagerNamesEditor({
   portfolio: PortfolioData
   onPortfolioPatch: (data: PortfolioData) => void
 }) {
-  const setManagerRename = useSettingsStore((s) => s.setManagerRename)
+  const managerRenames = useSettingsStore((s) => s.managerRenames)
   const saveSettings = useSettingsStore((s) => s.saveSettings)
 
   const [slots, setSlots] = useState<ManagerSlot[]>(() =>
-    managerSlotsFromPortfolio(portfolio.buildings),
+    managerSlotsFromPortfolio(portfolio.buildings, managerRenames),
   )
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [draftName, setDraftName] = useState(() => slots[0]?.name ?? '')
@@ -85,28 +84,20 @@ function PropertyManagerNamesEditor({
     setDraftName(committed[nextIndex]?.name ?? '')
   }
 
-  const handleAddManager = () => {
-    const committed = commitDraft(selectedIndex, draftName, slots)
-    const nextSlots = addManagerSlot(committed)
-    const newIndex = nextSlots.length - 1
-    setSlots(nextSlots)
-    setSelectedIndex(newIndex)
-    setDraftName('')
-  }
-
   const handleApply = () => {
     const committed = commitDraft(selectedIndex, draftName, slots)
-    const { portfolio: nextPortfolio, changed, managerRenames: appliedRenames } =
-      applyManagerSlots(portfolio, committed)
+    const { portfolio: nextPortfolio, changed, managerRenames: nextRenames } = applyManagerSlots(
+      portfolio,
+      committed,
+      managerRenames,
+    )
 
-    for (const [original, name] of Object.entries(appliedRenames)) {
-      setManagerRename(original, name)
-    }
+    useSettingsStore.setState({ managerRenames: nextRenames })
     void saveSettings()
 
     if (changed) {
       onPortfolioPatch(nextPortfolio)
-      const nextSlots = managerSlotsFromPortfolio(nextPortfolio.buildings)
+      const nextSlots = managerSlotsFromPortfolio(nextPortfolio.buildings, nextRenames)
       setSlots(nextSlots)
       setSelectedIndex(Math.min(selectedIndex, nextSlots.length - 1))
       setDraftName(nextSlots[Math.min(selectedIndex, nextSlots.length - 1)]?.name ?? '')
@@ -118,47 +109,43 @@ function PropertyManagerNamesEditor({
   }
 
   return (
-    <>
-      <div className={styles.mgrFieldList}>
-        <select
-          className={selectStyles.select}
-          value={String(selectedIndex)}
-          onChange={(e) => handleSlotPickerChange(e.target.value)}
-          aria-label="Select manager to edit"
-        >
-          {slots.map((slot, index) => (
-            <option key={`${slot.original}-${index}`} value={String(index)}>
-              {slot.name || managerSlotLabel(index)}
-            </option>
-          ))}
-        </select>
-        <input
-          type="text"
-          className={`${selectStyles.select} ${styles.mgrNameInput}`}
-          value={draftName}
-          onChange={(e) => setDraftName(e.target.value)}
-          placeholder={managerSlotLabel(selectedIndex)}
-          aria-label={`Edit ${managerSlotLabel(selectedIndex)}`}
-        />
-        <select
-          className={selectStyles.select}
-          value=""
-          onChange={(e) => {
-            if (e.target.value === ADD_MANAGER_VALUE) handleAddManager()
-          }}
-          aria-label="Add manager slot"
-        >
-          <option value="">Add Manager</option>
-          <option value={ADD_MANAGER_VALUE}>Add Manager</option>
-        </select>
-      </div>
+    <div className={styles.mgrEditor}>
+      <div className={styles.mgrSlotTitle}>{managerSlotLabel(selectedIndex)}</div>
+      <label className={styles.mgrFieldLabel} htmlFor="manager-slot-picker">
+        Manager slot
+      </label>
+      <select
+        id="manager-slot-picker"
+        className={selectStyles.select}
+        value={String(selectedIndex)}
+        onChange={(e) => handleSlotPickerChange(e.target.value)}
+        aria-label="Select manager slot"
+      >
+        {slots.map((slot, index) => (
+          <option key={slot.key} value={String(index)}>
+            {managerSlotLabel(index)}
+          </option>
+        ))}
+      </select>
+      <label className={styles.mgrFieldLabel} htmlFor="manager-display-name">
+        Display name
+      </label>
+      <input
+        id="manager-display-name"
+        type="text"
+        className={styles.mgrInput}
+        value={draftName}
+        onChange={(e) => setDraftName(e.target.value)}
+        placeholder={managerSlotLabel(selectedIndex)}
+        aria-label={`Display name for ${managerSlotLabel(selectedIndex)}`}
+      />
       <p className={styles.hint}>
-        Pick a manager above, edit the name, then apply. Add Manager stays available for extra slots.
+        Buildings stay on Manager 1–4. Edit the display name, then apply.
       </p>
       <button type="button" className={styles.mgrApplyBtn} onClick={handleApply}>
         Apply manager names
       </button>
-    </>
+    </div>
   )
 }
 
@@ -193,8 +180,9 @@ function SettingsForm({
 
   const managerEditorKey = useMemo(() => {
     if (!open) return 'closed'
-    return managerSlotsFromPortfolio(portfolio.buildings)
-      .map((slot) => `${slot.original}\t${slot.name}`)
+    const renames = useSettingsStore.getState().managerRenames
+    return managerSlotsFromPortfolio(portfolio.buildings, renames)
+      .map((slot) => `${slot.key}\t${slot.name}`)
       .join('|')
   }, [open, portfolio.buildings])
 
@@ -259,6 +247,49 @@ function SettingsForm({
       .finally(() => setUploadBusy(false))
   }
 
+  const handleClearStaleLocalPictures = () => {
+    if (!usesRemoteJsonData()) {
+      showToastError('Cloudflare JSON is not configured for this build.')
+      return
+    }
+    setUploadBusy(true)
+    void clearStaleLocalRtuPictures()
+      .then(({ removed, remaining }) => {
+        invalidateUnsyncedChanges()
+        if (remaining === 0) {
+          showToastSuccess(
+            removed > 0
+              ? `✓ Cleared ${removed} stale local picture copy(ies). Photos load from Cloudflare.`
+              : '✓ No stale local picture copies — everything loads from Cloudflare.',
+          )
+          return
+        }
+        showToastSuccess(
+          `✓ Cleared ${removed} stale copy(ies). ${remaining} new photo(s) on this PC still need sync.`,
+        )
+      })
+      .catch((error) => {
+        showToastError(error instanceof Error ? error.message : 'Could not clear stale pictures')
+      })
+      .finally(() => setUploadBusy(false))
+  }
+
+  const handleDownloadSyncReport = () => {
+    if (!usesRemoteJsonData()) {
+      showToastError('Cloudflare JSON is not configured for this build.')
+      return
+    }
+    setUploadBusy(true)
+    void downloadSyncStatusExcel()
+      .then(() => {
+        showToastSuccess('✓ Sync status report downloaded (Excel)')
+      })
+      .catch((error) => {
+        showToastError(error instanceof Error ? error.message : 'Could not download report')
+      })
+      .finally(() => setUploadBusy(false))
+  }
+
   return (
     <Modal
       open={open}
@@ -286,20 +317,17 @@ function SettingsForm({
         </section>
 
         <section>
+          <div className={styles.sectionLabel}>Property managers</div>
+          <PropertyManagerNamesEditor
+            key={managerEditorKey}
+            portfolio={portfolio}
+            onPortfolioPatch={onPortfolioPatch}
+          />
+        </section>
+
+        <section>
           <div className={styles.sectionLabel}>Edits</div>
           <div className={styles.tools}>
-            <Tooltip
-              content="Edit manager names shown in the sidebar All property managers filter."
-              position="left"
-              wide
-              className={`${tooltipStyles.wrapBlock} ${styles.toolBtnWrap}`}
-            >
-              <PropertyManagerNamesEditor
-                key={managerEditorKey}
-                portfolio={portfolio}
-                onPortfolioPatch={onPortfolioPatch}
-              />
-            </Tooltip>
             <SettingsToolButton
               tooltip="Edit supply, install, and other per-tonnage replacement costs used by the cost estimator."
               onClick={() => setPricingOpen(true)}
@@ -357,6 +385,24 @@ function SettingsForm({
         <section>
           <div className={styles.sectionLabel}>Cloudflare &amp; GitHub sync</div>
           <GitHubDeploySyncFields sync={githubSync} disabled={uploadBusy} />
+          {usesRemoteJsonData() ? (
+            <div className={styles.tools} style={{ marginTop: 8 }}>
+              <SettingsToolButton
+                tooltip="Remove browser copies of RTU photos that are already listed in the Cloudflare manifest. Use this if the unsynced warning keeps coming back after sync."
+                onClick={handleClearStaleLocalPictures}
+                disabled={uploadBusy}
+              >
+                Clear stale local picture copies
+              </SettingsToolButton>
+              <SettingsToolButton
+                tooltip="Download Excel: Cloudflare sync-meta, manifest list, and local unsynced photos on this PC."
+                onClick={handleDownloadSyncReport}
+                disabled={uploadBusy}
+              >
+                Download sync status report (Excel)
+              </SettingsToolButton>
+            </div>
+          ) : null}
         </section>
 
         <section>

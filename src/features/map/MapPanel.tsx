@@ -13,6 +13,8 @@ import { matchesUtility } from '@/lib/dragSelection'
 import { tenantPolygonCount, buildPolygonBuildingIndex } from '@/lib/polygonBuildings'
 import { installMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
 import { fitBoundsPreserveRotation, panToPreserveRotation } from '@/lib/mapRotation'
+import { enableMapDigitalZoom } from '@/lib/mapDigitalZoom'
+import { showToastSuccess } from '@/lib/toast'
 import type { Building, LayerKey, Polygon, PortfolioData, Rtu, Utility } from '@/types/domain'
 import type { ImageryMode } from '@/types/domain'
 import { useFilterStore } from '@/stores/filterStore'
@@ -46,6 +48,7 @@ export function MapPanel({
   const [map, setMap] = useState<google.maps.Map | null>(null)
   const [mapError, setMapError] = useState<string | null>(null)
   const [imageryMode, setImageryMode] = useState<ImageryMode>(IMAGERY_MODES[0]!)
+  const [digitalZoomScale, setDigitalZoomScale] = useState(1)
 
   const currentBuilding = useSelectionStore((s) => s.currentBuilding)
   const selectBuilding = useSelectionStore((s) => s.selectBuilding)
@@ -194,15 +197,33 @@ export function MapPanel({
 
   const pendingStageRevision = usePendingRtuPictureStore((s) => s.stageRevision)
   const pendingPictures = usePendingRtuPictureStore((s) => s.items)
+  const clearPendingPictures = usePendingRtuPictureStore((s) => s.clear)
+  const pendingPictureCount = pendingPictures.length
+
+  const handleClearPendingPictures = useCallback(() => {
+    if (pendingPictureCount === 0) return
+    if (
+      !window.confirm(
+        `Remove ${pendingPictureCount} photo marker${pendingPictureCount === 1 ? '' : 's'} from the map and start over?`,
+      )
+    ) {
+      return
+    }
+    clearPendingPictures()
+    showToastSuccess('Photo markers cleared — upload again from Settings when ready.')
+  }, [clearPendingPictures, pendingPictureCount])
 
   useEffect(() => {
-    if (!map || pendingPictures.length === 0) return
+    if (!map) return
+    const items = usePendingRtuPictureStore.getState().items
+    if (items.length === 0) return
     const bounds = new google.maps.LatLngBounds()
-    for (const item of pendingPictures) {
+    for (const item of items) {
       bounds.extend({ lat: item.lat, lng: item.lng })
     }
     fitBoundsPreserveRotation(map, bounds, 80)
-  }, [map, pendingStageRevision, pendingPictures])
+    // Only pan when a new batch is staged — not when individual photos are assigned.
+  }, [map, pendingStageRevision])
 
   usePolygons({
     map,
@@ -232,6 +253,7 @@ export function MapPanel({
   useEffect(() => {
     if (!mapsConfigured || !mapRef.current) return
     let cancelled = false
+    let cleanupDigitalZoom: (() => void) | null = null
     loadGoogleMaps()
       .then((google) => {
         if (cancelled || !mapRef.current) return
@@ -249,13 +271,18 @@ export function MapPanel({
           headingInteractionEnabled: true,
           tiltInteractionEnabled: true,
           isFractionalZoomEnabled: true,
-          renderingType: google.maps.RenderingType.VECTOR,
+          renderingType: google.maps.RenderingType.RASTER,
+        })
+        cleanupDigitalZoom = enableMapDigitalZoom(instance, mapRef.current, {
+          onScaleChange: setDigitalZoomScale,
         })
         setMap(instance)
       })
       .catch((err: Error) => setMapError(err.message))
     return () => {
       cancelled = true
+      cleanupDigitalZoom?.()
+      setDigitalZoomScale(1)
     }
   }, [mapsConfigured, mapId])
 
@@ -334,6 +361,25 @@ export function MapPanel({
             </button>
           </div>
         ) : null}
+        {pendingPictureCount > 0 ? (
+          <div
+            className={`${styles.pendingNotice}${dragMode ? ` ${styles.pendingNoticeBelowDrag}` : ''}`}
+            role="status"
+          >
+            <span className={styles.pendingNoticeText}>
+              {pendingPictureCount} photo marker{pendingPictureCount === 1 ? '' : 's'} waiting — drag onto an RTU pin
+              or click the RTU → Assign pending photo
+            </span>
+            <button
+              type="button"
+              className={styles.pendingNoticeAction}
+              onClick={handleClearPendingPictures}
+              title="Remove all pending photo markers from the map"
+            >
+              Clear &amp; start over
+            </button>
+          </div>
+        ) : null}
         {!mapsConfigured || mapError ? (
           <div className={styles.mapPlaceholder} id="map">
             <div>
@@ -346,7 +392,14 @@ export function MapPanel({
             </div>
           </div>
         ) : (
-          <div ref={mapRef} id="map" className={styles.mapCanvas} />
+          <>
+            <div ref={mapRef} id="map" className={styles.mapCanvas} />
+            {digitalZoomScale > 1.01 ? (
+              <div className={styles.digitalZoomNotice} role="status">
+                Digital zoom {Math.round(digitalZoomScale * 100)}% — scroll out or press Esc to reset
+              </div>
+            ) : null}
+          </>
         )}
       </div>
 

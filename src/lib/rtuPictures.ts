@@ -7,6 +7,7 @@ import {
   pictureFileRtuLabel,
 } from '@/lib/rtuPictureAssignNaming'
 import { isRtuManifestPictureHidden } from '@/lib/hiddenRtuPictures'
+import { usesRemoteJsonData } from '@/lib/jsonDataUrls'
 import {
   getRtuPictureManifestUrl,
   rtuPictureFileUrl,
@@ -354,10 +355,269 @@ export async function markRtuPicturesDeployed(fileNames: string[]): Promise<void
     }
     tx.oncomplete = () => {
       db.close()
+      notifyRtuPicturesChanged()
       resolve()
     }
     tx.onerror = () => reject(tx.error ?? new Error('IndexedDB write failed'))
   })
+}
+
+async function cloudRtuPictureReachable(fileName: string): Promise<boolean> {
+  const url = rtuPictureFileUrl(fileName)
+  try {
+    const response = await fetch(url, { method: 'HEAD', cache: 'no-store' })
+    if (response.ok) return true
+  } catch {
+    /* HEAD may be blocked by CORS — try image load */
+  }
+
+  if (!/\.(jpe?g|png|webp|gif)(\?|$)/i.test(fileName)) return false
+
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => resolve(true)
+    img.onerror = () => resolve(false)
+    img.src = `${url}${url.includes('?') ? '&' : '?'}reach=${Date.now()}`
+  })
+}
+
+function splitRtuPictureKey(rtuKey: string): { buildingAddress: string; rtuName: string } {
+  const pipe = rtuKey.indexOf('|')
+  if (pipe < 0) return { buildingAddress: rtuKey, rtuName: '' }
+  return { buildingAddress: rtuKey.slice(0, pipe), rtuName: rtuKey.slice(pipe + 1) }
+}
+
+function manifestFileAtIndex(
+  manifest: RtuPictureManifest,
+  rtuKey: string,
+  index: number,
+): string | null {
+  const { buildingAddress, rtuName } = splitRtuPictureKey(rtuKey)
+  const manifestKey = resolveManifestRtuKey(buildingAddress, rtuName, manifest)
+  for (const fileName of manifest.entries[manifestKey] ?? []) {
+    if (isRtuManifestPictureHidden(manifestKey, fileName)) continue
+    if (parseRtuPictureIndex(fileName) === index) return fileName
+  }
+  return null
+}
+
+/** True when Cloudflare manifest already lists the same picture slot (same cloud filename). */
+export function isIndexedDbRowSatisfiedByManifest(
+  manifest: RtuPictureManifest,
+  row: Pick<StoredRtuPictureRow, 'fileName' | 'rtuKey' | 'index'>,
+): boolean {
+  const manifestFile = manifestSlotForRow(manifest, row)
+  if (!manifestFile) return false
+  const { buildingAddress, rtuName } = splitRtuPictureKey(row.rtuKey)
+  const rowCloud = manifestEntryToCloudFileName(row.fileName, buildingAddress, rtuName)
+  const manifestCloud = manifestEntryToCloudFileName(manifestFile, buildingAddress, rtuName)
+  return rowCloud === manifestCloud
+}
+
+function manifestSlotForRow(
+  manifest: RtuPictureManifest,
+  row: Pick<StoredRtuPictureRow, 'fileName' | 'rtuKey' | 'index'>,
+): string | null {
+  const fromIndex = manifestFileAtIndex(manifest, row.rtuKey, row.index)
+  if (fromIndex) return fromIndex
+  const parsed = parseRtuPictureIndex(row.fileName)
+  if (parsed != null && parsed !== row.index) {
+    return manifestFileAtIndex(manifest, row.rtuKey, parsed)
+  }
+
+  const { buildingAddress, rtuName } = splitRtuPictureKey(row.rtuKey)
+  const unitCore = normalizeRtuUnitCore(rtuName)
+  if (!unitCore) return null
+  const buildingNum = buildingStreetNumber(buildingAddress)
+  const indices = new Set<number>()
+  if (row.index >= 1) indices.add(row.index)
+  if (parsed != null && parsed >= 1) indices.add(parsed)
+
+  for (const [key, files] of Object.entries(manifest.entries ?? {})) {
+    const sep = key.indexOf('|')
+    if (sep < 0) continue
+    const mBuilding = key.slice(0, sep)
+    const mRtu = key.slice(sep + 1)
+    if (buildingStreetNumber(mBuilding) !== buildingNum) continue
+    if (normalizeRtuUnitCore(mRtu) !== unitCore) continue
+    for (const fileName of files) {
+      if (isRtuManifestPictureHidden(key, fileName)) continue
+      const idx = parseRtuPictureIndex(fileName)
+      if (idx != null && indices.has(idx)) return fileName
+    }
+  }
+
+  return null
+}
+
+/** All manifest filenames plus cloud-normalized variants (for stale IndexedDB matching). */
+function buildManifestCloudNameSet(manifest: RtuPictureManifest): Set<string> {
+  const names = new Set<string>()
+  for (const [rtuKey, files] of Object.entries(manifest.entries ?? {})) {
+    const { buildingAddress, rtuName } = splitRtuPictureKey(rtuKey)
+    for (const fileName of files) {
+      names.add(fileName)
+      names.add(manifestEntryToCloudFileName(fileName, buildingAddress, rtuName))
+    }
+  }
+  return names
+}
+
+function rowFileNamesInManifest(manifest: RtuPictureManifest, row: StoredRtuPictureRow): boolean {
+  const cloudNames = buildManifestCloudNameSet(manifest)
+  const { buildingAddress, rtuName } = splitRtuPictureKey(row.rtuKey)
+  const cloudRow = manifestEntryToCloudFileName(row.fileName, buildingAddress, rtuName)
+  return cloudNames.has(row.fileName) || cloudNames.has(cloudRow)
+}
+
+/** Match pending rows when filename parses to the same building / unit / index as a manifest entry. */
+function rowParsedSlotInManifest(
+  manifest: RtuPictureManifest,
+  row: Pick<StoredRtuPictureRow, 'fileName' | 'rtuKey' | 'index'>,
+): boolean {
+  const parsed = parseBulkRtuPictureFileName(row.fileName)
+  const indices = new Set<number>()
+  if (row.index >= 1) indices.add(row.index)
+  const fromName = parseRtuPictureIndex(row.fileName)
+  if (fromName != null && fromName >= 1) indices.add(fromName)
+
+  const buildingNums = new Set<string>()
+  const unitCores = new Set<string>()
+  if (parsed?.unitCore) {
+    buildingNums.add(parsed.buildingNum)
+    unitCores.add(parsed.unitCore)
+  }
+  const { buildingAddress, rtuName } = splitRtuPictureKey(row.rtuKey)
+  const rowUnitCore = normalizeRtuUnitCore(rtuName)
+  if (rowUnitCore) {
+    buildingNums.add(buildingStreetNumber(buildingAddress))
+    unitCores.add(rowUnitCore)
+  }
+  if (!buildingNums.size || !unitCores.size || !indices.size) return false
+
+  for (const [rtuKey, files] of Object.entries(manifest.entries ?? {})) {
+    const sep = rtuKey.indexOf('|')
+    if (sep < 0) continue
+    const mBuildingNum = buildingStreetNumber(rtuKey.slice(0, sep))
+    const mUnitCore = normalizeRtuUnitCore(rtuKey.slice(sep + 1))
+    if (!mUnitCore || !buildingNums.has(mBuildingNum) || !unitCores.has(mUnitCore)) continue
+    for (const fileName of files) {
+      if (isRtuManifestPictureHidden(rtuKey, fileName)) continue
+      const idx = parseRtuPictureIndex(fileName)
+      if (idx != null && indices.has(idx)) return true
+    }
+  }
+  return false
+}
+
+function isStalePendingRow(manifest: RtuPictureManifest, row: StoredRtuPictureRow): boolean {
+  if (rowFileNamesInManifest(manifest, row)) return true
+  if (manifestSlotForRow(manifest, row)) return true
+  if (isIndexedDbRowSatisfiedByManifest(manifest, row)) return true
+  if (rowParsedSlotInManifest(manifest, row)) return true
+  return false
+}
+
+/** Pending IndexedDB pictures that still need a Cloudflare upload (excludes manifest/CDN matches). */
+export async function countPendingPicturesNeedingCloudUpload(): Promise<number> {
+  const manifest = await loadRtuPictureManifest()
+  const rows = await idbGetAllRows()
+  let count = 0
+  for (const row of rows) {
+    if (row.pendingDeploy === false) continue
+    if (isStalePendingRow(manifest, row)) continue
+    count++
+  }
+  return count
+}
+
+async function idbDeleteMany(fileNames: string[]): Promise<void> {
+  if (!fileNames.length) return
+  const db = await openDb()
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite')
+    const store = tx.objectStore(STORE)
+    for (const fileName of fileNames) store.delete(fileName)
+    tx.oncomplete = () => {
+      db.close()
+      resolve()
+    }
+    tx.onerror = () => reject(tx.error ?? new Error('IndexedDB delete failed'))
+  })
+}
+
+/**
+ * Drop stale IndexedDB copies when Cloudflare already serves that RTU picture slot.
+ * Fixes false "942 pictures waiting to upload" after pictures are already on R2/CDN.
+ */
+export async function reconcilePendingDeployWithCloud(): Promise<number> {
+  if (!usesRemoteJsonData()) return 0
+
+  const manifest = await loadRtuPictureManifest()
+  const rows = await idbGetAllRows()
+  const pending = rows.filter((row) => row.pendingDeploy !== false)
+  if (!pending.length) return 0
+
+  const deleteRedundant: string[] = []
+  const needsCdnCheck: StoredRtuPictureRow[] = []
+
+  for (const row of pending) {
+    const blob = row.fullBlob ?? row.thumbBlob
+    if (!blob || blob.size === 0) {
+      deleteRedundant.push(row.fileName)
+      continue
+    }
+    if (isStalePendingRow(manifest, row)) {
+      deleteRedundant.push(row.fileName)
+      continue
+    }
+    needsCdnCheck.push(row)
+  }
+
+  if (deleteRedundant.length) await idbDeleteMany(deleteRedundant)
+
+  const deleteOnCdn: string[] = []
+  const concurrency = 12
+  let cursor = 0
+  async function cdnWorker() {
+    while (cursor < needsCdnCheck.length) {
+      const row = needsCdnCheck[cursor++]!
+      const { buildingAddress, rtuName } = splitRtuPictureKey(row.rtuKey)
+      const candidates = [
+        row.fileName,
+        manifestEntryToCloudFileName(row.fileName, buildingAddress, rtuName),
+      ]
+      const manifestFile = manifestSlotForRow(manifest, row)
+      if (manifestFile) {
+        candidates.push(
+          manifestFile,
+          manifestEntryToCloudFileName(manifestFile, buildingAddress, rtuName),
+        )
+      }
+      for (const name of [...new Set(candidates)]) {
+        if (await cloudRtuPictureReachable(name)) {
+          deleteOnCdn.push(row.fileName)
+          break
+        }
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: concurrency }, () => cdnWorker()))
+  if (deleteOnCdn.length) await idbDeleteMany(deleteOnCdn)
+
+  const reconciled = deleteRedundant.length + deleteOnCdn.length
+  if (reconciled) notifyRtuPicturesChanged()
+  return reconciled
+}
+
+/** Remove stale browser copies of pictures already on Cloudflare; returns counts for UI. */
+export async function clearStaleLocalRtuPictures(): Promise<{
+  removed: number
+  remaining: number
+}> {
+  const removed = await reconcilePendingDeployWithCloud()
+  const remaining = await countPendingPicturesNeedingCloudUpload()
+  return { removed, remaining }
 }
 
 /** Picture count per RTU key (`buildingAddress|rtuName`), merging manifest + IndexedDB by index. */
@@ -388,13 +648,16 @@ export async function getRtuPictureCountMap(): Promise<Map<string, number>> {
   return new Map([...indexByKey.entries()].map(([key, indices]) => [key, indices.size]))
 }
 
-async function fetchManifestFromUrl(url: string): Promise<RtuPictureManifest | null> {
+async function fetchManifestFromUrl(
+  url: string,
+  options?: { allowEmpty?: boolean },
+): Promise<RtuPictureManifest | null> {
   try {
     const res = await fetch(url, { cache: 'no-store' })
     if (!res.ok) return null
     const data = (await res.json()) as RtuPictureManifest
     const entries = data.entries ?? {}
-    if (Object.keys(entries).length === 0) return null
+    if (!options?.allowEmpty && Object.keys(entries).length === 0) return null
     return { entries }
   } catch {
     return null
@@ -411,14 +674,27 @@ export async function loadRtuPictureManifest(): Promise<RtuPictureManifest> {
   manifestPromise = (async () => {
     try {
       const remoteUrl = getRtuPictureManifestUrl()
-      let manifest =
-        remoteUrl !== BUNDLED_MANIFEST_URL
-          ? await fetchManifestFromUrl(remoteUrl)
-          : null
-      if (!manifest) {
-        manifest = await fetchManifestFromUrl(BUNDLED_MANIFEST_URL)
+      const cloudflareJson = usesRemoteJsonData()
+
+      if (cloudflareJson) {
+        const remote = await fetchManifestFromUrl(remoteUrl, { allowEmpty: true })
+        if (remote) {
+          manifestCache = remote
+          return manifestCache
+        }
+        console.warn(
+          '[rtuPictures] Cloudflare manifest.json unavailable; falling back to bundled copy.',
+        )
+      } else if (remoteUrl !== BUNDLED_MANIFEST_URL) {
+        const remote = await fetchManifestFromUrl(remoteUrl)
+        if (remote) {
+          manifestCache = remote
+          return manifestCache
+        }
       }
-      manifestCache = manifest ?? { entries: {} }
+
+      const bundled = await fetchManifestFromUrl(BUNDLED_MANIFEST_URL)
+      manifestCache = bundled ?? { entries: {} }
       return manifestCache
     } finally {
       manifestPromise = null

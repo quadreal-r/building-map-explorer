@@ -8,11 +8,14 @@ import { SettingsModal } from '@/features/settings/SettingsModal'
 import { Sidebar } from '@/features/sidebar/Sidebar'
 import { useFilteredBuildings } from '@/hooks/useFilteredBuildings'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useRtuPictureViewerHistory } from '@/hooks/useRtuPictureViewerHistory'
+import { useUnsyncedChangesWarning } from '@/hooks/useUnsyncedChangesWarning'
 import { RemoteSyncUpdateModal } from '@/features/sync/RemoteSyncUpdateModal'
+import { UnsyncedChangesBanner } from '@/features/sync/UnsyncedChangesBanner'
 import { useRemoteSyncUpdateCheck } from '@/hooks/useRemoteSyncUpdateCheck'
 import { usePortfolioData, persistPortfolio, type PortfolioData } from '@/hooks/usePortfolioData'
 import { loadBundledHiddenRtuPictures } from '@/lib/hiddenRtuPictures'
-import { notifyRtuPicturesChanged } from '@/lib/rtuPictures'
+import { notifyRtuPicturesChanged, reconcilePendingDeployWithCloud } from '@/lib/rtuPictures'
 import { showToastSuccess } from '@/lib/toast'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { useRtuPricingStore } from '@/stores/rtuPricingStore'
@@ -50,6 +53,7 @@ export function AppShell() {
     void loadBundledHiddenRtuPictures().then((changed) => {
       if (changed) notifyRtuPicturesChanged()
     })
+    void reconcilePendingDeployWithCloud()
     void loadSettings()
     void loadRtuPricing()
     void loadRtuSchedule()
@@ -63,6 +67,8 @@ export function AppShell() {
   )
 
   useKeyboardShortcuts({ portfolio, onSaved: markSaved })
+  useRtuPictureViewerHistory()
+  const unsyncedChanges = useUnsyncedChangesWarning()
 
   const handlePortfolioImport = useCallback(
     (next: PortfolioData) => {
@@ -127,7 +133,10 @@ export function AppShell() {
   }
 
   return (
-    <div className="app">
+    <div className={`app${unsyncedChanges.hasUnsynced ? ` ${styles.appWithBanner}` : ''}`}>
+      {unsyncedChanges.hasUnsynced ? (
+        <UnsyncedChangesBanner lines={unsyncedChanges.lines} />
+      ) : null}
       <Sidebar
         allBuildings={portfolio.buildings}
         listBuildings={listBuildings}

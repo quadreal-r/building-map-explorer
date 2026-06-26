@@ -6,6 +6,10 @@
   min-height: 0;
 }
 
+.appWithBanner {
+  padding-top: 88px;
+}
+
 .loading {
   flex: 1;
   display: flex;

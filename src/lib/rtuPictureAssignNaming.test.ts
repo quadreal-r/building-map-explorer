@@ -5,7 +5,8 @@ import {
   formatRtuNameForPictureFile,
   manifestEntryToCloudFileName,
 } from '@/lib/rtuPictureAssignNaming'
-import { findNearestRtuAt } from '@/lib/rtuPictureGpsAssign'
+import { RTU_PICTURE_DROP_FEET } from '@/lib/geo'
+import { findNearestRtuAt, spreadStackedGpsPictures } from '@/lib/rtuPictureGpsAssign'
 import type { Building } from '@/types/domain'
 
 describe('formatRtuNameForPictureFile', () => {
@@ -99,7 +100,34 @@ describe('findNearestRtuAt', () => {
     expect(match?.rtu.name).toBe('RTU- 01')
   })
 
+  it('returns null when beyond drag-assign range', () => {
+    expect(findNearestRtuAt(buildings, 43.601, -79.401, RTU_PICTURE_DROP_FEET)).toBeNull()
+  })
+
   it('returns null when too far', () => {
     expect(findNearestRtuAt(buildings, 43.7, -79.5, 50)).toBeNull()
+  })
+})
+
+describe('spreadStackedGpsPictures', () => {
+  it('offsets duplicate GPS positions so markers do not stack', () => {
+    const base = {
+      id: 'a',
+      file: new File([], 'a.jpg'),
+      gpsLat: 43.6,
+      gpsLng: -79.4,
+      lat: 43.6,
+      lng: -79.4,
+      originalName: 'a.jpg',
+      previewUrl: 'blob:a',
+    }
+    const spread = spreadStackedGpsPictures([
+      base,
+      { ...base, id: 'b', originalName: 'b.jpg', previewUrl: 'blob:b' },
+      { ...base, id: 'c', originalName: 'c.jpg', previewUrl: 'blob:c' },
+    ])
+    expect(spread[0]!.lat).toBe(43.6)
+    expect(spread[1]!.lat).not.toBe(spread[0]!.lat)
+    expect(spread[2]!.lng).not.toBe(spread[0]!.lng)
   })
 })

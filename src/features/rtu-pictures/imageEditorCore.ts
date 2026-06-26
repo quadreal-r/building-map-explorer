@@ -271,12 +271,18 @@ function readTiff(dv: DataView, tiff: number): ExifData {
   return out
 }
 
-export function loadImageFromUrl(url: string): Promise<HTMLImageElement> {
+function loadImageElement(url: string, crossOrigin: boolean): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image()
-    if (!url.startsWith('blob:')) img.crossOrigin = 'anonymous'
+    if (crossOrigin) img.crossOrigin = 'anonymous'
     img.onload = () => resolve(img)
     img.onerror = () => reject(new Error('Failed to load image'))
     img.src = url
   })
+}
+
+/** Load for canvas display. Tries CORS first (for editing), then plain load (R2 without CORS headers). */
+export function loadImageFromUrl(url: string): Promise<HTMLImageElement> {
+  if (url.startsWith('blob:')) return loadImageElement(url, false)
+  return loadImageElement(url, true).catch(() => loadImageElement(url, false))
 }

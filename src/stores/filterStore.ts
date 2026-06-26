@@ -1,5 +1,10 @@
 import { create } from 'zustand'
 import {
+  loadSearchHistory,
+  pushSearchHistory,
+  saveSearchHistory,
+} from '@/lib/searchHistory'
+import {
   DEFAULT_ADV_FILTERS,
   type AdvFilterState,
   type AdvFilterValue,
@@ -8,6 +13,7 @@ import {
 interface FilterStoreState {
   searchInput: string
   search: string
+  recentSearches: string[]
   park: string
   cluster: string
   manager: string
@@ -15,6 +21,7 @@ interface FilterStoreState {
   advPanelOpen: boolean
   setSearchInput: (value: string) => void
   applySearch: () => void
+  applyRecentSearch: (query: string) => void
   clearSearch: () => void
   setPark: (park: string) => void
   setCluster: (cluster: string) => void
@@ -29,6 +36,7 @@ interface FilterStoreState {
 export const useFilterStore = create<FilterStoreState>((set, get) => ({
   searchInput: '',
   search: '',
+  recentSearches: loadSearchHistory(),
   park: '',
   cluster: '',
   manager: '',
@@ -40,7 +48,23 @@ export const useFilterStore = create<FilterStoreState>((set, get) => ({
     if (searchInput === '') get().applySearch()
   },
 
-  applySearch: () => set({ search: get().searchInput.trim() }),
+  applySearch: () => {
+    const query = get().searchInput.trim()
+    let recentSearches = get().recentSearches
+    if (query) {
+      recentSearches = pushSearchHistory(query, recentSearches)
+      saveSearchHistory(recentSearches)
+    }
+    set({ search: query, recentSearches })
+  },
+
+  applyRecentSearch: (query) => {
+    const trimmed = query.trim()
+    if (!trimmed) return
+    const recentSearches = pushSearchHistory(trimmed, get().recentSearches)
+    saveSearchHistory(recentSearches)
+    set({ searchInput: trimmed, search: trimmed, recentSearches })
+  },
 
   clearSearch: () => set({ searchInput: '', search: '' }),
 

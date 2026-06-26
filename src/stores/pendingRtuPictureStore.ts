@@ -1,6 +1,8 @@
 import { create } from 'zustand'
+import { clearAllPendingPictureMarkers } from '@/features/map/pendingPictureMarkerRegistry'
 import {
   assignPictureFileToRtu,
+  spreadStackedGpsPictures,
   stageGpsPicturesFromFiles,
   type StagedGpsPicture,
   type StageGpsPicturesResult,
@@ -30,11 +32,13 @@ export const usePendingRtuPictureStore = create<PendingRtuPictureState>((set, ge
   stageRevision: 0,
 
   stageFromFiles: async (files) => {
+    clearAllPendingPictureMarkers()
     for (const item of get().items) revokeItemPreview(item)
     const result = await stageGpsPicturesFromFiles(files)
-    if (result.staged.length) {
+    const spread = spreadStackedGpsPictures(result.staged)
+    if (spread.length) {
       set((state) => ({
-        items: result.staged,
+        items: spread,
         stageRevision: state.stageRevision + 1,
       }))
     } else {
@@ -56,6 +60,7 @@ export const usePendingRtuPictureStore = create<PendingRtuPictureState>((set, ge
   },
 
   clear: () => {
+    clearAllPendingPictureMarkers()
     for (const item of get().items) revokeItemPreview(item)
     set({ items: [] })
   },

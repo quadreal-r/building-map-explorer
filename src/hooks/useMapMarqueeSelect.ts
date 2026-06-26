@@ -43,7 +43,13 @@ export function useMapMarqueeSelect(
     const onMouseDown = (e: MouseEvent): void => {
       if (e.button !== 0) return
       const target = e.target as HTMLElement
-      if (target.closest('button, a, .gm-bundled-control, .gm-style-cc')) return
+      if (
+        target.closest(
+          'button, a, .gm-bundled-control, .gm-style-cc, [data-pending-picture-marker]',
+        )
+      ) {
+        return
+      }
       session = { startX: e.clientX, startY: e.clientY }
       marqueeActive = false
     }

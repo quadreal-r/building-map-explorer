@@ -28,8 +28,12 @@ export const UTILITY_LAYER_MAP: Record<UtilityType, LayerKey> = {
 export const PLACEHOLDER_LAT = 43.5852972
 export const PLACEHOLDER_LNG = -79.6449838
 
-/** Highest zoom level allowed on the main map (21 is the practical satellite max in most areas). */
-export const MAP_MAX_ZOOM = 21
+/** Hard cap for map zoom (includes digital zoom past native satellite tiles). */
+export const MAP_MAX_ZOOM = 24
+/** Extra integer zoom levels beyond Google's native satellite max at the current location. */
+export const MAP_EXTRA_ZOOM_LEVELS = 3
+/** Max visual scale when scroll-zooming past native satellite resolution. */
+export const MAP_MAX_DIGITAL_SCALE = 2.5
 /** Zoom used when panning to a building, RTU, polygon, or search hit. */
 export const MAP_DETAIL_ZOOM = 21
 
