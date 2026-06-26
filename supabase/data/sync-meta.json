@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "exportedAt": "2026-06-26T02:27:56.080Z",
-  "syncedAt": "2026-06-26T02:28:17.355Z",
+  "exportedAt": "2026-06-26T02:48:50.704Z",
+  "syncedAt": "2026-06-26T02:49:10.250Z",
   "source": "settings-sync",
   "summary": {
     "buildingCount": 102,
-    "rtuCount": 1073,
+    "rtuCount": 1072,
     "utilityCount": 257,
     "polygonCount": 447,
     "scheduleYearCount": 463,
