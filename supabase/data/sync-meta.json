@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "exportedAt": "2026-06-26T20:18:03.053Z",
-  "syncedAt": "2026-06-26T20:18:33.446Z",
+  "exportedAt": "2026-06-26T20:21:06.254Z",
+  "syncedAt": "2026-06-26T20:21:31.948Z",
   "source": "settings-sync",
   "summary": {
     "buildingCount": 102,
@@ -11,7 +11,7 @@
     "scheduleYearCount": 463,
     "scheduleNoteCount": 348,
     "pricingRowCount": 25,
-    "manifestPictureCount": 1268,
-    "picturesUploaded": 3
+    "manifestPictureCount": 1272,
+    "picturesUploaded": 4
   }
 }
