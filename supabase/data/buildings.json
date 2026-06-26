@@ -5499,6 +5499,12 @@
         "desc": "Building: 2320 Bristol Circle\r\nSystem: Roof Top Units\r\nDescription: RTU-01 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 1\r\nModel: LDT048H5EX1J✓\r\nSerial: 5625L00600✓\r\nMake: LENNOX\r\nDate Installed: Dec 01, 2025\r\nHeating Capacity:150,000 BTU\r\nCooling Capacity: 48,000 BTU (4 Ton)\r\nR-22 Refrigerant",
         "lat": 43.5161518,
         "lng": -79.6764078
+      },
+      {
+        "name": "RTU-4B Hybrid",
+        "desc": "RTU-04 Hybrid\nNew installation (no replacement)\nBuilding    2320 Bristol Circle\nSystem      Roof Top Units\nDescription RTU-04 Hybrid/Dual Fuel Heat Pump\nSuite       SUITE 4\nModel       LDT060H5EX1Y✓\nSerial      5625M01637✓\nMake        LENNOX\nDate InstalledFeb 04, 2026\nHeating Capacity125,000 BTU\nCooling Capacity48,000 BTU (5 Ton)",
+        "lat": 43.51648753003716,
+        "lng": -79.67712347512142
       }
     ]
   },
