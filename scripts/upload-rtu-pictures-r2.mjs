@@ -4,7 +4,7 @@
  *
  * Usage:
  *   node scripts/upload-rtu-pictures-r2.mjs
- *   node scripts/upload-rtu-pictures-r2.mjs --from-folder "C:/Users/Robert/Pictures/RTU-Pictures"
+ *   node scripts/upload-rtu-pictures-r2.mjs --skip-existing --from-folder "C:/Users/Robert/Pictures/RTU-Pictures"
  *
  * By default reads files from public/database/rtu-pictures/ (manifest-listed names only).
  * With --from-folder, uploads manifest entries found anywhere under that folder tree.
@@ -19,8 +19,10 @@ import {
   getR2PublicBaseUrl,
   guessPictureContentType,
   isR2Configured,
+  listR2PictureFileNames,
   uploadRtuPictureToR2,
 } from './lib/r2-client.mjs'
+import { loadDotEnvLocal, ROOT } from './lib/load-dotenv-local.mjs'
 import {
   RTU_GPS_MATCH_FEET,
   findRtuInPortfolio,
@@ -31,40 +33,21 @@ import {
 } from './lib/rtu-gps-validate.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const ROOT = join(__dirname, '..')
 const PICS_DIR = join(ROOT, 'public', 'database', 'rtu-pictures')
 const MANIFEST_PATH = join(PICS_DIR, 'manifest.json')
 
 const IMAGE_EXT = /\.(jpe?g|png|webp|gif|heic|heif|tiff?)$/i
 
-function loadDotEnvLocal() {
-  const path = join(ROOT, '.env.local')
-  if (!existsSync(path)) return
-  for (const line of readFileSync(path, 'utf8').split(/\r?\n/)) {
-    const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) continue
-    const eq = trimmed.indexOf('=')
-    if (eq < 0) continue
-    const key = trimmed.slice(0, eq).trim()
-    let value = trimmed.slice(eq + 1).trim()
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1)
-    }
-    if (!process.env[key]) process.env[key] = value
-  }
-}
-
 function parseArgs(argv) {
   let fromFolder = null
+  let skipExisting = false
   for (let i = 2; i < argv.length; i++) {
     const arg = argv[i]
     if (arg === '--from-folder') fromFolder = argv[++i] ?? null
+    else if (arg === '--skip-existing') skipExisting = true
     else if (!arg.startsWith('-')) fromFolder = arg
   }
-  return { fromFolder }
+  return { fromFolder, skipExisting }
 }
 
 function loadManifestFileMap() {
@@ -123,7 +106,7 @@ function resolveSourcePath(fileName, fromFolder, folderIndex) {
 
 async function main() {
   loadDotEnvLocal()
-  const { fromFolder } = parseArgs(process.argv)
+  const { fromFolder, skipExisting } = parseArgs(process.argv)
 
   if (!isR2Configured()) {
     if (fromFolder) {
@@ -152,15 +135,32 @@ async function main() {
 
   const folderIndex = fromFolder ? buildFolderFileIndex(fromFolder) : null
   const sourceLabel = fromFolder ? `folder ${fromFolder}` : PICS_DIR
-  console.log(`Uploading up to ${fileNames.length} manifest file(s) from ${sourceLabel}`)
+
+  const r2Existing = skipExisting ? new Set(await listR2PictureFileNames()) : null
+  const r2ByLower = skipExisting
+    ? new Map([...r2Existing].map((n) => [n.toLowerCase(), n]))
+    : null
+
+  console.log(
+    `Uploading up to ${fileNames.length} manifest file(s) from ${sourceLabel}${skipExisting ? ' (skip existing on R2)' : ''}`,
+  )
 
   let uploaded = 0
   let skipped = 0
+  let skippedOnR2 = 0
   let gpsWarnings = 0
   let noGps = 0
   const warningLines = []
 
   for (const fileName of fileNames) {
+    if (
+      r2Existing &&
+      (r2Existing.has(fileName) || r2ByLower.has(fileName.toLowerCase()))
+    ) {
+      skippedOnR2 += 1
+      continue
+    }
+
     const filePath = resolveSourcePath(fileName, fromFolder, folderIndex)
     if (!filePath) {
       skipped += 1
@@ -201,7 +201,7 @@ async function main() {
   }
 
   console.log(
-    `\nDone. Uploaded ${uploaded} file(s) to R2${skipped ? `, skipped ${skipped} missing locally` : ''}.`,
+    `\nDone. Uploaded ${uploaded} file(s) to R2${skipped ? `, skipped ${skipped} missing locally` : ''}${skippedOnR2 ? `, skipped ${skippedOnR2} already on R2` : ''}.`,
   )
   console.log(
     `GPS check (${RTU_GPS_MATCH_FEET} ft): ${gpsWarnings} warning(s), ${noGps} without EXIF GPS.`,

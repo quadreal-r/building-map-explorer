@@ -166,16 +166,14 @@ export function GitHubDeploySync({
         onClick={handleSync}
         disabled={syncing || disabled || !githubPat.trim() || cooldownSec > 0}
       >
-        <span className={styles.syncDeployBtnInner}>
-          {syncing || completed ? (
-            <span
-              className={`${styles.syncDeployBtnFill} ${completed ? styles.syncDeployBtnFillComplete : ''}`}
-              style={{ width: `${progressPct}%` }}
-              aria-hidden="true"
-            />
-          ) : null}
-          <span className={styles.syncDeployBtnText}>{buttonLabel}</span>
-        </span>
+        {syncing || completed ? (
+          <span
+            className={`${styles.syncDeployBtnFill} ${completed ? styles.syncDeployBtnFillComplete : ''}`}
+            style={{ width: `${progressPct}%` }}
+            aria-hidden="true"
+          />
+        ) : null}
+        <span className={styles.syncDeployBtnText}>{buttonLabel}</span>
       </button>
       {completed && cooldownSec > 0 ? (
         <p className={styles.hint}>

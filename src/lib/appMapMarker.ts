@@ -41,9 +41,14 @@ function symbolPathD(path: google.maps.Symbol['path']): string {
   return String(path ?? '')
 }
 
+/** Legacy `google.maps.Marker` Symbol diameter in CSS pixels (≈ scale × 2). */
+function symbolPixelSize(scale: number): number {
+  return Math.max(8, Math.round(scale * 2))
+}
+
 function buildSymbolContent(icon: google.maps.Symbol): HTMLElement {
   const scale = icon.scale ?? 5
-  const size = Math.max(12, Math.round(scale * 5))
+  const size = symbolPixelSize(scale)
   const wrap = document.createElement('div')
   wrap.style.width = `${size}px`
   wrap.style.height = `${size}px`
@@ -51,19 +56,21 @@ function buildSymbolContent(icon: google.maps.Symbol): HTMLElement {
   wrap.style.alignItems = 'center'
   wrap.style.justifyContent = 'center'
   wrap.style.pointerEvents = 'auto'
+  wrap.style.flexShrink = '0'
 
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   svg.setAttribute('viewBox', '-1.2 -1.2 2.4 2.4')
   svg.setAttribute('width', String(size))
   svg.setAttribute('height', String(size))
   svg.style.overflow = 'visible'
+  svg.style.display = 'block'
 
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
   path.setAttribute('d', symbolPathD(icon.path))
   path.setAttribute('fill', icon.fillColor ?? '#2563eb')
   path.setAttribute('fill-opacity', String(icon.fillOpacity ?? 1))
   path.setAttribute('stroke', icon.strokeColor ?? '#fff')
-  path.setAttribute('stroke-width', String((icon.strokeWeight ?? 1) / scale))
+  path.setAttribute('stroke-width', String(((icon.strokeWeight ?? 1) * 2.4) / size))
   svg.appendChild(path)
   wrap.appendChild(svg)
   return wrap
@@ -112,6 +119,71 @@ function buildLabelContent(
   return wrap
 }
 
+export interface DetailMarkerContentOptions {
+  icon: google.maps.Symbol
+  label?: google.maps.MarkerLabel
+  labelOffsetY?: number
+  pictureCount?: number
+}
+
+/** RTU / utility marker DOM — label above pin, optional picture-count badge centered on pin. */
+export function buildDetailMarkerContent(options: DetailMarkerContentOptions): HTMLElement {
+  const labelOffset = options.labelOffsetY ?? -7
+
+  const root = document.createElement('div')
+  root.style.position = 'relative'
+  root.style.display = 'inline-flex'
+  root.style.alignItems = 'center'
+  root.style.justifyContent = 'center'
+  root.style.pointerEvents = 'auto'
+  root.style.cursor = 'pointer'
+  root.style.lineHeight = '0'
+
+  root.appendChild(buildSymbolContent(options.icon))
+
+  if (options.label?.text) {
+    const span = document.createElement('span')
+    span.textContent = options.label.text
+    span.style.color = options.label.color ?? '#fbbf24'
+    span.style.fontSize = options.label.fontSize ?? '11px'
+    span.style.fontWeight = options.label.fontWeight ?? '500'
+    span.style.fontFamily = options.label.fontFamily ?? 'Inter,sans-serif'
+    span.style.whiteSpace = 'nowrap'
+    span.style.lineHeight = '1.2'
+    span.style.position = 'absolute'
+    span.style.left = '50%'
+    span.style.top = '50%'
+    // Legacy Marker labelOrigin (0.5, -15): label sits on top edge of pin
+    span.style.transform = `translate(-50%, calc(-100% + ${labelOffset}px))`
+    span.style.pointerEvents = 'auto'
+    if (options.label.className) span.className = options.label.className
+    root.appendChild(span)
+  }
+
+  const count = options.pictureCount ?? 0
+  if (count > 0) {
+    const badge = document.createElement('span')
+    badge.textContent = count > 99 ? '99+' : String(count)
+    badge.className = 'rtu-pic-badge'
+    badge.style.position = 'absolute'
+    badge.style.left = '50%'
+    badge.style.top = '50%'
+    badge.style.transform = 'translate(-50%, -50%)'
+    badge.style.pointerEvents = 'none'
+    root.appendChild(badge)
+  }
+
+  return root
+}
+
+export function setDetailMarkerContent(
+  marker: AppMapMarker,
+  options: DetailMarkerContentOptions,
+): void {
+  marker.content = buildDetailMarkerContent(options)
+  marker.gmpClickable = true
+}
+
 export interface CreateAppMarkerOptions {
   map?: google.maps.Map | null
   position: google.maps.LatLngLiteral
@@ -123,38 +195,30 @@ export interface CreateAppMarkerOptions {
   label?: google.maps.MarkerLabel
   /** Pixels below anchor for label-only markers (building labels ≈ 22). */
   labelOffsetY?: number
+  content?: HTMLElement
 }
 
 export function createAppMarker(options: CreateAppMarkerOptions): AppMapMarker {
   const { AdvancedMarkerElement } = google.maps.marker
 
-  let content: HTMLElement
-  if (options.label && !options.icon) {
-    content = buildLabelContent(options.label, options.labelOffsetY ?? 0)
-  } else if (options.icon && 'url' in options.icon && options.icon.url) {
-    content = buildIconUrlContent(options.icon)
-  } else if (options.icon) {
-    content = buildSymbolContent(options.icon as google.maps.Symbol)
-  } else {
-    content = document.createElement('div')
-  }
-
-  if (options.label && options.icon) {
-    const labeled = buildLabelContent(options.label, options.labelOffsetY ?? 18)
-    const symbol = buildSymbolContent(options.icon as google.maps.Symbol)
-    const combo = document.createElement('div')
-    combo.style.display = 'flex'
-    combo.style.flexDirection = 'column'
-    combo.style.alignItems = 'center'
-    combo.appendChild(symbol)
-    const text = labeled.querySelector('span')
-    if (text) combo.appendChild(text)
-    content = combo
+  let content = options.content
+  if (!content) {
+    if (options.label && !options.icon) {
+      content = buildLabelContent(options.label, options.labelOffsetY ?? 0)
+    } else if (options.icon && 'url' in options.icon && options.icon.url) {
+      content = buildIconUrlContent(options.icon)
+    } else if (options.icon) {
+      content = buildSymbolContent(options.icon as google.maps.Symbol)
+    } else {
+      content = document.createElement('div')
+    }
   }
 
   if (options.clickable === false) {
     content.style.pointerEvents = 'none'
   }
+
+  const clickable = options.clickable !== false
 
   const marker = new AdvancedMarkerElement({
     map: options.map ?? undefined,
@@ -162,6 +226,7 @@ export function createAppMarker(options: CreateAppMarkerOptions): AppMapMarker {
     title: options.title,
     zIndex: options.zIndex,
     gmpDraggable: options.draggable ?? false,
+    gmpClickable: clickable,
     content,
   })
 
@@ -228,6 +293,7 @@ export function setAppMarkerCursor(marker: AppMapMarker, cursor: string | null):
 }
 
 export function setAppMarkerClickable(marker: AppMapMarker, clickable: boolean): void {
+  marker.gmpClickable = clickable
   const el = marker.content
   if (el instanceof HTMLElement) {
     el.style.pointerEvents = clickable ? 'auto' : 'none'
@@ -239,5 +305,12 @@ export function addAppMarkerListener(
   event: MarkerListenerEvent,
   handler: (e: google.maps.MapMouseEvent) => void,
 ): google.maps.MapsEventListener {
-  return marker.addListener(LISTENER_EVENT[event], handler)
+  const eventName = LISTENER_EVENT[event]
+  const wrapped = (e: google.maps.MapMouseEvent) => {
+    if (event === 'click') {
+      e.domEvent?.stopPropagation()
+    }
+    handler(e)
+  }
+  return marker.addListener(eventName, wrapped)
 }

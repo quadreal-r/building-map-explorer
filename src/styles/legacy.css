@@ -108,6 +108,11 @@ select option{background:#1f2436}
   font-variant-numeric:tabular-nums!important;
 }
 
+/* Non-clickable Advanced Markers (labels, pic badges) must not block RTU pin clicks */
+gmp-advanced-marker[gmp-clickable="false"] {
+  pointer-events: none !important;
+}
+
 /* ── ADVANCED FILTER PANEL ────────────────────────────────────────── */
 #adv-filter-toggle{
   display:flex;align-items:center;gap:5px;
