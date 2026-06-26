@@ -1,6 +1,5 @@
 import { distanceFeet, RTU_GPS_MATCH_FEET } from '@/lib/geo'
 import { readImageGps } from '@/lib/imageGps'
-import { buildBulkRtuPictureFileName } from '@/lib/rtuPictureAssignNaming'
 import { isExcludedOldRtuPicture } from '@/lib/rtuBulkPictureImport'
 import {
   importRtuPictureAtIndex,
@@ -36,13 +35,6 @@ export interface StageGpsPicturesResult {
 function isImageFile(file: File): boolean {
   if (file.type.startsWith('image/')) return true
   return IMAGE_FILE_RE.test(file.name)
-}
-
-function fileExtension(file: File): string {
-  const fromName = file.name.split('.').pop()?.toLowerCase()
-  if (fromName && /^[a-z0-9]{2,5}$/.test(fromName)) return fromName
-  const mime = file.type.split('/')[1]
-  return mime === 'jpeg' ? 'jpg' : mime || 'jpg'
 }
 
 export function findNearestRtuAt(
@@ -114,8 +106,6 @@ export async function assignPictureFileToRtu(
   pictureIndex?: number,
 ): Promise<{ fileName: string; pictureIndex: number }> {
   const index = pictureIndex ?? (await computeNextPictureIndex(buildingAddress, rtuName))
-  const ext = fileExtension(file)
-  const fileName = buildBulkRtuPictureFileName(buildingAddress, rtuName, index, ext)
-  await importRtuPictureAtIndex(buildingAddress, rtuName, file, index, { fileName })
+  const fileName = await importRtuPictureAtIndex(buildingAddress, rtuName, file, index)
   return { fileName, pictureIndex: index }
 }

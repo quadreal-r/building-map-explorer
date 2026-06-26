@@ -69,7 +69,7 @@ After `npm test` passes, use the [Git workflow](#git-workflow-code-changes) abov
 - Uploads your local changes via GitHub Actions
 - CI may commit and push for you (`chore: sync portfolio and RTU pictures from Settings`)
 - No manual git needed if sync succeeds
-- **Repo secret:** add the same GitHub token as Settings under repository secret `BME_SYNC_PAT` (needs **repo** Contents read/write and **workflow** scopes)
+- **Repo secret:** add the same GitHub token as Settings under repository secret `BME_SYNC_PAT` (needs **repo** Contents read/write and **workflow** scopes) — used by Settings in the browser to upload the staging bundle; CI uses the built-in `GITHUB_TOKEN` to commit and push
 - Sync uploads your bundle to branch `bme-sync-staging` in the same repo; CI reads it from there (no gists)
 
 **Manual fallback** (if sync fails or bundle is too large):

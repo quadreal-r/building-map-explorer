@@ -26,4 +26,5 @@ supabase/data/deploy-bundle.json
 # RTU images live on Cloudflare R2 — only manifest.json is committed
 public/database/rtu-pictures/*
 !public/database/rtu-pictures/manifest.json
+!public/database/rtu-pictures/hidden.json
 !public/database/rtu-pictures/.gitkeep

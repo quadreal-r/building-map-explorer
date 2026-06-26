@@ -32,7 +32,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          token: ${{ secrets.BME_SYNC_PAT }}
           fetch-depth: 0
 
       - uses: actions/setup-node@v5
@@ -45,14 +44,11 @@ jobs:
       - name: Fetch sync staging branch
         env:
           STAGING_REF: ${{ inputs.staging_ref }}
-          BME_SYNC_PAT: ${{ secrets.BME_SYNC_PAT }}
         run: |
-          if [ -z "${BME_SYNC_PAT}" ]; then
-            echo "::error::BME_SYNC_PAT is missing. Add the same GitHub token as Settings under repository Secrets → Actions."
+          if ! git fetch origin "${STAGING_REF}:refs/remotes/origin/${STAGING_REF}"; then
+            echo "::error::Could not fetch ${STAGING_REF}. Run Settings → Sync to Cloudflare & GitHub first."
             exit 1
           fi
-          git remote set-url origin "https://x-access-token:${BME_SYNC_PAT}@github.com/${GITHUB_REPOSITORY}.git"
-          git fetch origin "${STAGING_REF}:refs/remotes/origin/${STAGING_REF}"
 
       - name: Load deploy bundle from staging branch
         env:
@@ -102,20 +98,17 @@ jobs:
         run: node scripts/upload-json-to-r2.mjs
 
       - name: Commit and push
-        env:
-          BME_SYNC_PAT: ${{ secrets.BME_SYNC_PAT }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add supabase/data public/database/rtu-pictures/manifest.json public/database/rtu-pictures/hidden.json
+          git add supabase/data public/database/rtu-pictures/manifest.json
+          if [ -f public/database/rtu-pictures/hidden.json ]; then
+            git add public/database/rtu-pictures/hidden.json
+          fi
           if git diff --staged --quiet; then
             echo "No changes to commit."
             exit 0
           fi
           git commit -m "chore: sync portfolio and RTU pictures from Settings"
-          if [ -z "${BME_SYNC_PAT}" ]; then
-            echo "::error::BME_SYNC_PAT is required to push commits."
-            exit 1
-          fi
-          git remote set-url origin "https://x-access-token:${BME_SYNC_PAT}@github.com/${GITHUB_REPOSITORY}.git"
-          git push origin HEAD:main
+          git pull --rebase origin main
+          git push origin main

@@ -58,8 +58,8 @@ export function RtuPictureGpsAssign({ onBusyChange }: RtuPictureGpsAssignProps) 
           <>
             Select RTU photos from your device. Photos with GPS appear as purple markers on the map
             at the location they were taken. Drag each marker onto the correct RTU — the picture is
-            saved and renamed like 2320-RTU-06 Hybrid (3).jpg. Drop within 100 ft of an RTU marker
-            to assign. Photos without GPS are skipped.
+            saved as e.g. 2320-RTU-04-1.jpg. Drop within 100 ft of an RTU marker to assign. Photos
+            without GPS are skipped. A new upload replaces any markers still waiting on the map.
           </>
         }
         onClick={() => inputRef.current?.click()}

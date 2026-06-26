@@ -30,12 +30,15 @@ export const usePendingRtuPictureStore = create<PendingRtuPictureState>((set, ge
   stageRevision: 0,
 
   stageFromFiles: async (files) => {
+    for (const item of get().items) revokeItemPreview(item)
     const result = await stageGpsPicturesFromFiles(files)
     if (result.staged.length) {
       set((state) => ({
-        items: [...state.items, ...result.staged],
+        items: result.staged,
         stageRevision: state.stageRevision + 1,
       }))
+    } else {
+      set({ items: [] })
     }
     return result
   },

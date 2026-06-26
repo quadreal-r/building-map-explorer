@@ -15,6 +15,7 @@ import type { Building } from '@/types/domain'
 interface PictureMarkerEntry {
   id: string
   marker: AppMapMarker
+  dragListener: google.maps.MapsEventListener
 }
 
 function pictureMarkerIcon(): google.maps.Symbol {
@@ -28,88 +29,111 @@ function pictureMarkerIcon(): google.maps.Symbol {
   }
 }
 
+function detachMarker(marker: AppMapMarker): void {
+  setAppMarkerMap(marker, null)
+}
+
 export function usePendingPictureMarkers(
   map: google.maps.Map | null,
   buildings: Building[],
 ): void {
   const items = usePendingRtuPictureStore((s) => s.items)
-  const updatePosition = usePendingRtuPictureStore((s) => s.updatePosition)
-  const assignToRtu = usePendingRtuPictureStore((s) => s.assignToRtu)
-  const markersRef = useRef<PictureMarkerEntry[]>([])
+  const markersRef = useRef<Map<string, PictureMarkerEntry>>(new Map())
   const buildingsRef = useRef(buildings)
+  const assignToRtuRef = useRef(usePendingRtuPictureStore.getState().assignToRtu)
+  const updatePositionRef = useRef(usePendingRtuPictureStore.getState().updatePosition)
+
+  useEffect(() => {
+    assignToRtuRef.current = usePendingRtuPictureStore.getState().assignToRtu
+    updatePositionRef.current = usePendingRtuPictureStore.getState().updatePosition
+  })
 
   useEffect(() => {
     buildingsRef.current = buildings
   }, [buildings])
 
   useEffect(() => {
-    if (!map) return
+    if (!map) {
+      for (const entry of markersRef.current.values()) {
+        google.maps.event.removeListener(entry.dragListener)
+        detachMarker(entry.marker)
+      }
+      markersRef.current.clear()
+      return
+    }
 
-    const byId = new Map(markersRef.current.map((entry) => [entry.id, entry.marker]))
-    const next: PictureMarkerEntry[] = []
+    const itemIds = new Set(items.map((item) => item.id))
+
+    for (const [id, entry] of [...markersRef.current.entries()]) {
+      if (itemIds.has(id)) continue
+      google.maps.event.removeListener(entry.dragListener)
+      detachMarker(entry.marker)
+      markersRef.current.delete(id)
+    }
 
     for (const item of items) {
-      let marker = byId.get(item.id)
-      if (!marker) {
-        const pendingId = item.id
-        const originalName = item.originalName
-        marker = createAppMarker({
-          map,
-          position: { lat: item.lat, lng: item.lng },
-          draggable: true,
-          title: `Photo: ${item.originalName} — drag onto RTU marker`,
-          icon: pictureMarkerIcon(),
-          zIndex: 2000,
-        })
-
-        addAppMarkerListener(marker, 'dragend', () => {
-          const pos = getAppMarkerPosition(marker!)
-          if (!pos) return
-          const lat = pos.lat()
-          const lng = pos.lng()
-          updatePosition(pendingId, lat, lng)
-
-          const match = findNearestRtuAt(buildingsRef.current, lat, lng, RTU_PICTURE_DROP_FEET)
-          if (!match) {
-            showToastError(
-              `Drop closer to an RTU marker (within ${RTU_PICTURE_DROP_FEET} ft) to assign this photo.`,
-            )
-            return
-          }
-
-          void assignToRtu(pendingId, match.building, match.rtu)
-            .then((result) => {
-              showToastSuccess(
-                `✓ Assigned ${originalName} → ${result.fileName} (${match.rtu.name})`,
-              )
-            })
-            .catch((error) => {
-              showToastError(error instanceof Error ? error.message : 'Failed to assign picture')
-            })
-        })
-      } else {
-        setAppMarkerMap(marker, map)
-        const pos = getAppMarkerPosition(marker)
+      const existing = markersRef.current.get(item.id)
+      if (existing) {
+        setAppMarkerMap(existing.marker, map)
+        const pos = getAppMarkerPosition(existing.marker)
         if (!pos || pos.lat() !== item.lat || pos.lng() !== item.lng) {
-          setAppMarkerPosition(marker, item.lat, item.lng)
+          setAppMarkerPosition(existing.marker, item.lat, item.lng)
         }
+        continue
       }
 
-      next.push({ id: item.id, marker })
-      byId.delete(item.id)
+      const pendingId = item.id
+      const originalName = item.originalName
+      const marker = createAppMarker({
+        map,
+        position: { lat: item.lat, lng: item.lng },
+        draggable: true,
+        title: `Photo: ${item.originalName} — drag onto RTU marker`,
+        icon: pictureMarkerIcon(),
+        zIndex: 2000,
+      })
+
+      const dragListener = addAppMarkerListener(marker, 'dragend', () => {
+        const pos = getAppMarkerPosition(marker)
+        if (!pos) return
+        const lat = pos.lat()
+        const lng = pos.lng()
+
+        const match = findNearestRtuAt(buildingsRef.current, lat, lng, RTU_PICTURE_DROP_FEET)
+        if (!match) {
+          updatePositionRef.current(pendingId, lat, lng)
+          showToastError(
+            `Drop closer to an RTU marker (within ${RTU_PICTURE_DROP_FEET} ft) to assign this photo.`,
+          )
+          return
+        }
+
+        void assignToRtuRef
+          .current(pendingId, match.building, match.rtu)
+          .then((result) => {
+            showToastSuccess(
+              `✓ Assigned ${originalName} → ${result.fileName} (${match.rtu.name})`,
+            )
+          })
+          .catch((error) => {
+            updatePositionRef.current(pendingId, lat, lng)
+            showToastError(error instanceof Error ? error.message : 'Failed to assign picture')
+          })
+      })
+
+      markersRef.current.set(item.id, { id: item.id, marker, dragListener })
     }
+  }, [map, items])
 
-    for (const orphan of byId.values()) {
-      setAppMarkerMap(orphan, null)
-    }
-
-    markersRef.current = next
-
+  useEffect(() => {
     return () => {
-      for (const entry of markersRef.current) {
-        setAppMarkerMap(entry.marker, null)
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- unmount cleanup must read latest ref
+      const markers = markersRef.current
+      for (const entry of markers.values()) {
+        google.maps.event.removeListener(entry.dragListener)
+        detachMarker(entry.marker)
       }
-      markersRef.current = []
+      markers.clear()
     }
-  }, [map, items, updatePosition, assignToRtu])
+  }, [])
 }
