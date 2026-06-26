@@ -3,9 +3,10 @@ name: Sync deploy bundle to Cloudflare and GitHub
 on:
   workflow_dispatch:
     inputs:
-      gist_id:
-        description: Gist ID containing deploy-bundle.json
-        required: true
+      staging_ref:
+        description: Branch containing sync/deploy-bundle.json
+        required: false
+        default: bme-sync-staging
         type: string
       rebuild_manifest:
         description: Rebuild manifest.json from R2 after applying bundle
@@ -41,11 +42,22 @@ jobs:
 
       - run: npm ci
 
-      - name: Download deploy bundle from gist
+      - name: Fetch sync staging branch
         env:
-          GIST_ID: ${{ inputs.gist_id }}
+          STAGING_REF: ${{ inputs.staging_ref }}
           BME_SYNC_PAT: ${{ secrets.BME_SYNC_PAT }}
-        run: node scripts/download-gist-bundle.mjs
+        run: |
+          if [ -z "${BME_SYNC_PAT}" ]; then
+            echo "::error::BME_SYNC_PAT is missing. Add the same GitHub token as Settings under repository Secrets → Actions."
+            exit 1
+          fi
+          git remote set-url origin "https://x-access-token:${BME_SYNC_PAT}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch origin "${STAGING_REF}:refs/remotes/origin/${STAGING_REF}"
+
+      - name: Load deploy bundle from staging branch
+        env:
+          STAGING_REF: origin/${{ inputs.staging_ref }}
+        run: node scripts/load-sync-staging-bundle.mjs
 
       - name: Apply bundle (R2 upload + portfolio data)
         env:
@@ -107,18 +119,3 @@ jobs:
           fi
           git remote set-url origin "https://x-access-token:${BME_SYNC_PAT}@github.com/${GITHUB_REPOSITORY}.git"
           git push origin HEAD:main
-
-      - name: Delete temporary gist
-        if: always()
-        env:
-          GIST_ID: ${{ inputs.gist_id }}
-          BME_SYNC_PAT: ${{ secrets.BME_SYNC_PAT }}
-        run: |
-          if [ -z "${BME_SYNC_PAT}" ] || [ -z "${GIST_ID}" ]; then
-            exit 0
-          fi
-          curl -fsSL -X DELETE \
-            -H "Authorization: Bearer ${BME_SYNC_PAT}" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/gists/${GIST_ID}" || true

@@ -42,7 +42,56 @@ export function RtuPictureViewer({
 }: RtuPictureViewerProps) {
   const current = pictures[index]
   const total = pictures.length
-  const editor = useImageEditor()
+  const {
+    stageRef,
+    canvasRef,
+    mode,
+    setMode,
+    loading,
+    loadError,
+    zoomPct,
+    dims,
+    fileSize,
+    sourceFileName,
+    taken,
+    location,
+    locationHref,
+    editCount,
+    pendingAngle,
+    textSettings,
+    setTextSettings,
+    saveFormat,
+    setSaveFormat,
+    quality,
+    setQuality,
+    cropDisabled,
+    undoDisabled,
+    resetDisabled,
+    applyRotDisabled,
+    placeTextDisabled,
+    canSaveToMap,
+    loadFromUrl,
+    resetSession,
+    cropToSelection,
+    undo,
+    resetToOriginal,
+    save,
+    printImage,
+    rotateLeft,
+    rotateRight,
+    previewRotation,
+    applyRotation,
+    clearRotationPreview,
+    placeText,
+    toggleBold,
+    toggleItalic,
+    onStagePointerDown,
+    onStagePointerMove,
+    onStagePointerUp,
+    onStageContextMenu,
+    onKeyDown,
+    getEditedBlob,
+  } = useImageEditor()
   const [savingToMap, setSavingToMap] = useState(false)
 
   const revokeBlobUrls = useCallback((items: RtuPictureViewerItem[]) => {
@@ -55,10 +104,10 @@ export function RtuPictureViewer({
   }, [])
 
   const handleSaveToMap = useCallback(async () => {
-    if (!current || savingToMap || !editor.canSaveToMap) return
+    if (!current || savingToMap || !canSaveToMap) return
     setSavingToMap(true)
     try {
-      const blob = await editor.getEditedBlob('image/jpeg', editor.quality)
+      const blob = await getEditedBlob('image/jpeg', quality)
       if (!blob) throw new Error('No image to save')
       await saveRtuPictureEdit(buildingAddress, rtuName, current.index, blob, current.fileName)
       revokeBlobUrls(pictures)
@@ -81,11 +130,13 @@ export function RtuPictureViewer({
     }
   }, [
     buildingAddress,
+    canSaveToMap,
     current,
-    editor,
+    getEditedBlob,
     index,
     onPicturesUpdated,
     pictures,
+    quality,
     revokeBlobUrls,
     rtuName,
     savingToMap,
@@ -93,17 +144,17 @@ export function RtuPictureViewer({
 
   useEffect(() => {
     if (!open || !current) {
-      editor.resetSession()
+      resetSession()
       return
     }
-    void editor.loadFromUrl(current.fullUrl, current.fileName)
+    void loadFromUrl(current.fullUrl, current.fileName)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when picture changes
   }, [open, current?.fullUrl, current?.fileName])
 
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
-      editor.onKeyDown(e as unknown as React.KeyboardEvent<HTMLDivElement>)
+      onKeyDown(e as unknown as React.KeyboardEvent<HTMLDivElement>)
       const inField = /^(INPUT|SELECT|TEXTAREA)$/.test((e.target as HTMLElement).tagName)
       if (inField) return
       if (e.key === 'ArrowLeft' && index > 0) {
@@ -144,15 +195,15 @@ export function RtuPictureViewer({
       <div className={styles.bar}>
         <button
           type="button"
-          className={`${styles.toolBtn}${editor.mode === 'select' ? ` ${styles.toolBtnActive}` : ''}`}
-          onClick={() => editor.setMode('select')}
+          className={`${styles.toolBtn}${mode === 'select' ? ` ${styles.toolBtnActive}` : ''}`}
+          onClick={() => setMode('select')}
         >
           Select
         </button>
         <button
           type="button"
-          className={`${styles.toolBtn}${editor.mode === 'text' ? ` ${styles.toolBtnActive}` : ''}`}
-          onClick={() => editor.setMode('text')}
+          className={`${styles.toolBtn}${mode === 'text' ? ` ${styles.toolBtnActive}` : ''}`}
+          onClick={() => setMode('text')}
         >
           Text
         </button>
@@ -160,26 +211,26 @@ export function RtuPictureViewer({
         <button
           type="button"
           className={styles.toolBtnPrimary}
-          disabled={editor.cropDisabled}
-          onClick={editor.cropToSelection}
+          disabled={cropDisabled}
+          onClick={cropToSelection}
         >
           Crop ⤵
         </button>
-        <button type="button" className={styles.toolBtn} disabled={editor.undoDisabled} onClick={editor.undo}>
+        <button type="button" className={styles.toolBtn} disabled={undoDisabled} onClick={undo}>
           Undo
         </button>
         <button
           type="button"
           className={styles.toolBtn}
-          disabled={editor.resetDisabled}
-          onClick={editor.resetToOriginal}
+          disabled={resetDisabled}
+          onClick={resetToOriginal}
         >
           Reset
         </button>
         <button
           type="button"
           className={styles.saveBtn}
-          disabled={!editor.canSaveToMap || savingToMap}
+          disabled={!canSaveToMap || savingToMap}
           onClick={() => void handleSaveToMap()}
         >
           {savingToMap ? 'Saving…' : 'Save to map'}
@@ -187,8 +238,8 @@ export function RtuPictureViewer({
         <span className={styles.sep} />
         <select
           className={`${styles.select} ${styles.formatSelect}`}
-          value={editor.saveFormat}
-          onChange={(e) => editor.setSaveFormat(e.target.value as 'png' | 'jpg' | 'pdf')}
+          value={saveFormat}
+          onChange={(e) => setSaveFormat(e.target.value as 'png' | 'jpg' | 'pdf')}
           aria-label="Download format"
           title="Download format"
         >
@@ -196,7 +247,7 @@ export function RtuPictureViewer({
           <option value="jpg">JPG</option>
           <option value="pdf">PDF</option>
         </select>
-        {editor.saveFormat !== 'png' ? (
+        {saveFormat !== 'png' ? (
           <label className={styles.label}>
             Quality
             <input
@@ -205,22 +256,22 @@ export function RtuPictureViewer({
               min={0.4}
               max={1}
               step={0.05}
-              value={editor.quality}
-              onChange={(e) => editor.setQuality(Number.parseFloat(e.target.value))}
+              value={quality}
+              onChange={(e) => setQuality(Number.parseFloat(e.target.value))}
             />
           </label>
         ) : null}
-        <button type="button" className={styles.toolBtn} onClick={() => editor.save(current.fileName)}>
+        <button type="button" className={styles.toolBtn} onClick={() => save(current.fileName)}>
           Download
         </button>
-        <button type="button" className={styles.toolBtn} onClick={editor.printImage}>
+        <button type="button" className={styles.toolBtn} onClick={printImage}>
           Print
         </button>
         <span className={styles.sep} />
-        <button type="button" className={styles.toolBtn} onClick={editor.rotateLeft}>
+        <button type="button" className={styles.toolBtn} onClick={rotateLeft}>
           ⟲ Left
         </button>
-        <button type="button" className={styles.toolBtn} onClick={editor.rotateRight}>
+        <button type="button" className={styles.toolBtn} onClick={rotateRight}>
           Right ⟳
         </button>
         <label className={styles.label}>
@@ -231,41 +282,41 @@ export function RtuPictureViewer({
             min={-45}
             max={45}
             step={0.5}
-            value={editor.pendingAngle}
-            onChange={(e) => editor.previewRotation(Number.parseFloat(e.target.value))}
+            value={pendingAngle}
+            onChange={(e) => previewRotation(Number.parseFloat(e.target.value))}
           />
         </label>
-        <span className={styles.angleLbl}>{editor.pendingAngle}°</span>
+        <span className={styles.angleLbl}>{pendingAngle}°</span>
         <button
           type="button"
           className={styles.toolBtn}
-          disabled={editor.applyRotDisabled}
-          onClick={editor.applyRotation}
+          disabled={applyRotDisabled}
+          onClick={applyRotation}
         >
           Apply
         </button>
-        <button type="button" className={styles.toolBtn} onClick={editor.clearRotationPreview}>
+        <button type="button" className={styles.toolBtn} onClick={clearRotationPreview}>
           ↺
         </button>
         <span className={styles.spacer} />
         <span className={styles.hint}>
-          Edits: <b>{editor.editCount}</b>
+          Edits: <b>{editCount}</b>
         </span>
       </div>
 
-      {editor.mode === 'text' ? (
+      {mode === 'text' ? (
         <div className={styles.textBar}>
           <input
             type="text"
             className={styles.textInput}
-            value={editor.textSettings.text}
+            value={textSettings.text}
             placeholder="Text…"
-            onChange={(e) => editor.setTextSettings((s) => ({ ...s, text: e.target.value }))}
+            onChange={(e) => setTextSettings((s) => ({ ...s, text: e.target.value }))}
           />
           <select
             className={styles.select}
-            value={editor.textSettings.family}
-            onChange={(e) => editor.setTextSettings((s) => ({ ...s, family: e.target.value }))}
+            value={textSettings.family}
+            onChange={(e) => setTextSettings((s) => ({ ...s, family: e.target.value }))}
           >
             {FONT_OPTIONS.map((font) => (
               <option key={font} value={font}>
@@ -280,37 +331,37 @@ export function RtuPictureViewer({
               className={styles.numberInput}
               min={4}
               max={600}
-              value={editor.textSettings.size}
+              value={textSettings.size}
               onChange={(e) =>
-                editor.setTextSettings((s) => ({ ...s, size: Number.parseInt(e.target.value, 10) || 48 }))
+                setTextSettings((s) => ({ ...s, size: Number.parseInt(e.target.value, 10) || 48 }))
               }
             />
           </label>
           <input
             type="color"
             className={styles.colorInput}
-            value={editor.textSettings.color}
-            onChange={(e) => editor.setTextSettings((s) => ({ ...s, color: e.target.value }))}
+            value={textSettings.color}
+            onChange={(e) => setTextSettings((s) => ({ ...s, color: e.target.value }))}
           />
           <button
             type="button"
-            className={`${styles.toolBtn}${editor.textSettings.bold ? ` ${styles.toolBtnActive}` : ''}`}
-            onClick={editor.toggleBold}
+            className={`${styles.toolBtn}${textSettings.bold ? ` ${styles.toolBtnActive}` : ''}`}
+            onClick={toggleBold}
           >
             <b>B</b>
           </button>
           <button
             type="button"
-            className={`${styles.toolBtn}${editor.textSettings.italic ? ` ${styles.toolBtnActive}` : ''}`}
-            onClick={editor.toggleItalic}
+            className={`${styles.toolBtn}${textSettings.italic ? ` ${styles.toolBtnActive}` : ''}`}
+            onClick={toggleItalic}
           >
             <i>I</i>
           </button>
           <button
             type="button"
             className={styles.toolBtnPrimary}
-            disabled={editor.placeTextDisabled}
-            onClick={editor.placeText}
+            disabled={placeTextDisabled}
+            onClick={placeText}
           >
             Place text
           </button>
@@ -321,16 +372,16 @@ export function RtuPictureViewer({
       ) : null}
 
       <div
-        ref={editor.stageRef}
-        className={`${styles.stage}${editor.mode === 'text' ? ` ${styles.stageText}` : ''}`}
-        onPointerDown={editor.onStagePointerDown}
-        onPointerMove={editor.onStagePointerMove}
-        onPointerUp={editor.onStagePointerUp}
-        onContextMenu={editor.onStageContextMenu}
+        ref={stageRef}
+        className={`${styles.stage}${mode === 'text' ? ` ${styles.stageText}` : ''}`}
+        onPointerDown={onStagePointerDown}
+        onPointerMove={onStagePointerMove}
+        onPointerUp={onStagePointerUp}
+        onContextMenu={onStageContextMenu}
       >
-        <canvas ref={editor.canvasRef} className={styles.canvas} />
-        {editor.loading ? <p className={styles.stageMessage}>Loading…</p> : null}
-        {editor.loadError ? (
+        <canvas ref={canvasRef} className={styles.canvas} />
+        {loading ? <p className={styles.stageMessage}>Loading…</p> : null}
+        {loadError ? (
           <p className={styles.stageMessage}>
             Image not found on server. Close and use Add pictures to upload a replacement.
           </p>
@@ -339,26 +390,26 @@ export function RtuPictureViewer({
 
       <footer className={styles.footer}>
         <span>
-          Zoom: <b>{editor.zoomPct}</b>
+          Zoom: <b>{zoomPct}</b>
         </span>
         <span>
-          Size: <b>{editor.dims}</b>
+          Size: <b>{dims}</b>
         </span>
-        <span title={editor.sourceFileName ?? undefined}>
-          File: <b>{editor.fileSize}</b>
+        <span title={sourceFileName ?? undefined}>
+          File: <b>{fileSize}</b>
         </span>
         <span>
-          Taken: <b>{editor.taken}</b>
+          Taken: <b>{taken}</b>
         </span>
         <span>
           Location:{' '}
           <b>
-            {editor.locationHref ? (
-              <a href={editor.locationHref} target="_blank" rel="noopener noreferrer" className={styles.link}>
-                {editor.location}
+            {locationHref ? (
+              <a href={locationHref} target="_blank" rel="noopener noreferrer" className={styles.link}>
+                {location}
               </a>
             ) : (
-              editor.location
+              location
             )}
           </b>
         </span>

@@ -1,4 +1,4 @@
-/** One-click Settings sync: gist deploy bundle → GitHub Actions → R2 + commit + deploy. */
+/** One-click Settings sync: staging branch → GitHub Actions → R2 + commit + deploy. */
 
 import { collectDeployBundleLean } from '@/lib/deployBundle'
 import {
@@ -12,8 +12,12 @@ import type { PortfolioData } from '@/types/domain'
 
 export const DEFAULT_GITHUB_REPO = 'quadreal-r/building-map-explorer'
 export const SYNC_DEPLOY_WORKFLOW = 'sync-deploy.yml'
-/** GitHub gist practical file size limit (leave headroom under 10 MB). */
+export const SYNC_STAGING_BRANCH = 'bme-sync-staging'
+export const SYNC_BUNDLE_PATH = 'sync/deploy-bundle.json'
+export const SYNC_PICTURES_PATH = 'sync/deploy-pictures.json'
+/** Max bytes for lean JSON + pictures in one sync (GitHub Contents API limit is much higher). */
 export const MAX_GIST_BYTES = 9 * 1024 * 1024
+export const MAX_SYNC_BUNDLE_BYTES = MAX_GIST_BYTES
 
 const GITHUB_API = 'https://api.github.com'
 
@@ -29,7 +33,7 @@ export interface GitHubSyncProgress {
 }
 
 export interface GitHubSyncResult {
-  gistId: string
+  stagingRef: string
   workflowRunUrl: string | null
   picturesOmitted: boolean
   pictureCount: number
@@ -161,33 +165,120 @@ export function resolveGitHubRepo(repo?: string): string {
   return trimmed || DEFAULT_GITHUB_REPO
 }
 
-export async function createDeployBundleGist(
+function utf8ToBase64(text: string): string {
+  const bytes = new TextEncoder().encode(text)
+  let binary = ''
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+  return btoa(binary)
+}
+
+async function getDefaultBranchSha(token: string, repo: string): Promise<string> {
+  const meta = await githubFetch<{ default_branch: string }>(`/repos/${repo}`, token)
+  const ref = await githubFetch<{ object: { sha: string } }>(
+    `/repos/${repo}/git/ref/heads/${meta.default_branch}`,
+    token,
+  )
+  return ref.object.sha
+}
+
+async function ensureSyncStagingBranch(token: string, repo: string): Promise<void> {
+  try {
+    await githubFetch(`/repos/${repo}/git/ref/heads/${SYNC_STAGING_BRANCH}`, token)
+    return
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.includes('404')) throw error
+  }
+  const sha = await getDefaultBranchSha(token, repo)
+  await githubFetch(`/repos/${repo}/git/refs`, token, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ref: `refs/heads/${SYNC_STAGING_BRANCH}`,
+      sha,
+    }),
+  })
+}
+
+async function getRepoFileSha(
+  token: string,
+  repo: string,
+  path: string,
+  branch: string,
+): Promise<string | undefined> {
+  try {
+    const file = await githubFetch<{ sha: string }>(
+      `/repos/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`,
+      token,
+    )
+    return file.sha
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('404')) return undefined
+    throw error
+  }
+}
+
+async function putRepoFile(
+  token: string,
+  repo: string,
+  path: string,
+  content: string,
+  message: string,
+  branch: string,
+): Promise<void> {
+  const sha = await getRepoFileSha(token, repo, path, branch)
+  await githubFetch(`/repos/${repo}/contents/${path}`, token, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message,
+      content: utf8ToBase64(content),
+      branch,
+      ...(sha ? { sha } : {}),
+    }),
+  })
+}
+
+async function deleteRepoFileIfExists(
+  token: string,
+  repo: string,
+  path: string,
+  message: string,
+  branch: string,
+): Promise<void> {
+  const sha = await getRepoFileSha(token, repo, path, branch)
+  if (!sha) return
+  await githubFetch(`/repos/${repo}/contents/${path}`, token, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, sha, branch }),
+  })
+}
+
+/** Upload deploy bundle files to the sync staging branch (same repo token CI uses). */
+export async function uploadSyncStagingBundle(
   leanJson: string,
   picturesJson: string | null,
   exportedAt: string,
   token: string,
-): Promise<string> {
-  const files: Record<string, { content: string }> = {
-    'deploy-bundle.json': { content: leanJson },
-  }
+  repo: string,
+): Promise<void> {
+  await ensureSyncStagingBranch(token, repo)
+  const message = `chore: sync staging bundle ${exportedAt}`
+  await putRepoFile(token, repo, SYNC_BUNDLE_PATH, leanJson, message, SYNC_STAGING_BRANCH)
   if (picturesJson) {
-    files['deploy-pictures.json'] = { content: picturesJson }
+    await putRepoFile(token, repo, SYNC_PICTURES_PATH, picturesJson, message, SYNC_STAGING_BRANCH)
+  } else {
+    await deleteRepoFileIfExists(
+      token,
+      repo,
+      SYNC_PICTURES_PATH,
+      `${message} (clear pictures)`,
+      SYNC_STAGING_BRANCH,
+    )
   }
-
-  const gist = await githubFetch<{ id: string }>('/gists', token, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      description: `BME deploy bundle ${exportedAt}`,
-      public: false,
-      files,
-    }),
-  })
-  return gist.id
 }
 
 export async function triggerSyncDeployWorkflow(
-  gistId: string,
   rebuildManifest: boolean,
   token: string,
   repo: string,
@@ -201,7 +292,7 @@ export async function triggerSyncDeployWorkflow(
       body: JSON.stringify({
         ref: 'main',
         inputs: {
-          gist_id: gistId,
+          staging_ref: SYNC_STAGING_BRANCH,
           rebuild_manifest: rebuildManifest ? 'true' : 'false',
         },
       }),
@@ -245,7 +336,7 @@ export async function waitForSyncWorkflowRun(
   return null
 }
 
-/** Upload bundle via gist, run sync-deploy workflow, wait for completion. */
+/** Upload bundle to staging branch, run sync-deploy workflow, wait for completion. */
 export async function syncDeployToGitHub(
   portfolio: PortfolioData,
   options: GitHubSyncOptions,
@@ -282,18 +373,13 @@ export async function syncDeployToGitHub(
     pictureExport.pictures.length > 0 ? JSON.stringify(pictureExport.pictures) : ''
 
   reportProgress(onProgress, 'Uploading bundle to GitHub…', 32)
-  const gistId = await createDeployBundleGist(
-    leanJson,
-    picturesJson || null,
-    bundle.exportedAt,
-    token,
-  )
+  await uploadSyncStagingBundle(leanJson, picturesJson || null, bundle.exportedAt, token, repo)
 
   const transferredPictureCount = bundle.pictures.length
   const rebuildManifest = picturesOmitted || transferredPictureCount === 0
   const startedAt = Date.now()
   reportProgress(onProgress, 'Starting Cloudflare & GitHub sync…', 48)
-  await triggerSyncDeployWorkflow(gistId, rebuildManifest, token, repo)
+  await triggerSyncDeployWorkflow(rebuildManifest, token, repo)
 
   const run = await waitForSyncWorkflowRun(startedAt, token, repo, onProgress)
   reportProgress(onProgress, 'Upload complete', 100)
@@ -303,7 +389,7 @@ export async function syncDeployToGitHub(
   }
 
   return {
-    gistId,
+    stagingRef: SYNC_STAGING_BRANCH,
     workflowRunUrl: run?.html_url ?? null,
     picturesOmitted,
     pictureCount: transferredPictureCount,

@@ -47,6 +47,10 @@ export function GitHubDeploySyncFields({
           disabled={sync.syncing || disabled}
         />
       </div>
+      <p className={styles.hint}>
+        Token needs <b>repo</b> and <b>workflow</b> scopes (Contents read/write). Add the same token as
+        repo secret <code>BME_SYNC_PAT</code> (GitHub → Settings → Secrets → Actions).
+      </p>
     </div>
   )
 }

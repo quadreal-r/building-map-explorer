@@ -120,17 +120,30 @@ export function useImageEditor(): UseImageEditorResult {
   const [textSettings, setTextSettings] = useState<TextSettings>(DEFAULT_TEXT)
   const [saveFormat, setSaveFormat] = useState<'png' | 'jpg' | 'pdf'>('png')
   const [quality, setQuality] = useState(0.92)
-  const [uiTick, setUiTick] = useState(0)
+  const [cropDisabled, setCropDisabled] = useState(true)
+  const [undoDisabled, setUndoDisabled] = useState(true)
+  const [resetDisabled, setResetDisabled] = useState(true)
+  const [applyRotDisabled, setApplyRotDisabled] = useState(true)
+  const [placeTextDisabled, setPlaceTextDisabled] = useState(true)
+  const [hasImage, setHasImage] = useState(false)
 
   const currentImage = () => previewImgRef.current || imgRef.current
 
-  const bumpUi = useCallback(() => setUiTick((n) => n + 1), [])
-
   const updateUi = useCallback(() => {
+    const img = imgRef.current
+    const original = originalRef.current
+    const sel = selRef.current
+    const preview = previewImgRef.current
+    const pendingText = pendingTextRef.current
     setEditCount(historyRef.current.length)
     setPendingAngle(pendingAngleRef.current)
-    bumpUi()
-  }, [bumpUi])
+    setHasImage(Boolean(preview || img))
+    setCropDisabled(!(sel && !preview))
+    setUndoDisabled(historyRef.current.length === 0)
+    setResetDisabled(img === original && historyRef.current.length === 0)
+    setApplyRotDisabled(!preview)
+    setPlaceTextDisabled(!(pendingText && mode === 'text'))
+  }, [mode])
 
   const draw = useCallback(() => {
     const stage = stageRef.current
@@ -295,7 +308,8 @@ export function useImageEditor(): UseImageEditorResult {
     previewImgRef.current = null
     pendingAngleRef.current = 0
     setPendingAngle(0)
-  }, [])
+    updateUi()
+  }, [updateUi])
 
   const cropToSelection = useCallback(() => {
     const img = imgRef.current
@@ -434,8 +448,9 @@ export function useImageEditor(): UseImageEditorResult {
     setLocation('—')
     setLocationHref(null)
     setEditCount(0)
+    updateUi()
     draw()
-  }, [draw])
+  }, [draw, updateUi])
 
   const applyExif = useCallback(async (ex: ExifData | null, byteLength?: number) => {
     setTaken(ex?.dateTaken ? formatExifDate(ex.dateTaken) : ex ? 'unknown' : 'no EXIF')
@@ -849,12 +864,11 @@ export function useImageEditor(): UseImageEditorResult {
     return () => observer.disconnect()
   }, [resizeCanvas])
 
-  void uiTick
+  useEffect(() => {
+    updateUi()
+  }, [loading, loadError, updateUi])
 
-  const img = imgRef.current
-  const sel = selRef.current
-  const preview = previewImgRef.current
-  const canSaveToMap = !loading && !loadError && Boolean(preview || imgRef.current)
+  const canSaveToMap = !loading && !loadError && hasImage
 
   return {
     stageRef,
@@ -878,11 +892,11 @@ export function useImageEditor(): UseImageEditorResult {
     setSaveFormat,
     quality,
     setQuality,
-    cropDisabled: !(sel && !preview),
-    undoDisabled: historyRef.current.length === 0,
-    resetDisabled: img === originalRef.current && historyRef.current.length === 0,
-    applyRotDisabled: !preview,
-    placeTextDisabled: !(pendingTextRef.current && mode === 'text'),
+    cropDisabled,
+    undoDisabled,
+    resetDisabled,
+    applyRotDisabled,
+    placeTextDisabled,
     loadFromUrl,
     resetSession,
     cropToSelection,

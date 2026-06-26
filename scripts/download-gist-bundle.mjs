@@ -33,31 +33,71 @@ const headers = {
   'X-GitHub-Api-Version': '2022-11-28',
 }
 
-const gistRes = await fetch(`https://api.github.com/gists/${gistId}`, { headers })
-if (!gistRes.ok) {
-  const body = await gistRes.text().catch(() => '')
+const publicHeaders = {
+  Accept: 'application/vnd.github+json',
+  'X-GitHub-Api-Version': '2022-11-28',
+}
+
+async function fetchGist() {
+  const authRes = await fetch(`https://api.github.com/gists/${gistId}`, { headers })
+  if (authRes.ok) return authRes.json()
+
+  if (authRes.status === 404) {
+    const publicRes = await fetch(`https://api.github.com/gists/${gistId}`, { headers: publicHeaders })
+    if (publicRes.ok) return publicRes.json()
+  }
+
+  const body = await authRes.text().catch(() => '')
   fail(
-    `Failed to fetch gist ${gistId} (HTTP ${gistRes.status}). Check BME_SYNC_PAT has Gists read access and matches the token in Settings. ${body.slice(0, 200)}`,
+    `Failed to fetch gist ${gistId} (HTTP ${authRes.status}). ` +
+      'If this persists, re-run Settings → Sync. For secret gists, set repo secret BME_SYNC_PAT to the same token as Settings (gist + repo + workflow scopes). ' +
+      body.slice(0, 200),
   )
 }
 
-const gist = await gistRes.json()
+const gist = await fetchGist()
 const bundleFile = gist.files?.['deploy-bundle.json']
 if (!bundleFile?.content && !bundleFile?.raw_url) {
   fail('deploy-bundle.json not found in gist.')
 }
 
-async function readGistFile(file) {
-  // Gist GET responses truncate large files in `content`; raw_url has the full payload.
-  if (file.raw_url) {
-    const rawRes = await fetch(file.raw_url, { headers })
-    if (rawRes.ok) return rawRes.text()
+async function readGistFile(fileName, file) {
+  if (!file) return null
+
+  const rawHeaders = {
+    Authorization: `Bearer ${token}`,
+    Accept: 'application/vnd.github.raw',
+    'X-GitHub-Api-Version': '2022-11-28',
   }
-  if (file.content != null && file.content !== '') return file.content
+
+  if (file.raw_url) {
+    const rawRes = await fetch(file.raw_url, { headers: rawHeaders, redirect: 'follow' })
+    if (rawRes.ok) {
+      const text = await rawRes.text()
+      if (!file.truncated || text.length >= (file.size ?? 0)) return text
+    }
+  }
+
+  const apiRawRes = await fetch(
+    `https://api.github.com/gists/${gistId}/files/${encodeURIComponent(fileName)}/raw`,
+    { headers: rawHeaders, redirect: 'follow' },
+  )
+  if (apiRawRes.ok) return apiRawRes.text()
+
+  if (file.content != null && file.content !== '' && !file.truncated) {
+    return file.content
+  }
+
+  if (file.truncated) {
+    fail(
+      `${fileName} is too large for the gist API preview and the raw download failed. Check BME_SYNC_PAT gist read access, or sync fewer/smaller pictures per run.`,
+    )
+  }
+
   return null
 }
 
-const bundleText = await readGistFile(bundleFile)
+const bundleText = await readGistFile('deploy-bundle.json', bundleFile)
 if (!bundleText) {
   fail('Failed to read deploy-bundle.json from gist.')
 }
@@ -75,7 +115,7 @@ if (!bundle.portfolio?.buildings?.length) {
 
 const picturesFile = gist.files?.['deploy-pictures.json']
 if (picturesFile) {
-  const picturesText = await readGistFile(picturesFile)
+  const picturesText = await readGistFile('deploy-pictures.json', picturesFile)
   if (!picturesText?.trim()) {
     fail('Failed to read deploy-pictures.json from gist.')
   }
@@ -84,7 +124,7 @@ if (picturesFile) {
   } catch {
     const preview = picturesText.slice(0, 80).replace(/\s+/g, ' ')
     fail(
-      `deploy-pictures.json is not valid JSON (${picturesText.length} bytes; starts with "${preview}").`,
+      `deploy-pictures.json is not valid JSON (${picturesText.length} bytes; starts with "${preview}"). The gist file may be truncated — sync fewer or smaller pictures.`,
     )
   }
 }

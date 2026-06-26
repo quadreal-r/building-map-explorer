@@ -54,6 +54,8 @@ Or tell the agent: **"Everything is good now, push the code"**.
 - Uploads your local changes via GitHub Actions
 - CI may commit and push for you (`chore: sync portfolio and RTU pictures from Settings`)
 - No manual git needed if sync succeeds
+- **Repo secret:** add the same GitHub token as Settings under repository secret `BME_SYNC_PAT` (needs **repo** Contents read/write and **workflow** scopes)
+- Sync uploads your bundle to branch `bme-sync-staging` in the same repo; CI reads it from there (no gists)
 
 **Manual fallback** (if sync fails or bundle is too large):
 
