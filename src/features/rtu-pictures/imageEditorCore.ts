@@ -166,6 +166,13 @@ export function humanFileSize(bytes: number): string {
   return `${bytes} B`
 }
 
+/** Short footer label — size when known, otherwise file extension only. */
+export function formatFileFooterLabel(byteLength?: number, fileName?: string): string {
+  if (byteLength != null) return humanFileSize(byteLength)
+  const ext = fileName?.match(/\.([a-z0-9]+)$/i)?.[1]?.toUpperCase()
+  return ext ?? '—'
+}
+
 export function formatExifDate(value: string | null): string {
   if (!value) return 'unknown'
   const match = /^(\d{4})[:-](\d{2})[:-](\d{2})[ T](\d{2}):(\d{2})/.exec(value)

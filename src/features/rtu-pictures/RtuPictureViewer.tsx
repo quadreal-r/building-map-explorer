@@ -1,12 +1,11 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { listRtuPictures, saveRtuPictureEdit } from '@/lib/rtuPictures'
+import { showToastError, showToastSuccess } from '@/lib/toast'
+import type { RtuPictureViewerItem } from '@/stores/uiStore'
 import { useImageEditor } from './useImageEditor'
 import styles from './RtuPictureViewer.module.css'
 
-export interface RtuPictureViewerItem {
-  fileName: string
-  fullUrl: string
-  index: number
-}
+export type { RtuPictureViewerItem }
 
 export interface RtuPictureViewerProps {
   open: boolean
@@ -16,6 +15,7 @@ export interface RtuPictureViewerProps {
   buildingAddress: string
   onClose: () => void
   onIndexChange: (index: number) => void
+  onPicturesUpdated: (pictures: RtuPictureViewerItem[], index?: number) => void
 }
 
 const FONT_OPTIONS = [
@@ -38,10 +38,58 @@ export function RtuPictureViewer({
   buildingAddress,
   onClose,
   onIndexChange,
+  onPicturesUpdated,
 }: RtuPictureViewerProps) {
   const current = pictures[index]
   const total = pictures.length
   const editor = useImageEditor()
+  const [savingToMap, setSavingToMap] = useState(false)
+
+  const revokeBlobUrls = useCallback((items: RtuPictureViewerItem[]) => {
+    for (const pic of items) {
+      if (pic.fullUrl.startsWith('blob:')) URL.revokeObjectURL(pic.fullUrl)
+      if (pic.thumbUrl.startsWith('blob:') && pic.thumbUrl !== pic.fullUrl) {
+        URL.revokeObjectURL(pic.thumbUrl)
+      }
+    }
+  }, [])
+
+  const handleSaveToMap = useCallback(async () => {
+    if (!current || savingToMap || !editor.canSaveToMap) return
+    setSavingToMap(true)
+    try {
+      const blob = await editor.getEditedBlob('image/jpeg', editor.quality)
+      if (!blob) throw new Error('No image to save')
+      await saveRtuPictureEdit(buildingAddress, rtuName, current.index, blob, current.fileName)
+      revokeBlobUrls(pictures)
+      const nextPictures = await listRtuPictures(buildingAddress, rtuName)
+      const items = nextPictures.map((p) => ({
+        fileName: p.fileName,
+        fullUrl: p.fullUrl,
+        thumbUrl: p.thumbUrl,
+        index: p.index,
+      }))
+      const nextIndex = items.findIndex((p) => p.index === current.index)
+      onPicturesUpdated(items, nextIndex >= 0 ? nextIndex : index)
+      showToastSuccess(
+        '✓ Saved to map — use Settings → Sync to Cloudflare & GitHub to publish to R2.',
+      )
+    } catch (error) {
+      showToastError(error instanceof Error ? error.message : 'Failed to save picture to map')
+    } finally {
+      setSavingToMap(false)
+    }
+  }, [
+    buildingAddress,
+    current,
+    editor,
+    index,
+    onPicturesUpdated,
+    pictures,
+    revokeBlobUrls,
+    rtuName,
+    savingToMap,
+  ])
 
   useEffect(() => {
     if (!open || !current) {
@@ -128,10 +176,21 @@ export function RtuPictureViewer({
         >
           Reset
         </button>
+        <button
+          type="button"
+          className={styles.saveBtn}
+          disabled={!editor.canSaveToMap || savingToMap}
+          onClick={() => void handleSaveToMap()}
+        >
+          {savingToMap ? 'Saving…' : 'Save to map'}
+        </button>
+        <span className={styles.sep} />
         <select
-          className={styles.select}
+          className={`${styles.select} ${styles.formatSelect}`}
           value={editor.saveFormat}
           onChange={(e) => editor.setSaveFormat(e.target.value as 'png' | 'jpg' | 'pdf')}
+          aria-label="Download format"
+          title="Download format"
         >
           <option value="png">PNG</option>
           <option value="jpg">JPG</option>
@@ -151,8 +210,8 @@ export function RtuPictureViewer({
             />
           </label>
         ) : null}
-        <button type="button" className={styles.saveBtn} onClick={() => editor.save(current.fileName)}>
-          Save
+        <button type="button" className={styles.toolBtn} onClick={() => editor.save(current.fileName)}>
+          Download
         </button>
         <button type="button" className={styles.toolBtn} onClick={editor.printImage}>
           Print
@@ -285,7 +344,7 @@ export function RtuPictureViewer({
         <span>
           Size: <b>{editor.dims}</b>
         </span>
-        <span>
+        <span title={editor.sourceFileName ?? undefined}>
           File: <b>{editor.fileSize}</b>
         </span>
         <span>

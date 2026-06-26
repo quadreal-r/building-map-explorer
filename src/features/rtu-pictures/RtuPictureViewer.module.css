@@ -106,6 +106,14 @@
   width: 64px;
 }
 
+.formatSelect {
+  width: 4.25rem;
+  min-width: 0;
+  flex: 0 0 auto;
+  padding-left: 6px;
+  padding-right: 4px;
+}
+
 .select:hover,
 .toolBtn:hover:not(:disabled),
 .toolBtnPrimary:hover:not(:disabled) {

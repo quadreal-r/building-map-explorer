@@ -466,6 +466,22 @@ export async function importRtuPictureAtIndex(
   return fileName
 }
 
+/** Persist the current edited image back to the map (IndexedDB, pending Cloudflare deploy). */
+export async function saveRtuPictureEdit(
+  buildingAddress: string,
+  rtuName: string,
+  index: number,
+  blob: Blob,
+  fileName: string,
+): Promise<string> {
+  const mimeType = blob.type || 'image/jpeg'
+  const safeName = fileName.includes('.')
+    ? fileName
+    : `${fileName}.${mimeType === 'image/png' ? 'png' : 'jpg'}`
+  const file = new File([blob], safeName, { type: mimeType })
+  return importRtuPictureAtIndex(buildingAddress, rtuName, file, index, { fileName: safeName })
+}
+
 export async function deleteRtuPicture(
   buildingAddress: string,
   rtuName: string,

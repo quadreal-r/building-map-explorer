@@ -10,6 +10,7 @@ import {
   flattenImage,
   fontString,
   formatExifDate,
+  formatFileFooterLabel,
   humanFileSize,
   insideRect,
   loadImageFromUrl,
@@ -32,6 +33,7 @@ export interface UseImageEditorResult {
   zoomPct: string
   dims: string
   fileSize: string
+  sourceFileName: string | null
   taken: string
   location: string
   locationHref: string | null
@@ -69,6 +71,8 @@ export interface UseImageEditorResult {
   onStageContextMenu: (e: React.MouseEvent) => void
   onKeyDown: (e: React.KeyboardEvent) => void
   getEditedDataUrl: () => string | null
+  getEditedBlob: (mimeType?: 'image/jpeg' | 'image/png', jpegQuality?: number) => Promise<Blob | null>
+  canSaveToMap: boolean
 }
 
 const DEFAULT_TEXT: TextSettings = {
@@ -107,6 +111,7 @@ export function useImageEditor(): UseImageEditorResult {
   const [zoomPct, setZoomPct] = useState('—')
   const [dims, setDims] = useState('—')
   const [fileSize, setFileSize] = useState('—')
+  const [sourceFileName, setSourceFileName] = useState<string | null>(null)
   const [taken, setTaken] = useState('—')
   const [location, setLocation] = useState('—')
   const [locationHref, setLocationHref] = useState<string | null>(null)
@@ -424,6 +429,7 @@ export function useImageEditor(): UseImageEditorResult {
     setZoomPct('—')
     setDims('—')
     setFileSize('—')
+    setSourceFileName(null)
     setTaken('—')
     setLocation('—')
     setLocationHref(null)
@@ -489,8 +495,9 @@ export function useImageEditor(): UseImageEditorResult {
         pendingTextRef.current = null
         editingRef.current = false
         setModeState('select')
+        setSourceFileName(fileName ?? null)
         await applyExif(ex, byteLength)
-        if (!byteLength && fileName) setFileSize(fileName)
+        if (byteLength == null) setFileSize(formatFileFooterLabel(undefined, fileName))
         applyFit()
       } catch {
         setLoadError(true)
@@ -504,10 +511,25 @@ export function useImageEditor(): UseImageEditorResult {
   )
 
   const getEditedDataUrl = useCallback((): string | null => {
-    const img = imgRef.current
+    const img = currentImage()
     if (!img) return null
     return flattenImage(img, false).toDataURL('image/jpeg', 0.92)
   }, [])
+
+  const getEditedBlob = useCallback(
+    (mimeType: 'image/jpeg' | 'image/png' = 'image/jpeg', jpegQuality = 0.92): Promise<Blob | null> => {
+      const img = currentImage()
+      if (!img) return Promise.resolve(null)
+      return new Promise((resolve) => {
+        flattenImage(img, mimeType === 'image/jpeg').toBlob(
+          (blob) => resolve(blob),
+          mimeType,
+          jpegQuality,
+        )
+      })
+    },
+    [],
+  )
 
   const save = useCallback(
     (fileName = 'edited.png') => {
@@ -832,6 +854,7 @@ export function useImageEditor(): UseImageEditorResult {
   const img = imgRef.current
   const sel = selRef.current
   const preview = previewImgRef.current
+  const canSaveToMap = !loading && !loadError && Boolean(preview || imgRef.current)
 
   return {
     stageRef,
@@ -843,6 +866,7 @@ export function useImageEditor(): UseImageEditorResult {
     zoomPct,
     dims,
     fileSize,
+    sourceFileName,
     taken,
     location,
     locationHref,
@@ -880,5 +904,7 @@ export function useImageEditor(): UseImageEditorResult {
     onStageContextMenu,
     onKeyDown,
     getEditedDataUrl,
+    getEditedBlob,
+    canSaveToMap,
   }
 }

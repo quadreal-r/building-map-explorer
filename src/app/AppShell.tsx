@@ -40,6 +40,7 @@ export function AppShell() {
   const rtuPictureViewer = useUiStore((s) => s.rtuPictureViewer)
   const closeRtuPictureViewer = useUiStore((s) => s.closeRtuPictureViewer)
   const setRtuPictureViewerIndex = useUiStore((s) => s.setRtuPictureViewerIndex)
+  const updateRtuPictureViewerPictures = useUiStore((s) => s.updateRtuPictureViewerPictures)
 
   const markSaved = usePortfolioStore((s) => s.markSaved)
 
@@ -167,6 +168,7 @@ export function AppShell() {
           buildingAddress={rtuPictureViewer.buildingAddress}
           onClose={closeRtuPictureViewer}
           onIndexChange={setRtuPictureViewerIndex}
+          onPicturesUpdated={updateRtuPictureViewerPictures}
         />
       ) : null}
       <RemoteSyncUpdateModal

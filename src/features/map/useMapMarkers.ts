@@ -971,8 +971,9 @@ export function useMapMarkers({
   useEffect(() => {
     return onRtuPicturesChanged(() => {
       void refreshRtuPictureBadges()
+      void refreshRtuPicturesView()
     })
-  }, [refreshRtuPictureBadges])
+  }, [refreshRtuPictureBadges, refreshRtuPicturesView])
 
   useEffect(() => {
     const closePopups = () => {

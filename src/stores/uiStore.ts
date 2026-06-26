@@ -46,6 +46,7 @@ interface UiState {
   openRtuPictureViewer: (state: RtuPictureViewerState) => void
   closeRtuPictureViewer: () => void
   setRtuPictureViewerIndex: (index: number) => void
+  updateRtuPictureViewerPictures: (pictures: RtuPictureViewerItem[], index?: number) => void
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
@@ -87,5 +88,17 @@ export const useUiStore = create<UiState>((set, get) => ({
   setRtuPictureViewerIndex: (index) =>
     set((state) =>
       state.rtuPictureViewer ? { rtuPictureViewer: { ...state.rtuPictureViewer, index } } : {},
+    ),
+  updateRtuPictureViewerPictures: (pictures, index) =>
+    set((state) =>
+      state.rtuPictureViewer
+        ? {
+            rtuPictureViewer: {
+              ...state.rtuPictureViewer,
+              pictures,
+              index: index ?? state.rtuPictureViewer.index,
+            },
+          }
+        : {},
     ),
 }))
