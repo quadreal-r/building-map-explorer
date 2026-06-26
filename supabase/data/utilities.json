@@ -199,29 +199,29 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "6150 Kennedy (West) B",
-    "lat": 43.637790542016035,
-    "lng": -79.6729316209743
+    "lat": 43.637803,
+    "lng": -79.6728993
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "6150 Kennedy (East) A",
-    "lat": 43.63776944520407,
-    "lng": -79.67262753760794
+    "lat": 43.6377836,
+    "lng": -79.6726019
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "6175 Kenway Dr",
-    "lat": 43.63646975725501,
-    "lng": -79.67551239132517
+    "lat": 43.6364954,
+    "lng": -79.6754665
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "6160 Kenway",
-    "lat": 43.63582851899601,
-    "lng": -79.6742199871745
+    "lat": 43.6358599,
+    "lng": -79.6741571
   },
   {
     "type": "Sprinkler Rooms",
@@ -402,8 +402,8 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1885 Meyerside Dr - 6350 Netherhart Dr",
-    "lat": 43.668560627335324,
-    "lng": -79.64523406411001
+    "lat": 43.6685844,
+    "lng": -79.645194
   },
   {
     "type": "Sprinkler Rooms",
@@ -472,8 +472,8 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "Interior Access\r\n6100 Kenway Dr",
-    "lat": 43.636877764922744,
-    "lng": -79.67205247477311
+    "lat": 43.6369054,
+    "lng": -79.6720205
   },
   {
     "type": "Sprinkler Rooms",
@@ -563,8 +563,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1590 South Gateway Rd",
-    "lat": 43.63436355648334,
-    "lng": -79.6112643914429
+    "lat": 43.6344016,
+    "lng": -79.611196
   },
   {
     "type": "Electrical Rooms",
@@ -584,8 +584,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "6175 Kenway Dr",
-    "lat": 43.636508357255,
-    "lng": -79.67554209132517
+    "lat": 43.636534,
+    "lng": -79.6754962
   },
   {
     "type": "Electrical Rooms",
@@ -612,15 +612,15 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "6150 Kennedy Rd(West)B",
-    "lat": 43.637821642016036,
-    "lng": -79.6729710209743
+    "lat": 43.6378341,
+    "lng": -79.6729387
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "6150 Kennedy Rd(East) A",
-    "lat": 43.63778414520407,
-    "lng": -79.67264863760794
+    "lat": 43.6377983,
+    "lng": -79.672623
   },
   {
     "type": "Electrical Rooms",
@@ -633,15 +633,15 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "6160 Kenway Dr",
-    "lat": 43.63661471899601,
-    "lng": -79.6730372871745
+    "lat": 43.6366461,
+    "lng": -79.6729744
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "6100 Kenway Dr",
-    "lat": 43.63730936492274,
-    "lng": -79.67121197477312
+    "lat": 43.637337,
+    "lng": -79.67118
   },
   {
     "type": "Electrical Rooms",
@@ -1200,8 +1200,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1885 Meyerside Dr - 6350 Netherhart Dr",
-    "lat": 43.66880662733532,
-    "lng": -79.64566726411002
+    "lat": 43.6688304,
+    "lng": -79.6456272
   },
   {
     "type": "Electrical Rooms",

@@ -1,22 +1,22 @@
 {
   "entries": {
     "100 Leek Crescent|RTU- 01": [
-      "100_RTU-01_(1).jpg"
+      "100-RTU-01-1.jpg"
     ],
     "100 Leek Crescent|RTU- 02": [
       "100-RTU-02-1.jpg"
     ],
     "100 Leek Crescent|RTU- 03": [
-      "100_RTU-03_(1).jpg"
+      "100-RTU-03-1.jpg"
     ],
     "100 Leek Crescent|RTU- 04": [
-      "100_RTU-04_(1).jpg"
+      "100-RTU-04-1.jpg"
     ],
     "100 Leek Crescent|RTU- 05": [
       "100-RTU-05-1.jpg"
     ],
     "100 Leek Crescent|RTU- 06": [
-      "100_RTU-06_(1).jpg"
+      "100-RTU-06-1.jpg"
     ],
     "100 Leek Crescent|RTU- 07": [
       "100-RTU-07-1.jpg"
@@ -168,8 +168,8 @@
     ],
     "1535 Meyerside Drive|RTU-04": [
       "1535-RTU 04-2023.jpg",
-      "1535-RTU-04-2.jpg",
-      "1535_RTU-04_(2023).jpg"
+      "1535-RTU-04-2023.jpg",
+      "1535-RTU-04-2.jpg"
     ],
     "1535 Meyerside Drive|RTU-01": [
       "1535-RTU-01-1.jpg",
@@ -261,10 +261,10 @@
       "1550-RTU-02-1.jpg"
     ],
     "1555 Bonhill Road|RTU-01": [
-      "1555_RTU-01_(1).jpg"
+      "1555-RTU-01-1.jpg"
     ],
     "1555 Bonhill Road|RTU-02": [
-      "1555_RTU-02_(1).jpg"
+      "1555-RTU-02-1.jpg"
     ],
     "1555 Bonhill Road|RTU-03": [
       "1555-RTU-03-1.jpg",
@@ -2921,9 +2921,6 @@
       "85-RTU-14-1.jpg",
       "85-RTU-14-2.jpg",
       "85-RTU-14-3.jpg"
-    ],
-    "2320 Bristol Circle|RTU-04 Hybrid": [
-      "2320-RTU-04-1.jpg"
     ]
   }
 }
