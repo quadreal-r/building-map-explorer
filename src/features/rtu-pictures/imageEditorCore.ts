@@ -211,7 +211,7 @@ function readTiff(dv: DataView, tiff: number): ExifData {
   }
 
   const ascii = (vo: number, count: number) => {
-    let p = count <= 4 ? vo : tiff + u32(vo)
+    const p = count <= 4 ? vo : tiff + u32(vo)
     let s = ''
     for (let i = 0; i < count; i++) {
       const ch = dv.getUint8(p + i)

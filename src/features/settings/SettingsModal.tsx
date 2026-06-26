@@ -4,8 +4,8 @@ import { RtuPictureGpsAssign } from '@/features/settings/RtuPictureGpsAssign'
 import {
   GitHubDeploySyncFields,
   GitHubDeploySyncButton,
-  useGitHubDeploySync,
 } from '@/features/settings/GitHubDeploySync'
+import { useGitHubDeploySync } from '@/features/settings/useGitHubDeploySync'
 import { RtuPricingSettings } from '@/features/settings/RtuPricingSettings'
 import { SettingsToolButton } from '@/features/settings/SettingsToolButton'
 import { Modal } from '@/components/Modal/Modal'
