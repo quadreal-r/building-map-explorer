@@ -1,18 +1,32 @@
 import { describe, expect, it } from 'vitest'
 import { applyRtuTextChangeInPortfolio } from '@/lib/rtuPortfolioEdit'
-import type { PortfolioData } from '@/types/domain'
+import type { Building, PortfolioData, Rtu } from '@/types/domain'
+
+function testBuilding(
+  address: string,
+  lat: number,
+  lng: number,
+  rtus: Rtu[] = [],
+): Building {
+  return {
+    park: 'P',
+    address,
+    bu: '1',
+    lat,
+    lng,
+    sqft: '1',
+    cluster: 'C',
+    manager: 'M',
+    rtus,
+  }
+}
 
 const portfolio: PortfolioData = {
   buildings: [
-    {
-      address: '100 Main',
-      lat: 43.6,
-      lng: -79.4,
-      rtus: [
-        { name: 'RTU-01', description: 'Model: ABC', lat: 43.601, lng: -79.401 },
-        { name: 'RTU-02', description: '', lat: 43.602, lng: -79.402 },
-      ],
-    },
+    testBuilding('100 Main', 43.6, -79.4, [
+      { name: 'RTU-01', description: 'Model: ABC', lat: 43.601, lng: -79.401 },
+      { name: 'RTU-02', description: '', lat: 43.602, lng: -79.402 },
+    ]),
   ],
   utilities: [],
   polygons: [],

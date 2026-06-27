@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Building, PortfolioData } from '@/types/domain'
+import type { Building, PortfolioData, Rtu } from '@/types/domain'
 import {
   findNearestBuildingByDistance,
   findPortfolioMarkerPlacementIssues,
@@ -8,15 +8,35 @@ import {
   rtuDistanceFromBuilding,
 } from '@/lib/portfolioMarkerValidation'
 
-function building(address: string, lat: number, lng: number, rtus: Building['rtus'] = []): Building {
-  return { address, lat, lng, rtus }
+function testBuilding(
+  address: string,
+  lat: number,
+  lng: number,
+  rtus: Rtu[] = [],
+): Building {
+  return {
+    park: 'P',
+    address,
+    bu: '1',
+    lat,
+    lng,
+    sqft: '1',
+    cluster: 'C',
+    manager: 'M',
+    rtus,
+  }
+}
+
+function testRtu(name: string, lat: number, lng: number, description = ''): Rtu {
+  return { name, description, lat, lng }
 }
 
 describe('portfolioMarkerValidation', () => {
-  const buildings: Building[] = [
-    building('Site A', 43.6, -79.4, [{ name: 'RTU-1', lat: 43.6001, lng: -79.4001 }]),
-    building('Site B', 43.7, -79.5),
-  ]
+  const siteA = testBuilding('Site A', 43.6, -79.4, [
+    testRtu('RTU-1', 43.6001, -79.4001),
+  ])
+  const siteB = testBuilding('Site B', 43.7, -79.5)
+  const buildings: Building[] = [siteA, siteB]
 
   it('findNearestBuildingByDistance picks closest site', () => {
     const nearest = findNearestBuildingByDistance(buildings, 43.6002, -79.4002)
@@ -27,24 +47,23 @@ describe('portfolioMarkerValidation', () => {
   it('flags RTUs far from assigned building', () => {
     const portfolio: PortfolioData = {
       buildings: [
-        building('Wrong site', 43.6, -79.4, [
-          { name: 'RTU-04B', lat: 43.7, lng: -79.5 },
-        ]),
-        building('Right site', 43.7, -79.5),
+        testBuilding('Wrong site', 43.6, -79.4, [testRtu('RTU-04B', 43.7, -79.5)]),
+        testBuilding('Right site', 43.7, -79.5),
       ],
       utilities: [],
       polygons: [],
     }
     const issues = findPortfolioMarkerPlacementIssues(portfolio)
     expect(issues).toHaveLength(1)
-    expect(issues[0].rtuName).toBe('RTU-04B')
-    expect(issues[0].nearestBuildingAddress).toBe('Right site')
-    expect(issues[0].feetFromBuilding).toBeGreaterThan(RTU_MARKER_BUILDING_WARN_FEET)
+    const issue = issues[0]
+    expect(issue?.rtuName).toBe('RTU-04B')
+    expect(issue?.nearestBuildingAddress).toBe('Right site')
+    expect(issue?.feetFromBuilding).toBeGreaterThan(RTU_MARKER_BUILDING_WARN_FEET)
   })
 
   it('ignores RTUs near their building', () => {
     const portfolio: PortfolioData = {
-      buildings: [buildings[0]],
+      buildings: [siteA],
       utilities: [],
       polygons: [],
     }
