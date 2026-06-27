@@ -83,6 +83,33 @@ export function readLocalHiddenRtuPictureKeys(): string[] {
   return [...readHidden()]
 }
 
+function rtuKeyForHide(buildingAddress: string, rtuName: string): string {
+  return `${buildingAddress}|${rtuName}`
+}
+
+/** Re-key local hide entries when an RTU is renamed in the portfolio. */
+export function migrateHiddenRtuPictureKeys(
+  renames: Array<{ buildingAddress: string; oldName: string; newName: string }>,
+): void {
+  if (!renames.length) return
+  const hidden = readHidden()
+  let changed = false
+  for (const { buildingAddress, oldName, newName } of renames) {
+    const oldPrefix = `${rtuKeyForHide(buildingAddress, oldName)}|`
+    const newPrefix = `${rtuKeyForHide(buildingAddress, newName)}|`
+    for (const key of [...hidden]) {
+      if (!key.startsWith(oldPrefix)) continue
+      hidden.delete(key)
+      hidden.add(`${newPrefix}${key.slice(oldPrefix.length)}`)
+      changed = true
+    }
+  }
+  if (changed) {
+    writeHidden(hidden)
+    invalidateUnsyncedChanges()
+  }
+}
+
 /** Local hides not included in the last successful Cloudflare sync on this PC. */
 export function countUnsyncedLocalHiddenRtuPictures(
   lastPushedHiddenKeys: string[] | null,

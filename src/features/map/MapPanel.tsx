@@ -14,7 +14,13 @@ import { tenantPolygonCount, buildPolygonBuildingIndex } from '@/lib/polygonBuil
 import { installMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
 import { fitBoundsPreserveRotation, panToPreserveRotation } from '@/lib/mapRotation'
 import { enableMapDigitalZoom } from '@/lib/mapDigitalZoom'
-import { showToastSuccess } from '@/lib/toast'
+import { showToastError, showToastSuccess } from '@/lib/toast'
+import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
+import {
+  applyRtuTextChangeInPortfolio,
+  migrateRtuAssociatedData,
+} from '@/lib/rtuPortfolioEdit'
+import { notifyRtuPicturesChanged } from '@/lib/rtuPictures'
 import type { Building, LayerKey, Polygon, PortfolioData, Rtu, Utility } from '@/types/domain'
 import type { ImageryMode } from '@/types/domain'
 import { useFilterStore } from '@/stores/filterStore'
@@ -141,6 +147,49 @@ export function MapPanel({
     [onPortfolioPatch, portfolio],
   )
 
+  const handleEditDetail = useCallback(
+    async (
+      layerKey: LayerKey,
+      building: Building,
+      oldName: string,
+      updates: { name: string; description: string },
+    ) => {
+      if (layerKey !== 'rtu') return
+      try {
+        const { portfolio: next, rename } = applyRtuTextChangeInPortfolio(
+          portfolio,
+          building.address,
+          oldName,
+          updates,
+        )
+        if (rename) {
+          await migrateRtuAssociatedData(rename)
+          notifyRtuPicturesChanged()
+          const viewer = useUiStore.getState().rtuPictureViewer
+          if (
+            viewer?.buildingAddress === building.address &&
+            viewer.rtuName === oldName
+          ) {
+            useUiStore.setState({
+              rtuPictureViewer: { ...viewer, rtuName: rename.newName },
+            })
+          }
+        }
+        onPortfolioPatch(next)
+        invalidateUnsyncedChanges()
+        showToastSuccess(
+          rename
+            ? `✓ RTU renamed to ${rename.newName} — sync to update Cloudflare.`
+            : '✓ RTU text updated — sync to update Cloudflare.',
+        )
+      } catch (error) {
+        showToastError(error instanceof Error ? error.message : 'Could not update RTU')
+        throw error
+      }
+    },
+    [onPortfolioPatch, portfolio],
+  )
+
   const handlePolygonUpdated = useCallback(
     (polygon: Polygon) => {
       onPortfolioPatch({
@@ -190,6 +239,7 @@ export function MapPanel({
     onBuildingMoved: handleBuildingMoved,
     onDetailMoved: handleDetailMoved,
     onDeleteDetail: handleDeleteDetail,
+    onEditDetail: handleEditDetail,
     onGroupMoved: handleGroupMoved,
   })
 

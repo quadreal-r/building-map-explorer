@@ -4,6 +4,10 @@ import {
   syncDeployToGitHub,
   type GitHubSyncProgress,
 } from '@/lib/githubDeploySync'
+import {
+  confirmPortfolioMarkerPlacements,
+  findPortfolioMarkerPlacementIssues,
+} from '@/lib/portfolioMarkerValidation'
 import { recordLocalSyncPush } from '@/lib/remoteSyncState'
 import { exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
 import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
@@ -75,6 +79,9 @@ export function useGitHubDeploySync({
       return
     }
     if (cooldownSec > 0) return
+
+    const markerIssues = findPortfolioMarkerPlacementIssues(portfolio)
+    if (!confirmPortfolioMarkerPlacements(markerIssues)) return
 
     setSyncing(true)
     setCompleted(false)

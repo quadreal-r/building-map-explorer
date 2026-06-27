@@ -7,6 +7,7 @@ import {
 } from '@/features/settings/GitHubDeploySync'
 import { useGitHubDeploySync } from '@/features/settings/useGitHubDeploySync'
 import { RtuPricingSettings } from '@/features/settings/RtuPricingSettings'
+import { RtuEditorSettings } from '@/features/settings/RtuEditorSettings'
 import { SettingsToolButton } from '@/features/settings/SettingsToolButton'
 import { Modal } from '@/components/Modal/Modal'
 import { APP_THEMES } from '@/lib/themes'
@@ -171,6 +172,7 @@ function SettingsForm({
 
   const [uploadBusy, setUploadBusy] = useState(false)
   const [pricingOpen, setPricingOpen] = useState(false)
+  const [rtuEditorOpen, setRtuEditorOpen] = useState(false)
 
   const githubSync = useGitHubDeploySync({
     portfolio,
@@ -329,6 +331,12 @@ function SettingsForm({
           <div className={styles.sectionLabel}>Edits</div>
           <div className={styles.tools}>
             <SettingsToolButton
+              tooltip="Pick an RTU to show on the map, move its pin, or delete it."
+              onClick={() => setRtuEditorOpen(true)}
+            >
+              Edit RTU
+            </SettingsToolButton>
+            <SettingsToolButton
               tooltip="Edit supply, install, and other per-tonnage replacement costs used by the cost estimator."
               onClick={() => setPricingOpen(true)}
             >
@@ -435,6 +443,12 @@ function SettingsForm({
         </section>
       </div>
       <RtuPricingSettings open={pricingOpen} onClose={() => setPricingOpen(false)} />
+      <RtuEditorSettings
+        open={rtuEditorOpen}
+        onClose={() => setRtuEditorOpen(false)}
+        portfolio={portfolio}
+        onPortfolioPatch={onPortfolioPatch}
+      />
     </Modal>
   )
 }

@@ -47,6 +47,10 @@ function pictureButton(): string {
   return `<button class="iw-pic-btn" data-iw-action="pictures" title="View RTU pictures">🖼 Picture</button>`
 }
 
+function editTextButton(): string {
+  return `<button class="iw-edit-btn" data-iw-action="edit-text" title="Edit RTU name and description">✎ Edit text</button>`
+}
+
 function assignPendingPictureButton(count: number): string {
   return `<button type="button" class="iw-pic-btn" data-iw-action="picture-assign-pending" title="Assign the closest pending photo within range">📎 Assign pending photo${count > 1 ? ` (${count} nearby)` : ''}</button>`
 }
@@ -305,25 +309,53 @@ export function buildDetailInfoHtml(
       ? ''
       : `<div class="iw-badges"><span class="iw-badge" style="background:${cfg.fill}22;color:${cfg.fill};border:1px solid ${cfg.fill}44">${layerKey.toUpperCase()}</span></div>`
 
-  const moveBtn = moveButton({
-    'iw-kind': 'detail',
-    'iw-layer': layerKey,
-    'iw-name': name,
-    'iw-building': options?.buildingAddress ?? '',
-  })
+  const moveBtn =
+    layerKey === 'rtu'
+      ? ''
+      : moveButton({
+          'iw-kind': 'detail',
+          'iw-layer': layerKey,
+          'iw-name': name,
+          'iw-building': options?.buildingAddress ?? '',
+        })
   const deleteBtn =
-    options?.showDelete !== false
-      ? `<button class="iw-del-btn" data-iw-action="delete" data-iw-layer="${layerKey}" data-iw-name="${escapeHtml(name)}" data-iw-building="${escapeHtml(options?.buildingAddress ?? '')}" title="Delete this marker">🗑 Delete</button>`
-      : ''
+    layerKey === 'rtu' || options?.showDelete === false
+      ? ''
+      : `<button class="iw-del-btn" data-iw-action="delete" data-iw-layer="${layerKey}" data-iw-name="${escapeHtml(name)}" data-iw-building="${escapeHtml(options?.buildingAddress ?? '')}" title="Delete this marker">🗑 Delete</button>`
   const plainText = buildDetailInfoPlainText(layerKey, data, options)
 
   const pictureBtn = layerKey === 'rtu' ? pictureButton() : ''
+  const editTextBtn = layerKey === 'rtu' ? editTextButton() : ''
   const assignPendingBtn =
     layerKey === 'rtu' && (options?.pendingPictureAssignCount ?? 0) > 0
       ? assignPendingPictureButton(options!.pendingPictureAssignCount!)
       : ''
 
-  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${badgeHtml}${closeButton()}</div><div class="iw-body">${rows}</div>${actionFooter(`${copyButton()}${assignPendingBtn}${pictureBtn}${moveBtn}${deleteBtn}`)}</div>`
+  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${badgeHtml}${closeButton()}</div><div class="iw-body">${rows}</div>${actionFooter(`${copyButton()}${assignPendingBtn}${pictureBtn}${editTextBtn}${moveBtn}${deleteBtn}`)}</div>`
+}
+
+export function buildDetailEditHtml(
+  data: Rtu,
+  options?: { buildingAddress?: string },
+): string {
+  const name = data.name ?? ''
+  const desc = data.description ?? ''
+  const buildingAttr = options?.buildingAddress
+    ? ` data-iw-building="${escapeHtml(options.buildingAddress)}"`
+    : ''
+
+  return `<div class="iw iw-edit"${buildingAttr} data-iw-rtu-name="${escapeHtml(name)}">
+    <div class="iw-head"><div class="iw-name">Edit RTU</div>${closeButton()}</div>
+    <div class="iw-body iw-edit-body">
+      <label class="iw-edit-label">Name
+        <input class="iw-edit-input" data-iw-field="name" type="text" value="${escapeHtml(name)}" />
+      </label>
+      <label class="iw-edit-label">Description
+        <textarea class="iw-edit-textarea" data-iw-field="description" rows="6">${escapeHtml(desc)}</textarea>
+      </label>
+    </div>
+    ${actionFooter(`<button type="button" class="iw-edit-btn" data-iw-action="edit-save">Save</button><button type="button" class="iw-back-btn" data-iw-action="edit-cancel">Cancel</button>`)}
+  </div>`
 }
 
 export function buildRtuPicturesHtml(

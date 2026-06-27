@@ -18,6 +18,10 @@ import {
 import { LAYER_COLORS } from '@/lib/constants'
 import { setMapAddMarkerPickHandler } from '@/lib/mapAddMarkerPick'
 import { afterMapViewChange } from '@/lib/mapRotation'
+import {
+  confirmRtuMarkerBuildingPlacement,
+  findNearestBuildingByDistance,
+} from '@/lib/portfolioMarkerValidation'
 import { showToastSuccess } from '@/lib/toast'
 import { useLayerStore } from '@/stores/layerStore'
 import { useUiStore } from '@/stores/uiStore'
@@ -93,6 +97,7 @@ function AddMarkerForm({
   const [shapeIdx, setShapeIdx] = useState(getMarkerShapeIndex())
   const [scale, setScale] = useState(getMarkerScale())
   const [error, setError] = useState<string | null>(null)
+  const [buildingAutoNote, setBuildingAutoNote] = useState<string | null>(null)
   const previewMarkerRef = useRef<AppMapMarker | null>(null)
   const dragListenerRef = useRef<google.maps.MapsEventListener | null>(null)
 
@@ -119,18 +124,35 @@ function AddMarkerForm({
     onClose()
   }
 
+  const assignNearestBuildingForPin = useCallback(
+    (lat: number, lng: number) => {
+      if (category !== 'rtu') return
+      const nearest = findNearestBuildingByDistance(portfolio.buildings, lat, lng)
+      if (!nearest) return
+      if (nearest.building.address !== buildingAddress) {
+        setBuildingAddress(nearest.building.address)
+        setBuildingAutoNote(
+          `Building set to ${nearest.building.address} (nearest to pin, ${Math.round(nearest.feet)} ft).`,
+        )
+      }
+    },
+    [buildingAddress, category, portfolio.buildings],
+  )
+
   const onMapClickPlace = useCallback(
     (lat: number, lng: number) => {
       if (phase !== 'awaitMapClick') return
       setError(null)
+      setBuildingAutoNote(null)
       const coords = { lat, lng }
       setPosition(coords)
+      assignNearestBuildingForPin(lat, lng)
       setPhase('placing')
       if (map) {
         ensureDetailMarkerZoom(map)
       }
     },
-    [map, phase],
+    [assignNearestBuildingForPin, map, phase],
   )
 
   const registerMapClickHandler = useCallback(() => {
@@ -178,13 +200,16 @@ function AddMarkerForm({
       dragListenerRef.current = addAppMarkerListener(previewMarkerRef.current, 'dragend', () => {
         const pos = getAppMarkerPosition(previewMarkerRef.current!)
         if (!pos) return
-        setPosition({ lat: pos.lat(), lng: pos.lng() })
+        const lat = pos.lat()
+        const lng = pos.lng()
+        setPosition({ lat, lng })
+        assignNearestBuildingForPin(lat, lng)
       })
     } else {
       setAppMarkerPosition(previewMarkerRef.current, position.lat, position.lng)
       setAppMarkerMap(previewMarkerRef.current, map)
     }
-  }, [map, phase, position, removePreviewMarker])
+  }, [assignNearestBuildingForPin, map, phase, position, removePreviewMarker])
 
   useEffect(() => {
     if (!previewMarkerRef.current || phase !== 'placing') return
@@ -260,6 +285,16 @@ function AddMarkerForm({
         setError('Building not found.')
         return
       }
+      if (
+        !confirmRtuMarkerBuildingPlacement(
+          building,
+          position.lat,
+          position.lng,
+          portfolio.buildings,
+        )
+      ) {
+        return
+      }
       onAdded({
         ...portfolio,
         buildings: portfolio.buildings.map((b) =>
@@ -297,6 +332,7 @@ function AddMarkerForm({
   }
 
   const fieldsLocked = phase !== 'config'
+  const buildingSelectDisabled = phase === 'awaitMapClick'
 
   return (
     <div className={styles.form}>
@@ -318,8 +354,11 @@ function AddMarkerForm({
           Building
           <select
             value={buildingAddress}
-            disabled={fieldsLocked}
-            onChange={(e) => setBuildingAddress(e.target.value)}
+            disabled={buildingSelectDisabled}
+            onChange={(e) => {
+              setBuildingAddress(e.target.value)
+              setBuildingAutoNote(null)
+            }}
             style={{ width: '100%', marginTop: 4 }}
           >
             {portfolio.buildings.map((b) => (
@@ -350,9 +389,10 @@ function AddMarkerForm({
 
       {phase === 'awaitMapClick' ? (
         <p className={styles.placingHint}>
-          Click the map to place the marker at that location.
+          Click the map to place the marker. For RTUs, the nearest building is selected automatically.
         </p>
       ) : null}
+      {buildingAutoNote ? <p className={styles.placingHint}>{buildingAutoNote}</p> : null}
       {phase === 'placing' ? (
         <p className={styles.placingHint}>
           Drag the marker to fine-tune its position. Adjust shape, size, or description, then Save.

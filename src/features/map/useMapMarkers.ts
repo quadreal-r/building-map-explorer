@@ -52,7 +52,7 @@ import {
 import { closeAllMapPopups, ensureInfoWindowVisible, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
 import { collectSearchHits } from '@/lib/searchHits'
 import { getDetailMarkerIcon, getMarkerIcon } from '@/lib/markerStyles'
-import { buildBuildingInfoHtml, buildDetailInfoHtml, buildRtuPicturesHtml, copyPopupText } from '@/lib/mapInfoWindow'
+import { buildBuildingInfoHtml, buildDetailEditHtml, buildDetailInfoHtml, buildRtuPicturesHtml, copyPopupText } from '@/lib/mapInfoWindow'
 import { hideRtuManifestPicture } from '@/lib/hiddenRtuPictures'
 import {
   addRtuPicturesFromFiles,
@@ -163,7 +163,7 @@ function syncDetailMarkerPositions(entry: DetailMarkerEntry, lat: number, lng: n
 
 interface ActiveDetailInfo {
   entry: DetailMarkerEntry
-  view: 'info' | 'pictures'
+  view: 'info' | 'pictures' | 'edit'
   pictureIndex: number
 }
 
@@ -177,6 +177,12 @@ export interface UseMapMarkersOptions {
   onBuildingMoved?: (building: Building, lat: number, lng: number) => void
   onDetailMoved?: (layerKey: LayerKey, data: Rtu | Utility, lat: number, lng: number, building: Building | null) => void
   onDeleteDetail?: (layerKey: LayerKey, data: Rtu | Utility, building: Building | null) => void
+  onEditDetail?: (
+    layerKey: LayerKey,
+    building: Building,
+    oldName: string,
+    updates: { name: string; description: string },
+  ) => void | Promise<void>
   onGroupMoved?: (portfolio: { buildings: Building[]; utilities: Utility[]; polygons: Polygon[] }) => void
 }
 
@@ -190,6 +196,7 @@ export function useMapMarkers({
   onBuildingMoved,
   onDetailMoved,
   onDeleteDetail,
+  onEditDetail,
   onGroupMoved,
 }: UseMapMarkersOptions) {
   const layers = useLayerStore((s) => s.layers)
@@ -228,13 +235,20 @@ export function useMapMarkers({
     onBuildingMoved,
     onDetailMoved,
     onDeleteDetail,
+    onEditDetail,
   })
 
   const layersRef = useRef(layers)
 
   useEffect(() => {
-    callbacksRef.current = { onSelectBuilding, onBuildingMoved, onDetailMoved, onDeleteDetail }
-  }, [onSelectBuilding, onBuildingMoved, onDetailMoved, onDeleteDetail])
+    callbacksRef.current = {
+      onSelectBuilding,
+      onBuildingMoved,
+      onDetailMoved,
+      onDeleteDetail,
+      onEditDetail,
+    }
+  }, [onSelectBuilding, onBuildingMoved, onDetailMoved, onDeleteDetail, onEditDetail])
 
   useEffect(() => {
     layersRef.current = layers
@@ -507,6 +521,67 @@ export function useMapMarkers({
           callbacksRef.current.onDeleteDetail?.(entry.type, entry.data, entry.building)
         })
       }
+
+      container.querySelector('[data-iw-action="edit-text"]')?.addEventListener('click', () => {
+        const ctx = activeDetailInfoRef.current
+        if (!ctx || ctx.entry.type !== 'rtu') return
+        ctx.view = 'edit'
+        iw.setContent(
+          buildDetailEditHtml(ctx.entry.data as Rtu, {
+            buildingAddress: ctx.entry.building?.address,
+          }),
+        )
+      })
+
+      container.querySelector('[data-iw-action="edit-cancel"]')?.addEventListener('click', () => {
+        const ctx = activeDetailInfoRef.current
+        if (!ctx || ctx.view !== 'edit') return
+        ctx.view = 'info'
+        const { type, data, building } = ctx.entry
+        const pendingPictureAssignCount =
+          type === 'rtu'
+            ? countPendingPicturesNearRtu(
+                usePendingRtuPictureStore.getState().items,
+                (data as Rtu).lat,
+                (data as Rtu).lng,
+              )
+            : 0
+        iw.setContent(
+          buildDetailInfoHtml(type, data, {
+            buildingAddress: building?.address,
+            pendingPictureAssignCount,
+          }),
+        )
+      })
+
+      container.querySelector('[data-iw-action="edit-save"]')?.addEventListener('click', () => {
+        void (async () => {
+          const ctx = activeDetailInfoRef.current
+          if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'edit' || !ctx.entry.building) return
+          const nameInput = container.querySelector('[data-iw-field="name"]') as HTMLInputElement | null
+          const descInput = container.querySelector(
+            '[data-iw-field="description"]',
+          ) as HTMLTextAreaElement | null
+          if (!nameInput || !descInput) return
+          const oldName =
+            container.querySelector('.iw-edit')?.getAttribute('data-iw-rtu-name') ??
+            ctx.entry.data.name ??
+            ''
+          try {
+            await callbacksRef.current.onEditDetail?.(
+              'rtu',
+              ctx.entry.building,
+              oldName,
+              { name: nameInput.value, description: descInput.value },
+            )
+          } catch {
+            return
+          }
+          iw.close()
+          activeInfoMarkerRef.current = null
+          activeDetailInfoRef.current = null
+        })()
+      })
 
       container.querySelector('[data-iw-action="pictures"]')?.addEventListener('click', () => {
         const ctx = activeDetailInfoRef.current
@@ -1113,6 +1188,31 @@ export function useMapMarkers({
     window.addEventListener('map:openDetail', handler)
     return () => window.removeEventListener('map:openDetail', handler)
   }, [map, openDetailInfo])
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (
+        e as CustomEvent<{ layerKey: LayerKey; name: string; buildingAddress?: string }>
+      ).detail
+      const entry = detailMarkersRef.current.find(
+        (dm) =>
+          dm.type === detail.layerKey &&
+          dm.data.name === detail.name &&
+          (detail.buildingAddress
+            ? dm.building?.address === detail.buildingAddress
+            : !dm.building),
+      )
+      if (!entry || !map) return
+      panToPreserveRotation(map, { lat: entry.data.lat, lng: entry.data.lng }, MAP_DETAIL_ZOOM, {
+        onlyZoomIn: true,
+      })
+      closeAllMapPopups()
+      activeDetailInfoRef.current = null
+      startSoloMove(entry.marker)
+    }
+    window.addEventListener('map:rtuSoloMove', handler)
+    return () => window.removeEventListener('map:rtuSoloMove', handler)
+  }, [map, startSoloMove])
 
   useEffect(() => {
     const handler = (e: Event) => {

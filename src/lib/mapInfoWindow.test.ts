@@ -100,13 +100,28 @@ describe('mapInfoWindow', () => {
     expect(text).toContain('Unit 1  Acme Corp')
   })
 
-  it('includes Copy, Move, and Delete in detail popup footer', () => {
+  it('includes Copy and Edit text in RTU popup footer', () => {
     const html = buildDetailInfoHtml('rtu', rtu, { buildingAddress: building.address })
     expect(html).toContain('class="iw-foot"')
     expect(html).toContain('📋 Copy')
+    expect(html).toContain('data-iw-action="edit-text"')
+    expect(html).not.toContain('↔ Move')
+    expect(html).not.toContain('🗑 Delete')
+    expect(html.indexOf('class="iw-body"')).toBeLessThan(html.indexOf('class="iw-foot"'))
+  })
+
+  it('includes Copy, Move, and Delete in utility detail popup footer', () => {
+    const utility = {
+      id: 1,
+      utility_type: 'Fire Hydrants' as const,
+      name: 'Hydrant A',
+      description: 'North lot',
+      lat: 43.651,
+      lng: -79.621,
+    }
+    const html = buildDetailInfoHtml('hydrant', utility)
     expect(html).toContain('↔ Move')
     expect(html).toContain('🗑 Delete')
-    expect(html.indexOf('class="iw-body"')).toBeLessThan(html.indexOf('class="iw-foot"'))
   })
 
   it('builds detail plain text without redundant RTU label or building footer', () => {
