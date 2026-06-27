@@ -45,12 +45,6 @@
         "desc": "Building: 1850 Derry Road East\r\nSystem: Roof Top Units\r\nDescription: RTU-06 Hybrid/Dual Fuel Heat Pump\r\nSuite: Single Tenant\r\nModel: DSK180AWSAH02F0D0A1B✓\r\nSerial: 255010845D✓\r\nMake: TRANE\r\nDate Installed: Jan 15, 2026\r\nHeating Capacity: 400,000 BTU\r\nCooling Capacity: 180,000 BTU (15 Ton)\r\nR-454B Refrigerant",
         "lat": 43.6820286,
         "lng": -79.6656702
-      },
-      {
-        "name": "RTU-04B Hybrid",
-        "desc": "RTU-04 Hybrid\nBrand New Installation> no replacement\nBuilding    2320 Bristol Circle\nSystem      Roof Top Units\nDescription RTU-04 Hybrid/Dual Fuel Heat Pump\nSuite       SUITE 4\nModel       LDT060H5EX1Y✓\nSerial      5625M01637✓\nMake        LENNOX\nDate InstalledFeb 04, 2026\nHeating Capacity125,000 BTU\nCooling Capacity48,000 BTU (5 Ton)",
-        "lat": 43.51647761172214,
-        "lng": -79.67710158922165
       }
     ]
   },
@@ -5483,10 +5477,16 @@
         "lng": -79.6767035
       },
       {
-        "name": "RTU-04 Hybrid",
-        "desc": "Building: 2320 Bristol Circle\r\nSystem: Roof Top Units\r\nDescription: RTU-04 Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 2\r\nModel: LDT060H5EX1Y✓\r\nSerial: 5625M01637✓\r\nMake: LENNOX\r\nDate Installed: Feb 04, 2026\r\nHeating Capacity :125,000 BTU\r\nCooling Capacity: 48,000 BTU (5 Ton)",
+        "name": "RTU-04",
+        "desc": "Building: 2320 Bristol Circle",
         "lat": 43.5163824,
         "lng": -79.6765468
+      },
+      {
+        "name": "RTU-04B Hybrid",
+        "desc": "Building: 2320 Bristol Circle\r\nSystem: Roof Top Units\r\nDescription: RTU-04B Hybrid/Dual Fuel Heat Pump\r\nSuite: SUITE 4\r\nModel: LDT060H5EX1Y✓\r\nSerial: 5625M01637✓\r\nMake: LENNOX\r\nDate Installed: Feb 04, 2026\r\nHeating Capacity: 125,000 BTU\r\nCooling Capacity: 48,000 BTU (5 Ton)",
+        "lat": 43.51645922974974,
+        "lng": -79.67710252001324
       },
       {
         "name": "RTU-03",
