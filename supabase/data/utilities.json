@@ -66,8 +66,8 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "3105 Unity Dr",
-    "lat": 43.5385972,
-    "lng": -79.7086361
+    "lat": 43.5390338,
+    "lng": -79.7090475
   },
   {
     "type": "Sprinkler Rooms",
@@ -731,8 +731,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "6774 Financial Dr",
-    "lat": 43.6088776,
-    "lng": -79.7422424
+    "lat": 43.6088554,
+    "lng": -79.7422306
   },
   {
     "type": "Electrical Rooms",
@@ -759,8 +759,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "151 Courtneypark Dr W",
-    "lat": 43.6341975,
-    "lng": -79.6983828
+    "lat": 43.6342011,
+    "lng": -79.6983783
   },
   {
     "type": "Electrical Rooms",
