@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { PortfolioData } from '@/types/domain'
+import { setPortfolioDirtyLocally } from '@/hooks/usePortfolioData'
 
 const STORAGE_KEY = 'bme-portfolio'
 
@@ -26,10 +27,14 @@ export const usePortfolioStore = create<PortfolioStoreState>((set, get) => ({
 
   patchPortfolio: (data) => {
     get().persistToStorage(data)
+    setPortfolioDirtyLocally(true)
     set({ portfolio: data, unsaved: true })
   },
 
-  markSaved: () => set({ unsaved: false }),
+  markSaved: () => {
+    setPortfolioDirtyLocally(false)
+    set({ unsaved: false })
+  },
   markUnsaved: () => set({ unsaved: true }),
 
   loadFromStorage: () => {

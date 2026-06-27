@@ -25,6 +25,46 @@ import staticPolygons from '../../supabase/data/polygons.json'
 export type { PortfolioData } from '@/types/domain'
 
 const STORAGE_KEY = 'bme-portfolio'
+const UNSAVED_KEY = 'bme-portfolio-unsaved'
+
+export function isPortfolioDirtyLocally(): boolean {
+  if (typeof localStorage === 'undefined') return false
+  return localStorage.getItem(UNSAVED_KEY) === '1'
+}
+
+export function setPortfolioDirtyLocally(dirty: boolean): void {
+  if (typeof localStorage === 'undefined') return
+  if (dirty) localStorage.setItem(UNSAVED_KEY, '1')
+  else localStorage.removeItem(UNSAVED_KEY)
+}
+
+function totalRtus(portfolio: PortfolioData): number {
+  return portfolio.buildings.reduce((count, building) => count + (building.rtus?.length ?? 0), 0)
+}
+
+/** True when this browser has portfolio edits not present in the cloud JSON snapshot. */
+export function localPortfolioAheadOfRemote(
+  local: PortfolioData,
+  remote: PortfolioData,
+): boolean {
+  if (totalRtus(local) > totalRtus(remote)) return true
+
+  for (const localBuilding of local.buildings) {
+    const remoteBuilding = remote.buildings.find((b) => b.address === localBuilding.address)
+    if (!remoteBuilding) continue
+    const remoteNames = new Set((remoteBuilding.rtus ?? []).map((rtu) => rtu.name))
+    for (const rtu of localBuilding.rtus ?? []) {
+      if (!remoteNames.has(rtu.name)) return true
+    }
+    for (const rtu of localBuilding.rtus ?? []) {
+      const remoteRtu = remoteBuilding.rtus?.find((r) => r.name === rtu.name)
+      if (!remoteRtu) continue
+      if (remoteRtu.lat !== rtu.lat || remoteRtu.lng !== rtu.lng) return true
+    }
+  }
+
+  return false
+}
 
 declare global {
   interface Window {
@@ -105,13 +145,24 @@ export async function loadPortfolioData(): Promise<PortfolioData> {
   const embedded = loadEmbeddedPortfolio()
   if (embedded) return normalizePortfolioData(embedded)
 
+  const stored = loadStoredPortfolio()
   const jsonBase = getJsonDataBaseUrl()
+
   if (jsonBase) {
     const remote = await loadRemotePortfolio(jsonBase)
+    if (stored && remote) {
+      const preferLocal =
+        isPortfolioDirtyLocally() || localPortfolioAheadOfRemote(stored, remote)
+      if (preferLocal) {
+        if (!isPortfolioDirtyLocally()) setPortfolioDirtyLocally(true)
+        const { portfolio } = await repairStoredPortfolioRtuNames(stored, { notify: true })
+        return portfolio
+      }
+      return remote
+    }
     if (remote) return remote
   }
 
-  const stored = loadStoredPortfolio()
   if (stored) {
     const { portfolio } = await repairStoredPortfolioRtuNames(stored, { notify: true })
     return portfolio
@@ -130,8 +181,13 @@ export function usePortfolioData() {
   })
 }
 
-export function persistPortfolio(data: PortfolioData): void {
+export function persistPortfolio(data: PortfolioData, options?: { markSynced?: boolean }): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  if (options?.markSynced) {
+    setPortfolioDirtyLocally(false)
+  } else {
+    setPortfolioDirtyLocally(true)
+  }
 }
 
 /** Shorten mistaken long RTU names and re-link IndexedDB pictures before sync. */
@@ -151,7 +207,9 @@ export async function repairStoredPortfolioRtuNames(
   }
   picturesMigrated += await migrateLegacyPictureFileNames()
 
-  if (renames.length && options?.persist !== false) persistPortfolio(repaired)
+  if (renames.length && options?.persist !== false) {
+    persistPortfolio(repaired, { markSynced: !isPortfolioDirtyLocally() })
+  }
 
   if (options?.notify && (renames.length || picturesMigrated)) {
     const { showToastSuccess } = await import('@/lib/toast')

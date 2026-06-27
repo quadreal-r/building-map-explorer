@@ -32,7 +32,7 @@ export async function pullRemoteUpdatesToLocal(): Promise<PortfolioData> {
     throw new Error('Could not load portfolio from Cloudflare.')
   }
 
-  persistPortfolio(portfolio)
+  persistPortfolio(portfolio, { markSynced: true })
 
   const schedule = await fetchRemoteJson<StoredRtuSchedule>('rtu-schedule.json')
   if (schedule) {
