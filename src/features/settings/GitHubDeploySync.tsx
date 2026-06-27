@@ -81,7 +81,7 @@ export function GitHubDeploySyncButton({
       </button>
       {sync.completed && sync.cooldownSec > 0 ? (
         <p className={styles.hint}>
-          Live site and Cloudflare updates may take up to 5 minutes. Hard-refresh the map when the
+          Live site and Cloudflare updates may take up to 2 minutes. Hard-refresh the map when the
           timer ends.
         </p>
       ) : null}

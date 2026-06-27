@@ -44,7 +44,7 @@ export interface GitHubSyncResult {
   deployedFileNames: string[]
 }
 
-export const SYNC_COOLDOWN_MS = 5 * 60 * 1000
+export const SYNC_COOLDOWN_MS = 2 * 60 * 1000
 
 /** Encode pending pictures one at a time until the JSON array fits the gist byte budget. */
 export function jsonArraySizeAfterAddingEntry(currentSize: number, entryCount: number, entryJsonLength: number): number {
