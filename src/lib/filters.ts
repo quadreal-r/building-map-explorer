@@ -32,6 +32,11 @@ function matchesManagerFilter(
   const storedDisplay = resolveManagerDisplayName(stored, managerRenames)
   if (storedDisplay === managerFilter) return true
 
+  if (isManagerSlotKey(managerFilter)) {
+    const slotDisplay = managerRenames?.[managerFilter]?.trim()
+    if (slotDisplay && (stored === slotDisplay || storedDisplay === slotDisplay)) return true
+  }
+
   if (isManagerSlotKey(stored)) {
     const renamed = managerRenames?.[stored]?.trim()
     if (renamed && renamed === managerFilter) return true

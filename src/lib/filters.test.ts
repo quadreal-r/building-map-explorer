@@ -30,9 +30,10 @@ const buildings = (legacyBuildings as LegacyBuildingJson[]).map(
 const polygons = (legacyPolygons as LegacyPolygonJson[]).map(normalizeLegacyPolygon)
 const polygonIndex = buildPolygonBuildingIndex(buildings, polygons)
 
-/** Portfolio JSON stores manager slots; Josh Starkey maps to Manager 2. */
+/** Josh Starkey is Manager 2 when settings use manager slots. */
+const JOSH_MANAGER_NAME = 'Josh Starkey'
 const JOSH_MANAGER_SLOT = 'Manager 2'
-const JOSH_MANAGER_RENAMES = { [JOSH_MANAGER_SLOT]: 'Josh Starkey' }
+const JOSH_MANAGER_RENAMES = { [JOSH_MANAGER_SLOT]: JOSH_MANAGER_NAME }
 
 describe('matchesSearch', () => {
   it('matches address substring', () => {
@@ -100,19 +101,19 @@ describe('passDqFilter', () => {
 describe('collectFilterOptions', () => {
   it('narrows parks and clusters when a manager is selected', () => {
     const all = collectFilterOptions(buildings)
-    const josh = collectFilterOptions(buildings, {
-      search: '',
-      park: '',
-      cluster: '',
-      manager: JOSH_MANAGER_SLOT,
-    })
+    const josh = collectFilterOptions(
+      buildings,
+      { search: '', park: '', cluster: '', manager: JOSH_MANAGER_SLOT },
+      polygonIndex,
+      JOSH_MANAGER_RENAMES,
+    )
 
     expect(josh.parks.length).toBeGreaterThan(0)
     expect(josh.parks.length).toBeLessThan(all.parks.length)
     expect(josh.clusters.length).toBeGreaterThan(0)
     expect(josh.clusters.length).toBeLessThanOrEqual(all.clusters.length)
 
-    const joshBuildings = buildings.filter((b) => b.manager === JOSH_MANAGER_SLOT)
+    const joshBuildings = buildings.filter((b) => b.manager === JOSH_MANAGER_NAME)
     expect(josh.parks.every((p) => joshBuildings.some((b) => b.park === p))).toBe(true)
     expect(josh.clusters.every((c) => joshBuildings.some((b) => b.cluster === c))).toBe(true)
   })
@@ -147,15 +148,20 @@ describe('reconcileFilterDropdowns', () => {
 
   it('clears park when it does not belong to the selected manager', () => {
     const joshParks = new Set(
-      buildings.filter((b) => b.manager === JOSH_MANAGER_SLOT).map((b) => b.park),
+      buildings.filter((b) => b.manager === JOSH_MANAGER_NAME).map((b) => b.park),
     )
     const otherPark = [...new Set(buildings.map((b) => b.park))].find((p) => !joshParks.has(p))!
 
-    const reconciled = reconcileFilterDropdowns(buildings, {
-      ...DEFAULT_FILTER_STATE,
-      manager: JOSH_MANAGER_SLOT,
-      park: otherPark,
-    })
+    const reconciled = reconcileFilterDropdowns(
+      buildings,
+      {
+        ...DEFAULT_FILTER_STATE,
+        manager: JOSH_MANAGER_SLOT,
+        park: otherPark,
+      },
+      polygonIndex,
+      JOSH_MANAGER_RENAMES,
+    )
     expect(reconciled.park).toBe('')
   })
 
@@ -232,23 +238,25 @@ describe('applyCostScopeFilters', () => {
 
 describe('applyFilters', () => {
   it('filters by exact property manager slot', () => {
-    const filtered = applyFilters(buildings, {
-      ...DEFAULT_FILTER_STATE,
-      manager: JOSH_MANAGER_SLOT,
-    })
+    const filtered = applyFilters(
+      buildings,
+      { ...DEFAULT_FILTER_STATE, manager: JOSH_MANAGER_SLOT },
+      polygonIndex,
+      JOSH_MANAGER_RENAMES,
+    )
     expect(filtered.length).toBeGreaterThan(0)
-    expect(filtered.every((b) => b.manager === JOSH_MANAGER_SLOT)).toBe(true)
+    expect(filtered.every((b) => b.manager === JOSH_MANAGER_NAME)).toBe(true)
   })
 
   it('filters by display name when buildings use manager slots', () => {
     const filtered = applyFilters(
       buildings,
-      { ...DEFAULT_FILTER_STATE, manager: 'Josh Starkey' },
+      { ...DEFAULT_FILTER_STATE, manager: JOSH_MANAGER_NAME },
       polygonIndex,
       JOSH_MANAGER_RENAMES,
     )
     expect(filtered.length).toBeGreaterThan(0)
-    expect(filtered.every((b) => b.manager === JOSH_MANAGER_SLOT)).toBe(true)
+    expect(filtered.every((b) => b.manager === JOSH_MANAGER_NAME)).toBe(true)
   })
 
   it('returns subset for park filter', () => {
