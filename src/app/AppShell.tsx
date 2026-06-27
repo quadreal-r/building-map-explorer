@@ -52,8 +52,8 @@ export function AppShell() {
   useEffect(() => {
     void loadBundledHiddenRtuPictures().then((changed) => {
       if (changed) notifyRtuPicturesChanged()
+      return reconcilePendingDeployWithCloud()
     })
-    void reconcilePendingDeployWithCloud()
     void loadSettings()
     void loadRtuPricing()
     void loadRtuSchedule()

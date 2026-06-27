@@ -6,7 +6,7 @@ import {
   manifestEntryToCloudFileName,
   pictureFileRtuLabel,
 } from '@/lib/rtuPictureAssignNaming'
-import { isRtuManifestPictureHidden, exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
+import { exportHiddenRtuPicturesForDeploy, isRtuManifestPictureHidden, loadBundledHiddenRtuPictures } from '@/lib/hiddenRtuPictures'
 import { usesRemoteJsonData } from '@/lib/jsonDataUrls'
 import {
   getRtuPictureManifestUrl,
@@ -395,6 +395,7 @@ export async function occupiedPictureIndicesForRtu(
   rtuName: string,
   manifest?: RtuPictureManifest,
 ): Promise<Set<number>> {
+  await loadBundledHiddenRtuPictures()
   const resolvedManifest = manifest ?? (await loadRtuPictureManifest())
   const key = rtuPictureKey(buildingAddress, rtuName)
   const manifestKey = resolveManifestRtuKey(buildingAddress, rtuName, resolvedManifest)
@@ -418,10 +419,36 @@ export async function nextAvailablePictureIndex(
   buildingAddress: string,
   rtuName: string,
 ): Promise<number> {
-  const used = await occupiedPictureIndicesForRtu(buildingAddress, rtuName)
+  const manifest = await loadRtuPictureManifest()
+  const used = await occupiedPictureIndicesForRtu(buildingAddress, rtuName, manifest)
   let candidate = 1
-  while (used.has(candidate)) candidate++
+  while (
+    used.has(candidate) ||
+    (await cloudFilenameBlockedForNewUpload(buildingAddress, rtuName, candidate, manifest))
+  ) {
+    candidate++
+  }
   return candidate
+}
+
+/** Skip auto-assigning an index when CDN already has that filename but manifest does not claim it for this RTU. */
+async function cloudFilenameBlockedForNewUpload(
+  buildingAddress: string,
+  rtuName: string,
+  index: number,
+  manifest: RtuPictureManifest,
+): Promise<boolean> {
+  const fileName = buildCloudRtuPictureFileName(buildingAddress, rtuName, index, 'jpg')
+  if (!(await cloudRtuPictureReachable(fileName))) return false
+
+  const key = rtuPictureKey(buildingAddress, rtuName)
+  const manifestKey = resolveManifestRtuKey(buildingAddress, rtuName, manifest)
+  const manifestFile = manifestFileAtIndex(manifest, key, index)
+  if (manifestFile && !isRtuManifestPictureHidden(manifestKey, manifestFile)) {
+    return true
+  }
+  // Old/hidden CDN file still at this path — use the next index instead of reusing the filename.
+  return true
 }
 
 async function cloudRtuPictureReachable(fileName: string): Promise<boolean> {
