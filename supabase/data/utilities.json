@@ -66,8 +66,8 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "3105 Unity Dr",
-    "lat": 43.5390338,
-    "lng": -79.7090475
+    "lat": 43.5385972,
+    "lng": -79.7086361
   },
   {
     "type": "Sprinkler Rooms",
@@ -429,14 +429,14 @@
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
-    "desc": "Interior Access\r\n6820 Creditview Rd",
+    "desc": "Interior Access\r\r\n6820 Creditview Rd",
     "lat": 43.6132792,
     "lng": -79.7353355
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
-    "desc": "Interior Access\r\n6980 Creditview Rd",
+    "desc": "Interior Access\r\r\n6980 Creditview Rd",
     "lat": 43.6123605,
     "lng": -79.7424253
   },
@@ -450,55 +450,55 @@
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
-    "desc": "Interior Access\r\n441 Courtneypark Dr E",
+    "desc": "Interior Access\r\r\n441 Courtneypark Dr E",
     "lat": 43.6465621,
     "lng": -79.6859965
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
-    "desc": "Interior Access\r\n326 Superior Blvd",
+    "desc": "Interior Access\r\r\n326 Superior Blvd",
     "lat": 43.6479704,
     "lng": -79.6909146
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
-    "desc": "Interior Access\r\n320 Superior Blvd",
+    "desc": "Interior Access\r\r\n320 Superior Blvd",
     "lat": 43.647323,
     "lng": -79.6919033
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
-    "desc": "Interior Access\r\n6100 Kenway Dr",
+    "desc": "Interior Access\r\r\n6100 Kenway Dr",
     "lat": 43.6369054,
     "lng": -79.6720205
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
-    "desc": "Interior Access\r\n6270 Kenway Dr",
+    "desc": "Interior Access\r\r\n6270 Kenway Dr",
     "lat": 43.6347137,
     "lng": -79.6767882
   },
   {
     "type": "Sprinkler Rooms",
-    "name": "S",
+    "name": "Sprinkler Room",
     "desc": "1750 Courtneypark",
     "lat": 43.668472,
     "lng": -79.6517399
   },
   {
     "type": "Sprinkler Rooms",
-    "name": "S",
+    "name": "Sprinkler Room",
     "desc": "151 Courtneypark Dr",
     "lat": 43.634624,
     "lng": -79.6978951
   },
   {
     "type": "Sprinkler Rooms",
-    "name": "S",
+    "name": "Sprinkler Room",
     "desc": "6774 Financial Dr",
     "lat": 43.6088653,
     "lng": -79.7416575
@@ -534,7 +534,7 @@
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
-    "desc": "7030 Royal Bank Dr\r\n(interior access?)",
+    "desc": "7030 Royal Bank Dr\r\r\n(interior access?)",
     "lat": 43.6086232,
     "lng": -79.7491216
   },
@@ -695,7 +695,7 @@
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
-    "desc": "Interior Access\r\n6980 Creditview Rd",
+    "desc": "Interior Access\r\r\n6980 Creditview Rd",
     "lat": 43.6126229,
     "lng": -79.7429736
   },
@@ -723,7 +723,7 @@
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
-    "desc": "Interior Access\r\n6820 Creditview Rd",
+    "desc": "Interior Access\r\r\n6820 Creditview Rd",
     "lat": 43.6131796,
     "lng": -79.7352906
   },
@@ -731,27 +731,27 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "6774 Financial Dr",
-    "lat": 43.6088554,
-    "lng": -79.7422306
+    "lat": 43.6088776,
+    "lng": -79.7422424
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
-    "desc": "Interior Access\r\n441 Courtneypark Dr E",
+    "desc": "Interior Access\r\r\n441 Courtneypark Dr E",
     "lat": 43.6465891,
     "lng": -79.6859646
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
-    "desc": "Interior Access\r\n326 Superior Blvd",
+    "desc": "Interior Access\r\r\n326 Superior Blvd",
     "lat": 43.6476037,
     "lng": -79.6913268
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
-    "desc": "Interior Access\r\n320 Superior Blvd",
+    "desc": "Interior Access\r\r\n320 Superior Blvd",
     "lat": 43.6474825,
     "lng": -79.6917282
   },
@@ -759,8 +759,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "151 Courtneypark Dr W",
-    "lat": 43.6342011,
-    "lng": -79.6983783
+    "lat": 43.6341975,
+    "lng": -79.6983828
   },
   {
     "type": "Electrical Rooms",
@@ -1024,7 +1024,7 @@
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
-    "desc": "1550 Courtneypark Dr E\r\nElec. R Interior Access",
+    "desc": "1550 Courtneypark Dr E\r\r\nElec. R Interior Access",
     "lat": 43.6645916,
     "lng": -79.6560855
   },
@@ -1087,7 +1087,7 @@
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
-    "desc": "1633-1655 Meyerside Rd\r\n1500 Bonhill Rd\r\n1577 Meyerside Dr",
+    "desc": "1633-1655 Meyerside Rd\r\r\n1500 Bonhill Rd\r\r\n1577 Meyerside Dr",
     "lat": 43.6640964,
     "lng": -79.6507616
   },

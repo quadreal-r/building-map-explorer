@@ -1,6 +1,6 @@
 [
   {
-    "name": "Units # 3,4",
+    "name": "Suites # 3,4",
     "desc": "Snowdon HVAC",
     "color": "#60a5fa",
     "paths": [
@@ -27,7 +27,7 @@
     ]
   },
   {
-    "name": "Units # 5,6",
+    "name": "Suites # 5,6",
     "desc": "Odel Business Solutions Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -54,7 +54,7 @@
     ]
   },
   {
-    "name": "Unit # 7",
+    "name": "Suite # 7",
     "desc": "Universal Field Supplies",
     "color": "#60a5fa",
     "paths": [
@@ -81,7 +81,7 @@
     ]
   },
   {
-    "name": "Unit # 14",
+    "name": "Suite # 14",
     "desc": "Canuck Doors",
     "color": "#60a5fa",
     "paths": [
@@ -108,7 +108,7 @@
     ]
   },
   {
-    "name": "Units # 12,13",
+    "name": "Suites # 12,13",
     "desc": "Capture Logistics Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -135,7 +135,7 @@
     ]
   },
   {
-    "name": "Units # 9,10,11",
+    "name": "Suites # 9,10,11",
     "desc": "No Information",
     "color": "#60a5fa",
     "paths": [
@@ -162,7 +162,7 @@
     ]
   },
   {
-    "name": "Unit # 8",
+    "name": "Suite # 8",
     "desc": "Chocolate Smet Canada",
     "color": "#60a5fa",
     "paths": [
@@ -189,7 +189,7 @@
     ]
   },
   {
-    "name": "Units # 1,2",
+    "name": "Suites # 1,2",
     "desc": "Universal Field Supplies",
     "color": "#60a5fa",
     "paths": [
@@ -224,7 +224,7 @@
     ]
   },
   {
-    "name": "Units # 1,2",
+    "name": "Suites # 1,2",
     "desc": "Wuxly Movement",
     "color": "#60a5fa",
     "paths": [
@@ -259,7 +259,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "B Town Carrier Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -286,7 +286,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Atlantic and Pacific International Global Logistics Canada Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -313,7 +313,7 @@
     ]
   },
   {
-    "name": "Units #12,13,14",
+    "name": "Suites #12,13,14",
     "desc": "Furniture Village Canada Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -340,7 +340,7 @@
     ]
   },
   {
-    "name": "Units # 5,6,7",
+    "name": "Suites # 5,6,7",
     "desc": "Vulcan Automotive Equipment",
     "color": "#60a5fa",
     "paths": [
@@ -367,7 +367,7 @@
     ]
   },
   {
-    "name": "Unit # 11",
+    "name": "Suite # 11",
     "desc": "Spier and McKay",
     "color": "#60a5fa",
     "paths": [
@@ -394,7 +394,7 @@
     ]
   },
   {
-    "name": "Unit # 9-10",
+    "name": "Suite # 9-10",
     "desc": "13931072 Canada Inc. and 2417588 Ontario Corp.",
     "color": "#60a5fa",
     "paths": [
@@ -421,7 +421,7 @@
     ]
   },
   {
-    "name": "Unit # 8",
+    "name": "Suite # 8",
     "desc": "MWS HVAC",
     "color": "#60a5fa",
     "paths": [
@@ -448,7 +448,7 @@
     ]
   },
   {
-    "name": "Main Unit",
+    "name": "Main Suite",
     "desc": "I.O.F, Business Furniture Manufacturing Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -491,7 +491,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Power Battery Sales Ltd",
     "color": "#60a5fa",
     "paths": [
@@ -526,7 +526,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Footprint Products",
     "color": "#60a5fa",
     "paths": [
@@ -561,7 +561,7 @@
     ]
   },
   {
-    "name": "Units # 1,2,3",
+    "name": "Suites # 1,2,3",
     "desc": "Mayekawa Canada Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -600,7 +600,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Unicorn Enterprises Corp.",
     "color": "#60a5fa",
     "paths": [
@@ -635,7 +635,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "33 Logistics Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -670,7 +670,7 @@
     ]
   },
   {
-    "name": "Units # 6,7",
+    "name": "Suites # 6,7",
     "desc": "Raven Force Couriers Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -705,7 +705,7 @@
     ]
   },
   {
-    "name": "Unit # 8",
+    "name": "Suite # 8",
     "desc": "Drennan Refrigeration Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -740,7 +740,7 @@
     ]
   },
   {
-    "name": "Units # 1, 2,3, 4",
+    "name": "Suites # 1, 2,3, 4",
     "desc": "Spier and Mckay",
     "color": "#60a5fa",
     "paths": [
@@ -807,7 +807,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "D.K. International Group",
     "color": "#60a5fa",
     "paths": [
@@ -842,7 +842,7 @@
     ]
   },
   {
-    "name": "Units # 6,7,8",
+    "name": "Suites # 6,7,8",
     "desc": "Hercules SLr Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -881,7 +881,7 @@
     ]
   },
   {
-    "name": "Units # 1,2,3,4,5,6,7",
+    "name": "Suites # 1,2,3,4,5,6,7",
     "desc": "Desco Plumbing and Heating Supply Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -940,7 +940,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Sunstar LED Solution",
     "color": "#60a5fa",
     "paths": [
@@ -971,7 +971,7 @@
     ]
   },
   {
-    "name": "Units # 2, 3, 4",
+    "name": "Suites # 2, 3, 4",
     "desc": "CANUSA Automotive Warehousing Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -1014,7 +1014,7 @@
     ]
   },
   {
-    "name": "Units # 5, 6,7",
+    "name": "Suites # 5, 6,7",
     "desc": "Vulcan Automotive Equipment",
     "color": "#60a5fa",
     "paths": [
@@ -1045,7 +1045,7 @@
     ]
   },
   {
-    "name": "Unit # Main",
+    "name": "Suite # Main",
     "desc": "Ultra-Fit Manufacturing",
     "color": "#60a5fa",
     "paths": [
@@ -1096,7 +1096,7 @@
     ]
   },
   {
-    "name": "Unit # 1840",
+    "name": "Suite # 1840",
     "desc": "Ultra-Fit Manufacturing",
     "color": "#60a5fa",
     "paths": [
@@ -1139,7 +1139,7 @@
     ]
   },
   {
-    "name": "Units # 1850",
+    "name": "Suites # 1850",
     "desc": "National Energy Equipment Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -1210,7 +1210,7 @@
     ]
   },
   {
-    "name": "Unit # 1870",
+    "name": "Suite # 1870",
     "desc": "Van Houtte Coffe Services",
     "color": "#60a5fa",
     "paths": [
@@ -1253,7 +1253,7 @@
     ]
   },
   {
-    "name": "Unit # 1880",
+    "name": "Suite # 1880",
     "desc": "ULT Powertrain",
     "color": "#60a5fa",
     "paths": [
@@ -1280,7 +1280,7 @@
     ]
   },
   {
-    "name": "Units # 1,2",
+    "name": "Suites # 1,2",
     "desc": "MedX Health Corp.",
     "color": "#60a5fa",
     "paths": [
@@ -1315,7 +1315,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Metallurgical Sensors Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -1342,7 +1342,7 @@
     ]
   },
   {
-    "name": "Units # 4,5,6,7,8",
+    "name": "Suites # 4,5,6,7,8",
     "desc": "No Information",
     "color": "#60a5fa",
     "paths": [
@@ -1377,7 +1377,7 @@
     ]
   },
   {
-    "name": "Units # 9, 10",
+    "name": "Suites # 9, 10",
     "desc": "Fillware Technologies",
     "color": "#60a5fa",
     "paths": [
@@ -1420,7 +1420,7 @@
     ]
   },
   {
-    "name": "Unit # 11",
+    "name": "Suite # 11",
     "desc": "HVAC Dimensions",
     "color": "#60a5fa",
     "paths": [
@@ -1447,7 +1447,7 @@
     ]
   },
   {
-    "name": "Units # 12, 13",
+    "name": "Suites # 12, 13",
     "desc": "Sibwest Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -1474,7 +1474,7 @@
     ]
   },
   {
-    "name": "Unit # 14",
+    "name": "Suite # 14",
     "desc": "ProTech Garage",
     "color": "#60a5fa",
     "paths": [
@@ -1501,7 +1501,7 @@
     ]
   },
   {
-    "name": "Unit # 16",
+    "name": "Suite # 16",
     "desc": "Directrade",
     "color": "#60a5fa",
     "paths": [
@@ -1536,7 +1536,7 @@
     ]
   },
   {
-    "name": "Unit # 15",
+    "name": "Suite # 15",
     "desc": "Coba Auto Group Ltd.",
     "color": "#60a5fa",
     "paths": [
@@ -1563,7 +1563,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Adorable Kids Canada",
     "color": "#60a5fa",
     "paths": [
@@ -1590,7 +1590,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "A.N.N. HORECA Supplies Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -1617,7 +1617,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Alumalco",
     "color": "#60a5fa",
     "paths": [
@@ -1644,7 +1644,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Process Heaters Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -1671,7 +1671,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "Delta Facilities Maintenance, Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -1698,7 +1698,7 @@
     ]
   },
   {
-    "name": "Units # 7,8",
+    "name": "Suites # 7,8",
     "desc": "Paterson Group Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -1725,7 +1725,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "Ufly Simulator Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -1752,7 +1752,7 @@
     ]
   },
   {
-    "name": "Unit # 9",
+    "name": "Suite # 9",
     "desc": "CGK Industrial",
     "color": "#60a5fa",
     "paths": [
@@ -1779,7 +1779,7 @@
     ]
   },
   {
-    "name": "Unit # 10",
+    "name": "Suite # 10",
     "desc": "Alex Veka",
     "color": "#60a5fa",
     "paths": [
@@ -1806,7 +1806,7 @@
     ]
   },
   {
-    "name": "Units # 13,14",
+    "name": "Suites # 13,14",
     "desc": "Ivan Fasteners Canada",
     "color": "#60a5fa",
     "paths": [
@@ -1833,7 +1833,7 @@
     ]
   },
   {
-    "name": "Units # 15,16",
+    "name": "Suites # 15,16",
     "desc": "Premium Wholesale Home & Leisure",
     "color": "#60a5fa",
     "paths": [
@@ -1860,7 +1860,7 @@
     ]
   },
   {
-    "name": "Unit # 17",
+    "name": "Suite # 17",
     "desc": "Too Fast Motors",
     "color": "#60a5fa",
     "paths": [
@@ -1887,7 +1887,7 @@
     ]
   },
   {
-    "name": "Unit # 18",
+    "name": "Suite # 18",
     "desc": "WDS Express Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -1918,7 +1918,7 @@
     ]
   },
   {
-    "name": "Units # 19, 20",
+    "name": "Suites # 19, 20",
     "desc": "D.K International Group",
     "color": "#60a5fa",
     "paths": [
@@ -1945,7 +1945,7 @@
     ]
   },
   {
-    "name": "Units # 11, 12",
+    "name": "Suites # 11, 12",
     "desc": "IPS Invoice Payment System Corp.",
     "color": "#60a5fa",
     "paths": [
@@ -1984,7 +1984,7 @@
     ]
   },
   {
-    "name": "Unit # 1577",
+    "name": "Suite # 1577",
     "desc": "DGN Marketing Services",
     "color": "#60a5fa",
     "paths": [
@@ -2071,7 +2071,7 @@
     ]
   },
   {
-    "name": "Units # 1675, 1695,1705",
+    "name": "Suites # 1675, 1695,1705",
     "desc": "DGN Marketing Services",
     "color": "#60a5fa",
     "paths": [
@@ -2098,7 +2098,7 @@
     ]
   },
   {
-    "name": "Units # 1,2",
+    "name": "Suites # 1,2",
     "desc": "Airbase Services, Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -2133,7 +2133,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "Tradewinds International Sales Co. Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -2160,7 +2160,7 @@
     ]
   },
   {
-    "name": "Units # 3,4",
+    "name": "Suites # 3,4",
     "desc": "Taff-Guard Filtration",
     "color": "#60a5fa",
     "paths": [
@@ -2195,7 +2195,7 @@
     ]
   },
   {
-    "name": "Units # 7,8,9",
+    "name": "Suites # 7,8,9",
     "desc": "UBC-Cool Canada Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -2230,7 +2230,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "Berlet Electronics",
     "color": "#60a5fa",
     "paths": [
@@ -2257,7 +2257,7 @@
     ]
   },
   {
-    "name": "Units # 1,2,3",
+    "name": "Suites # 1,2,3",
     "desc": "Voestalphine Bohler Welding",
     "color": "#60a5fa",
     "paths": [
@@ -2292,7 +2292,7 @@
     ]
   },
   {
-    "name": "Units # 4,5,6",
+    "name": "Suites # 4,5,6",
     "desc": "Felder Group Canada",
     "color": "#60a5fa",
     "paths": [
@@ -2323,7 +2323,7 @@
     ]
   },
   {
-    "name": "Units # 7,8",
+    "name": "Suites # 7,8",
     "desc": "Geonics Limited",
     "color": "#60a5fa",
     "paths": [
@@ -2350,7 +2350,7 @@
     ]
   },
   {
-    "name": "Units # 9, 10",
+    "name": "Suites # 9, 10",
     "desc": "The Mover's Choice Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -2377,7 +2377,7 @@
     ]
   },
   {
-    "name": "Units # 1,2,3",
+    "name": "Suites # 1,2,3",
     "desc": "Imagine It 3D",
     "color": "#60a5fa",
     "paths": [
@@ -2404,7 +2404,7 @@
     ]
   },
   {
-    "name": "Units # 4,5",
+    "name": "Suites # 4,5",
     "desc": "Tyger Group Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -2431,7 +2431,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "Pantechnology Engineered Services LTD.",
     "color": "#60a5fa",
     "paths": [
@@ -2466,7 +2466,7 @@
     ]
   },
   {
-    "name": "Unit # 7",
+    "name": "Suite # 7",
     "desc": "Magic Touch Decal Removal Systems Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -2501,7 +2501,7 @@
     ]
   },
   {
-    "name": "Unit # 8",
+    "name": "Suite # 8",
     "desc": "Urban Images",
     "color": "#60a5fa",
     "paths": [
@@ -2528,7 +2528,7 @@
     ]
   },
   {
-    "name": "Unit # 9",
+    "name": "Suite # 9",
     "desc": "XO Decors Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -2555,7 +2555,7 @@
     ]
   },
   {
-    "name": "Unit # 10",
+    "name": "Suite # 10",
     "desc": "Brother's Glass and Mirror Ltd.",
     "color": "#60a5fa",
     "paths": [
@@ -2586,7 +2586,7 @@
     ]
   },
   {
-    "name": "Units # 11,12",
+    "name": "Suites # 11,12",
     "desc": "Safetek Emergency Vehicles",
     "color": "#60a5fa",
     "paths": [
@@ -2613,7 +2613,7 @@
     ]
   },
   {
-    "name": "Units # 1,2,3",
+    "name": "Suites # 1,2,3",
     "desc": "Xemar Industries Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -2656,7 +2656,7 @@
     ]
   },
   {
-    "name": "Units # 4,5",
+    "name": "Suites # 4,5",
     "desc": "Footprint Products",
     "color": "#60a5fa",
     "paths": [
@@ -2691,7 +2691,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "Smartriver Industrial",
     "color": "#60a5fa",
     "paths": [
@@ -2734,7 +2734,7 @@
     ]
   },
   {
-    "name": "Unit # 7",
+    "name": "Suite # 7",
     "desc": "Green Circle Salons Ontario",
     "color": "#60a5fa",
     "paths": [
@@ -2769,7 +2769,7 @@
     ]
   },
   {
-    "name": "Units # 8,9",
+    "name": "Suites # 8,9",
     "desc": "Premium Aluminum Products",
     "color": "#60a5fa",
     "paths": [
@@ -2796,7 +2796,7 @@
     ]
   },
   {
-    "name": "Units # 10,11",
+    "name": "Suites # 10,11",
     "desc": "WRI Supply",
     "color": "#60a5fa",
     "paths": [
@@ -2839,7 +2839,7 @@
     ]
   },
   {
-    "name": "Units # 1,2,3",
+    "name": "Suites # 1,2,3",
     "desc": "NLYTN INC.",
     "color": "#60a5fa",
     "paths": [
@@ -2882,7 +2882,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Felder Group Canada",
     "color": "#60a5fa",
     "paths": [
@@ -2909,7 +2909,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "Star Pro Chemicals Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -2936,7 +2936,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "Jaks Micro Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -2971,7 +2971,7 @@
     ]
   },
   {
-    "name": "Unit # 7",
+    "name": "Suite # 7",
     "desc": "Metalex Trading Ltd.",
     "color": "#60a5fa",
     "paths": [
@@ -3006,7 +3006,7 @@
     ]
   },
   {
-    "name": "Units # 8,9",
+    "name": "Suites # 8,9",
     "desc": "Korber Supply Chain Ltd.",
     "color": "#60a5fa",
     "paths": [
@@ -3033,7 +3033,7 @@
     ]
   },
   {
-    "name": "Unit # 10",
+    "name": "Suite # 10",
     "desc": "Metalex Trading Ltd.",
     "color": "#60a5fa",
     "paths": [
@@ -3060,7 +3060,7 @@
     ]
   },
   {
-    "name": "Unit # 11",
+    "name": "Suite # 11",
     "desc": "HomeMind Corporation",
     "color": "#60a5fa",
     "paths": [
@@ -3087,7 +3087,7 @@
     ]
   },
   {
-    "name": "Unit # 12",
+    "name": "Suite # 12",
     "desc": "Metro Bound Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -3114,7 +3114,7 @@
     ]
   },
   {
-    "name": "Units # 1,2",
+    "name": "Suites # 1,2",
     "desc": "Natusoy Foods Ltd.",
     "color": "#60a5fa",
     "paths": [
@@ -3149,7 +3149,7 @@
     ]
   },
   {
-    "name": "Units # 3,4",
+    "name": "Suites # 3,4",
     "desc": "United Abrasives Canada",
     "color": "#60a5fa",
     "paths": [
@@ -3184,7 +3184,7 @@
     ]
   },
   {
-    "name": "Units # 5,6,7",
+    "name": "Suites # 5,6,7",
     "desc": "No Information",
     "color": "#60a5fa",
     "paths": [
@@ -3243,7 +3243,7 @@
     ]
   },
   {
-    "name": "Unit # 8",
+    "name": "Suite # 8",
     "desc": "KMC Distribution",
     "color": "#60a5fa",
     "paths": [
@@ -3270,7 +3270,7 @@
     ]
   },
   {
-    "name": "Unit # 9",
+    "name": "Suite # 9",
     "desc": "Helix Impressions Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -3297,7 +3297,7 @@
     ]
   },
   {
-    "name": "Units # 10,11",
+    "name": "Suites # 10,11",
     "desc": "Eztrans Logistics Ltd.",
     "color": "#60a5fa",
     "paths": [
@@ -3340,7 +3340,7 @@
     ]
   },
   {
-    "name": "Unit # Main",
+    "name": "Suite # Main",
     "desc": "No Information",
     "color": "#60a5fa",
     "paths": [
@@ -3367,7 +3367,7 @@
     ]
   },
   {
-    "name": "Units # 3,4,5,6,7,8,9,10",
+    "name": "Suites # 3,4,5,6,7,8,9,10",
     "desc": "Newrest Toronto Corp",
     "color": "#60a5fa",
     "paths": [
@@ -3402,7 +3402,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Sabri Contracting Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -3429,7 +3429,7 @@
     ]
   },
   {
-    "name": "Unit #2",
+    "name": "Suite #2",
     "desc": "Conxcorp",
     "color": "#60a5fa",
     "paths": [
@@ -3456,7 +3456,7 @@
     ]
   },
   {
-    "name": "Unit # Main",
+    "name": "Suite # Main",
     "desc": "Binex Line Corporation",
     "color": "#60a5fa",
     "paths": [
@@ -3503,7 +3503,7 @@
     ]
   },
   {
-    "name": "Units # 1-12",
+    "name": "Suites # 1-12",
     "desc": "Helix Impressions Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -3566,7 +3566,7 @@
     ]
   },
   {
-    "name": "Units # 1, 2",
+    "name": "Suites # 1, 2",
     "desc": "Farm Boy Company Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -3609,7 +3609,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Premium Wholesalte Home & Leisure",
     "color": "#60a5fa",
     "paths": [
@@ -3636,7 +3636,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "No information",
     "color": "#60a5fa",
     "paths": [
@@ -3675,7 +3675,7 @@
     ]
   },
   {
-    "name": "Units #  3,4,5",
+    "name": "Suites #  3,4,5",
     "desc": "B2B Freightway Inc.",
     "color": "#60a5fa",
     "paths": [
@@ -3710,7 +3710,7 @@
     ]
   },
   {
-    "name": "Units # 6,7,8",
+    "name": "Suites # 6,7,8",
     "desc": "Rubenstein RB Digital",
     "color": "#60a5fa",
     "paths": [
@@ -3757,7 +3757,7 @@
     ]
   },
   {
-    "name": "Units # 9,10,11,12",
+    "name": "Suites # 9,10,11,12",
     "desc": "Home Reno Direct",
     "color": "#60a5fa",
     "paths": [
@@ -3812,7 +3812,7 @@
     ]
   },
   {
-    "name": "Unit # Main",
+    "name": "Suite # Main",
     "desc": "Olympus Canada Inc.",
     "color": "#34d399",
     "paths": [
@@ -3847,7 +3847,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Wittmann Canada Inc.",
     "color": "#34d399",
     "paths": [
@@ -3930,7 +3930,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Light Harvesting Shading Solutioins Inc.",
     "color": "#34d399",
     "paths": [
@@ -3981,7 +3981,7 @@
     ]
   },
   {
-    "name": "Units #  2,3",
+    "name": "Suites #  2,3",
     "desc": "LLLOIS Shipping Limited",
     "color": "#34d399",
     "paths": [
@@ -4016,7 +4016,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "UAP Inc.",
     "color": "#34d399",
     "paths": [
@@ -4043,7 +4043,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "CKMax Technology Inc.",
     "color": "#34d399",
     "paths": [
@@ -4070,7 +4070,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "Flatline Spraybooth Specialist Inc.",
     "color": "#34d399",
     "paths": [
@@ -4097,7 +4097,7 @@
     ]
   },
   {
-    "name": "Unit # 7",
+    "name": "Suite # 7",
     "desc": "Formula Brands",
     "color": "#34d399",
     "paths": [
@@ -4199,7 +4199,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "General Products Inc.",
     "color": "#34d399",
     "paths": [
@@ -4242,7 +4242,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Johnson Controls",
     "color": "#34d399",
     "paths": [
@@ -4293,7 +4293,7 @@
     ]
   },
   {
-    "name": "Unit # main",
+    "name": "Suite # main",
     "desc": "Applanix Corporation",
     "color": "#34d399",
     "paths": [
@@ -4328,7 +4328,7 @@
     ]
   },
   {
-    "name": "Units # 1,2",
+    "name": "Suites # 1,2",
     "desc": "Dynamix Professional Vido",
     "color": "#34d399",
     "paths": [
@@ -4415,7 +4415,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Gigabyte Canada Inc.",
     "color": "#34d399",
     "paths": [
@@ -4470,7 +4470,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Devine & Associates Ltd",
     "color": "#34d399",
     "paths": [
@@ -4517,7 +4517,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "3Z Dental Supplies",
     "color": "#34d399",
     "paths": [
@@ -4572,7 +4572,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "Invincible Garage Inc",
     "color": "#34d399",
     "paths": [
@@ -4603,7 +4603,7 @@
     ]
   },
   {
-    "name": "Unit # 7",
+    "name": "Suite # 7",
     "desc": "POS King Ontario Inc.",
     "color": "#34d399",
     "paths": [
@@ -4634,7 +4634,7 @@
     ]
   },
   {
-    "name": "Unit # 8",
+    "name": "Suite # 8",
     "desc": "Heyday Kitchen Inc.",
     "color": "#34d399",
     "paths": [
@@ -4665,7 +4665,7 @@
     ]
   },
   {
-    "name": "Unit # 9",
+    "name": "Suite # 9",
     "desc": "Enviroair Industries Inc.",
     "color": "#34d399",
     "paths": [
@@ -4708,7 +4708,7 @@
     ]
   },
   {
-    "name": "Units # 13, 14, 15",
+    "name": "Suites # 13, 14, 15",
     "desc": "Invasix Corp.",
     "color": "#34d399",
     "paths": [
@@ -4803,7 +4803,7 @@
     ]
   },
   {
-    "name": "Unit # 12",
+    "name": "Suite # 12",
     "desc": "Mineral Medix Corp",
     "color": "#34d399",
     "paths": [
@@ -4850,7 +4850,7 @@
     ]
   },
   {
-    "name": "Unit # 11",
+    "name": "Suite # 11",
     "desc": "Hytera Communications",
     "color": "#34d399",
     "paths": [
@@ -4897,7 +4897,7 @@
     ]
   },
   {
-    "name": "Unit # 10",
+    "name": "Suite # 10",
     "desc": "CTC/Canadian Test Centre Inc.",
     "color": "#34d399",
     "paths": [
@@ -4944,7 +4944,7 @@
     ]
   },
   {
-    "name": "Units # 6,7",
+    "name": "Suites # 6,7",
     "desc": "Suzo Happ Canada",
     "color": "#34d399",
     "paths": [
@@ -4995,7 +4995,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "3G Print Group Inc.",
     "color": "#34d399",
     "paths": [
@@ -5046,7 +5046,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Beyond Kitchens and Bath",
     "color": "#34d399",
     "paths": [
@@ -5073,7 +5073,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "iGEN Technologies Inc.",
     "color": "#34d399",
     "paths": [
@@ -5100,7 +5100,7 @@
     ]
   },
   {
-    "name": "Units # 3,4",
+    "name": "Suites # 3,4",
     "desc": "No Information",
     "color": "#34d399",
     "paths": [
@@ -5147,7 +5147,7 @@
     ]
   },
   {
-    "name": "Unit # 145",
+    "name": "Suite # 145",
     "desc": "Hudson's Bay Company ULC",
     "color": "#34d399",
     "paths": [
@@ -5198,7 +5198,7 @@
     ]
   },
   {
-    "name": "Unit # 130",
+    "name": "Suite # 130",
     "desc": "OHO NOVA International Trading Corp.",
     "color": "#34d399",
     "paths": [
@@ -5225,7 +5225,7 @@
     ]
   },
   {
-    "name": "Unit # 136",
+    "name": "Suite # 136",
     "desc": "Innova Medical Ophthalmics Inc.",
     "color": "#34d399",
     "paths": [
@@ -5252,7 +5252,7 @@
     ]
   },
   {
-    "name": "Unit # 146",
+    "name": "Suite # 146",
     "desc": "Quantec Geoscience Limited",
     "color": "#34d399",
     "paths": [
@@ -5287,7 +5287,7 @@
     ]
   },
   {
-    "name": "Unit #200",
+    "name": "Suite #200",
     "desc": "Kasican, Inc.",
     "color": "#34d399",
     "paths": [
@@ -5314,7 +5314,7 @@
     ]
   },
   {
-    "name": "Unit #202-206",
+    "name": "Suite #202-206",
     "desc": "Uni Express Inc.",
     "color": "#34d399",
     "paths": [
@@ -5341,7 +5341,7 @@
     ]
   },
   {
-    "name": "Units # 250-256",
+    "name": "Suites # 250-256",
     "desc": "S.A.N. Steel Fabricating",
     "color": "#34d399",
     "paths": [
@@ -5384,7 +5384,7 @@
     ]
   },
   {
-    "name": "Units # 100-1 & 100-2",
+    "name": "Suites # 100-1 & 100-2",
     "desc": "Toronto and Region Conservation Authority (TRCA)",
     "color": "#34d399",
     "paths": [
@@ -5511,7 +5511,7 @@
     ]
   },
   {
-    "name": "Units # OFF, WHS",
+    "name": "Suites # OFF, WHS",
     "desc": "Mobile Climate Control Industries Inc",
     "color": "#34d399",
     "paths": [
@@ -5634,7 +5634,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "WRI Supply",
     "color": "#34d399",
     "paths": [
@@ -5669,7 +5669,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "TCE Trading",
     "color": "#34d399",
     "paths": [
@@ -5696,7 +5696,7 @@
     ]
   },
   {
-    "name": "Units # 3,4",
+    "name": "Suites # 3,4",
     "desc": "Staples Canada Inc.",
     "color": "#34d399",
     "paths": [
@@ -5731,7 +5731,7 @@
     ]
   },
   {
-    "name": "Unit #12",
+    "name": "Suite #12",
     "desc": "No information",
     "color": "#f97316",
     "paths": [
@@ -5758,7 +5758,7 @@
     ]
   },
   {
-    "name": "Unit # 13",
+    "name": "Suite # 13",
     "desc": "No Information",
     "color": "#f97316",
     "paths": [
@@ -5785,7 +5785,7 @@
     ]
   },
   {
-    "name": "Units # 1,2,3",
+    "name": "Suites # 1,2,3",
     "desc": "Lenworth Building Services Limited",
     "color": "#f97316",
     "paths": [
@@ -5828,7 +5828,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "J.M. Autotech Inc.",
     "color": "#f97316",
     "paths": [
@@ -5855,7 +5855,7 @@
     ]
   },
   {
-    "name": "Unit # 5 & 6",
+    "name": "Suite # 5 & 6",
     "desc": "Ford Motor Company of Canada Limited",
     "color": "#f97316",
     "paths": [
@@ -5882,7 +5882,7 @@
     ]
   },
   {
-    "name": "Unit # 7",
+    "name": "Suite # 7",
     "desc": "Neola Corporation",
     "color": "#f97316",
     "paths": [
@@ -5909,7 +5909,7 @@
     ]
   },
   {
-    "name": "Unit # 9",
+    "name": "Suite # 9",
     "desc": "AKPRO Canada Inc.",
     "color": "#f97316",
     "paths": [
@@ -5936,7 +5936,7 @@
     ]
   },
   {
-    "name": "Unit # 10",
+    "name": "Suite # 10",
     "desc": "Bureau Veritas Canada (2019) Inc.",
     "color": "#f97316",
     "paths": [
@@ -5971,7 +5971,7 @@
     ]
   },
   {
-    "name": "Unit #11",
+    "name": "Suite #11",
     "desc": "2221158 ONTARIO INC. (t/a \"Business Edge International\")",
     "color": "#f97316",
     "paths": [
@@ -5998,7 +5998,7 @@
     ]
   },
   {
-    "name": "Unit # 20",
+    "name": "Suite # 20",
     "desc": "GSA Property Management Inc.",
     "color": "#f97316",
     "paths": [
@@ -6025,7 +6025,7 @@
     ]
   },
   {
-    "name": "Unit # 18",
+    "name": "Suite # 18",
     "desc": "Neola Corporation",
     "color": "#f97316",
     "paths": [
@@ -6052,7 +6052,7 @@
     ]
   },
   {
-    "name": "Unit # 16",
+    "name": "Suite # 16",
     "desc": "Do Re Mi For Kids",
     "color": "#f97316",
     "paths": [
@@ -6079,7 +6079,7 @@
     ]
   },
   {
-    "name": "Unit # 21",
+    "name": "Suite # 21",
     "desc": "Coscorp Inc.",
     "color": "#f97316",
     "paths": [
@@ -6106,7 +6106,7 @@
     ]
   },
   {
-    "name": "Unit # 22",
+    "name": "Suite # 22",
     "desc": "Silvercom Distribution Inc.",
     "color": "#f97316",
     "paths": [
@@ -6149,7 +6149,7 @@
     ]
   },
   {
-    "name": "Unit # 19",
+    "name": "Suite # 19",
     "desc": "Enviroair Industries Inc.",
     "color": "#f97316",
     "paths": [
@@ -6176,7 +6176,7 @@
     ]
   },
   {
-    "name": "Unit # 17",
+    "name": "Suite # 17",
     "desc": "Quintessential Canada Inc.",
     "color": "#f97316",
     "paths": [
@@ -6207,7 +6207,7 @@
     ]
   },
   {
-    "name": "Unit # 15",
+    "name": "Suite # 15",
     "desc": "Airline Associates Group Inc.",
     "color": "#f97316",
     "paths": [
@@ -6234,7 +6234,7 @@
     ]
   },
   {
-    "name": "Unit # 14",
+    "name": "Suite # 14",
     "desc": "AB Project Management & Construction Inc.",
     "color": "#f97316",
     "paths": [
@@ -6261,7 +6261,7 @@
     ]
   },
   {
-    "name": "UNIT #1",
+    "name": "Suite #1",
     "desc": "Unity Pro Auto Service",
     "color": "#f97316",
     "paths": [
@@ -6288,7 +6288,7 @@
     ]
   },
   {
-    "name": "UNIT #2",
+    "name": "Suite #2",
     "desc": "Fortco",
     "color": "#f97316",
     "paths": [
@@ -6315,7 +6315,7 @@
     ]
   },
   {
-    "name": "UNIT # 3-4",
+    "name": "Suite # 3-4",
     "desc": "Fiesta Wholesale",
     "color": "#f97316",
     "paths": [
@@ -6350,7 +6350,7 @@
     ]
   },
   {
-    "name": "UNIT # 7, 8, 9",
+    "name": "Suite # 7, 8, 9",
     "desc": "Cansec Systems Ltd",
     "color": "#f97316",
     "paths": [
@@ -6377,7 +6377,7 @@
     ]
   },
   {
-    "name": "Units # 5 & 6",
+    "name": "Suites # 5 & 6",
     "desc": "Gourmet Craft & Catering",
     "color": "#f97316",
     "paths": [
@@ -6404,7 +6404,7 @@
     ]
   },
   {
-    "name": "Unit # 11",
+    "name": "Suite # 11",
     "desc": "MLY Construction Ltd.",
     "color": "#f97316",
     "paths": [
@@ -6431,7 +6431,7 @@
     ]
   },
   {
-    "name": "Unit # 12",
+    "name": "Suite # 12",
     "desc": "Mobileyez Inc.",
     "color": "#f97316",
     "paths": [
@@ -6458,7 +6458,7 @@
     ]
   },
   {
-    "name": "Unit # 10",
+    "name": "Suite # 10",
     "desc": "Fiesta Wholesale",
     "color": "#f97316",
     "paths": [
@@ -6485,7 +6485,7 @@
     ]
   },
   {
-    "name": "Units # 13 & 14",
+    "name": "Suites # 13 & 14",
     "desc": "Fiesta Wholesale Inc.",
     "color": "#f97316",
     "paths": [
@@ -6520,7 +6520,7 @@
     ]
   },
   {
-    "name": "Units # 15 & 16",
+    "name": "Suites # 15 & 16",
     "desc": "High Octane Training Inc.",
     "color": "#f97316",
     "paths": [
@@ -6547,7 +6547,7 @@
     ]
   },
   {
-    "name": "Units # 17 & 18",
+    "name": "Suites # 17 & 18",
     "desc": "Granite Edge Ltd.",
     "color": "#f97316",
     "paths": [
@@ -6574,7 +6574,7 @@
     ]
   },
   {
-    "name": "Unit # 19",
+    "name": "Suite # 19",
     "desc": "Viasox Limited",
     "color": "#f97316",
     "paths": [
@@ -6601,7 +6601,7 @@
     ]
   },
   {
-    "name": "Unit # 20",
+    "name": "Suite # 20",
     "desc": "Tour Experience Golf Inc.",
     "color": "#f97316",
     "paths": [
@@ -6632,7 +6632,7 @@
     ]
   },
   {
-    "name": "Unit # 21",
+    "name": "Suite # 21",
     "desc": "Your Flags Ltd.",
     "color": "#f97316",
     "paths": [
@@ -6659,7 +6659,7 @@
     ]
   },
   {
-    "name": "Unit # 22",
+    "name": "Suite # 22",
     "desc": "Century 21 Active Realty",
     "color": "#f97316",
     "paths": [
@@ -6694,7 +6694,7 @@
     ]
   },
   {
-    "name": "Units # 23 & 24",
+    "name": "Suites # 23 & 24",
     "desc": "Graphic Dimensions Inc.",
     "color": "#f97316",
     "paths": [
@@ -6733,7 +6733,7 @@
     ]
   },
   {
-    "name": "Unit # 25",
+    "name": "Suite # 25",
     "desc": "Graphic Dimensions Inc.",
     "color": "#f97316",
     "paths": [
@@ -6760,7 +6760,7 @@
     ]
   },
   {
-    "name": "Unit # 26",
+    "name": "Suite # 26",
     "desc": "Nailed It Roofing Ltd.",
     "color": "#f97316",
     "paths": [
@@ -6787,7 +6787,7 @@
     ]
   },
   {
-    "name": "Unit # 27",
+    "name": "Suite # 27",
     "desc": "Denmar Dental Inc.",
     "color": "#f97316",
     "paths": [
@@ -6814,7 +6814,7 @@
     ]
   },
   {
-    "name": "Units # 28 & 29",
+    "name": "Suites # 28 & 29",
     "desc": "Robert G. McEwen & Associates Ltd.",
     "color": "#f97316",
     "paths": [
@@ -6845,7 +6845,7 @@
     ]
   },
   {
-    "name": "Units # 30 & 31",
+    "name": "Suites # 30 & 31",
     "desc": "Authentic Stitch Inc.",
     "color": "#f97316",
     "paths": [
@@ -6876,7 +6876,7 @@
     ]
   },
   {
-    "name": "Unit # 32",
+    "name": "Suite # 32",
     "desc": "Fisherman's Place",
     "color": "#f97316",
     "paths": [
@@ -6903,7 +6903,7 @@
     ]
   },
   {
-    "name": "Unit # 33",
+    "name": "Suite # 33",
     "desc": "Vacant",
     "color": "#f97316",
     "paths": [
@@ -6934,7 +6934,7 @@
     ]
   },
   {
-    "name": "Unit # 34",
+    "name": "Suite # 34",
     "desc": "Absolutely Dentures",
     "color": "#f97316",
     "paths": [
@@ -6961,7 +6961,7 @@
     ]
   },
   {
-    "name": "Unit # 35",
+    "name": "Suite # 35",
     "desc": "Alfa Smile Inc.",
     "color": "#f97316",
     "paths": [
@@ -7004,7 +7004,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Flying Fresh Air Freight",
     "color": "#f97316",
     "paths": [
@@ -7031,7 +7031,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Paint & Flooring Warehouse",
     "color": "#f97316",
     "paths": [
@@ -7058,7 +7058,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Erin Mills Soccer Club",
     "color": "#f97316",
     "paths": [
@@ -7085,7 +7085,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "Disaster RX",
     "color": "#f97316",
     "paths": [
@@ -7112,7 +7112,7 @@
     ]
   },
   {
-    "name": "Unit #3",
+    "name": "Suite #3",
     "desc": "Vacant",
     "color": "#f97316",
     "paths": [
@@ -7139,7 +7139,7 @@
     ]
   },
   {
-    "name": "Units # 1,2",
+    "name": "Suites # 1,2",
     "desc": "Vital Biosciences Inc.",
     "color": "#f97316",
     "paths": [
@@ -7166,7 +7166,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Pace Sensors Limited",
     "color": "#f97316",
     "paths": [
@@ -7193,7 +7193,7 @@
     ]
   },
   {
-    "name": "Units # 4, 5",
+    "name": "Suites # 4, 5",
     "desc": "Windmill Power Equipment Ltd.",
     "color": "#f97316",
     "paths": [
@@ -7220,7 +7220,7 @@
     ]
   },
   {
-    "name": "Units # 1,2, 3, 4",
+    "name": "Suites # 1,2, 3, 4",
     "desc": "Best Office Inc.",
     "color": "#f97316",
     "paths": [
@@ -7283,7 +7283,7 @@
     ]
   },
   {
-    "name": "Units # 5 & 6",
+    "name": "Suites # 5 & 6",
     "desc": "O'Dell HVAC Group Inc.",
     "color": "#f97316",
     "paths": [
@@ -7310,7 +7310,7 @@
     ]
   },
   {
-    "name": "Units # 7 & 8",
+    "name": "Suites # 7 & 8",
     "desc": "Powermaster Machinery Ltd.",
     "color": "#f97316",
     "paths": [
@@ -7337,7 +7337,7 @@
     ]
   },
   {
-    "name": "Units # 9 & 10",
+    "name": "Suites # 9 & 10",
     "desc": "CCM Fabrication",
     "color": "#f97316",
     "paths": [
@@ -7364,7 +7364,7 @@
     ]
   },
   {
-    "name": "Units # 11,12,13,14",
+    "name": "Suites # 11,12,13,14",
     "desc": "Rapid Aid Corp.",
     "color": "#f97316",
     "paths": [
@@ -7411,7 +7411,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Drapery, Fabric Design Inc",
     "color": "#f97316",
     "paths": [
@@ -7442,7 +7442,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Freshly Made Inc.",
     "color": "#f97316",
     "paths": [
@@ -7469,7 +7469,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Taconic",
     "color": "#f97316",
     "paths": [
@@ -7496,7 +7496,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Maple Indoor Golf",
     "color": "#f97316",
     "paths": [
@@ -7523,7 +7523,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "TESKIE INTERNATIONAL CORP.",
     "color": "#f97316",
     "paths": [
@@ -7550,7 +7550,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "Green-Pro Lawn Maintenance Inc. and Jean-Francois C. Villiard",
     "color": "#f97316",
     "paths": [
@@ -7577,7 +7577,7 @@
     ]
   },
   {
-    "name": "Units # 7 & 8",
+    "name": "Suites # 7 & 8",
     "desc": "Teskie International Corp.",
     "color": "#f97316",
     "paths": [
@@ -7620,7 +7620,7 @@
     ]
   },
   {
-    "name": "Unit # 9",
+    "name": "Suite # 9",
     "desc": "Auto Glass Tec",
     "color": "#f97316",
     "paths": [
@@ -7647,7 +7647,7 @@
     ]
   },
   {
-    "name": "Unit # 10",
+    "name": "Suite # 10",
     "desc": "Bruce Elevator Service Limited",
     "color": "#f97316",
     "paths": [
@@ -7674,7 +7674,7 @@
     ]
   },
   {
-    "name": "Units # 11,12,13",
+    "name": "Suites # 11,12,13",
     "desc": "West End Islamic Centre",
     "color": "#f97316",
     "paths": [
@@ -7721,7 +7721,7 @@
     ]
   },
   {
-    "name": "Unit # 14",
+    "name": "Suite # 14",
     "desc": "Top Care Heating & Cooling Inc.",
     "color": "#f97316",
     "paths": [
@@ -7748,7 +7748,7 @@
     ]
   },
   {
-    "name": "Unit # 15",
+    "name": "Suite # 15",
     "desc": "J.A.F. Pool Service Ltd.",
     "color": "#f97316",
     "paths": [
@@ -7775,7 +7775,7 @@
     ]
   },
   {
-    "name": "Unit # 20",
+    "name": "Suite # 20",
     "desc": "Amazing Event Decor",
     "color": "#f97316",
     "paths": [
@@ -7802,7 +7802,7 @@
     ]
   },
   {
-    "name": "Units # 18 & 19",
+    "name": "Suites # 18 & 19",
     "desc": "Culmer Distributions",
     "color": "#f97316",
     "paths": [
@@ -7849,7 +7849,7 @@
     ]
   },
   {
-    "name": "Unit # 17",
+    "name": "Suite # 17",
     "desc": "Current Express Courier Ltd.",
     "color": "#f97316",
     "paths": [
@@ -7876,7 +7876,7 @@
     ]
   },
   {
-    "name": "Unit # 16",
+    "name": "Suite # 16",
     "desc": "no information",
     "color": "#f97316",
     "paths": [
@@ -7903,7 +7903,7 @@
     ]
   },
   {
-    "name": "Units # 21 & 22",
+    "name": "Suites # 21 & 22",
     "desc": "Escrap Canada Inc.",
     "color": "#f97316",
     "paths": [
@@ -7930,7 +7930,7 @@
     ]
   },
   {
-    "name": "Units # 23, 24, 25",
+    "name": "Suites # 23, 24, 25",
     "desc": "Worldwide Security",
     "color": "#f97316",
     "paths": [
@@ -7957,7 +7957,7 @@
     ]
   },
   {
-    "name": "Unit # 26",
+    "name": "Suite # 26",
     "desc": "Worldwide Security",
     "color": "#f97316",
     "paths": [
@@ -7984,7 +7984,7 @@
     ]
   },
   {
-    "name": "Unit # 27",
+    "name": "Suite # 27",
     "desc": "Thompson Sheet Metal Limited",
     "color": "#f97316",
     "paths": [
@@ -8011,7 +8011,7 @@
     ]
   },
   {
-    "name": "Unit # 28",
+    "name": "Suite # 28",
     "desc": "Northern Choice Windows and Doors Corp.",
     "color": "#f97316",
     "paths": [
@@ -8038,7 +8038,7 @@
     ]
   },
   {
-    "name": "Unit # 51",
+    "name": "Suite # 51",
     "desc": "Ready Care Inc., Hatch Group Inc. , Omar Alrayiss",
     "color": "#f97316",
     "paths": [
@@ -8065,7 +8065,7 @@
     ]
   },
   {
-    "name": "Unit # 50",
+    "name": "Suite # 50",
     "desc": "Roberts Electric Automation",
     "color": "#f97316",
     "paths": [
@@ -8092,7 +8092,7 @@
     ]
   },
   {
-    "name": "Unit # 49",
+    "name": "Suite # 49",
     "desc": "The Lab",
     "color": "#f97316",
     "paths": [
@@ -8119,7 +8119,7 @@
     ]
   },
   {
-    "name": "Unit # 48",
+    "name": "Suite # 48",
     "desc": "Equity Dental Supply Inc.",
     "color": "#f97316",
     "paths": [
@@ -8146,7 +8146,7 @@
     ]
   },
   {
-    "name": "Units # 46, 47",
+    "name": "Suites # 46, 47",
     "desc": "Hoerbiger (Canada) Ltd.",
     "color": "#f97316",
     "paths": [
@@ -8173,7 +8173,7 @@
     ]
   },
   {
-    "name": "Unit # 43",
+    "name": "Suite # 43",
     "desc": "Herbamax",
     "color": "#f97316",
     "paths": [
@@ -8200,7 +8200,7 @@
     ]
   },
   {
-    "name": "Unit # 44",
+    "name": "Suite # 44",
     "desc": "Custom Home Decor Ltd",
     "color": "#f97316",
     "paths": [
@@ -8227,7 +8227,7 @@
     ]
   },
   {
-    "name": "Unit # 41 & 42",
+    "name": "Suite # 41 & 42",
     "desc": "Tarasick McMillan Kubicki Limited",
     "color": "#f97316",
     "paths": [
@@ -8266,7 +8266,7 @@
     ]
   },
   {
-    "name": "Unit # 40",
+    "name": "Suite # 40",
     "desc": "Sheref Sabaway, MPP",
     "color": "#f97316",
     "paths": [
@@ -8293,7 +8293,7 @@
     ]
   },
   {
-    "name": "Unit # 39",
+    "name": "Suite # 39",
     "desc": "The Quran Academy",
     "color": "#f97316",
     "paths": [
@@ -8324,7 +8324,7 @@
     ]
   },
   {
-    "name": "Unit # 38",
+    "name": "Suite # 38",
     "desc": "1001265660 Ontario Inc",
     "color": "#f97316",
     "paths": [
@@ -8355,7 +8355,7 @@
     ]
   },
   {
-    "name": "Unit # 37",
+    "name": "Suite # 37",
     "desc": "The Plant Lady Inc.",
     "color": "#f97316",
     "paths": [
@@ -8382,7 +8382,7 @@
     ]
   },
   {
-    "name": "Unit # 35",
+    "name": "Suite # 35",
     "desc": "Digital Media Limited",
     "color": "#f97316",
     "paths": [
@@ -8409,8 +8409,8 @@
     ]
   },
   {
-    "name": "Unit # 33",
-    "desc": "Yesu Worldwide Trading (11121871 Canada Corp.)\nArea (sq.ft.) 2,294\nMove-In Date:  2025-02-06",
+    "name": "Suite # 33",
+    "desc": "Yesu Worldwide Trading (11121871 Canada Corp.)\r\nArea (sq.ft.) 2,294\r\nMove-In Date:  2025-02-06",
     "color": "#f97316",
     "paths": [
       {
@@ -8436,7 +8436,7 @@
     ]
   },
   {
-    "name": "Unit # 32",
+    "name": "Suite # 32",
     "desc": "Technical Construction Infrastructure Inc.",
     "color": "#f97316",
     "paths": [
@@ -8463,7 +8463,7 @@
     ]
   },
   {
-    "name": "Unit #29",
+    "name": "Suite #29",
     "desc": "Deen City",
     "color": "#f97316",
     "paths": [
@@ -8490,7 +8490,7 @@
     ]
   },
   {
-    "name": "Unit # 31",
+    "name": "Suite # 31",
     "desc": "No information",
     "color": "#f97316",
     "paths": [
@@ -8517,7 +8517,7 @@
     ]
   },
   {
-    "name": "Unit # 30",
+    "name": "Suite # 30",
     "desc": "no information",
     "color": "#f97316",
     "paths": [
@@ -8548,7 +8548,7 @@
     ]
   },
   {
-    "name": "Unit # 45",
+    "name": "Suite # 45",
     "desc": "Custom Home Decor LTD",
     "color": "#f97316",
     "paths": [
@@ -8575,7 +8575,7 @@
     ]
   },
   {
-    "name": "Unit # 34",
+    "name": "Suite # 34",
     "desc": "no information",
     "color": "#f97316",
     "paths": [
@@ -8602,7 +8602,7 @@
     ]
   },
   {
-    "name": "Unit # 36",
+    "name": "Suite # 36",
     "desc": "MS CHUGHTAI PROFESSIONAL CORPORATION",
     "color": "#f97316",
     "paths": [
@@ -8629,7 +8629,7 @@
     ]
   },
   {
-    "name": "Unit # 23",
+    "name": "Suite # 23",
     "desc": "Calibration Technologies Ltd.",
     "color": "#f97316",
     "paths": [
@@ -8672,7 +8672,7 @@
     ]
   },
   {
-    "name": "Unit # 24",
+    "name": "Suite # 24",
     "desc": "Custom Orthotic Design Group",
     "color": "#f97316",
     "paths": [
@@ -8699,7 +8699,7 @@
     ]
   },
   {
-    "name": "Unit # 25",
+    "name": "Suite # 25",
     "desc": "Novatech Analytical Solutions Inc.",
     "color": "#f97316",
     "paths": [
@@ -8726,7 +8726,7 @@
     ]
   },
   {
-    "name": "Unit # 26",
+    "name": "Suite # 26",
     "desc": "Colossus Security Inc.",
     "color": "#f97316",
     "paths": [
@@ -8757,7 +8757,7 @@
     ]
   },
   {
-    "name": "Unit # 27",
+    "name": "Suite # 27",
     "desc": "Garage One Inc.",
     "color": "#f97316",
     "paths": [
@@ -8784,7 +8784,7 @@
     ]
   },
   {
-    "name": "Units # 28 & 29",
+    "name": "Suites # 28 & 29",
     "desc": "Taimco Inc.",
     "color": "#f97316",
     "paths": [
@@ -8819,7 +8819,7 @@
     ]
   },
   {
-    "name": "Units # 30,31,32,33",
+    "name": "Suites # 30,31,32,33",
     "desc": "Streetwise Automotive Centre",
     "color": "#f97316",
     "paths": [
@@ -8866,7 +8866,7 @@
     ]
   },
   {
-    "name": "Units # 34 & 35",
+    "name": "Suites # 34 & 35",
     "desc": "Tarpon Contracting",
     "color": "#f97316",
     "paths": [
@@ -8905,7 +8905,7 @@
     ]
   },
   {
-    "name": "Unit # 36",
+    "name": "Suite # 36",
     "desc": "Always Green",
     "color": "#f97316",
     "paths": [
@@ -8932,7 +8932,7 @@
     ]
   },
   {
-    "name": "Unit # 37",
+    "name": "Suite # 37",
     "desc": "CanQuest Medical Corporation",
     "color": "#f97316",
     "paths": [
@@ -8959,7 +8959,7 @@
     ]
   },
   {
-    "name": "Unit # 38",
+    "name": "Suite # 38",
     "desc": "Classic Awards Ltd.",
     "color": "#f97316",
     "paths": [
@@ -8986,7 +8986,7 @@
     ]
   },
   {
-    "name": "Unit # 39",
+    "name": "Suite # 39",
     "desc": "The Irish Club of Mississauga Inc.",
     "color": "#f97316",
     "paths": [
@@ -9013,7 +9013,7 @@
     ]
   },
   {
-    "name": "Unit # 40",
+    "name": "Suite # 40",
     "desc": "Vital Biosciences Inc.",
     "color": "#f97316",
     "paths": [
@@ -9040,7 +9040,7 @@
     ]
   },
   {
-    "name": "Unit # 41",
+    "name": "Suite # 41",
     "desc": "Catek Technical Services Inc.",
     "color": "#f97316",
     "paths": [
@@ -9067,7 +9067,7 @@
     ]
   },
   {
-    "name": "Units # 42 & 43",
+    "name": "Suites # 42 & 43",
     "desc": "Muslim Community Services(Greater Toronto)",
     "color": "#f97316",
     "paths": [
@@ -9118,7 +9118,7 @@
     ]
   },
   {
-    "name": "Units # 1,2,3,4",
+    "name": "Suites # 1,2,3,4",
     "desc": "Custom Window Designs",
     "color": "#f97316",
     "paths": [
@@ -9161,7 +9161,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "The Graphix Source Canada",
     "color": "#f97316",
     "paths": [
@@ -9188,7 +9188,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "Zodiac Impex Inc.",
     "color": "#f97316",
     "paths": [
@@ -9215,7 +9215,7 @@
     ]
   },
   {
-    "name": "Units # 7 & 8",
+    "name": "Suites # 7 & 8",
     "desc": "Eglinton Carpet & Flooring",
     "color": "#f97316",
     "paths": [
@@ -9250,7 +9250,7 @@
     ]
   },
   {
-    "name": "Unit # 9",
+    "name": "Suite # 9",
     "desc": "Ruito Trading Inc.",
     "color": "#f97316",
     "paths": [
@@ -9277,7 +9277,7 @@
     ]
   },
   {
-    "name": "Unit # 10",
+    "name": "Suite # 10",
     "desc": "Rutio Trading Inc.",
     "color": "#f97316",
     "paths": [
@@ -9304,7 +9304,7 @@
     ]
   },
   {
-    "name": "Unit # 11",
+    "name": "Suite # 11",
     "desc": "Royaltex Apparel",
     "color": "#f97316",
     "paths": [
@@ -9331,7 +9331,7 @@
     ]
   },
   {
-    "name": "Unit # 12",
+    "name": "Suite # 12",
     "desc": "Traferox Technologies Inc.",
     "color": "#f97316",
     "paths": [
@@ -9358,7 +9358,7 @@
     ]
   },
   {
-    "name": "Units # 13,14,15",
+    "name": "Suites # 13,14,15",
     "desc": "Landmark Kitchen Concepts Ltd.",
     "color": "#f97316",
     "paths": [
@@ -9393,7 +9393,7 @@
     ]
   },
   {
-    "name": "Units # 16, 17",
+    "name": "Suites # 16, 17",
     "desc": "CALS Logistics Inc.",
     "color": "#f97316",
     "paths": [
@@ -9420,7 +9420,7 @@
     ]
   },
   {
-    "name": "Unit # 18",
+    "name": "Suite # 18",
     "desc": "Yielda Home & Garden Inc.",
     "color": "#f97316",
     "paths": [
@@ -9447,7 +9447,7 @@
     ]
   },
   {
-    "name": "Unit # 19",
+    "name": "Suite # 19",
     "desc": "Yielda Home & Garden Inc.",
     "color": "#f97316",
     "paths": [
@@ -9474,7 +9474,7 @@
     ]
   },
   {
-    "name": "Unit # 20",
+    "name": "Suite # 20",
     "desc": "Papiyona Corp.",
     "color": "#f97316",
     "paths": [
@@ -9501,7 +9501,7 @@
     ]
   },
   {
-    "name": "Unit # 21",
+    "name": "Suite # 21",
     "desc": "Westburne Electric",
     "color": "#f97316",
     "paths": [
@@ -9528,7 +9528,7 @@
     ]
   },
   {
-    "name": "Units # 22, 23",
+    "name": "Suites # 22, 23",
     "desc": "The Rental Guys",
     "color": "#f97316",
     "paths": [
@@ -9555,7 +9555,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Flex Energy Inc.",
     "color": "#f97316",
     "paths": [
@@ -9590,7 +9590,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Ontario Hearth Ltd.",
     "color": "#f97316",
     "paths": [
@@ -9637,7 +9637,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Pantheon Stone & Contractors' Corner",
     "color": "#f97316",
     "paths": [
@@ -9672,7 +9672,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Ashcon International",
     "color": "#f97316",
     "paths": [
@@ -9707,7 +9707,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "Pro-Door & Dock Systems",
     "color": "#f97316",
     "paths": [
@@ -9742,7 +9742,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "Futures Gymnastics Centre",
     "color": "#f97316",
     "paths": [
@@ -9769,7 +9769,7 @@
     ]
   },
   {
-    "name": "Unit # 7",
+    "name": "Suite # 7",
     "desc": "Surfaces Inc.",
     "color": "#f97316",
     "paths": [
@@ -9796,7 +9796,7 @@
     ]
   },
   {
-    "name": "Unit # 8",
+    "name": "Suite # 8",
     "desc": "All Forward Group",
     "color": "#f97316",
     "paths": [
@@ -9823,7 +9823,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Living Expressions",
     "color": "#f97316",
     "paths": [
@@ -9858,7 +9858,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Just A Countertop",
     "color": "#f97316",
     "paths": [
@@ -9885,7 +9885,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Electronic Source",
     "color": "#f97316",
     "paths": [
@@ -9912,7 +9912,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Custom Home Decor Ltd.",
     "color": "#f97316",
     "paths": [
@@ -9947,7 +9947,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "The Tile Shoppe Inc.",
     "color": "#f97316",
     "paths": [
@@ -9974,7 +9974,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Hongz Inc.",
     "color": "#f97316",
     "paths": [
@@ -10001,7 +10001,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Sky Fitness",
     "color": "#f97316",
     "paths": [
@@ -10028,7 +10028,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Myron Tile & Design Center",
     "color": "#f97316",
     "paths": [
@@ -10059,7 +10059,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "CMJ Precision Machining Inc.",
     "color": "#f97316",
     "paths": [
@@ -10114,7 +10114,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Buckingham Steel Design Inc.",
     "color": "#f97316",
     "paths": [
@@ -10141,7 +10141,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Enfaze Medical Technologies Inc./ Alma Lasers, Inc.",
     "color": "#f97316",
     "paths": [
@@ -10168,7 +10168,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Rexstone",
     "color": "#f97316",
     "paths": [
@@ -10195,7 +10195,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "Custom Window Designs Ltd.",
     "color": "#f97316",
     "paths": [
@@ -10222,7 +10222,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "VIA Canada Holding Group Inc.",
     "color": "#f97316",
     "paths": [
@@ -10249,7 +10249,7 @@
     ]
   },
   {
-    "name": "Units # 7 & 8",
+    "name": "Suites # 7 & 8",
     "desc": "Solid Fabrications",
     "color": "#f97316",
     "paths": [
@@ -10276,7 +10276,7 @@
     ]
   },
   {
-    "name": "Units # 9, 10,11",
+    "name": "Suites # 9, 10,11",
     "desc": "VC Control Inc.",
     "color": "#f97316",
     "paths": [
@@ -10311,7 +10311,7 @@
     ]
   },
   {
-    "name": "Unit # 12",
+    "name": "Suite # 12",
     "desc": "Emesa Dental Laboratory Inc.",
     "color": "#f97316",
     "paths": [
@@ -10338,7 +10338,7 @@
     ]
   },
   {
-    "name": "Unit # 13",
+    "name": "Suite # 13",
     "desc": "HireUp Inc.",
     "color": "#f97316",
     "paths": [
@@ -10365,7 +10365,7 @@
     ]
   },
   {
-    "name": "Unit # 14",
+    "name": "Suite # 14",
     "desc": "Wesecure",
     "color": "#f97316",
     "paths": [
@@ -10392,7 +10392,7 @@
     ]
   },
   {
-    "name": "Unit # 15",
+    "name": "Suite # 15",
     "desc": "Medpro Respiratory Care",
     "color": "#f97316",
     "paths": [
@@ -10419,7 +10419,7 @@
     ]
   },
   {
-    "name": "Units # 16, 17",
+    "name": "Suites # 16, 17",
     "desc": "Bisan Trading and Industrial Services Inc.",
     "color": "#f97316",
     "paths": [
@@ -10454,7 +10454,7 @@
     ]
   },
   {
-    "name": "Unit # 18",
+    "name": "Suite # 18",
     "desc": "Ker Studio",
     "color": "#f97316",
     "paths": [
@@ -10481,7 +10481,7 @@
     ]
   },
   {
-    "name": "Units # 19, 20",
+    "name": "Suites # 19, 20",
     "desc": "MAC Energy Inc.",
     "color": "#f97316",
     "paths": [
@@ -10520,7 +10520,7 @@
     ]
   },
   {
-    "name": "Unit # 21",
+    "name": "Suite # 21",
     "desc": "RoCryst Inc.",
     "color": "#f97316",
     "paths": [
@@ -10547,7 +10547,7 @@
     ]
   },
   {
-    "name": "Unit # 22-23",
+    "name": "Suite # 22-23",
     "desc": "Starlight Shutter",
     "color": "#f97316",
     "paths": [
@@ -10590,7 +10590,7 @@
     ]
   },
   {
-    "name": "Unit # 24",
+    "name": "Suite # 24",
     "desc": "Fine Details Systems",
     "color": "#f97316",
     "paths": [
@@ -10617,7 +10617,7 @@
     ]
   },
   {
-    "name": "Unit # 25",
+    "name": "Suite # 25",
     "desc": "CityGate Developments",
     "color": "#f97316",
     "paths": [
@@ -10644,7 +10644,7 @@
     ]
   },
   {
-    "name": "Unit # 26",
+    "name": "Suite # 26",
     "desc": "Canadian Metal Wood Inc.",
     "color": "#f97316",
     "paths": [
@@ -10671,7 +10671,7 @@
     ]
   },
   {
-    "name": "Units # 27, 28, 29",
+    "name": "Suites # 27, 28, 29",
     "desc": "Exoparts",
     "color": "#f97316",
     "paths": [
@@ -10706,7 +10706,7 @@
     ]
   },
   {
-    "name": "Units # 30, 31",
+    "name": "Suites # 30, 31",
     "desc": "June Lawrence School of Dance",
     "color": "#f97316",
     "paths": [
@@ -10741,7 +10741,7 @@
     ]
   },
   {
-    "name": "Unit # 32",
+    "name": "Suite # 32",
     "desc": "The Best Deals Inc.",
     "color": "#f97316",
     "paths": [
@@ -10768,7 +10768,7 @@
     ]
   },
   {
-    "name": "Unit # 33",
+    "name": "Suite # 33",
     "desc": "INGENUITY DEVELOPMENT INC",
     "color": "#f97316",
     "paths": [
@@ -10795,7 +10795,7 @@
     ]
   },
   {
-    "name": "Unit # 34",
+    "name": "Suite # 34",
     "desc": "TBS BUILDING SERVICES INC",
     "color": "#f97316",
     "paths": [
@@ -10822,7 +10822,7 @@
     ]
   },
   {
-    "name": "Unit # 35",
+    "name": "Suite # 35",
     "desc": "Kore-Energy Wellness",
     "color": "#f97316",
     "paths": [
@@ -10877,7 +10877,7 @@
     ]
   },
   {
-    "name": "Unit # 66",
+    "name": "Suite # 66",
     "desc": "Shish Mahal Indian Cuisine",
     "color": "#f97316",
     "paths": [
@@ -10908,7 +10908,7 @@
     ]
   },
   {
-    "name": "Units # 64 & 65",
+    "name": "Suites # 64 & 65",
     "desc": "Kingsmen Kustoms Ltd.",
     "color": "#f97316",
     "paths": [
@@ -10935,7 +10935,7 @@
     ]
   },
   {
-    "name": "Unit # 63",
+    "name": "Suite # 63",
     "desc": "Payless Sign & Printing",
     "color": "#f97316",
     "paths": [
@@ -10962,7 +10962,7 @@
     ]
   },
   {
-    "name": "Unit # 47",
+    "name": "Suite # 47",
     "desc": "Tasteworks Inc.",
     "color": "#f97316",
     "paths": [
@@ -11017,7 +11017,7 @@
     ]
   },
   {
-    "name": "Unit # 48",
+    "name": "Suite # 48",
     "desc": "White Gold Sweets",
     "color": "#f97316",
     "paths": [
@@ -11044,7 +11044,7 @@
     ]
   },
   {
-    "name": "Unit #49",
+    "name": "Suite #49",
     "desc": "BLUE OASIS: THE WATER TAP SERVICES INC.",
     "color": "#f97316",
     "paths": [
@@ -11071,7 +11071,7 @@
     ]
   },
   {
-    "name": "Unit # 50",
+    "name": "Suite # 50",
     "desc": "SanTrupt Inc.",
     "color": "#f97316",
     "paths": [
@@ -11098,7 +11098,7 @@
     ]
   },
   {
-    "name": "Unit # 51",
+    "name": "Suite # 51",
     "desc": "Hyperfit Tools Inc.",
     "color": "#f97316",
     "paths": [
@@ -11125,7 +11125,7 @@
     ]
   },
   {
-    "name": "Unit # 52",
+    "name": "Suite # 52",
     "desc": "Jericho Trading",
     "color": "#f97316",
     "paths": [
@@ -11152,7 +11152,7 @@
     ]
   },
   {
-    "name": "Units # 53 & 54",
+    "name": "Suites # 53 & 54",
     "desc": "Well Dressed Home",
     "color": "#f97316",
     "paths": [
@@ -11187,7 +11187,7 @@
     ]
   },
   {
-    "name": "Unit # 55",
+    "name": "Suite # 55",
     "desc": "Wilson Air & Equipment Ltd.",
     "color": "#f97316",
     "paths": [
@@ -11214,7 +11214,7 @@
     ]
   },
   {
-    "name": "Unit # 58",
+    "name": "Suite # 58",
     "desc": "Pearl Medical Group Inc.",
     "color": "#f97316",
     "paths": [
@@ -11241,7 +11241,7 @@
     ]
   },
   {
-    "name": "Unit # 59",
+    "name": "Suite # 59",
     "desc": "",
     "color": "#f97316",
     "paths": [
@@ -11268,7 +11268,7 @@
     ]
   },
   {
-    "name": "Unit # 62",
+    "name": "Suite # 62",
     "desc": "MySolar Group Ltd.",
     "color": "#f97316",
     "paths": [
@@ -11295,7 +11295,7 @@
     ]
   },
   {
-    "name": "Unit # 61",
+    "name": "Suite # 61",
     "desc": "MySolar Ltd.",
     "color": "#f97316",
     "paths": [
@@ -11322,7 +11322,7 @@
     ]
   },
   {
-    "name": "Unit # 60",
+    "name": "Suite # 60",
     "desc": "MySolar Group Ltd.",
     "color": "#f97316",
     "paths": [
@@ -11349,8 +11349,8 @@
     ]
   },
   {
-    "name": "Unit # 57",
-    "desc": "5042376 ONTARIO INC.\n(t/a A to Z Decks and Struxure\")",
+    "name": "Suite # 57",
+    "desc": "5042376 ONTARIO INC.\r\n(t/a A to Z Decks and Struxure\")",
     "color": "#f97316",
     "paths": [
       {
@@ -11376,7 +11376,7 @@
     ]
   },
   {
-    "name": "Unit # 56",
+    "name": "Suite # 56",
     "desc": "Tekmor Systems Inc.",
     "color": "#f97316",
     "paths": [
@@ -11403,7 +11403,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Glasswork4You Ltd.",
     "color": "#f97316",
     "paths": [
@@ -11442,7 +11442,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Transpark Systems Inc.",
     "color": "#f97316",
     "paths": [
@@ -11469,7 +11469,7 @@
     ]
   },
   {
-    "name": "Unit # 3 & 4",
+    "name": "Suite # 3 & 4",
     "desc": "Seguin Morris Inc.",
     "color": "#f97316",
     "paths": [
@@ -11496,7 +11496,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "Serve Kings Oakville Inc.",
     "color": "#f97316",
     "paths": [
@@ -11523,7 +11523,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "Jump Network Telecommunications Ltd.",
     "color": "#f97316",
     "paths": [
@@ -11550,7 +11550,7 @@
     ]
   },
   {
-    "name": "Unit # 7",
+    "name": "Suite # 7",
     "desc": "Ayad Electric",
     "color": "#f97316",
     "paths": [
@@ -11577,7 +11577,7 @@
     ]
   },
   {
-    "name": "Unit # 8",
+    "name": "Suite # 8",
     "desc": "Aerowood Stairs",
     "color": "#f97316",
     "paths": [
@@ -11604,7 +11604,7 @@
     ]
   },
   {
-    "name": "Unit # 9",
+    "name": "Suite # 9",
     "desc": "Tsgitsam Technology Ltd.",
     "color": "#f97316",
     "paths": [
@@ -11631,7 +11631,7 @@
     ]
   },
   {
-    "name": "Unit # 10",
+    "name": "Suite # 10",
     "desc": "Tobii Dynavox Canada inc.",
     "color": "#f97316",
     "paths": [
@@ -11658,7 +11658,7 @@
     ]
   },
   {
-    "name": "Units # 11 & 12",
+    "name": "Suites # 11 & 12",
     "desc": "IndusControl Incorporated",
     "color": "#f97316",
     "paths": [
@@ -11685,7 +11685,7 @@
     ]
   },
   {
-    "name": "Units # 13 & 14",
+    "name": "Suites # 13 & 14",
     "desc": "AM Tuning",
     "color": "#f97316",
     "paths": [
@@ -11712,7 +11712,7 @@
     ]
   },
   {
-    "name": "Unit # 15",
+    "name": "Suite # 15",
     "desc": "ISA of Canada Ltd.",
     "color": "#f97316",
     "paths": [
@@ -11739,7 +11739,7 @@
     ]
   },
   {
-    "name": "Units # 1 16-20",
+    "name": "Suites # 1 16-20",
     "desc": "B & M Garage Door Inc.",
     "color": "#f97316",
     "paths": [
@@ -11774,7 +11774,7 @@
     ]
   },
   {
-    "name": "Unit # 21",
+    "name": "Suite # 21",
     "desc": "Hides Global Inc.",
     "color": "#f97316",
     "paths": [
@@ -11801,7 +11801,7 @@
     ]
   },
   {
-    "name": "Unit # 22",
+    "name": "Suite # 22",
     "desc": "Cankopy Document Solutions",
     "color": "#f97316",
     "paths": [
@@ -11828,7 +11828,7 @@
     ]
   },
   {
-    "name": "Unit # 23",
+    "name": "Suite # 23",
     "desc": "Floor Coverings International",
     "color": "#f97316",
     "paths": [
@@ -11855,7 +11855,7 @@
     ]
   },
   {
-    "name": "Unit # 24",
+    "name": "Suite # 24",
     "desc": "Get Set Home",
     "color": "#f97316",
     "paths": [
@@ -11882,7 +11882,7 @@
     ]
   },
   {
-    "name": "Unit # 25",
+    "name": "Suite # 25",
     "desc": "Mass Liquidation Inc.",
     "color": "#f97316",
     "paths": [
@@ -11909,7 +11909,7 @@
     ]
   },
   {
-    "name": "Unit # 26",
+    "name": "Suite # 26",
     "desc": "Centre For Islamic Knowledge",
     "color": "#f97316",
     "paths": [
@@ -11936,7 +11936,7 @@
     ]
   },
   {
-    "name": "Units # 27 & 28",
+    "name": "Suites # 27 & 28",
     "desc": "Signs & Graphics Land",
     "color": "#f97316",
     "paths": [
@@ -11971,7 +11971,7 @@
     ]
   },
   {
-    "name": "Units # 29 & 30",
+    "name": "Suites # 29 & 30",
     "desc": "CTS Auto Inc.",
     "color": "#f97316",
     "paths": [
@@ -11998,7 +11998,7 @@
     ]
   },
   {
-    "name": "Unit # 31",
+    "name": "Suite # 31",
     "desc": "Pool Man Group Mississauga",
     "color": "#f97316",
     "paths": [
@@ -12025,7 +12025,7 @@
     ]
   },
   {
-    "name": "Units # 32, 33",
+    "name": "Suites # 32, 33",
     "desc": "QuadReal Property Group LP",
     "color": "#f97316",
     "paths": [
@@ -12056,7 +12056,7 @@
     ]
   },
   {
-    "name": "Unit # 34",
+    "name": "Suite # 34",
     "desc": "Tormac Mechanical Contractors Ltd.",
     "color": "#f97316",
     "paths": [
@@ -12083,7 +12083,7 @@
     ]
   },
   {
-    "name": "Units # 36 & 37",
+    "name": "Suites # 36 & 37",
     "desc": "The Delgada Group Inc.",
     "color": "#f97316",
     "paths": [
@@ -12110,7 +12110,7 @@
     ]
   },
   {
-    "name": "Unit # 35",
+    "name": "Suite # 35",
     "desc": "Seasonal Home Comfort Heating & A/C Inc.",
     "color": "#f97316",
     "paths": [
@@ -12137,7 +12137,7 @@
     ]
   },
   {
-    "name": "Units # 38-40",
+    "name": "Suites # 38-40",
     "desc": "Bass Curtainwalls Inc.",
     "color": "#f97316",
     "paths": [
@@ -12164,7 +12164,7 @@
     ]
   },
   {
-    "name": "Unit # 41",
+    "name": "Suite # 41",
     "desc": "Marhaba Book Store & Hijab Fashion",
     "color": "#f97316",
     "paths": [
@@ -12191,7 +12191,7 @@
     ]
   },
   {
-    "name": "Unit # 42",
+    "name": "Suite # 42",
     "desc": "Telecon Inc.",
     "color": "#f97316",
     "paths": [
@@ -12218,7 +12218,7 @@
     ]
   },
   {
-    "name": "Units # 43 & 44",
+    "name": "Suites # 43 & 44",
     "desc": "Branch Audiovisual",
     "color": "#f97316",
     "paths": [
@@ -12269,7 +12269,7 @@
     ]
   },
   {
-    "name": "Units # 36 & 37",
+    "name": "Suites # 36 & 37",
     "desc": "KINGSWAY REAL ESTATE INC",
     "color": "#f97316",
     "paths": [
@@ -12312,7 +12312,7 @@
     ]
   },
   {
-    "name": "Unit # 38",
+    "name": "Suite # 38",
     "desc": "Intelligent Health Group",
     "color": "#f97316",
     "paths": [
@@ -12339,7 +12339,7 @@
     ]
   },
   {
-    "name": "Units # 39 & 40",
+    "name": "Suites # 39 & 40",
     "desc": "Mortgage-Free Inc.",
     "color": "#f97316",
     "paths": [
@@ -12374,7 +12374,7 @@
     ]
   },
   {
-    "name": "Unit # 41",
+    "name": "Suite # 41",
     "desc": "Iqra Khalid MPP",
     "color": "#f97316",
     "paths": [
@@ -12401,7 +12401,7 @@
     ]
   },
   {
-    "name": "Unit # 42",
+    "name": "Suite # 42",
     "desc": "Smart-Pot Coffee Timers Inc.",
     "color": "#f97316",
     "paths": [
@@ -12428,7 +12428,7 @@
     ]
   },
   {
-    "name": "Units # 43 & 44",
+    "name": "Suites # 43 & 44",
     "desc": "Image Monitoring Inc.",
     "color": "#f97316",
     "paths": [
@@ -12455,7 +12455,7 @@
     ]
   },
   {
-    "name": "Unit # 45",
+    "name": "Suite # 45",
     "desc": "Ridge Tech Dental Lab",
     "color": "#f97316",
     "paths": [
@@ -12482,7 +12482,7 @@
     ]
   },
   {
-    "name": "Unit # 46",
+    "name": "Suite # 46",
     "desc": "Corlan Electric Inc.",
     "color": "#f97316",
     "paths": [
@@ -12509,7 +12509,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Kraft Heinz Canada ULC",
     "color": "#a78bfa",
     "paths": [
@@ -12560,7 +12560,7 @@
     ]
   },
   {
-    "name": "Unit # 7951",
+    "name": "Suite # 7951",
     "desc": "Kraft Heinz Canada ULC",
     "color": "#a78bfa",
     "paths": [
@@ -12587,7 +12587,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Vacant",
     "color": "#a78bfa",
     "paths": [
@@ -12614,7 +12614,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Neovia Logistics Services",
     "color": "#a78bfa",
     "paths": [
@@ -12641,7 +12641,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "National Logistics Services",
     "color": "#a78bfa",
     "paths": [
@@ -12668,7 +12668,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Gracious Living",
     "color": "#a78bfa",
     "paths": [
@@ -12707,7 +12707,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Regal Beloit Holdings",
     "color": "#a78bfa",
     "paths": [
@@ -12766,7 +12766,7 @@
     ]
   },
   {
-    "name": "Unit # 326",
+    "name": "Suite # 326",
     "desc": "Vacant",
     "color": "#a78bfa",
     "paths": [
@@ -12825,7 +12825,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Arterra Wines",
     "color": "#a78bfa",
     "paths": [
@@ -12904,7 +12904,7 @@
     ]
   },
   {
-    "name": "Unit # 100",
+    "name": "Suite # 100",
     "desc": "F-H Welding Machines Limited",
     "color": "#a78bfa",
     "paths": [
@@ -12999,7 +12999,7 @@
     ]
   },
   {
-    "name": "Units # Main, 2",
+    "name": "Suites # Main, 2",
     "desc": "Creation Technologies LP",
     "color": "#a78bfa",
     "paths": [
@@ -13074,7 +13074,7 @@
     ]
   },
   {
-    "name": "Unit",
+    "name": "Suite",
     "desc": "Tech Data",
     "color": "#a78bfa",
     "paths": [
@@ -13101,7 +13101,7 @@
     ]
   },
   {
-    "name": "Unit",
+    "name": "Suite",
     "desc": "Tech Data",
     "color": "#a78bfa",
     "paths": [
@@ -13128,7 +13128,7 @@
     ]
   },
   {
-    "name": "Unit",
+    "name": "Suite",
     "desc": "Bosch",
     "color": "#a78bfa",
     "paths": [
@@ -13179,7 +13179,7 @@
     ]
   },
   {
-    "name": "Units # 1,2",
+    "name": "Suites # 1,2",
     "desc": "Caldic",
     "color": "#a78bfa",
     "paths": [
@@ -13222,7 +13222,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Childventures Early Learning Academy Inc.",
     "color": "#a78bfa",
     "paths": [
@@ -13265,7 +13265,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Abbott Medical Canada",
     "color": "#a78bfa",
     "paths": [
@@ -13308,7 +13308,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Hino Motors Canada Ltd.",
     "color": "#a78bfa",
     "paths": [
@@ -13359,7 +13359,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Baxter Corporation",
     "color": "#a78bfa",
     "paths": [
@@ -13410,7 +13410,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Macdonald, Dettwiler and Associates Inc.",
     "color": "#a78bfa",
     "paths": [
@@ -13477,7 +13477,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Accent Fairchild",
     "color": "#a78bfa",
     "paths": [
@@ -13512,7 +13512,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "R.J. Burnside & Associates Limited",
     "color": "#a78bfa",
     "paths": [
@@ -13547,7 +13547,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Pella Windows & Doors Ontario, Corp.",
     "color": "#a78bfa",
     "paths": [
@@ -13582,7 +13582,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "RX Connect Specialty Pharmacy Inc. or Morris National Inc.",
     "color": "#a78bfa",
     "paths": [
@@ -13609,7 +13609,7 @@
     ]
   },
   {
-    "name": "Unit # 5",
+    "name": "Suite # 5",
     "desc": "Masco Canada Limited",
     "color": "#a78bfa",
     "paths": [
@@ -13652,7 +13652,7 @@
     ]
   },
   {
-    "name": "Unit # 6",
+    "name": "Suite # 6",
     "desc": "Vitalaire Canada Inc.",
     "color": "#a78bfa",
     "paths": [
@@ -13695,7 +13695,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Audmet Canada Ltd.",
     "color": "#a78bfa",
     "paths": [
@@ -13722,7 +13722,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Rational Canada Inc.",
     "color": "#a78bfa",
     "paths": [
@@ -13749,7 +13749,7 @@
     ]
   },
   {
-    "name": "Unit # 3",
+    "name": "Suite # 3",
     "desc": "Pet Science Ltd.",
     "color": "#a78bfa",
     "paths": [
@@ -13784,7 +13784,7 @@
     ]
   },
   {
-    "name": "Unit # 4",
+    "name": "Suite # 4",
     "desc": "Hill-Rom Canada",
     "color": "#a78bfa",
     "paths": [
@@ -13831,7 +13831,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Pineberry Manufacturing Inc.",
     "color": "#fb923c",
     "paths": [
@@ -13870,7 +13870,7 @@
     ]
   },
   {
-    "name": "Units # 4, 5,6",
+    "name": "Suites # 4, 5,6",
     "desc": "MDM Business Solutions Inc",
     "color": "#fb923c",
     "paths": [
@@ -13941,7 +13941,7 @@
     ]
   },
   {
-    "name": "Unit # 2 , 3",
+    "name": "Suite # 2 , 3",
     "desc": "Zebra Pen Corp.",
     "color": "#fb923c",
     "paths": [
@@ -13989,7 +13989,7 @@
   },
   {
     "name": "Suite # 1",
-    "desc": "Everest Automation Inc.\nActive: 03/23/2026",
+    "desc": "Everest Automation Inc.\r\nActive: 03/23/2026",
     "color": "#fb923c",
     "paths": [
       {
@@ -14044,7 +14044,7 @@
   },
   {
     "name": "Suite # 2",
-    "desc": "Everest Automation Inc.\nActive: 03/23/2026",
+    "desc": "Everest Automation Inc.\r\nActive: 03/23/2026",
     "color": "#fb923c",
     "paths": [
       {
@@ -14087,7 +14087,7 @@
   },
   {
     "name": "Suite # 3",
-    "desc": "Previously: Bar Capital (Entripy Custom Clothing)\nExpired",
+    "desc": "Previously: Bar Capital (Entripy Custom Clothing)\r\nExpired",
     "color": "#fb923c",
     "paths": [
       {
@@ -14158,7 +14158,7 @@
   },
   {
     "name": "Suite # 4",
-    "desc": "Previously: Bar Capital (Entripy Custom Clothing)\nExpired",
+    "desc": "Previously: Bar Capital (Entripy Custom Clothing)\r\nExpired",
     "color": "#fb923c",
     "paths": [
       {
@@ -14205,7 +14205,7 @@
   },
   {
     "name": "Suite # 5",
-    "desc": "Previously: Bar Capital (Entripy Custom Clothing)\nExpired",
+    "desc": "Previously: Bar Capital (Entripy Custom Clothing)\r\nExpired",
     "color": "#fb923c",
     "paths": [
       {
@@ -14244,7 +14244,7 @@
   },
   {
     "name": "Suite # 6",
-    "desc": "Network Power Solutions Inc\nActive: 03/23/2026",
+    "desc": "Network Power Solutions Inc\r\nActive: 03/23/2026",
     "color": "#fb923c",
     "paths": [
       {
@@ -14283,7 +14283,7 @@
   },
   {
     "name": "Suite # 7",
-    "desc": "Network Power Solutions Inc\nActive: 03/23/2026",
+    "desc": "Network Power Solutions Inc\r\nActive: 03/23/2026",
     "color": "#fb923c",
     "paths": [
       {
@@ -14329,8 +14329,8 @@
     ]
   },
   {
-    "name": "Unit # 8",
-    "desc": "MCS Facility Support (K&S Services)\nActive: 03/23/2026",
+    "name": "Suite # 8",
+    "desc": "MCS Facility Support (K&S Services)\r\nActive: 03/23/2026",
     "color": "#fb923c",
     "paths": [
       {
@@ -14380,7 +14380,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Aco Systems Ltd",
     "color": "#fb923c",
     "paths": [
@@ -14459,7 +14459,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Advanced Presentation Products Inc.",
     "color": "#fb923c",
     "paths": [
@@ -14506,7 +14506,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Premier Brands",
     "color": "#fb923c",
     "paths": [
@@ -14628,7 +14628,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "JW Fulfillment YVR Inc.",
     "color": "#38bdf8",
     "paths": [
@@ -14687,7 +14687,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Hain-Celestial Canada",
     "color": "#38bdf8",
     "paths": [
@@ -14840,8 +14840,8 @@
     ]
   },
   {
-    "name": "Unit # 1",
-    "desc": "House of Electrical Supplies\n8475 SQFT",
+    "name": "Suite # 1",
+    "desc": "House of Electrical Supplies\r\n8475 SQFT",
     "color": "#38bdf8",
     "paths": [
       {
@@ -14891,8 +14891,8 @@
     ]
   },
   {
-    "name": "Unit # 2",
-    "desc": "XeMODeX Inc.\n8565 SQFT",
+    "name": "Suite # 2",
+    "desc": "XeMODeX Inc.\r\n8565 SQFT",
     "color": "#38bdf8",
     "paths": [
       {
@@ -14926,8 +14926,8 @@
     ]
   },
   {
-    "name": "Unit # 3",
-    "desc": "Diversey Canada Inc.\n15632 SQFT",
+    "name": "Suite # 3",
+    "desc": "Diversey Canada Inc.\r\n15632 SQFT",
     "color": "#38bdf8",
     "paths": [
       {
@@ -14993,8 +14993,8 @@
     ]
   },
   {
-    "name": "Unit # 4",
-    "desc": "Orbis Express Ltd.\n9422 SQFT",
+    "name": "Suite # 4",
+    "desc": "Orbis Express Ltd.\r\n9422 SQFT",
     "color": "#38bdf8",
     "paths": [
       {
@@ -15040,8 +15040,8 @@
     ]
   },
   {
-    "name": "Units # 5, 6",
-    "desc": "Panex Courier & Branding Ltd\n14934 SQFT\n7281 SQFT",
+    "name": "Suites # 5, 6",
+    "desc": "Panex Courier & Branding Ltd\r\n14934 SQFT\r\n7281 SQFT",
     "color": "#38bdf8",
     "paths": [
       {
@@ -15099,8 +15099,8 @@
     ]
   },
   {
-    "name": "Unit # 7",
-    "desc": "Rebel Apparel Inc.\n6316 SQFT",
+    "name": "Suite # 7",
+    "desc": "Rebel Apparel Inc.\r\n6316 SQFT",
     "color": "#38bdf8",
     "paths": [
       {
@@ -15130,8 +15130,8 @@
     ]
   },
   {
-    "name": "Unit # 8",
-    "desc": "Day to Day Logistics Inc\n5346 SQFT",
+    "name": "Suite # 8",
+    "desc": "Day to Day Logistics Inc\r\n5346 SQFT",
     "color": "#38bdf8",
     "paths": [
       {
@@ -15161,8 +15161,8 @@
     ]
   },
   {
-    "name": "Units # 10, 11",
-    "desc": "Canada Welding Supply Inc.\n11671 SQFT",
+    "name": "Suites # 10, 11",
+    "desc": "Canada Welding Supply Inc.\r\n11671 SQFT",
     "color": "#38bdf8",
     "paths": [
       {
@@ -15208,8 +15208,8 @@
     ]
   },
   {
-    "name": "Unit # 9",
-    "desc": "Rack-A-Tiers Manufacturing Inc.\n3916 SQFT",
+    "name": "Suite # 9",
+    "desc": "Rack-A-Tiers Manufacturing Inc.\r\n3916 SQFT",
     "color": "#38bdf8",
     "paths": [
       {
@@ -15409,7 +15409,7 @@
     ]
   },
   {
-    "name": "Unit # 60",
+    "name": "Suite # 60",
     "desc": "No Information",
     "color": "#f472b6",
     "paths": [
@@ -15452,7 +15452,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "The Hospital for Sick Children",
     "color": "#f472b6",
     "paths": [
@@ -15487,7 +15487,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Wiseacre Inc.",
     "color": "#f472b6",
     "paths": [
@@ -15530,7 +15530,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "JP Logistics Corp.",
     "color": "#f472b6",
     "paths": [
@@ -15573,7 +15573,7 @@
     ]
   },
   {
-    "name": "Unit # 1590",
+    "name": "Suite # 1590",
     "desc": "Revlon Canada Inc./ Kitchen Stuff Plus",
     "color": "#facc15",
     "paths": [
@@ -15640,7 +15640,7 @@
     ]
   },
   {
-    "name": "Unit # 1",
+    "name": "Suite # 1",
     "desc": "Midland Transport Limited/Transport Midland Limitee",
     "color": "#facc15",
     "paths": [
@@ -15675,7 +15675,7 @@
     ]
   },
   {
-    "name": "Unit # 2",
+    "name": "Suite # 2",
     "desc": "Integral Transportation Networks Corp.",
     "color": "#facc15",
     "paths": [
