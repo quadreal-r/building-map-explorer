@@ -11,7 +11,6 @@ import {
   parseRtuPictureIndex,
 } from '@/lib/rtuPictures'
 import { manifestEntryToCloudFileName } from '@/lib/rtuPictureAssignNaming'
-import type { PortfolioData } from '@/types/domain'
 
 function splitRtuKey(rtuKey: string): { buildingAddress: string; rtuName: string } {
   const pipe = rtuKey.indexOf('|')
@@ -37,7 +36,8 @@ function pictureSlotFromFileName(fileName: string): {
   return { pictureIndex: parseRtuPictureIndex(fileName), installYear: null }
 }
 
-/** Download Excel: Cloudflare sync-meta + local unsynced items on this browser. */export async function downloadSyncStatusExcel(portfolio: PortfolioData): Promise<void> {
+/** Download Excel: Cloudflare sync-meta + local unsynced items on this browser. */
+export async function downloadSyncStatusExcel(): Promise<void> {
   const [
     cloudMeta,
     cloudHistory,

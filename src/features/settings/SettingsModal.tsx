@@ -281,7 +281,7 @@ function SettingsForm({
       return
     }
     setUploadBusy(true)
-    void downloadSyncStatusExcel(portfolio)
+    void downloadSyncStatusExcel()
       .then(() => {
         showToastSuccess('✓ Sync status report downloaded (Excel)')
       })
