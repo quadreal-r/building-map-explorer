@@ -6,7 +6,7 @@ import {
   manifestEntryToCloudFileName,
   pictureFileRtuLabel,
 } from '@/lib/rtuPictureAssignNaming'
-import { isRtuManifestPictureHidden } from '@/lib/hiddenRtuPictures'
+import { isRtuManifestPictureHidden, exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
 import { usesRemoteJsonData } from '@/lib/jsonDataUrls'
 import {
   getRtuPictureManifestUrl,
@@ -362,6 +362,68 @@ export async function markRtuPicturesDeployed(fileNames: string[]): Promise<void
   })
 }
 
+function parsePictureHideKey(hideKey: string): { rtuKey: string; fileName: string } | null {
+  const sep = hideKey.lastIndexOf('|')
+  if (sep < 0) return null
+  return { rtuKey: hideKey.slice(0, sep), fileName: hideKey.slice(sep + 1) }
+}
+
+export function collectPictureIndicesFromManifestAndHidden(
+  rtuKeys: string[],
+  manifest: RtuPictureManifest,
+  hiddenKeys: string[],
+): Set<number> {
+  const used = new Set<number>()
+  for (const rtuKey of rtuKeys) {
+    for (const fileName of manifest.entries[rtuKey] ?? []) {
+      const idx = parseRtuPictureIndex(fileName)
+      if (idx != null && idx >= 1) used.add(idx)
+    }
+  }
+  for (const hideKey of hiddenKeys) {
+    const parsed = parsePictureHideKey(hideKey)
+    if (!parsed || !rtuKeys.includes(parsed.rtuKey)) continue
+    const idx = parseRtuPictureIndex(parsed.fileName)
+    if (idx != null && idx >= 1) used.add(idx)
+  }
+  return used
+}
+
+/** Picture slots already used by manifest, IndexedDB, or hidden entries for this RTU. */
+export async function occupiedPictureIndicesForRtu(
+  buildingAddress: string,
+  rtuName: string,
+  manifest?: RtuPictureManifest,
+): Promise<Set<number>> {
+  const resolvedManifest = manifest ?? (await loadRtuPictureManifest())
+  const key = rtuPictureKey(buildingAddress, rtuName)
+  const manifestKey = resolveManifestRtuKey(buildingAddress, rtuName, resolvedManifest)
+  const keys = manifestKey === key ? [key] : [key, manifestKey]
+  const used = collectPictureIndicesFromManifestAndHidden(
+    keys,
+    resolvedManifest,
+    exportHiddenRtuPicturesForDeploy(),
+  )
+
+  for (const rtuKey of keys) {
+    for (const row of await idbGetAllForRtu(rtuKey)) {
+      if (row.index >= 1) used.add(row.index)
+    }
+  }
+
+  return used
+}
+
+export async function nextAvailablePictureIndex(
+  buildingAddress: string,
+  rtuName: string,
+): Promise<number> {
+  const used = await occupiedPictureIndicesForRtu(buildingAddress, rtuName)
+  let candidate = 1
+  while (used.has(candidate)) candidate++
+  return candidate
+}
+
 async function cloudRtuPictureReachable(fileName: string): Promise<boolean> {
   const url = rtuPictureFileUrl(fileName)
   try {
@@ -564,7 +626,22 @@ export async function reconcilePendingDeployWithCloud(): Promise<number> {
         )
       }
       for (const name of [...new Set(candidates)]) {
-        if (await cloudRtuPictureReachable(name)) {
+        if (!(await cloudRtuPictureReachable(name))) continue
+        if (isIndexedDbRowSatisfiedByManifest(manifest, row)) {
+          deleteOnCdn.push(row.fileName)
+          break
+        }
+        const manifestFile = manifestFileAtIndex(manifest, row.rtuKey, row.index)
+        if (!manifestFile) {
+          // Orphan CDN file at this path — keep local replacement pending upload.
+          continue
+        }
+        const { buildingAddress, rtuName } = splitRtuPictureKey(row.rtuKey)
+        const manifestKey = resolveManifestRtuKey(buildingAddress, rtuName, manifest)
+        if (isRtuManifestPictureHidden(manifestKey, manifestFile)) continue
+        const rowCloud = manifestEntryToCloudFileName(row.fileName, buildingAddress, rtuName)
+        const manifestCloud = manifestEntryToCloudFileName(manifestFile, buildingAddress, rtuName)
+        if (rowCloud === manifestCloud) {
           deleteOnCdn.push(row.fileName)
           break
         }
@@ -820,10 +897,7 @@ export async function importRtuPictureAtIndex(
     const resolvedIndex =
       index != null && index >= 1
         ? index
-        : await (async () => {
-            const existing = await listRtuPictures(buildingAddress, rtuName)
-            return existing.reduce((max, pic) => Math.max(max, pic.index), 0) + 1
-          })()
+        : await nextAvailablePictureIndex(buildingAddress, rtuName)
     return importRtuPictureAtIndexImpl(buildingAddress, rtuName, file, resolvedIndex, options)
   })
   importPictureQueue = run.then(
@@ -887,11 +961,15 @@ export async function addRtuPicturesFromFiles(
   const existing = await listRtuPictures(buildingAddress, rtuName)
   revokeRtuPictureUrls(existing.filter((p) => p.source === 'indexeddb'))
 
-  let nextIndex = existing.reduce((max, pic) => Math.max(max, pic.index), 0) + 1
+  const used = await occupiedPictureIndicesForRtu(buildingAddress, rtuName)
+  let nextIndex = 1
+  while (used.has(nextIndex)) nextIndex++
 
   for (const file of imageFiles) {
     await importRtuPictureAtIndex(buildingAddress, rtuName, file, nextIndex)
+    used.add(nextIndex)
     nextIndex += 1
+    while (used.has(nextIndex)) nextIndex++
   }
 
   return listRtuPictures(buildingAddress, rtuName)

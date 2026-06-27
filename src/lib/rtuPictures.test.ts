@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildingStreetNumber,
+  collectPictureIndicesFromManifestAndHidden,
   estimateDeployPictureJsonBytes,
   isIndexedDbRowSatisfiedByManifest,
   parseRtuPictureIndex,
@@ -55,6 +56,22 @@ describe('rtuPictures naming', () => {
         manifest,
       ),
     ).toBe('2320 Bristol Circle|RTU-04 Hybrid')
+  })
+
+  it('skips hidden picture slots when choosing the next upload index', () => {
+    const key = '2320 Bristol Circle|RTU-04 Hybrid'
+    const used = collectPictureIndicesFromManifestAndHidden(
+      [key],
+      { entries: {} },
+      [
+        `${key}|2320-RTU-04 Hybrid (1).jpg`,
+        `${key}|2320-RTU-04-1.jpg`,
+      ],
+    )
+    expect(used.has(1)).toBe(true)
+    let next = 1
+    while (used.has(next)) next++
+    expect(next).toBe(2)
   })
 })
 
