@@ -4,7 +4,10 @@ import { importCapitalRtuWorkbook } from '@/lib/capitalRtuWorkbook'
 import { detectExcelWorkbookKind } from '@/lib/excelWorkbookType'
 import { exportPortfolioExcel, importPortfolioExcel } from '@/lib/excel'
 import { importEquipmentSchedule } from '@/lib/equipmentSheet'
+import { markDeployDataDirty } from '@/lib/deploySyncSnapshot'
+import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
 import { showToastError, showToastSuccess } from '@/lib/toast'
+import { normalizePortfolioData } from '@/types/domain'
 import { useRtuPricingStore } from '@/stores/rtuPricingStore'
 import { useRtuScheduleStore } from '@/stores/rtuScheduleStore'
 import type { Building, PortfolioData } from '@/types/domain'
@@ -54,18 +57,22 @@ export function ImportExportButtons({
       const result = importCapitalRtuWorkbook(buffer, buildings)
       applyEquipmentImport(result.equipment, file.name)
       applyPricingImport(result.pricing.rows, result.pricing.version, file.name)
+      markDeployDataDirty()
+      invalidateUnsyncedChanges()
       const { stats } = result.equipment
       showToastSuccess(
-        `Imported ${stats.matchedYears} replacement years, ${stats.matchedNotes} notes, and ${result.pricing.rowCount} pricing tiers`,
+        `Imported ${stats.matchedYears} replacement years, ${stats.matchedNotes} notes, and ${result.pricing.rowCount} pricing tiers. Sync to Cloudflare & GitHub to replace cloud data.`,
       )
       return
     }
 
     const equipment = importEquipmentSchedule(buffer, buildings)
     applyEquipmentImport(equipment, file.name)
+    markDeployDataDirty()
+    invalidateUnsyncedChanges()
     const { stats } = equipment
     showToastSuccess(
-      `Imported ${stats.matchedYears} replacement years and ${stats.matchedNotes} notes`,
+      `Imported ${stats.matchedYears} replacement years and ${stats.matchedNotes} notes. Sync to Cloudflare & GitHub to replace cloud data.`,
     )
   }
 
@@ -78,8 +85,12 @@ export function ImportExportButtons({
       )
 
       if (kind === 'portfolio') {
-        const data = importPortfolioExcel(buffer)
+        const data = normalizePortfolioData(importPortfolioExcel(buffer))
         onImport(data)
+        invalidateUnsyncedChanges()
+        showToastSuccess(
+          '✓ Database imported — use Settings → Sync to Cloudflare & GitHub to replace cloud JSON.',
+        )
         return
       }
 

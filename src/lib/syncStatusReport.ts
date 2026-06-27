@@ -1,5 +1,14 @@
 import * as XLSX from 'xlsx'
 import { collectUnsyncedChangesSummary } from '@/lib/unsyncedChanges'
+import {
+  isDeployDataDirtyLocally,
+  portfolioSyncFingerprint,
+  pricingSyncFingerprint,
+  readPricingSnapshotFromStorage,
+  readScheduleSnapshotFromStorage,
+  scheduleSyncFingerprint,
+} from '@/lib/deploySyncSnapshot'
+import { loadStoredPortfolio, isPortfolioDirtyLocally } from '@/hooks/usePortfolioData'
 import { fetchRemoteSyncMeta } from '@/lib/syncMeta'
 import { buildSyncHistorySheetRows, fetchRemoteSyncHistory } from '@/lib/syncHistory'
 import { loadRemoteSyncState } from '@/lib/remoteSyncState'
@@ -36,7 +45,13 @@ function pictureSlotFromFileName(fileName: string): {
   return { pictureIndex: parseRtuPictureIndex(fileName), installYear: null }
 }
 
-/** Download Excel: Cloudflare sync-meta + local unsynced items on this browser. */
+function fingerprintStatus(current: string | null, lastPushed: string | null): string {
+  if (!current) return 'n/a'
+  if (!lastPushed) return 'never pushed from this browser'
+  return current === lastPushed ? 'matches last push' : 'differs from last push'
+}
+
+/** Download Excel: Cloudflare sync-meta + sync history + local unsynced items on this browser. */
 export async function downloadSyncStatusExcel(): Promise<void> {
   const [
     cloudMeta,
@@ -74,7 +89,12 @@ export async function downloadSyncStatusExcel(): Promise<void> {
     summaryRows.push(['RTUs', cloudMeta.summary.rtuCount])
     summaryRows.push(['manifest pictures', cloudMeta.summary.manifestPictureCount])
     summaryRows.push(['pictures uploaded (last sync)', cloudMeta.summary.picturesUploaded])
+    if (cloudMeta.summary.pictureChunkCount != null && cloudMeta.summary.pictureChunkCount > 0) {
+      summaryRows.push(['picture upload batches (last sync)', cloudMeta.summary.pictureChunkCount])
+    }
     summaryRows.push(['pricing rows', cloudMeta.summary.pricingRowCount])
+    summaryRows.push(['schedule replacement years', cloudMeta.summary.scheduleYearCount])
+    summaryRows.push(['schedule notes', cloudMeta.summary.scheduleNoteCount])
   } else {
     summaryRows.push(['(Cloudflare sync-meta not available)', ''])
   }
@@ -82,7 +102,41 @@ export async function downloadSyncStatusExcel(): Promise<void> {
   summaryRows.push([])
   summaryRows.push(['This browser', ''])
   summaryRows.push(['Last successful push exportedAt', syncState.lastPushedExportedAt ?? ''])
+  summaryRows.push(['Portfolio dirty (localStorage)', isPortfolioDirtyLocally() ? 'yes' : 'no'])
+  summaryRows.push(['Schedule/pricing dirty', isDeployDataDirtyLocally() ? 'yes' : 'no'])
   summaryRows.push(['Local pictures needing Cloudflare upload', pendingNeedingUpload])
+
+  const storedPortfolio = loadStoredPortfolio()
+  const scheduleSnapshot = readScheduleSnapshotFromStorage()
+  const pricingSnapshot = readPricingSnapshotFromStorage()
+  if (storedPortfolio) {
+    summaryRows.push([
+      'Portfolio vs last push',
+      fingerprintStatus(
+        portfolioSyncFingerprint(storedPortfolio),
+        syncState.lastPushedPortfolioFingerprint,
+      ),
+    ])
+  }
+  if (scheduleSnapshot) {
+    summaryRows.push([
+      'RTU schedule vs last push',
+      fingerprintStatus(
+        scheduleSyncFingerprint(scheduleSnapshot),
+        syncState.lastPushedScheduleFingerprint,
+      ),
+    ])
+  }
+  if (pricingSnapshot) {
+    summaryRows.push([
+      'RTU pricing vs last push',
+      fingerprintStatus(
+        pricingSyncFingerprint(pricingSnapshot),
+        syncState.lastPushedPricingFingerprint,
+      ),
+    ])
+  }
+
   summaryRows.push([])
   summaryRows.push(['Unsynced summary lines', ''])
 

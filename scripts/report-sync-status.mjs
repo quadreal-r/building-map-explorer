@@ -163,7 +163,12 @@ function buildWorkbook({
     summaryRows.push(['RTUs', s.rtuCount ?? ''])
     summaryRows.push(['manifest pictures', s.manifestPictureCount ?? ''])
     summaryRows.push(['pictures uploaded last sync', s.picturesUploaded ?? ''])
+    if (s.pictureChunkCount != null && s.pictureChunkCount > 0) {
+      summaryRows.push(['picture upload batches last sync', s.pictureChunkCount])
+    }
     summaryRows.push(['pricing rows', s.pricingRowCount ?? ''])
+    summaryRows.push(['schedule replacement years', s.scheduleYearCount ?? ''])
+    summaryRows.push(['schedule notes', s.scheduleNoteCount ?? ''])
   }
 
   if (localSyncMeta) {

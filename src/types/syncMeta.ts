@@ -7,6 +7,8 @@ export interface SyncMetaSummary {
   polygonCount: number
   manifestPictureCount: number
   picturesUploaded: number
+  /** Number of picture JSON chunks uploaded in one Settings sync (1 when all fit one batch). */
+  pictureChunkCount?: number
   scheduleYearCount: number
   scheduleNoteCount: number
   pricingRowCount: number

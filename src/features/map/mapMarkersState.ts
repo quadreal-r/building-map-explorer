@@ -250,7 +250,15 @@ export function syncMarkersFromPortfolio(
   for (const entry of detailMarkers) {
     if (entry.type === 'rtu' && entry.building) {
       const b = buildings.find((x) => x.address === entry.building!.address)
-      const rtu = b?.rtus?.find((r) => r.name === entry.data.name)
+      const rtus = b?.rtus ?? []
+      const rtu =
+        rtus.find((r) => r.name === entry.data.name) ??
+        rtus.find(
+          (r) =>
+            r.lat === entry.data.lat &&
+            r.lng === entry.data.lng &&
+            !isLegacySuiteMarkerName(r.name),
+        )
       if (!b || !rtu) continue
       entry.building = b
       entry.data = rtu

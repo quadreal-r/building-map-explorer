@@ -9,6 +9,15 @@ import { exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
 import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
 import { clearRtuPictureManifestCache, reconcilePendingDeployWithCloud } from '@/lib/rtuPictures'
 import { showToastError, showToastSuccess } from '@/lib/toast'
+import { loadStoredPortfolio, persistPortfolio } from '@/hooks/usePortfolioData'
+import {
+  clearDeployDataDirty,
+  portfolioSyncFingerprint,
+  readPricingSnapshotFromStorage,
+  readScheduleSnapshotFromStorage,
+  scheduleSyncFingerprint,
+  pricingSyncFingerprint,
+} from '@/lib/deploySyncSnapshot'
 import { usePortfolioStore } from '@/stores/portfolioStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import type { PortfolioData } from '@/types/domain'
@@ -107,11 +116,23 @@ export function useGitHubDeploySync({
           parts.push(`Workflow: ${result.workflowRunUrl}`)
         }
         showToastSuccess(parts.join(' '))
+        const syncedPortfolio = loadStoredPortfolio() ?? portfolio
+        const scheduleSnapshot = readScheduleSnapshotFromStorage()
+        const pricingSnapshot = readPricingSnapshotFromStorage()
+        persistPortfolio(syncedPortfolio, { markSynced: true })
+        clearDeployDataDirty()
+        usePortfolioStore.getState().setPortfolio(syncedPortfolio, { markSaved: true })
         recordLocalSyncPush(result.exportedAt, {
           hiddenKeys: exportHiddenRtuPicturesForDeploy(),
+          portfolioFingerprint: portfolioSyncFingerprint(syncedPortfolio),
+          scheduleFingerprint: scheduleSnapshot
+            ? scheduleSyncFingerprint(scheduleSnapshot)
+            : undefined,
+          pricingFingerprint: pricingSnapshot
+            ? pricingSyncFingerprint(pricingSnapshot)
+            : undefined,
         })
         clearRtuPictureManifestCache()
-        usePortfolioStore.getState().markSaved()
         void reconcilePendingDeployWithCloud().finally(() => {
           invalidateUnsyncedChanges()
         })

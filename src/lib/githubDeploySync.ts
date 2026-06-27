@@ -1,7 +1,7 @@
 /** One-click Settings sync: staging branch → GitHub Actions → R2 + commit + deploy. */
 
 import { collectDeployBundleLean } from '@/lib/deployBundle'
-import { repairStoredPortfolioRtuNames } from '@/hooks/usePortfolioData'
+import { loadStoredPortfolio, repairStoredPortfolioRtuNames } from '@/hooks/usePortfolioData'
 import {
   encodeDeployPictureEntry,
   listPendingDeployPictureRows,
@@ -406,14 +406,15 @@ export async function syncDeployToGitHub(
   const { onProgress } = options
 
   reportProgress(onProgress, 'Checking RTU names…', 4)
-  const repaired = await repairStoredPortfolioRtuNames(portfolioIn, { notify: false })
+  const portfolioForSync = loadStoredPortfolio() ?? portfolioIn
+  const repaired = await repairStoredPortfolioRtuNames(portfolioForSync, { notify: false })
   const portfolio = repaired.portfolio
 
   reportProgress(onProgress, 'Collecting local data…', 8)
   const leanCore = collectDeployBundleLean(portfolio)
-  const leanBundle = { ...leanCore, pictures: [] as DeployPictureEntry[] }
-  const leanJson = JSON.stringify(leanBundle)
-  if (leanJson.length > MAX_GIST_BYTES) {
+  const leanBundleForSize = { ...leanCore, pictures: [] as DeployPictureEntry[] }
+  const leanJsonForSize = JSON.stringify(leanBundleForSize)
+  if (leanJsonForSize.length > MAX_GIST_BYTES) {
     throw new Error(
       'Deploy bundle is too large for one-click sync. Use Export data for GitHub deploy and run apply-deploy-bundle locally.',
     )
@@ -427,10 +428,15 @@ export async function syncDeployToGitHub(
   }
 
   const allPictures = pictureExport.chunks.flat()
-  reportProgress(onProgress, 'Preparing deploy bundle…', 18)
-  const bundle = { ...leanCore, pictures: allPictures }
-  const picturesOmitted = pictureExport.picturesOmitted
   const pictureChunkJsons = pictureExport.chunks.map((chunk) => JSON.stringify(chunk))
+  reportProgress(onProgress, 'Preparing deploy bundle…', 18)
+  const leanJson = JSON.stringify({
+    ...leanCore,
+    pictures: [] as DeployPictureEntry[],
+    pictureChunkCount: pictureChunkJsons.length,
+  })
+  const bundle = { ...leanCore, pictures: allPictures, pictureChunkCount: pictureChunkJsons.length }
+  const picturesOmitted = pictureExport.picturesOmitted
 
   reportProgress(
     onProgress,

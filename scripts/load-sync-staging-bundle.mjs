@@ -54,14 +54,17 @@ function loadPictureChunks() {
     index += 1
   }
 
+  let pictureChunkCount = index
+
   if (pictures.length === 0) {
     const legacyText = gitShow('sync/deploy-pictures.json')
     if (legacyText?.trim()) {
       pictures.push(...parsePictureChunk(legacyText, 'sync/deploy-pictures.json'))
+      pictureChunkCount = 1
     }
   }
 
-  return pictures
+  return { pictures, pictureChunkCount }
 }
 
 const bundleText = gitShow('sync/deploy-bundle.json')
@@ -80,7 +83,11 @@ if (!bundle.portfolio?.buildings?.length) {
   fail('Deploy bundle is missing portfolio.buildings.')
 }
 
-bundle.pictures = loadPictureChunks()
+const { pictures, pictureChunkCount } = loadPictureChunks()
+bundle.pictures = pictures
+if (pictureChunkCount > 0) {
+  bundle.pictureChunkCount = pictureChunkCount
+}
 
 writeFileSync(outPath, `${JSON.stringify(bundle)}\n`)
 console.log(

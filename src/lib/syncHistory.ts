@@ -31,6 +31,15 @@ export function buildSyncHistoryChanges(
       delta: picturesUploaded,
     })
   }
+  const chunkCount = after.pictureChunkCount ?? 0
+  if (chunkCount > 0) {
+    changes.push({
+      label: 'Picture upload batches',
+      before: before?.pictureChunkCount ?? 0,
+      after: chunkCount,
+      delta: chunkCount - (before?.pictureChunkCount ?? 0),
+    })
+  }
   return changes
 }
 

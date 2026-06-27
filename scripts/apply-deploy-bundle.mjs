@@ -260,6 +260,7 @@ writeJson(manifestPath, manifest)
 const syncMeta = buildSyncMetaFromBundle(bundle, {
   manifest,
   picturesUploaded: r2Uploads + localWrites,
+  pictureChunkCount: bundle.pictureChunkCount ?? 0,
 })
 writeSyncMetaFile(join(DATA_DIR, 'sync-meta.json'), syncMeta)
 appendSyncHistoryEntry(DATA_DIR, syncMeta)

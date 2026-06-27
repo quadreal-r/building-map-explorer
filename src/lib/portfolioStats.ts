@@ -57,8 +57,8 @@ export function buildSummaryDeltas(
 
   return fields
     .map(({ key, label }) => {
-      const before = local[key]
-      const after = remote[key]
+      const before = local[key] ?? 0
+      const after = remote[key] ?? 0
       return { label, before, after, delta: after - before }
     })
     .filter((line) => line.delta !== 0 || line.before !== line.after)

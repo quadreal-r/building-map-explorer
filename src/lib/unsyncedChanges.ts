@@ -1,4 +1,6 @@
 import { countUnsyncedLocalHiddenRtuPictures } from '@/lib/hiddenRtuPictures'
+import { isDeployDataDirtyLocally } from '@/lib/deploySyncSnapshot'
+import { isPortfolioDirtyLocally } from '@/hooks/usePortfolioData'
 import { loadRemoteSyncState } from '@/lib/remoteSyncState'
 import {
   countPendingPicturesNeedingCloudUpload,
@@ -26,10 +28,17 @@ export async function collectUnsyncedChangesSummary(): Promise<UnsyncedChangeLin
 
   const lines: UnsyncedChangeLine[] = []
 
-  if (usePortfolioStore.getState().unsaved) {
+  if (usePortfolioStore.getState().unsaved || isPortfolioDirtyLocally()) {
     lines.push({
       id: 'portfolio',
-      label: 'Portfolio and map edits (buildings, managers, polygons)',
+      label: 'Portfolio database (buildings, RTUs, polygons, utilities)',
+    })
+  }
+
+  if (isDeployDataDirtyLocally()) {
+    lines.push({
+      id: 'schedule-pricing',
+      label: 'RTU schedule and pricing from Excel import',
     })
   }
 

@@ -1,5 +1,10 @@
 import { create } from 'zustand'
 import {
+  isDeployDataDirtyLocally,
+  markDeployDataDirty,
+  pricingSyncFingerprint,
+} from '@/lib/deploySyncSnapshot'
+import {
   DEFAULT_RTU_PRICING_ROWS,
   DEFAULT_RTU_PRICING_VERSION,
 } from '@/lib/rtuPricing.defaults'
@@ -57,6 +62,34 @@ interface RtuPricingState {
   persist: () => void
 }
 
+function readStoredPricing(): StoredRtuPricing | null {
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (!stored) return null
+  try {
+    const parsed = JSON.parse(stored) as StoredRtuPricing
+    if (!parsed.rows?.length) return null
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+function applyStoredPricing(
+  parsed: StoredRtuPricing,
+  set: (partial: Partial<RtuPricingState> | ((state: RtuPricingState) => Partial<RtuPricingState>)) => void,
+  get: () => RtuPricingState,
+): void {
+  const rows = cloneRows(parsed.rows ?? [])
+  set({
+    rows,
+    version: parsed.version ?? null,
+    sourceFile: parsed.sourceFile ?? null,
+    pricingTable: buildPricingTable(rows),
+    revision: get().revision + 1,
+    loaded: true,
+  })
+}
+
 export const useRtuPricingStore = create<RtuPricingState>((set, get) => ({
   rows: cloneRows(DEFAULT_RTU_PRICING_ROWS),
   version: DEFAULT_RTU_PRICING_VERSION,
@@ -66,44 +99,45 @@ export const useRtuPricingStore = create<RtuPricingState>((set, get) => ({
   loaded: false,
 
   load: async () => {
-    const loadFromStorage = (): boolean => {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (!stored) return false
-      try {
-        const parsed = JSON.parse(stored) as StoredRtuPricing
-        if (!parsed.rows?.length) return false
-        const rows = cloneRows(parsed.rows)
-        set({
-          rows,
-          version: parsed.version ?? null,
-          sourceFile: parsed.sourceFile ?? null,
-          pricingTable: buildPricingTable(rows),
-          revision: get().revision + 1,
-          loaded: true,
-        })
-        return true
-      } catch {
-        return false
+    if (!usesRemoteJsonData()) {
+      const stored = readStoredPricing()
+      if (stored) {
+        applyStoredPricing(stored, set, get)
+        return
       }
     }
 
-    if (!usesRemoteJsonData() && loadFromStorage()) return
-
     const remote = await fetchRemoteJson<StoredRtuPricing>('rtu-pricing-rows.json')
-    if (remote?.rows?.length) {
-      const rows = cloneRows(remote.rows)
-      set({
-        rows,
-        version: remote.version ?? null,
-        sourceFile: remote.sourceFile ?? null,
-        pricingTable: buildPricingTable(rows),
-        revision: get().revision + 1,
-        loaded: true,
-      })
+    const stored = readStoredPricing()
+
+    if (stored && remote?.rows?.length) {
+      const preferLocal =
+        isDeployDataDirtyLocally() ||
+        pricingSyncFingerprint({
+          version: stored.version ?? null,
+          rows: stored.rows ?? [],
+        }) !==
+          pricingSyncFingerprint({
+            version: remote.version ?? null,
+            rows: remote.rows,
+          })
+      if (preferLocal) {
+        applyStoredPricing(stored, set, get)
+        return
+      }
+      applyStoredPricing(remote, set, get)
       return
     }
 
-    if (usesRemoteJsonData() && loadFromStorage()) return
+    if (remote?.rows?.length) {
+      applyStoredPricing(remote, set, get)
+      return
+    }
+
+    if (stored) {
+      applyStoredPricing(stored, set, get)
+      return
+    }
 
     const rows = cloneRows(
       bundledPricing.rows?.length ? bundledPricing.rows : DEFAULT_RTU_PRICING_ROWS,
@@ -177,6 +211,7 @@ export const useRtuPricingStore = create<RtuPricingState>((set, get) => ({
     const { rows, version, sourceFile } = get()
     const payload: StoredRtuPricing = { rows, version, sourceFile }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+    markDeployDataDirty()
   },
 }))
 

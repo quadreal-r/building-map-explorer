@@ -39,6 +39,15 @@ export function buildSyncHistoryChanges(before, after, picturesUploaded = 0) {
       delta: picturesUploaded,
     })
   }
+  const chunkCount = after?.pictureChunkCount ?? 0
+  if (chunkCount > 0) {
+    changes.push({
+      label: 'Picture upload batches',
+      before: before?.pictureChunkCount ?? 0,
+      after: chunkCount,
+      delta: chunkCount - (before?.pictureChunkCount ?? 0),
+    })
+  }
   return changes
 }
 
@@ -94,6 +103,7 @@ export function buildSyncMetaFromBundle(bundle, options = {}) {
       bundle.pricing,
       manifest,
       options.picturesUploaded ?? bundle.pictures?.length ?? 0,
+      options.pictureChunkCount ?? bundle.pictureChunkCount ?? 0,
     ),
   }
 }

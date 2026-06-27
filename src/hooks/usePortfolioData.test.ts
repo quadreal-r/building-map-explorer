@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { isValidStoredPortfolio, loadPortfolioData } from '@/hooks/usePortfolioData'
+import {
+  isValidStoredPortfolio,
+  loadPortfolioData,
+  localPortfolioAheadOfRemote,
+  type PortfolioData,
+} from '@/hooks/usePortfolioData'
 
 const samplePortfolio = {
   buildings: [
@@ -17,6 +22,40 @@ const samplePortfolio = {
   utilities: [],
   polygons: [],
 }
+
+function portfolioWithRtu(description: string): PortfolioData {
+  return {
+    buildings: [
+      {
+        address: '1 Main St',
+        lat: 43.6,
+        lng: -79.4,
+        park: 'P',
+        bu: '1',
+        sqft: '1',
+        cluster: 'C',
+        manager: 'M',
+        rtus: [{ name: 'RTU-01', description, lat: 43.61, lng: -79.41 }],
+      },
+    ],
+    utilities: [],
+    polygons: [],
+  }
+}
+
+describe('localPortfolioAheadOfRemote', () => {
+  it('detects RTU description edits not yet on the remote snapshot', () => {
+    const local = portfolioWithRtu('Updated make and model')
+    const remote = portfolioWithRtu('Original notes')
+    expect(localPortfolioAheadOfRemote(local, remote)).toBe(true)
+  })
+
+  it('returns false when RTU text matches the remote snapshot', () => {
+    const local = portfolioWithRtu('Same text')
+    const remote = portfolioWithRtu('Same text')
+    expect(localPortfolioAheadOfRemote(local, remote)).toBe(false)
+  })
+})
 
 describe('isValidStoredPortfolio', () => {
   it('accepts a well-formed portfolio', () => {

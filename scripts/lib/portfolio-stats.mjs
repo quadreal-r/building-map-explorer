@@ -30,7 +30,7 @@ export function countScheduleStats(schedule) {
   }
 }
 
-export function buildPortfolioSummary(portfolio, schedule, pricing, manifest, picturesUploaded = 0) {
+export function buildPortfolioSummary(portfolio, schedule, pricing, manifest, picturesUploaded = 0, pictureChunkCount = 0) {
   const portfolioStats = countPortfolioStats(portfolio)
   const scheduleStats = countScheduleStats(schedule ?? {})
   return {
@@ -39,5 +39,6 @@ export function buildPortfolioSummary(portfolio, schedule, pricing, manifest, pi
     pricingRowCount: pricing?.rows?.length ?? 0,
     manifestPictureCount: countManifestPictures(manifest),
     picturesUploaded,
+    ...(pictureChunkCount > 0 ? { pictureChunkCount } : {}),
   }
 }

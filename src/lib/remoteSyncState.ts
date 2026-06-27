@@ -7,6 +7,10 @@ export interface RemoteSyncState {
   lastPushedExportedAt: string | null
   /** Hidden RTU picture keys included in the last successful push on this computer. */
   lastPushedHiddenKeys: string[] | null
+  /** Fingerprints of portfolio / schedule / pricing included in the last successful push. */
+  lastPushedPortfolioFingerprint: string | null
+  lastPushedScheduleFingerprint: string | null
+  lastPushedPricingFingerprint: string | null
   /** First remote check completed without showing a stale alert. */
   initialized: boolean
 }
@@ -15,6 +19,9 @@ const DEFAULT_STATE: RemoteSyncState = {
   acknowledgedExportedAt: null,
   lastPushedExportedAt: null,
   lastPushedHiddenKeys: null,
+  lastPushedPortfolioFingerprint: null,
+  lastPushedScheduleFingerprint: null,
+  lastPushedPricingFingerprint: null,
   initialized: false,
 }
 
@@ -29,6 +36,18 @@ export function loadRemoteSyncState(): RemoteSyncState {
       lastPushedHiddenKeys: Array.isArray(parsed.lastPushedHiddenKeys)
         ? parsed.lastPushedHiddenKeys.filter((item): item is string => typeof item === 'string')
         : null,
+      lastPushedPortfolioFingerprint:
+        typeof parsed.lastPushedPortfolioFingerprint === 'string'
+          ? parsed.lastPushedPortfolioFingerprint
+          : null,
+      lastPushedScheduleFingerprint:
+        typeof parsed.lastPushedScheduleFingerprint === 'string'
+          ? parsed.lastPushedScheduleFingerprint
+          : null,
+      lastPushedPricingFingerprint:
+        typeof parsed.lastPushedPricingFingerprint === 'string'
+          ? parsed.lastPushedPricingFingerprint
+          : null,
       initialized: parsed.initialized ?? false,
     }
   } catch {
@@ -42,7 +61,12 @@ function saveRemoteSyncState(state: RemoteSyncState): void {
 
 export function recordLocalSyncPush(
   exportedAt: string,
-  options?: { hiddenKeys?: string[] },
+  options?: {
+    hiddenKeys?: string[]
+    portfolioFingerprint?: string
+    scheduleFingerprint?: string
+    pricingFingerprint?: string
+  },
 ): void {
   const state = loadRemoteSyncState()
   saveRemoteSyncState({
@@ -50,6 +74,12 @@ export function recordLocalSyncPush(
     lastPushedExportedAt: exportedAt,
     acknowledgedExportedAt: exportedAt,
     lastPushedHiddenKeys: options?.hiddenKeys ?? state.lastPushedHiddenKeys,
+    lastPushedPortfolioFingerprint:
+      options?.portfolioFingerprint ?? state.lastPushedPortfolioFingerprint,
+    lastPushedScheduleFingerprint:
+      options?.scheduleFingerprint ?? state.lastPushedScheduleFingerprint,
+    lastPushedPricingFingerprint:
+      options?.pricingFingerprint ?? state.lastPushedPricingFingerprint,
     initialized: true,
   })
 }

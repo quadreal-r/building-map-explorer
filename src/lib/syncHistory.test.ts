@@ -25,6 +25,7 @@ describe('syncHistory', () => {
       rtuCount: 1002,
       manifestPictureCount: 1603,
       picturesUploaded: 3,
+      pictureChunkCount: 2,
     }
     const changes = buildSyncHistoryChanges(baseSummary, after, 3)
     expect(changes).toEqual(
@@ -32,6 +33,7 @@ describe('syncHistory', () => {
         expect.objectContaining({ label: 'RTU markers', delta: 2 }),
         expect.objectContaining({ label: 'RTU pictures (manifest)', delta: 3 }),
         expect.objectContaining({ label: 'Pictures uploaded (this sync)', delta: 3 }),
+        expect.objectContaining({ label: 'Picture upload batches', after: 2, delta: 2 }),
       ]),
     )
   })

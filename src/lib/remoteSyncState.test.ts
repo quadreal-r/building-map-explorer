@@ -17,6 +17,9 @@ describe('remoteSyncState', () => {
         acknowledgedExportedAt: null,
         lastPushedExportedAt: null,
         lastPushedHiddenKeys: null,
+        lastPushedPortfolioFingerprint: null,
+        lastPushedScheduleFingerprint: null,
+        lastPushedPricingFingerprint: null,
         initialized: false,
       }),
     ).toBe(false)

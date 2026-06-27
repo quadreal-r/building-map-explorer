@@ -17,6 +17,7 @@ import {
 import { repairPortfolioRtuNames } from '@/lib/rtuNameRepair'
 import { migrateIndexedDbRtuKeys, migrateLegacyPictureFileNames } from '@/lib/rtuPictures'
 import { getJsonDataBaseUrl, usesRemoteJsonData } from '@/lib/jsonDataUrls'
+import { localPortfolioDiffersFromRemote } from '@/lib/deploySyncSnapshot'
 
 import staticBuildings from '../../supabase/data/buildings.json'
 import staticUtilities from '../../supabase/data/utilities.json'
@@ -38,64 +39,12 @@ export function setPortfolioDirtyLocally(dirty: boolean): void {
   else localStorage.removeItem(UNSAVED_KEY)
 }
 
-function totalRtus(portfolio: PortfolioData): number {
-  return portfolio.buildings.reduce((count, building) => count + (building.rtus?.length ?? 0), 0)
-}
-
 /** True when this browser has portfolio edits not present in the cloud JSON snapshot. */
 export function localPortfolioAheadOfRemote(
   local: PortfolioData,
   remote: PortfolioData,
 ): boolean {
-  // RTU count changed
-  if (totalRtus(local) > totalRtus(remote)) return true
-
-  // Building count changed
-  if (local.buildings.length !== remote.buildings.length) return true
-
-  for (const localBuilding of local.buildings) {
-    const remoteBuilding = remote.buildings.find((b) => b.address === localBuilding.address)
-    if (!remoteBuilding) continue
-
-    // Building notes changed
-    if ((localBuilding.notes ?? '') !== (remoteBuilding.notes ?? '')) return true
-
-    // Building position changed
-    if (localBuilding.lat !== remoteBuilding.lat || localBuilding.lng !== remoteBuilding.lng) return true
-
-    const remoteNames = new Set((remoteBuilding.rtus ?? []).map((rtu) => rtu.name))
-    for (const rtu of localBuilding.rtus ?? []) {
-      if (!remoteNames.has(rtu.name)) return true
-    }
-    for (const rtu of localBuilding.rtus ?? []) {
-      const remoteRtu = remoteBuilding.rtus?.find((r) => r.name === rtu.name)
-      if (!remoteRtu) continue
-      if (remoteRtu.lat !== rtu.lat || remoteRtu.lng !== rtu.lng) return true
-    }
-  }
-
-  // Polygon count or content changed
-  if (local.polygons.length !== remote.polygons.length) return true
-  for (const localPoly of local.polygons) {
-    const remotePoly = remote.polygons.find(
-      (p) => p.name === localPoly.name && p.description === localPoly.description,
-    )
-    if (!remotePoly) return true
-    if (localPoly.color !== remotePoly.color) return true
-    if (localPoly.paths.length !== remotePoly.paths.length) return true
-  }
-
-  // Utility count or position changed
-  if (local.utilities.length !== remote.utilities.length) return true
-  for (const localUtil of local.utilities) {
-    const remoteUtil = remote.utilities.find(
-      (u) => u.utility_type === localUtil.utility_type && u.name === localUtil.name,
-    )
-    if (!remoteUtil) return true
-    if (localUtil.lat !== remoteUtil.lat || localUtil.lng !== remoteUtil.lng) return true
-  }
-
-  return false
+  return localPortfolioDiffersFromRemote(local, remote)
 }
 
 declare global {
@@ -173,7 +122,8 @@ export async function loadRemotePortfolio(baseUrl: string): Promise<PortfolioDat
   }
 }
 
-function loadStoredPortfolio(): PortfolioData | null {
+/** Latest portfolio saved in this browser (localStorage), when valid. */
+export function loadStoredPortfolio(): PortfolioData | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null

@@ -30,6 +30,8 @@ export interface DeployBundle {
   schedule: DeploySchedulePayload
   pricing: DeployPricingPayload
   pictures: DeployPictureEntry[]
-  /** `rtuKey|fileName` entries hidden from the map (manifest/R2 pictures). */
+  /** Picture batches in sync/deploy-pictures-N.json (Settings sync). */
+  pictureChunkCount?: number
+  /** Hidden RTU picture keys hidden from the map (manifest/R2 pictures). */
   hiddenRtuPictures?: string[]
 }

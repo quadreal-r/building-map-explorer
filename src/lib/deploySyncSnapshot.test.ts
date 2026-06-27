@@ -1,0 +1,84 @@
+import { describe, expect, it } from 'vitest'
+import {
+  localPortfolioDiffersFromRemote,
+  portfolioSyncFingerprint,
+  scheduleSyncFingerprint,
+} from '@/lib/deploySyncSnapshot'
+import type { PortfolioData } from '@/types/domain'
+
+const basePortfolio = (): PortfolioData => ({
+  buildings: [
+    {
+      address: '1 Main St',
+      lat: 43.6,
+      lng: -79.4,
+      park: 'P',
+      bu: '1',
+      sqft: '1000',
+      cluster: 'C',
+      manager: 'Alice',
+      rtus: [{ name: 'RTU-01', description: 'Model: X', lat: 43.61, lng: -79.41 }],
+    },
+  ],
+  utilities: [],
+  polygons: [],
+})
+
+describe('portfolioSyncFingerprint', () => {
+  it('detects Excel-style building field changes', () => {
+    const local = basePortfolio()
+    const remote = basePortfolio()
+    remote.buildings[0]!.manager = 'Bob'
+    expect(localPortfolioDiffersFromRemote(local, remote)).toBe(true)
+  })
+
+  it('detects RTU description edits from Excel or popup text changes', () => {
+    const local = basePortfolio()
+    const remote = basePortfolio()
+    remote.buildings[0]!.rtus![0]!.description = 'Original'
+    local.buildings[0]!.rtus![0]!.description = 'Model: Updated'
+    expect(localPortfolioDiffersFromRemote(local, remote)).toBe(true)
+  })
+
+  it('detects removed buildings from a full database import', () => {
+    const local = basePortfolio()
+    const remote: PortfolioData = {
+      ...local,
+      buildings: [
+        ...local.buildings,
+        {
+          address: '2 Other St',
+          lat: 43.7,
+          lng: -79.5,
+          park: 'P',
+          bu: '2',
+          sqft: '500',
+          cluster: 'C',
+          manager: 'Alice',
+        },
+      ],
+    }
+    expect(localPortfolioDiffersFromRemote(local, remote)).toBe(true)
+  })
+
+  it('returns false for identical sync snapshots', () => {
+    const local = basePortfolio()
+    const remote = basePortfolio()
+    expect(portfolioSyncFingerprint(local)).toBe(portfolioSyncFingerprint(remote))
+    expect(localPortfolioDiffersFromRemote(local, remote)).toBe(false)
+  })
+})
+
+describe('scheduleSyncFingerprint', () => {
+  it('detects replacement year changes from capital workbook import', () => {
+    const local = scheduleSyncFingerprint({
+      replacementYears: { '1 Main St|RTU-01': '2030' },
+      notes: {},
+    })
+    const remote = scheduleSyncFingerprint({
+      replacementYears: { '1 Main St|RTU-01': '2028' },
+      notes: {},
+    })
+    expect(local).not.toBe(remote)
+  })
+})

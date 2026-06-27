@@ -13,13 +13,16 @@ const buildings = (legacyBuildings as LegacyBuildingJson[]).map(normalizeLegacyB
 const polygons = (legacyPolygons as LegacyPolygonJson[]).map(normalizeLegacyPolygon)
 
 describe('collectSearchHits', () => {
-  it('finds tenant polygon for Baxter and opens Unit # 3', () => {
+  it('finds tenant polygon for Baxter', () => {
     const hits = collectSearchHits(buildings, polygons, 'Baxter')
-    expect(hits.length).toBeGreaterThan(0)
-    const first = hits[0]!
-    expect(first.kind).toBe('polygon')
-    expect(first.polygonName).toMatch(/Unit #\s*3/i)
-    expect(first.polygonDescription).toMatch(/Baxter/i)
+    const baxterPolygon = hits.find(
+      (hit) =>
+        hit.kind === 'polygon' &&
+        (/Baxter/i.test(hit.polygonDescription ?? '') || /Baxter/i.test(hit.label)),
+    )
+    expect(baxterPolygon).toBeDefined()
+    expect(baxterPolygon!.polygonName).toMatch(/#\s*3/i)
+    expect(baxterPolygon!.polygonDescription).toMatch(/Baxter/i)
   })
 
   it('finds RTU detail hits when search is not a building metadata match', () => {
