@@ -470,52 +470,20 @@ function rowFileNamesInManifest(manifest: RtuPictureManifest, row: StoredRtuPict
   return cloudNames.has(row.fileName) || cloudNames.has(cloudRow)
 }
 
-/** Match pending rows when filename parses to the same building / unit / index as a manifest entry. */
-function rowParsedSlotInManifest(
-  manifest: RtuPictureManifest,
-  row: Pick<StoredRtuPictureRow, 'fileName' | 'rtuKey' | 'index'>,
-): boolean {
-  const parsed = parseBulkRtuPictureFileName(row.fileName)
-  const indices = new Set<number>()
-  if (row.index >= 1) indices.add(row.index)
-  const fromName = parseRtuPictureIndex(row.fileName)
-  if (fromName != null && fromName >= 1) indices.add(fromName)
-
-  const buildingNums = new Set<string>()
-  const unitCores = new Set<string>()
-  if (parsed?.unitCore) {
-    buildingNums.add(parsed.buildingNum)
-    unitCores.add(parsed.unitCore)
-  }
-  const { buildingAddress, rtuName } = splitRtuPictureKey(row.rtuKey)
-  const rowUnitCore = normalizeRtuUnitCore(rtuName)
-  if (rowUnitCore) {
-    buildingNums.add(buildingStreetNumber(buildingAddress))
-    unitCores.add(rowUnitCore)
-  }
-  if (!buildingNums.size || !unitCores.size || !indices.size) return false
-
-  for (const [rtuKey, files] of Object.entries(manifest.entries ?? {})) {
-    const sep = rtuKey.indexOf('|')
-    if (sep < 0) continue
-    const mBuildingNum = buildingStreetNumber(rtuKey.slice(0, sep))
-    const mUnitCore = normalizeRtuUnitCore(rtuKey.slice(sep + 1))
-    if (!mUnitCore || !buildingNums.has(mBuildingNum) || !unitCores.has(mUnitCore)) continue
-    for (const fileName of files) {
-      if (isRtuManifestPictureHidden(rtuKey, fileName)) continue
-      const idx = parseRtuPictureIndex(fileName)
-      if (idx != null && indices.has(idx)) return true
-    }
-  }
+function isStalePendingRow(manifest: RtuPictureManifest, row: StoredRtuPictureRow): boolean {
+  if (rowFileNamesInManifest(manifest, row)) return true
+  if (isIndexedDbRowSatisfiedByManifest(manifest, row)) return true
+  // Do not match manifest index slots alone — a pending local row can be a new photo at the
+  // next index while an older file still occupies that slot in the cloud manifest.
   return false
 }
 
-function isStalePendingRow(manifest: RtuPictureManifest, row: StoredRtuPictureRow): boolean {
-  if (rowFileNamesInManifest(manifest, row)) return true
-  if (manifestSlotForRow(manifest, row)) return true
-  if (isIndexedDbRowSatisfiedByManifest(manifest, row)) return true
-  if (rowParsedSlotInManifest(manifest, row)) return true
-  return false
+/** @internal Tests only */
+export function isStalePendingRowForTests(
+  manifest: RtuPictureManifest,
+  row: StoredRtuPictureRow,
+): boolean {
+  return isStalePendingRow(manifest, row)
 }
 
 /** Pending IndexedDB pictures that still need a Cloudflare upload (excludes manifest/CDN matches). */
@@ -525,6 +493,7 @@ export async function countPendingPicturesNeedingCloudUpload(): Promise<number> 
   let count = 0
   for (const row of rows) {
     if (row.pendingDeploy === false) continue
+if ((row.fullBlob?.size ?? 0) === 0) continue
     if (isStalePendingRow(manifest, row)) continue
     count++
   }
@@ -799,8 +768,9 @@ async function idbDeleteByRtuAndIndex(rtuKey: string, index: number): Promise<vo
   await Promise.all(rows.filter((row) => row.index === index).map((row) => idbDelete(row.fileName)))
 }
 
-/** Store or replace a picture at a specific index (bulk import / explicit numbering). */
-export async function importRtuPictureAtIndex(
+let importPictureQueue: Promise<unknown> = Promise.resolve()
+
+async function importRtuPictureAtIndexImpl(
   buildingAddress: string,
   rtuName: string,
   file: File,
@@ -836,6 +806,31 @@ export async function importRtuPictureAtIndex(
   })
   notifyRtuPicturesChanged()
   return fileName
+}
+
+/** Store or replace a picture at a specific index (bulk import / explicit numbering). */
+export async function importRtuPictureAtIndex(
+  buildingAddress: string,
+  rtuName: string,
+  file: File,
+  index?: number,
+  options?: { fileName?: string },
+): Promise<string> {
+  const run = importPictureQueue.then(async () => {
+    const resolvedIndex =
+      index != null && index >= 1
+        ? index
+        : await (async () => {
+            const existing = await listRtuPictures(buildingAddress, rtuName)
+            return existing.reduce((max, pic) => Math.max(max, pic.index), 0) + 1
+          })()
+    return importRtuPictureAtIndexImpl(buildingAddress, rtuName, file, resolvedIndex, options)
+  })
+  importPictureQueue = run.then(
+    () => undefined,
+    () => undefined,
+  )
+  return run
 }
 
 /** Persist the current edited image back to the map (IndexedDB, pending Cloudflare deploy). */
