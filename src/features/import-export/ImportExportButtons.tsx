@@ -111,7 +111,7 @@ export function ImportExportButtons({
         <SettingsToolButton
           tooltip={
             <>
-              Import from Excel: portfolio export (Buildings, RTUs, Tenant Polygons, Utilities) updates
+              Import Database from Excel: portfolio export (Buildings, RTUs, Tenant Polygons, Utilities) updates
               map positions and equipment, or Capital RTU Replacement workbook (Equipment + RTU Pricing)
               updates replacement years, notes, and tonnage pricing.
             </>
@@ -119,7 +119,7 @@ export function ImportExportButtons({
           onClick={() => inputRef.current?.click()}
           disabled={busy}
         >
-          {busy ? 'Importing…' : 'Import from Excel'}
+          {busy ? 'Importing…' : 'Import Database from Excel'}
         </SettingsToolButton>
       ) : null}
       {showImport ? (

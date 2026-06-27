@@ -23,12 +23,45 @@ function gitShow(path) {
   try {
     return execSync(`git show "${stagingRef}:${path}"`, {
       encoding: 'utf8',
-      maxBuffer: 64 * 1024 * 1024,
+      maxBuffer: 128 * 1024 * 1024,
       stdio: ['ignore', 'pipe', 'pipe'],
     })
   } catch {
     return null
   }
+}
+
+function parsePictureChunk(text, label) {
+  try {
+    const chunk = JSON.parse(text)
+    if (!Array.isArray(chunk)) {
+      fail(`${label} is not a JSON array.`)
+    }
+    return chunk
+  } catch {
+    const preview = text.slice(0, 80).replace(/\s+/g, ' ')
+    fail(`${label} is not valid JSON (${text.length} bytes; starts with "${preview}").`)
+  }
+}
+
+function loadPictureChunks() {
+  const pictures = []
+  let index = 0
+  while (true) {
+    const chunkText = gitShow(`sync/deploy-pictures-${index}.json`)
+    if (!chunkText?.trim()) break
+    pictures.push(...parsePictureChunk(chunkText, `sync/deploy-pictures-${index}.json`))
+    index += 1
+  }
+
+  if (pictures.length === 0) {
+    const legacyText = gitShow('sync/deploy-pictures.json')
+    if (legacyText?.trim()) {
+      pictures.push(...parsePictureChunk(legacyText, 'sync/deploy-pictures.json'))
+    }
+  }
+
+  return pictures
 }
 
 const bundleText = gitShow('sync/deploy-bundle.json')
@@ -47,21 +80,7 @@ if (!bundle.portfolio?.buildings?.length) {
   fail('Deploy bundle is missing portfolio.buildings.')
 }
 
-const picturesText = gitShow('sync/deploy-pictures.json')
-if (picturesText?.trim()) {
-  try {
-    bundle.pictures = JSON.parse(picturesText)
-  } catch {
-    const preview = picturesText.slice(0, 80).replace(/\s+/g, ' ')
-    fail(
-      `sync/deploy-pictures.json is not valid JSON (${picturesText.length} bytes; starts with "${preview}").`,
-    )
-  }
-}
-
-if (!Array.isArray(bundle.pictures)) {
-  bundle.pictures = []
-}
+bundle.pictures = loadPictureChunks()
 
 writeFileSync(outPath, `${JSON.stringify(bundle)}\n`)
 console.log(

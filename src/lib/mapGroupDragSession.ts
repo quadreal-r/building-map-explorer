@@ -63,24 +63,28 @@ export function setNativeDragPolygonKey(key: string | null): void {
 }
 
 export function applyGroupDragDelta(currentAnchor: { lat: number; lng: number }): GroupDragSnapshot | null {
-  const visuals = getVisuals()
-  if (!activeDrag || !visuals) return null
+  if (!activeDrag) return null
   const dLat = currentAnchor.lat - activeDrag.anchorStart.lat
   const dLng = currentAnchor.lng - activeDrag.anchorStart.lng
   const nextSnapshot = applyDeltaToSnapshot(activeDrag.baseSnapshot, dLat, dLng)
 
-  for (const [address, pos] of Object.entries(nextSnapshot.buildings)) {
-    visuals.setBuildingPosition(address, pos.lat, pos.lng)
-  }
-  for (const item of nextSnapshot.details) {
-    visuals.setDetailPosition(item.key, item.lat, item.lng)
-  }
-  for (const [key, poly] of Object.entries(nextSnapshot.polygons)) {
-    if (key === nativeDragPolygonKey) continue
-    visuals.setPolygonPaths(key, poly.paths)
+  // Always update the snapshot (used by endGroupDrag) even if visuals aren't ready.
+  activeDrag.currentSnapshot = nextSnapshot
+
+  const visuals = getVisuals()
+  if (visuals) {
+    for (const [address, pos] of Object.entries(nextSnapshot.buildings)) {
+      visuals.setBuildingPosition(address, pos.lat, pos.lng)
+    }
+    for (const item of nextSnapshot.details) {
+      visuals.setDetailPosition(item.key, item.lat, item.lng)
+    }
+    for (const [key, poly] of Object.entries(nextSnapshot.polygons)) {
+      if (key === nativeDragPolygonKey) continue
+      visuals.setPolygonPaths(key, poly.paths)
+    }
   }
 
-  activeDrag.currentSnapshot = nextSnapshot
   return nextSnapshot
 }
 

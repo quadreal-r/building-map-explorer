@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Modal } from '@/components/Modal/Modal'
+import { confirm } from '@/stores/confirmStore'
 import { isLegacySuiteMarkerName } from '@/lib/legacySuiteMarkers'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import type { Building, PortfolioData } from '@/types/domain'
@@ -38,14 +39,14 @@ export function RtuEditorSettings({
     setRtuName(nextRtus[0]?.name ?? '')
   }
 
-  const dispatchMapAction = (type: 'open' | 'move') => {
+  const showOnMap = () => {
     if (!buildingAddress || !rtuName) {
       showToastError('Select a building and RTU first.')
       return
     }
     onClose()
     window.dispatchEvent(
-      new CustomEvent(type === 'open' ? 'map:openDetail' : 'map:rtuSoloMove', {
+      new CustomEvent('map:openDetail', {
         detail: {
           layerKey: 'rtu',
           name: rtuName,
@@ -53,9 +54,6 @@ export function RtuEditorSettings({
         },
       }),
     )
-    if (type === 'move') {
-      showToastSuccess('Drag the RTU marker on the map to move it.')
-    }
   }
 
   const handleDelete = () => {
@@ -63,25 +61,27 @@ export function RtuEditorSettings({
       showToastError('Select a building and RTU first.')
       return
     }
-    if (!window.confirm(`Delete RTU "${selectedRtu.name}" from ${building.address}?`)) return
-    onPortfolioPatch({
-      ...portfolio,
-      buildings: portfolio.buildings.map((b) =>
-        b.address === building.address
-          ? { ...b, rtus: b.rtus?.filter((rtu) => rtu.name !== selectedRtu.name) }
-          : b,
-      ),
+    void confirm(`Delete RTU "${selectedRtu.name}" from ${building.address}?`).then((ok) => {
+      if (!ok || !building || !selectedRtu) return
+      onPortfolioPatch({
+        ...portfolio,
+        buildings: portfolio.buildings.map((b) =>
+          b.address === building.address
+            ? { ...b, rtus: b.rtus?.filter((rtu) => rtu.name !== selectedRtu.name) }
+            : b,
+        ),
+      })
+      const remaining = rtusForBuilding(building).filter((rtu) => rtu.name !== selectedRtu.name)
+      setRtuName(remaining[0]?.name ?? '')
+      showToastSuccess('✓ RTU deleted — sync to update Cloudflare.')
     })
-    const remaining = rtusForBuilding(building).filter((rtu) => rtu.name !== selectedRtu.name)
-    setRtuName(remaining[0]?.name ?? '')
-    showToastSuccess('✓ RTU deleted — sync to update Cloudflare.')
   }
 
   return (
     <Modal open={open} onClose={onClose} title="Edit RTU" width={420} align="center">
       <div className={styles.body}>
         <p className={styles.mgrFieldLabel} style={{ textTransform: 'none', letterSpacing: 0, fontSize: 12 }}>
-          Move or delete RTUs here. Use the map popup to edit name and description.
+          Delete RTUs here or show one on the map. Use the map popup to edit name and description, or move the marker.
         </p>
 
         <label className={styles.mgrFieldLabel} htmlFor="rtu-editor-building">
@@ -133,18 +133,9 @@ export function RtuEditorSettings({
             className="btn-action"
             style={{ width: '100%', justifyContent: 'flex-start' }}
             disabled={!selectedRtu}
-            onClick={() => dispatchMapAction('open')}
+            onClick={showOnMap}
           >
             Show on map
-          </button>
-          <button
-            type="button"
-            className="btn-action"
-            style={{ width: '100%', justifyContent: 'flex-start' }}
-            disabled={!selectedRtu}
-            onClick={() => dispatchMapAction('move')}
-          >
-            ↔ Move on map
           </button>
           <button
             type="button"

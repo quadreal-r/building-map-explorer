@@ -24,6 +24,7 @@ import { clearStaleLocalRtuPictures } from '@/lib/rtuPictures'
 import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
 import { downloadSyncStatusExcel } from '@/lib/syncStatusReport'
 import { usesRemoteJsonData } from '@/lib/jsonDataUrls'
+import { confirm } from '@/stores/confirmStore'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
@@ -111,7 +112,6 @@ function PropertyManagerNamesEditor({
 
   return (
     <div className={styles.mgrEditor}>
-      <div className={styles.mgrSlotTitle}>{managerSlotLabel(selectedIndex)}</div>
       <label className={styles.mgrFieldLabel} htmlFor="manager-slot-picker">
         Manager slot
       </label>
@@ -207,15 +207,14 @@ function SettingsForm({
   const handleImport = (data: PortfolioData) => {
     onImport(data)
     handleClose()
-    const save = window.confirm(
-      'Import complete. Export to HTML to keep these changes on this computer?',
+    void confirm('Import complete. Export to HTML to keep these changes on this computer?').then(
+      (save) => {
+        if (!save) return
+        void saveDatabase(data).then((ok) => {
+          if (ok) onSaved?.()
+        })
+      },
     )
-    if (!save) return
-    void saveDatabase(data).then((ok) => {
-      if (ok) {
-        onSaved?.()
-      }
-    })
   }
 
   const handleExportHtml = () => {
@@ -282,7 +281,7 @@ function SettingsForm({
       return
     }
     setUploadBusy(true)
-    void downloadSyncStatusExcel()
+    void downloadSyncStatusExcel(portfolio)
       .then(() => {
         showToastSuccess('✓ Sync status report downloaded (Excel)')
       })
@@ -403,7 +402,7 @@ function SettingsForm({
                 Clear stale local picture copies
               </SettingsToolButton>
               <SettingsToolButton
-                tooltip="Download Excel: Cloudflare sync-meta, manifest list, and local unsynced photos on this PC."
+                tooltip="Download Excel: Cloudflare sync-meta, sync history, manifest list, and local unsynced photos."
                 onClick={handleDownloadSyncReport}
                 disabled={uploadBusy}
               >

@@ -14,14 +14,14 @@ import {
 } from '@/lib/rtuPictureUrls'
 
 export interface RtuPictureManifest {
-  /** Keys: `${buildingAddress}|${rtuName}` → filenames in rtu-pictures folder */
+  /** Keys: `${buildingAddress}|${rtuName}` -> filenames in rtu-pictures folder */
   entries: Record<string, string[]>
 }
 
 export interface RtuPicture {
   fileName: string
   index: number
-  /** Low-res preview URL — caller must revoke blob URLs when done */
+  /** Low-res preview URL -- caller must revoke blob URLs when done */
   thumbUrl: string
   /** Full-resolution URL (static file or stored original blob) */
   fullUrl: string
@@ -84,13 +84,13 @@ export function resolveManifestRtuKey(
   return exact
 }
 
-/** First street number from a building address, e.g. "1590 South Gateway Rd." → "1590". */
+/** First street number from a building address, e.g. "1590 South Gateway Rd." -> "1590". */
 export function buildingStreetNumber(address: string): string {
   const match = address.match(/\d+/)
   return match?.[0] ?? 'unknown'
 }
 
-/** RTU label for filenames, e.g. "RTU- 04" → "RTU-04". */
+/** RTU label for filenames, e.g. "RTU- 04" -> "RTU-04". */
 export function sanitizeRtuFileToken(rtuName: string): string {
   return rtuName
     .trim()
@@ -447,7 +447,7 @@ async function cloudFilenameBlockedForNewUpload(
   if (manifestFile && !isRtuManifestPictureHidden(manifestKey, manifestFile)) {
     return true
   }
-  // Old/hidden CDN file still at this path — use the next index instead of reusing the filename.
+  // Old/hidden CDN file still at this path -- use the next index instead of reusing the filename.
   return true
 }
 
@@ -457,7 +457,7 @@ async function cloudRtuPictureReachable(fileName: string): Promise<boolean> {
     const response = await fetch(url, { method: 'HEAD', cache: 'no-store' })
     if (response.ok) return true
   } catch {
-    /* HEAD may be blocked by CORS — try image load */
+    /* HEAD may be blocked by CORS -- try image load */
   }
 
   if (!/\.(jpe?g|png|webp|gif)(\?|$)/i.test(fileName)) return false
@@ -562,7 +562,7 @@ function rowFileNamesInManifest(manifest: RtuPictureManifest, row: StoredRtuPict
 function isStalePendingRow(manifest: RtuPictureManifest, row: StoredRtuPictureRow): boolean {
   if (rowFileNamesInManifest(manifest, row)) return true
   if (isIndexedDbRowSatisfiedByManifest(manifest, row)) return true
-  // Do not match manifest index slots alone — a pending local row can be a new photo at the
+  // Do not match manifest index slots alone -- a pending local row can be a new photo at the
   // next index while an older file still occupies that slot in the cloud manifest.
   return false
 }
@@ -582,7 +582,7 @@ export async function countPendingPicturesNeedingCloudUpload(): Promise<number> 
   let count = 0
   for (const row of rows) {
     if (row.pendingDeploy === false) continue
-if ((row.fullBlob?.size ?? 0) === 0) continue
+    if ((row.fullBlob?.size ?? 0) === 0) continue
     if (isStalePendingRow(manifest, row)) continue
     count++
   }
@@ -660,7 +660,7 @@ export async function reconcilePendingDeployWithCloud(): Promise<number> {
         }
         const manifestFile = manifestFileAtIndex(manifest, row.rtuKey, row.index)
         if (!manifestFile) {
-          // Orphan CDN file at this path — keep local replacement pending upload.
+          // Orphan CDN file at this path -- keep local replacement pending upload.
           continue
         }
         const { buildingAddress, rtuName } = splitRtuPictureKey(row.rtuKey)
@@ -691,6 +691,15 @@ export async function clearStaleLocalRtuPictures(): Promise<{
   const removed = await reconcilePendingDeployWithCloud()
   const remaining = await countPendingPicturesNeedingCloudUpload()
   return { removed, remaining }
+}
+
+/** Drop all RTU pictures on this PC that were never synced to Cloudflare. */
+export async function discardPendingLocalRtuPictures(): Promise<number> {
+  const rows = await idbGetAllRows()
+  const toDelete = rows.filter((row) => row.pendingDeploy !== false).map((row) => row.fileName)
+  if (toDelete.length) await idbDeleteMany(toDelete)
+  if (toDelete.length) notifyRtuPicturesChanged()
+  return toDelete.length
 }
 
 /** Picture count per RTU key (`buildingAddress|rtuName`), merging manifest + IndexedDB by index. */
@@ -820,7 +829,7 @@ export async function listRtuPictures(
     ...(manifestKey !== key ? await idbGetAllForRtu(manifestKey) : []),
   ]
 
-  /** One picture per index — IndexedDB uploads replace static/manifest entries at the same slot. */
+  /** One picture per index -- IndexedDB uploads replace static/manifest entries at the same slot. */
   const byIndex = new Map<number, RtuPicture>()
 
   for (const fileName of staticNames) {
@@ -1001,3 +1010,5 @@ export async function addRtuPicturesFromFiles(
 
   return listRtuPictures(buildingAddress, rtuName)
 }
+
+export { hideRtuManifestPicture } from '@/lib/hiddenRtuPictures'

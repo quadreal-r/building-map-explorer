@@ -47,11 +47,22 @@ export function localPortfolioAheadOfRemote(
   local: PortfolioData,
   remote: PortfolioData,
 ): boolean {
+  // RTU count changed
   if (totalRtus(local) > totalRtus(remote)) return true
+
+  // Building count changed
+  if (local.buildings.length !== remote.buildings.length) return true
 
   for (const localBuilding of local.buildings) {
     const remoteBuilding = remote.buildings.find((b) => b.address === localBuilding.address)
     if (!remoteBuilding) continue
+
+    // Building notes changed
+    if ((localBuilding.notes ?? '') !== (remoteBuilding.notes ?? '')) return true
+
+    // Building position changed
+    if (localBuilding.lat !== remoteBuilding.lat || localBuilding.lng !== remoteBuilding.lng) return true
+
     const remoteNames = new Set((remoteBuilding.rtus ?? []).map((rtu) => rtu.name))
     for (const rtu of localBuilding.rtus ?? []) {
       if (!remoteNames.has(rtu.name)) return true
@@ -61,6 +72,27 @@ export function localPortfolioAheadOfRemote(
       if (!remoteRtu) continue
       if (remoteRtu.lat !== rtu.lat || remoteRtu.lng !== rtu.lng) return true
     }
+  }
+
+  // Polygon count or content changed
+  if (local.polygons.length !== remote.polygons.length) return true
+  for (const localPoly of local.polygons) {
+    const remotePoly = remote.polygons.find(
+      (p) => p.name === localPoly.name && p.description === localPoly.description,
+    )
+    if (!remotePoly) return true
+    if (localPoly.color !== remotePoly.color) return true
+    if (localPoly.paths.length !== remotePoly.paths.length) return true
+  }
+
+  // Utility count or position changed
+  if (local.utilities.length !== remote.utilities.length) return true
+  for (const localUtil of local.utilities) {
+    const remoteUtil = remote.utilities.find(
+      (u) => u.utility_type === localUtil.utility_type && u.name === localUtil.name,
+    )
+    if (!remoteUtil) return true
+    if (localUtil.lat !== remoteUtil.lat || localUtil.lng !== remoteUtil.lng) return true
   }
 
   return false
@@ -99,6 +131,21 @@ function loadStaticPortfolio(): PortfolioData {
     utilities: (staticUtilities as LegacyUtilityJson[]).map(normalizeLegacyUtility),
     polygons: (staticPolygons as LegacyPolygonJson[]).map(normalizeLegacyPolygon),
   })
+}
+
+export type PortfolioSnapshotSource = 'cloudflare' | 'bundled'
+
+/** Cloudflare JSON when reachable, otherwise the bundled git snapshot. */
+export async function loadFreshPortfolioSnapshot(): Promise<{
+  portfolio: PortfolioData
+  source: PortfolioSnapshotSource
+}> {
+  const baseUrl = getJsonDataBaseUrl()
+  if (baseUrl) {
+    const remote = await loadRemotePortfolio(baseUrl)
+    if (remote) return { portfolio: remote, source: 'cloudflare' }
+  }
+  return { portfolio: loadStaticPortfolio(), source: 'bundled' }
 }
 
 export async function loadRemotePortfolio(baseUrl: string): Promise<PortfolioData | null> {

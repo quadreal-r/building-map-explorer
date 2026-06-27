@@ -12,12 +12,27 @@ const DEFAULT_LAYERS: LayerVisibility = {
   gas: true,
 }
 
+const ALL_LAYERS_OFF: LayerVisibility = {
+  rtu: false,
+  polygons: false,
+  sprinkler: false,
+  electrical: false,
+  hydrant: false,
+  gas: false,
+}
+
+export function areAllLayersHidden(layers: LayerVisibility): boolean {
+  return !Object.values(layers).some(Boolean)
+}
+
 interface LayerState {
   layers: LayerVisibility
   toggleLayer: (key: LayerKey) => void
   setLayer: (key: LayerKey, visible: boolean) => void
   setLayers: (layers: LayerVisibility) => void
   resetLayers: () => void
+  hideAllLayers: () => void
+  showAllLayers: () => void
 }
 
 export const useLayerStore = create<LayerState>((set) => ({
@@ -36,4 +51,8 @@ export const useLayerStore = create<LayerState>((set) => ({
   setLayers: (layers) => set({ layers: { ...layers } }),
 
   resetLayers: () => set({ layers: { ...DEFAULT_LAYERS } }),
+
+  hideAllLayers: () => set({ layers: { ...ALL_LAYERS_OFF } }),
+
+  showAllLayers: () => set({ layers: { ...DEFAULT_LAYERS } }),
 }))

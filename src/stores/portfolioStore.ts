@@ -22,7 +22,6 @@ export const usePortfolioStore = create<PortfolioStoreState>((set, get) => ({
   setPortfolio: (data, options) => {
     get().persistToStorage(data)
     set({ portfolio: data, unsaved: options?.markSaved === false })
-    if (options?.markSaved !== false) set({ unsaved: false })
   },
 
   patchPortfolio: (data) => {

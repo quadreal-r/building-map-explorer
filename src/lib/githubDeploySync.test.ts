@@ -3,6 +3,7 @@ import {
   DEFAULT_GITHUB_REPO,
   jsonArraySizeAfterAddingEntry,
   MAX_GIST_BYTES,
+  MAX_PICTURE_CHUNK_BYTES,
   resolveGitHubRepo,
 } from '@/lib/githubDeploySync'
 
@@ -27,5 +28,12 @@ describe('jsonArraySizeAfterAddingEntry', () => {
   it('tracks JSON array growth for deploy picture entries', () => {
     expect(jsonArraySizeAfterAddingEntry(2, 0, 48)).toBe(50)
     expect(jsonArraySizeAfterAddingEntry(50, 1, 48)).toBe(99)
+  })
+})
+
+describe('MAX_PICTURE_CHUNK_BYTES', () => {
+  it('allows multiple photos per chunk without hitting the old 9 MB total cap', () => {
+    expect(MAX_PICTURE_CHUNK_BYTES).toBeGreaterThan(7 * 1024 * 1024)
+    expect(MAX_PICTURE_CHUNK_BYTES).toBeLessThan(MAX_GIST_BYTES)
   })
 })

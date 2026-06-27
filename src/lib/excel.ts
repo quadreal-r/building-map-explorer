@@ -9,7 +9,9 @@ import {
 } from '@/types/domain'
 import {
   buildPolygonBuildingIndex,
-  nearestBuilding,
+  buildingForPolygon,
+  formatSuiteExportLabel,
+  parseSuiteImportLabel,
   polygonCentroid,
   tenantPolygonCount,
 } from '@/lib/polygonBuildings'
@@ -35,7 +37,7 @@ const COL_WIDTHS = {
   buildings: [32.875, 12.875, 28.875, 24.875, 18.875, 10.875, 12.875, 11.875, 16.125, 14.875, 14.875],
   rtus: [32.875, 28.875, 20.875, 18.875, 23.375, 28.875, 16.875, 12.875, 16.875, 22.875, 22.875, 14.875, 18, 44.875, 10, 12, 48, 72],
   rtuPictures: [32.875, 28.875, 20.875, 18.875, 23.375, 36.875, 40.875, 12.875, 28.875, 16, 48, 72],
-  polygons: [32.875, 12.875, 28.875, 16.875, 36.875, 36.875, 12.125, 8.875, 14.875, 14.875, 14.875],
+  polygons: [32.875, 12.875, 28.875, 16.875, 48.875, 36.875, 12.125, 8.875, 14.875, 14.875, 14.875],
   utilities: [20.875, 38.875, 40.875, 14.875, 14.875],
 } as const
 
@@ -315,13 +317,14 @@ export async function exportPortfolioExcel(
 
   const polygonsRows = polygons.map((p) => {
     const c = polygonCentroid(p.paths)
-    const b = nearestBuilding(buildings, c.lat, c.lng)
+    const b = buildingForPolygon(buildings, p)
+    const address = b?.address ?? ''
     return [
-      b?.address ?? '',
+      address,
       b?.park ?? '',
       b?.cluster ?? '',
       b?.manager ?? '',
-      p.name,
+      formatSuiteExportLabel(p.name, address),
       p.description,
       p.paths.length,
       p.color,
@@ -575,7 +578,7 @@ export function importPortfolioExcel(buffer: ArrayBuffer): PortfolioData {
         paths = []
       }
       const legacy: LegacyPolygonJson = {
-        name: str(row['Suite']) || str(row['Tenant Name']) || 'Polygon',
+        name: parseSuiteImportLabel(str(row['Suite']) || str(row['Tenant Name']) || 'Polygon'),
         desc: str(row['Tenant Name']),
         color: str(row['Color']) || '#60a5fa',
         paths,

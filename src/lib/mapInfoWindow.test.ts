@@ -76,7 +76,7 @@ describe('mapInfoWindow', () => {
       },
     ]
     const html = buildBuildingInfoHtml(oldRtuBuilding, vacantPolygons)
-    expect(html).toContain('yr RTU</span>')
+    expect(html).not.toContain('yr RTU</span>')
     expect(html).toContain('VACANT</span>')
   })
   it('includes Copy and Move in building popup', () => {

@@ -10,6 +10,7 @@ import { useFilteredBuildings } from '@/hooks/useFilteredBuildings'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useRtuPictureViewerHistory } from '@/hooks/useRtuPictureViewerHistory'
 import { useUnsyncedChangesWarning } from '@/hooks/useUnsyncedChangesWarning'
+import { ConfirmDialog } from '@/components/ConfirmDialog/ConfirmDialog'
 import { RemoteSyncUpdateModal } from '@/features/sync/RemoteSyncUpdateModal'
 import { UnsyncedChangesBanner } from '@/features/sync/UnsyncedChangesBanner'
 import { useRemoteSyncUpdateCheck } from '@/hooks/useRemoteSyncUpdateCheck'
@@ -70,7 +71,18 @@ export function AppShell() {
   useRtuPictureViewerHistory()
   const unsyncedChanges = useUnsyncedChangesWarning()
 
-  const handlePortfolioImport = useCallback(
+  const handleUnsyncedDiscarded = useCallback(
+    (result: { portfolio: PortfolioData }) => {
+      setPortfolioOverride(null)
+      queryClient.setQueryData(['portfolio'], result.portfolio)
+      usePortfolioStore.getState().setPortfolio(result.portfolio, { markSaved: true })
+      unsyncedChanges.refresh()
+    },
+    [queryClient, unsyncedChanges.refresh],
+  )
+
+  // Both import and patch use the same update path
+  const handlePortfolioChange = useCallback(
     (next: PortfolioData) => {
       persistPortfolio(next)
       setPortfolioOverride(next)
@@ -80,15 +92,8 @@ export function AppShell() {
     [queryClient],
   )
 
-  const handlePortfolioPatch = useCallback(
-    (next: PortfolioData) => {
-      persistPortfolio(next)
-      setPortfolioOverride(next)
-      queryClient.setQueryData(['portfolio'], next)
-      usePortfolioStore.getState().patchPortfolio(next)
-    },
-    [queryClient],
-  )
+  const handlePortfolioImport = handlePortfolioChange
+  const handlePortfolioPatch = handlePortfolioChange
 
   const remoteSync = useRemoteSyncUpdateCheck(portfolio, handlePortfolioImport)
   const {
@@ -135,7 +140,7 @@ export function AppShell() {
   return (
     <div className={`app${unsyncedChanges.hasUnsynced ? ` ${styles.appWithBanner}` : ''}`}>
       {unsyncedChanges.hasUnsynced ? (
-        <UnsyncedChangesBanner lines={unsyncedChanges.lines} />
+        <UnsyncedChangesBanner lines={unsyncedChanges.lines} onDiscarded={handleUnsyncedDiscarded} />
       ) : null}
       <Sidebar
         allBuildings={portfolio.buildings}
@@ -193,6 +198,7 @@ export function AppShell() {
         onDismiss={dismissRemoteSync}
         onLoadUpdates={handleLoadRemoteUpdates}
       />
+      <ConfirmDialog />
     </div>
   )
 }

@@ -21,12 +21,14 @@ import {
   parseStoredRtuPictureFileName,
 } from './lib/rtu-picture-match.mjs'
 import { isR2Configured, listR2PictureFileNames } from './lib/r2-client.mjs'
-import { SYNC_META_FILE } from './lib/sync-meta.mjs'
+import { SYNC_META_FILE, SYNC_HISTORY_FILE } from './lib/sync-meta.mjs'
+import { buildSyncHistorySheetRows } from './lib/sync-history-sheet.mjs'
 
 const ROOT = getProjectRoot()
 const REPORT_DIR = join(ROOT, 'reports')
 const MANIFEST_PATH = join(ROOT, 'public', 'database', 'rtu-pictures', 'manifest.json')
 const LOCAL_SYNC_META_PATH = join(ROOT, 'supabase', 'data', SYNC_META_FILE)
+const LOCAL_SYNC_HISTORY_PATH = join(ROOT, 'supabase', 'data', SYNC_HISTORY_FILE)
 
 function normalizeBaseUrl(url) {
   if (!url) return ''
@@ -126,6 +128,7 @@ function buildWorkbook({
   generatedAt,
   cloudSyncMeta,
   localSyncMeta,
+  syncHistory,
   pictureRows,
   manifestDiff,
   cdnBase,
@@ -258,6 +261,12 @@ function buildWorkbook({
     'By RTU',
   )
 
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.aoa_to_sheet(buildSyncHistorySheetRows(syncHistory)),
+    'Sync history',
+  )
+
   return wb
 }
 
@@ -268,8 +277,11 @@ async function main() {
 
   const githubManifest = readJsonFile(MANIFEST_PATH) ?? { entries: {} }
   const localSyncMeta = readJsonFile(LOCAL_SYNC_META_PATH)
+  const localSyncHistory = readJsonFile(LOCAL_SYNC_HISTORY_PATH)
   const cloudManifest = jsonBase ? await fetchJson(`${jsonBase}manifest.json`) : null
   const cloudSyncMeta = jsonBase ? await fetchJson(`${jsonBase}sync-meta.json`) : null
+  const cloudSyncHistory = jsonBase ? await fetchJson(`${jsonBase}${SYNC_HISTORY_FILE}`) : null
+  const syncHistory = cloudSyncHistory ?? localSyncHistory
 
   const authoritativeManifest = cloudManifest ?? githubManifest
 
@@ -320,6 +332,7 @@ async function main() {
     generatedAt,
     cloudSyncMeta,
     localSyncMeta,
+    syncHistory,
     pictureRows,
     manifestDiff,
     cdnBase,
@@ -333,6 +346,7 @@ async function main() {
     generatedAt,
     cloudSyncMeta,
     localSyncMeta,
+    syncHistoryEntryCount: syncHistory?.entries?.length ?? 0,
     totals: {
       manifestPictures: pictureRows.length,
       syncedOnCdn: pictureRows.filter((row) => row.syncStatus === 'Synced on CDN').length,

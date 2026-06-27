@@ -18,10 +18,7 @@ import {
 import { LAYER_COLORS } from '@/lib/constants'
 import { setMapAddMarkerPickHandler } from '@/lib/mapAddMarkerPick'
 import { afterMapViewChange } from '@/lib/mapRotation'
-import {
-  confirmRtuMarkerBuildingPlacement,
-  findNearestBuildingByDistance,
-} from '@/lib/portfolioMarkerValidation'
+import { findNearestBuildingByDistance } from '@/lib/polygonBuildings'
 import { showToastSuccess } from '@/lib/toast'
 import { useLayerStore } from '@/stores/layerStore'
 import { useUiStore } from '@/stores/uiStore'
@@ -54,7 +51,7 @@ const LAYER_TO_UTILITY: Partial<Record<LayerKey, Utility['utility_type']>> = {
   gas: 'Natural Gas Shut-Off',
 }
 
-/** RTU/utility markers only show at zoom ≥ 16 — bump zoom without panning. */
+/** RTU/utility markers only show at zoom >= 16 — bump zoom without panning. */
 function ensureDetailMarkerZoom(map: google.maps.Map): void {
   if ((map.getZoom() ?? 10) < 16) {
     map.setZoom(16)
@@ -263,6 +260,7 @@ function AddMarkerForm({
   }
 
   const handleSave = () => {
+    void (async () => {
     setError(null)
     if (!position) return
     if (!name.trim()) {
@@ -283,16 +281,6 @@ function AddMarkerForm({
       const building = portfolio.buildings.find((b) => b.address === buildingAddress)
       if (!building) {
         setError('Building not found.')
-        return
-      }
-      if (
-        !confirmRtuMarkerBuildingPlacement(
-          building,
-          position.lat,
-          position.lng,
-          portfolio.buildings,
-        )
-      ) {
         return
       }
       onAdded({
@@ -324,6 +312,7 @@ function AddMarkerForm({
     resetFlow()
     showToastSuccess('✓ Marker added — save to HTML to keep it.')
     onClose()
+    })()
   }
 
   const handlePrimary = () => {

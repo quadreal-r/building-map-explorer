@@ -2,7 +2,7 @@ import { RTU_AGE_CRITICAL, RTU_AGE_WARN } from '@/lib/constants'
 import { getColor } from '@/lib/colors'
 import { resolveManagerDisplayName } from '@/lib/managerNames'
 import { hasPlaceholderGps, hasVacant, mlCount } from '@/lib/dataQuality'
-import { getRtuAge, getRtuYear, oldestRtuAge } from '@/lib/rtu'
+import { getRtuAge, getRtuYear } from '@/lib/rtu'
 import type { RtuPicture } from '@/lib/rtuPictures'
 import { showToastSuccess } from '@/lib/toast'
 import type { Building, LayerKey, Polygon, Rtu, Utility } from '@/types/domain'
@@ -156,7 +156,7 @@ export function buildDetailInfoPlainText(
   data: Rtu | Utility,
   options?: { buildingAddress?: string },
 ): string {
-  void options
+  void options?.buildingAddress
   const name = data.name ?? ''
   const lines: string[] = [name]
 
@@ -180,12 +180,6 @@ function isTenantVacant(polygon: Polygon): boolean {
 
 function buildingStatusBadges(building: Building, tenantPolygons: Polygon[]): string {
   let badges = ''
-  const oldest = oldestRtuAge(building)
-  if (oldest >= RTU_AGE_CRITICAL) {
-    badges += ` <span class="iw-badge" style="background:rgba(255,80,80,.22);color:#ff6060;border:1px solid rgba(255,80,80,.5)">🔥 ${oldest} yr RTU</span>`
-  } else if (oldest >= RTU_AGE_WARN) {
-    badges += ` <span class="iw-badge" style="background:rgba(251,191,36,.22);color:#fbbf24;border:1px solid rgba(251,191,36,.5)">${oldest} yr RTU</span>`
-  }
   if (hasVacant(building, tenantPolygons)) {
     badges += ` <span class="iw-badge" style="background:rgba(251,146,60,.2);color:#fb923c;border:1px solid rgba(251,146,60,.4)">VACANT</span>`
   }
@@ -276,7 +270,11 @@ export function buildBuildingInfoHtml(
 export function buildDetailInfoHtml(
   layerKey: LayerKey,
   data: Rtu | Utility,
-  options?: { showDelete?: boolean; buildingAddress?: string; pendingPictureAssignCount?: number },
+  options?: {
+    showDelete?: boolean
+    buildingAddress?: string
+    pendingPictureAssignCount?: number
+  },
 ): string {
   const cfg = LAYER_COLORS[layerKey]
   const name = data.name ?? ''
@@ -332,6 +330,33 @@ export function buildDetailInfoHtml(
       : ''
 
   return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${badgeHtml}${closeButton()}</div><div class="iw-body">${rows}</div>${actionFooter(`${copyButton()}${assignPendingBtn}${pictureBtn}${editTextBtn}${moveBtn}${deleteBtn}`)}</div>`
+}
+
+export function buildPolygonInfoHtml(
+  polygon: Polygon,
+  options?: {
+    assignedBuildingAddress?: string | null
+    isEditing?: boolean
+    actionKey?: string
+  },
+): string {
+  const esc = (t: string) => escapeHtml(t)
+  const actionKey = options?.actionKey ?? esc(`${polygon.name}\0${polygon.description ?? ''}`)
+  const isEditing = options?.isEditing ?? false
+  const buildingAddress = options?.assignedBuildingAddress ?? null
+  const assignedLine = buildingAddress
+    ? `<div class="iw-row"><strong>Building</strong>${esc(buildingAddress)}</div>`
+    : ''
+
+  return `<div class="iw"><div class="iw-head"><div class="iw-name">${esc(polygon.name || 'Polygon')}</div></div><div class="iw-body">${assignedLine}${
+    polygon.description
+      ? `<div class="iw-row" style="white-space:pre-wrap">${esc(polygon.description)}</div>`
+      : ''
+  }</div><div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap" data-poly-actions="${actionKey}">
+        <button data-poly-action="edit" style="font-size:11px;padding:4px 10px;background:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer">${isEditing ? '✏ Edit Off' : '✏ Edit Points'}</button>
+        <button data-poly-action="move" style="font-size:11px;padding:4px 10px;background:#059669;color:#fff;border:none;border-radius:4px;cursor:pointer">↔ Move</button>
+        <button data-poly-action="delete" style="font-size:11px;padding:4px 10px;background:#ef4444;color:#fff;border:none;border-radius:4px;cursor:pointer">🗑 Delete</button>
+      </div></div>`
 }
 
 export function buildDetailEditHtml(

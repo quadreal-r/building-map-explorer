@@ -1,5 +1,5 @@
 import { useEffect, type RefObject } from 'react'
-import { installRotationGuard } from '@/lib/mapRotation'
+import { applyStoredRotation, installRotationGuard, resetMapRotationPreserveView } from '@/lib/mapRotation'
 import { useMapRotationStore } from '@/stores/mapRotationStore'
 
 const ROT_SCALE = 0.3
@@ -65,9 +65,7 @@ export function useMapRotation(
       if (!e.ctrlKey) return
       e.preventDefault()
       e.stopPropagation()
-      useMapRotationStore.getState().resetRotation()
-      map.setHeading(0)
-      map.setTilt(0)
+      resetMapRotationPreserveView(map)
     }
 
     const rg = { on: false, a0: 0, h0: 0, d0: 1 }
@@ -112,6 +110,7 @@ export function useMapRotation(
     mapDiv.addEventListener('touchmove', onTouchMove, { passive: false, capture: true })
     mapDiv.addEventListener('touchend', onTouchEnd, { passive: true, capture: true })
 
+    applyStoredRotation(map)
     const rotationGuard = installRotationGuard(map)
 
     return () => {

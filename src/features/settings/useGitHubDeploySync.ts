@@ -4,10 +4,6 @@ import {
   syncDeployToGitHub,
   type GitHubSyncProgress,
 } from '@/lib/githubDeploySync'
-import {
-  confirmPortfolioMarkerPlacements,
-  findPortfolioMarkerPlacementIssues,
-} from '@/lib/portfolioMarkerValidation'
 import { recordLocalSyncPush } from '@/lib/remoteSyncState'
 import { exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
 import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
@@ -80,30 +76,31 @@ export function useGitHubDeploySync({
     }
     if (cooldownSec > 0) return
 
-    const markerIssues = findPortfolioMarkerPlacementIssues(portfolio)
-    if (!confirmPortfolioMarkerPlacements(markerIssues)) return
+    void (async () => {
+      setSyncing(true)
+      setCompleted(false)
+      setProgress({ message: 'Starting...', percent: 0 })
 
-    setSyncing(true)
-    setCompleted(false)
-    setProgress({ message: 'Starting…', percent: 0 })
-
-    void syncDeployToGitHub(portfolio, {
-      token: githubPat,
-      repo: githubRepo,
-      onProgress: setProgress,
-    })
-      .then((result) => {
+      try {
+        const result = await syncDeployToGitHub(portfolio, {
+          token: githubPat,
+          repo: githubRepo,
+          onProgress: setProgress,
+        })
         const parts = ['✓ Sync complete — portfolio JSON uploaded to Cloudflare and GitHub Pages will redeploy.']
-        if (result.picturesOmitted && result.pendingPictureCount > 0) {
-          const skipped = Math.max(0, result.pendingPictureCount - result.pictureCount)
+        if (result.pictureCount > 0) {
+          const batchNote =
+            result.pictureChunkCount > 1
+              ? ` (${result.pictureChunkCount} upload batches in one sync)`
+              : ''
+          parts.push(`${result.pictureCount} picture(s) uploaded to Cloudflare${batchNote}.`)
+        }
+        if (result.picturesOmitted && result.pendingPictureCount > result.pictureCount) {
+          const skipped = result.pendingPictureCount - result.pictureCount
           parts.push(
-            skipped > 0
-              ? `${skipped} local picture(s) were too large to include in the sync bundle — sync again later or use npm run upload-rtu-pictures-r2 locally.`
-              : `${result.pendingPictureCount} local picture(s) were too large to include in the sync bundle — they were not uploaded to Cloudflare. Try fewer pictures per sync or export manually.`,
+            `${skipped} local picture(s) were too large to upload — resize them or use npm run upload-rtu-pictures-r2 locally.`,
           )
-        } else if (result.pictureCount > 0) {
-          parts.push(`${result.pictureCount} picture(s) uploaded to Cloudflare.`)
-        } else if (result.pendingPictureCount > 0) {
+        } else if (result.pendingPictureCount > 0 && result.pictureCount === 0) {
           parts.push(`${result.pendingPictureCount} picture(s) were pending but none were uploaded.`)
         }
         if (result.workflowRunUrl) {
@@ -121,19 +118,18 @@ export function useGitHubDeploySync({
         setCompleted(true)
         setCooldownSec(Math.ceil(SYNC_COOLDOWN_MS / 1000))
         setProgress({ message: 'Completed upload', percent: 100 })
-      })
-      .catch((error) => {
+      } catch (error) {
         showToastError(error instanceof Error ? error.message : 'Sync failed')
         setCompleted(false)
         setProgress({ message: '', percent: 0 })
-      })
-      .finally(() => {
+      } finally {
         setSyncing(false)
-      })
+      }
+    })()
   }
 
   const buttonLabel = (() => {
-    if (syncing) return progress.message || 'Syncing…'
+    if (syncing) return progress.message || 'Syncing...'
     if (completed && cooldownSec > 0) {
       return `Completed upload (wait ${formatCooldown(cooldownSec)} to activate)`
     }

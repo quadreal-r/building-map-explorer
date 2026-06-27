@@ -8,7 +8,7 @@ interface MapRotationState {
   resetRotation: () => void
 }
 
-/** User-controlled map rotation; only reset via Ctrl+dblclick. */
+/** User-controlled map rotation; reset via Ctrl+dblclick. */
 export const useMapRotationStore = create<MapRotationState>((set) => ({
   heading: 0,
   tilt: 0,

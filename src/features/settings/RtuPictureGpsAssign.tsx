@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { SettingsToolButton } from '@/features/settings/SettingsToolButton'
 import { RTU_PICTURE_DROP_FEET } from '@/lib/geo'
+import { confirm } from '@/stores/confirmStore'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import { usePendingRtuPictureStore } from '@/stores/pendingRtuPictureStore'
 import { useUiStore } from '@/stores/uiStore'
@@ -24,15 +25,13 @@ export function RtuPictureGpsAssign({ onBusyChange }: RtuPictureGpsAssignProps) 
 
   const handleClearPending = () => {
     if (pendingCount === 0) return
-    if (
-      !window.confirm(
-        `Remove ${pendingCount} photo marker${pendingCount === 1 ? '' : 's'} from the map and start over?`,
-      )
-    ) {
-      return
-    }
-    clearPending()
-    showToastSuccess('Photo markers cleared — choose Upload RTU Pictures when ready.')
+    void confirm(
+      `Remove ${pendingCount} photo marker${pendingCount === 1 ? '' : 's'} from the map and start over?`,
+    ).then((ok) => {
+      if (!ok) return
+      clearPending()
+      showToastSuccess('Photo markers cleared — choose Upload RTU Pictures when ready.')
+    })
   }
 
   const handleFiles = () => {
@@ -72,7 +71,7 @@ export function RtuPictureGpsAssign({ onBusyChange }: RtuPictureGpsAssignProps) 
           <>
             Select RTU photos from your device. Photos with GPS are placed on the map at the
             exact coordinates from the photo. Double-click a marker for full size. Drag onto
-            the correct RTU pin to assign, or click the RTU pin → Assign pending photo. Saved as
+            the correct RTU pin to assign, or click the RTU pin &rarr; Assign pending photo. Saved as
             e.g. 2320-RTU-04-1.jpg (within {RTU_PICTURE_DROP_FEET} ft). Turn off Edit Multiple Positions first.
             Photos without GPS are skipped. A new upload replaces any markers
             still waiting on the map.

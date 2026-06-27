@@ -43,7 +43,7 @@
 }
 
 .wide {
-  max-width: 300px;
+  max-width: 360px;
 }
 
 .tip[data-position='left']::before {

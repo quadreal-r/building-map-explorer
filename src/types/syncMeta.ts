@@ -19,3 +19,23 @@ export interface SyncMeta {
   source: 'settings-sync' | 'git-push' | string
   summary: SyncMetaSummary
 }
+
+export interface SyncHistoryChange {
+  label: string
+  before: number
+  after: number
+  delta: number
+}
+
+export interface SyncHistoryEntry {
+  syncedAt: string
+  exportedAt: string
+  source: string
+  summary: SyncMetaSummary
+  changes: SyncHistoryChange[]
+}
+
+export interface SyncHistory {
+  version: number
+  entries: SyncHistoryEntry[]
+}

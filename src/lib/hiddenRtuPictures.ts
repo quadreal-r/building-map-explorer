@@ -110,6 +110,13 @@ export function migrateHiddenRtuPictureKeys(
   }
 }
 
+/** Remove browser-only hide entries (reverts unsynced picture hides). */
+export function clearLocalHiddenRtuPictures(): void {
+  if (typeof localStorage === 'undefined') return
+  localStorage.removeItem(STORAGE_KEY)
+  invalidateUnsyncedChanges()
+}
+
 /** Local hides not included in the last successful Cloudflare sync on this PC. */
 export function countUnsyncedLocalHiddenRtuPictures(
   lastPushedHiddenKeys: string[] | null,

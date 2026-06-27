@@ -10,8 +10,10 @@ import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import {
+  appendSyncHistoryEntry,
   buildSyncMetaFromDataDir,
   SYNC_META_FILE,
+  SYNC_HISTORY_FILE,
   writeSyncMetaFile,
 } from './lib/sync-meta.mjs'
 import {
@@ -45,6 +47,10 @@ export const PORTFOLIO_JSON_FILES = [
     localPath: join(ROOT, 'supabase', 'data', 'sync-meta.json'),
     objectKey: 'sync-meta.json',
   },
+  {
+    localPath: join(ROOT, 'supabase', 'data', SYNC_HISTORY_FILE),
+    objectKey: SYNC_HISTORY_FILE,
+  },
 ]
 
 const DATA_DIR = join(ROOT, 'supabase', 'data')
@@ -63,6 +69,7 @@ export async function uploadPortfolioJsonToR2() {
   if (!existsSync(syncMetaPath)) {
     const meta = buildSyncMetaFromDataDir(DATA_DIR, PICS_DIR, { preserveExportedAt: false })
     writeSyncMetaFile(syncMetaPath, meta)
+    appendSyncHistoryEntry(DATA_DIR, meta)
     console.log(`Wrote ${SYNC_META_FILE} from current data files`)
   }
 

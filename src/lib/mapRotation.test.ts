@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
-import { applyStoredRotation, panToPreserveRotation } from '@/lib/mapRotation'
+import {
+  applyStoredRotation,
+  panToPreserveRotation,
+  resetMapRotationPreserveView,
+} from '@/lib/mapRotation'
 import { useMapRotationStore } from '@/stores/mapRotationStore'
 
 describe('mapRotation', () => {
@@ -53,5 +57,36 @@ describe('mapRotation', () => {
     panToPreserveRotation(map, { lat: 1, lng: 2 }, 21, { onlyZoomIn: true })
 
     expect(setZoom).toHaveBeenCalledWith(21)
+  })
+
+  it('resetMapRotationPreserveView clears rotation but keeps center and zoom', () => {
+    useMapRotationStore.setState({ heading: 90, tilt: 15 })
+    const center = { lat: () => 43.5, lng: () => -79.6 }
+    let heading = 90
+    let tilt = 15
+    let setCenterArg: google.maps.LatLng | null = null
+    const map = {
+      getCenter: () => center,
+      getZoom: () => 17,
+      setHeading: (h: number) => {
+        heading = h
+      },
+      setTilt: (t: number) => {
+        tilt = t
+      },
+      setCenter: (c: google.maps.LatLng) => {
+        setCenterArg = c
+      },
+      setZoom: vi.fn(),
+    } as unknown as google.maps.Map
+
+    resetMapRotationPreserveView(map)
+
+    expect(heading).toBe(0)
+    expect(tilt).toBe(0)
+    expect(useMapRotationStore.getState().heading).toBe(0)
+    expect(useMapRotationStore.getState().tilt).toBe(0)
+    expect(setCenterArg).toBe(center)
+    expect(map.setZoom).toHaveBeenCalledWith(17)
   })
 })

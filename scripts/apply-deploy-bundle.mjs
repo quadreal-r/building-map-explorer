@@ -20,7 +20,7 @@ import {
   uploadRtuPictureToR2,
 } from './lib/r2-client.mjs'
 import { parseBulkRtuPictureFileName } from './lib/rtu-picture-filename.mjs'
-import { buildSyncMetaFromBundle, writeSyncMetaFile } from './lib/sync-meta.mjs'
+import { buildSyncMetaFromBundle, writeSyncMetaFile, appendSyncHistoryEntry } from './lib/sync-meta.mjs'
 import { uploadPortfolioJsonToR2 } from './upload-json-to-r2.mjs'
 import {
   RTU_GPS_MATCH_FEET,
@@ -262,6 +262,7 @@ const syncMeta = buildSyncMetaFromBundle(bundle, {
   picturesUploaded: r2Uploads + localWrites,
 })
 writeSyncMetaFile(join(DATA_DIR, 'sync-meta.json'), syncMeta)
+appendSyncHistoryEntry(DATA_DIR, syncMeta)
 console.log(`Sync meta: exported ${syncMeta.exportedAt}`)
 
 if (isR2Configured()) {

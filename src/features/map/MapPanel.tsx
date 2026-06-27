@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AddMarkerPanel } from '@/features/map/AddMarkerPanel'
 import { VersionStamp } from '@/components/VersionStamp/VersionStamp'
 import { PolygonDrawPanel } from '@/features/polygons/PolygonDrawPanel'
@@ -12,8 +12,17 @@ import { IMAGERY_MODES, MAP_MAX_ZOOM } from '@/lib/constants'
 import { matchesUtility } from '@/lib/dragSelection'
 import { tenantPolygonCount, buildPolygonBuildingIndex } from '@/lib/polygonBuildings'
 import { installMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
-import { fitBoundsPreserveRotation, panToPreserveRotation } from '@/lib/mapRotation'
+import { fitBoundsPreserveRotation, panToPreserveRotation, applyStoredRotation } from '@/lib/mapRotation'
+import {
+  applyHardRefreshViewToMap,
+  HARD_REFRESH_VIEW_KEY,
+  markHardRefreshViewApplied,
+  readHardRefreshViewState,
+  registerLiveMapViewReader,
+  suppressNextBuildingMapFocus,
+} from '@/lib/hardRefresh'
 import { enableMapDigitalZoom } from '@/lib/mapDigitalZoom'
+import { confirm } from '@/stores/confirmStore'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
 import {
@@ -28,6 +37,8 @@ import { usePortfolioStore } from '@/stores/portfolioStore'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useUiStore } from '@/stores/uiStore'
 import { usePendingRtuPictureStore } from '@/stores/pendingRtuPictureStore'
+import { useMapViewStore } from '@/stores/mapViewStore'
+import { useMapRotationStore } from '@/stores/mapRotationStore'
 import styles from './MapPanel.module.css'
 
 export interface MapPanelProps {
@@ -51,6 +62,7 @@ export function MapPanel({
   onAddMarkerClose,
 }: MapPanelProps) {
   const mapRef = useRef<HTMLDivElement>(null)
+  const hardRefreshMapAppliedRef = useRef(false)
   const [map, setMap] = useState<google.maps.Map | null>(null)
   const [mapError, setMapError] = useState<string | null>(null)
   const [imageryMode, setImageryMode] = useState<ImageryMode>(IMAGERY_MODES[0]!)
@@ -63,6 +75,7 @@ export function MapPanel({
   const setDragMode = useSelectionStore((s) => s.setDragMode)
   const resetFilters = useFilterStore((s) => s.resetFilters)
   const openSettings = useUiStore((s) => s.openSettings)
+  const setMapViewSnapshot = useMapViewStore((s) => s.setSnapshot)
 
   const { mapId, isConfigured: mapsConfigured } = readGoogleMapsEnv()
 
@@ -252,15 +265,13 @@ export function MapPanel({
 
   const handleClearPendingPictures = useCallback(() => {
     if (pendingPictureCount === 0) return
-    if (
-      !window.confirm(
-        `Remove ${pendingPictureCount} photo marker${pendingPictureCount === 1 ? '' : 's'} from the map and start over?`,
-      )
-    ) {
-      return
-    }
-    clearPendingPictures()
-    showToastSuccess('Photo markers cleared — upload again from Settings when ready.')
+    void confirm(
+      `Remove ${pendingPictureCount} photo marker${pendingPictureCount === 1 ? '' : 's'} from the map and start over?`,
+    ).then((ok) => {
+      if (!ok) return
+      clearPendingPictures()
+      showToastSuccess('Photo markers cleared — upload again from Settings when ready.')
+    })
   }, [clearPendingPictures, pendingPictureCount])
 
   useEffect(() => {
@@ -321,7 +332,8 @@ export function MapPanel({
           headingInteractionEnabled: true,
           tiltInteractionEnabled: true,
           isFractionalZoomEnabled: true,
-          renderingType: google.maps.RenderingType.RASTER,
+          // Heading/tilt (Ctrl+drag rotate) require vector rendering with a mapId.
+          renderingType: google.maps.RenderingType.VECTOR,
         })
         cleanupDigitalZoom = enableMapDigitalZoom(instance, mapRef.current, {
           onScaleChange: setDigitalZoomScale,
@@ -336,6 +348,73 @@ export function MapPanel({
     }
   }, [mapsConfigured, mapId])
 
+  useEffect(() => {
+    if (!map) return
+    const snapshotView = () => {
+      const center = map.getCenter()
+      if (!center) return
+      setMapViewSnapshot({
+        lat: center.lat(),
+        lng: center.lng(),
+        zoom: map.getZoom() ?? 10,
+      })
+    }
+    snapshotView()
+    const listeners = [
+      map.addListener('idle', snapshotView),
+      map.addListener('center_changed', snapshotView),
+      map.addListener('zoom_changed', snapshotView),
+    ]
+    return () => listeners.forEach((listener) => google.maps.event.removeListener(listener))
+  }, [map, setMapViewSnapshot])
+
+  useEffect(() => {
+    if (!map) return
+    return registerLiveMapViewReader(() => {
+      const center = map.getCenter()
+      if (!center) return null
+      const { heading, tilt } = useMapRotationStore.getState()
+      const buildingAddress = useSelectionStore.getState().currentBuilding?.address ?? null
+      return {
+        lat: center.lat(),
+        lng: center.lng(),
+        zoom: map.getZoom() ?? 10,
+        heading,
+        tilt,
+        buildingAddress,
+      }
+    })
+  }, [map])
+
+  useEffect(() => {
+    if (!map) return
+    const restored = readHardRefreshViewState()
+    if (!restored) return
+
+    const applyView = () => {
+      applyHardRefreshViewToMap(map, restored)
+      applyStoredRotation(map)
+    }
+
+    if (!hardRefreshMapAppliedRef.current) {
+      applyView()
+      markHardRefreshViewApplied()
+      hardRefreshMapAppliedRef.current = true
+      google.maps.event.addListenerOnce(map, 'idle', applyView)
+    }
+
+    if (restored.buildingAddress) {
+      if (!portfolio.buildings.length) return
+      const building = portfolio.buildings.find((b) => b.address === restored.buildingAddress)
+      if (building) {
+        suppressNextBuildingMapFocus()
+        selectBuilding(building)
+      }
+    }
+
+    sessionStorage.removeItem(HARD_REFRESH_VIEW_KEY)
+  }, [map, portfolio.buildings, selectBuilding])
+
   const handleCycleImagery = () => {
     const mode = cycleImagery()
     if (mode) setImageryMode(mode)
@@ -347,7 +426,10 @@ export function MapPanel({
     showAllMarkers()
   }
 
-  const polygonIndex = buildPolygonBuildingIndex(portfolio.buildings, portfolio.polygons)
+  const polygonIndex = useMemo(
+    () => buildPolygonBuildingIndex(portfolio.buildings, portfolio.polygons),
+    [portfolio.buildings, portfolio.polygons],
+  )
 
   const mapTitle = currentBuilding?.address ?? 'Industrial Portfolio — Ontario'
   const subtitle = currentBuilding
@@ -387,7 +469,7 @@ export function MapPanel({
           >
             {imageryMode.label}
           </button>
-          <button type="button" className="btn-action" onClick={openSettings} title="Settings — themes & manager names" style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
+          <button type="button" className="btn-action" onClick={openSettings} title="Settings — themes &amp; manager names" style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
             Settings
           </button>
           <VersionStamp />
@@ -398,7 +480,7 @@ export function MapPanel({
         {dragMode ? (
           <div className={styles.dragNotice} role="status">
             <span className={styles.dragNoticeText}>
-              ✦ Edit positions — drag a box to select · click to toggle · Ctrl/Shift+click or drag to add ·{' '}
+              Edit positions — drag a box to select · click to toggle · Ctrl/Shift+click or drag to add ·{' '}
               <span className={styles.dragNoticeMuted}>click empty map to clear</span>
             </span>
             <button

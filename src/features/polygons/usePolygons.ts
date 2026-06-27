@@ -13,6 +13,8 @@ import { afterMapViewChange, panToPreserveRotation } from '@/lib/mapRotation'
 import { consumeMapClickClearSuppression, registerMarqueeTarget, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
 import { tryConsumeMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
 import { closeAllMapPopups, ensureInfoWindowVisible, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
+import { buildPolygonInfoHtml } from '@/lib/mapInfoWindow'
+import { buildingForPolygon } from '@/lib/polygonBuildings'
 import { showToastSuccess } from '@/lib/toast'
 import { useLayerStore } from '@/stores/layerStore'
 import { useSelectionStore } from '@/stores/selectionStore'
@@ -234,15 +236,12 @@ export function usePolygons({
       const esc = (t: string) => t.replace(/</g, '&lt;').replace(/"/g, '&quot;')
       const actionKey = esc(polygonKey(data))
       const isEditing = editingRef.current?.poly === poly
-      const content = `<div class="iw"><div class="iw-head"><div class="iw-name">${esc(data.name || 'Polygon')}</div></div>${
-        data.description
-          ? `<div class="iw-row" style="margin-top:6px;white-space:pre-wrap">${esc(data.description)}</div>`
-          : ''
-      }<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap" data-poly-actions="${actionKey}">
-        <button data-poly-action="edit" style="font-size:11px;padding:4px 10px;background:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer">${isEditing ? '✏ Edit Off' : '✏ Edit Points'}</button>
-        <button data-poly-action="move" style="font-size:11px;padding:4px 10px;background:#059669;color:#fff;border:none;border-radius:4px;cursor:pointer">↔ Move</button>
-        <button data-poly-action="delete" style="font-size:11px;padding:4px 10px;background:#ef4444;color:#fff;border:none;border-radius:4px;cursor:pointer">🗑 Delete</button>
-      </div></div>`
+      const assigned = buildingForPolygon(buildings, data)
+      const content = buildPolygonInfoHtml(data, {
+        assignedBuildingAddress: assigned?.address ?? null,
+        isEditing,
+        actionKey,
+      })
 
       infoWindowRef.current = new google.maps.InfoWindow({
         content,
@@ -294,6 +293,28 @@ export function usePolygons({
   useEffect(() => {
     openPopupRef.current = openPopup
   }, [openPopup])
+
+  const syncPolygonLayerVisibility = useCallback(() => {
+    const { layers } = useLayerStore.getState()
+    const polygonsOn = layers.polygons
+    for (const entry of renderedRef.current) {
+      entry.gmPoly.setVisible(polygonsOn)
+    }
+    if (!polygonsOn) {
+      infoWindowRef.current?.close()
+      infoWindowRef.current = null
+      infoPolyRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    return useLayerStore.subscribe((state, prevState) => {
+      if (state.layers === prevState.layers) {
+        return
+      }
+      syncPolygonLayerVisibility()
+    })
+  }, [syncPolygonLayerVisibility])
 
   useEffect(() => {
     if (!map) return
@@ -442,15 +463,8 @@ export function usePolygons({
   }, [dragMode, dragSelectedKeys])
 
   useEffect(() => {
-    for (const entry of renderedRef.current) {
-      entry.gmPoly.setVisible(polygonsLayerVisible)
-    }
-    if (!polygonsLayerVisible) {
-      infoWindowRef.current?.close()
-      infoWindowRef.current = null
-      infoPolyRef.current = null
-    }
-  }, [polygonsLayerVisible])
+    syncPolygonLayerVisibility()
+  }, [polygonsLayerVisible, syncPolygonLayerVisibility])
 
   useEffect(() => {
     const closePopups = () => {

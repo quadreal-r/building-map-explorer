@@ -20,7 +20,8 @@ function SearchHitNavInner({ hits }: { hits: SearchHit[] }) {
     if (hits.length >= 1) {
       openSearchHit(hits[0]!)
     }
-  }, [hits])
+    // Intentionally mount-only: parent remounts via key={search} when the query changes.
+  }, [])
 
   if (hits.length <= 1) return null
 

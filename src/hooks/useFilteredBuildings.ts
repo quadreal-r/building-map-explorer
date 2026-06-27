@@ -30,26 +30,20 @@ export function useFilteredBuildings(buildings: Building[], polygons: Polygon[] 
     [search, park, cluster, manager, adv],
   )
 
-  const filteredBuildings = useMemo(
-    () =>
-      applyPrimaryFilters(
-        buildings,
-        reconcileFilterDropdowns(buildings, filters, polygonIndex, managerRenames),
-        polygonIndex,
-        managerRenames,
-      ),
+  // Reconcile once and reuse for both filtered and cost-scope passes
+  const reconciledFilters = useMemo(
+    () => reconcileFilterDropdowns(buildings, filters, polygonIndex, managerRenames),
     [buildings, filters, polygonIndex, managerRenames],
   )
 
+  const filteredBuildings = useMemo(
+    () => applyPrimaryFilters(buildings, reconciledFilters, polygonIndex, managerRenames),
+    [buildings, reconciledFilters, polygonIndex, managerRenames],
+  )
+
   const costScopeBuildings = useMemo(
-    () =>
-      applyCostScopeFilters(
-        buildings,
-        reconcileFilterDropdowns(buildings, filters, polygonIndex, managerRenames),
-        polygonIndex,
-        managerRenames,
-      ),
-    [buildings, filters, polygonIndex, managerRenames],
+    () => applyCostScopeFilters(buildings, reconciledFilters, polygonIndex, managerRenames),
+    [buildings, reconciledFilters, polygonIndex, managerRenames],
   )
 
   return {

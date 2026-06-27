@@ -1,0 +1,43 @@
+.message {
+  color: var(--text-primary, #ffffff);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0 0 16px;
+  white-space: pre-wrap;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cancel,
+.confirm {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: opacity 0.15s;
+}
+
+.cancel {
+  background: transparent;
+  border-color: var(--border, #2e6ec0);
+  color: var(--text-primary, #ffffff);
+}
+
+.cancel:hover {
+  background: var(--surface-hover, rgba(255, 255, 255, 0.07));
+}
+
+.confirm {
+  background: var(--accent, #3b82f6);
+  color: #fff;
+}
+
+.confirm:hover {
+  opacity: 0.88;
+}

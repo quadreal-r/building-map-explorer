@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx'
 import { collectUnsyncedChangesSummary } from '@/lib/unsyncedChanges'
 import { fetchRemoteSyncMeta } from '@/lib/syncMeta'
+import { buildSyncHistorySheetRows, fetchRemoteSyncHistory } from '@/lib/syncHistory'
 import { loadRemoteSyncState } from '@/lib/remoteSyncState'
 import { parseBulkRtuPictureFileName } from '@/lib/rtuPictureMatch'
 import {
@@ -10,6 +11,7 @@ import {
   parseRtuPictureIndex,
 } from '@/lib/rtuPictures'
 import { manifestEntryToCloudFileName } from '@/lib/rtuPictureAssignNaming'
+import type { PortfolioData } from '@/types/domain'
 
 function splitRtuKey(rtuKey: string): { buildingAddress: string; rtuName: string } {
   const pipe = rtuKey.indexOf('|')
@@ -35,10 +37,10 @@ function pictureSlotFromFileName(fileName: string): {
   return { pictureIndex: parseRtuPictureIndex(fileName), installYear: null }
 }
 
-/** Download Excel: Cloudflare sync-meta + local unsynced items on this browser. */
-export async function downloadSyncStatusExcel(): Promise<void> {
+/** Download Excel: Cloudflare sync-meta + local unsynced items on this browser. */export async function downloadSyncStatusExcel(portfolio: PortfolioData): Promise<void> {
   const [
     cloudMeta,
+    cloudHistory,
     manifest,
     unsyncedLines,
     pendingRows,
@@ -46,6 +48,7 @@ export async function downloadSyncStatusExcel(): Promise<void> {
     syncState,
   ] = await Promise.all([
     fetchRemoteSyncMeta(),
+    fetchRemoteSyncHistory(),
     loadRtuPictureManifest(),
     collectUnsyncedChangesSummary(),
     listPendingDeployPictureRows(),
@@ -156,6 +159,12 @@ export async function downloadSyncStatusExcel(): Promise<void> {
     wb,
     XLSX.utils.aoa_to_sheet([manifestHeader, ...manifestRows]),
     'Cloudflare manifest',
+  )
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.aoa_to_sheet(buildSyncHistorySheetRows(cloudHistory)),
+    'Sync history',
   )
 
   XLSX.writeFile(wb, `sync-status-${stampFileName()}.xlsx`)

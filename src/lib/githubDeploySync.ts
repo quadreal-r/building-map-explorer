@@ -4,7 +4,6 @@ import { collectDeployBundleLean } from '@/lib/deployBundle'
 import { repairStoredPortfolioRtuNames } from '@/hooks/usePortfolioData'
 import {
   encodeDeployPictureEntry,
-  estimateDeployPictureJsonBytes,
   listPendingDeployPictureRows,
   markRtuPicturesDeployed,
 } from '@/lib/rtuPictures'
@@ -16,9 +15,19 @@ export const SYNC_DEPLOY_WORKFLOW = 'sync-deploy.yml'
 export const SYNC_STAGING_BRANCH = 'bme-sync-staging'
 export const SYNC_BUNDLE_PATH = 'sync/deploy-bundle.json'
 export const SYNC_PICTURES_PATH = 'sync/deploy-pictures.json'
+/** Numbered picture chunks: sync/deploy-pictures-0.json, sync/deploy-pictures-1.json, … */
+export const SYNC_PICTURE_CHUNK_PREFIX = 'sync/deploy-pictures-'
+/** Target size per picture chunk JSON (base64 photos). Single larger photos may exceed this. */
+export const MAX_PICTURE_CHUNK_BYTES = 8 * 1024 * 1024
+/** Hard limit for one picture chunk file (GitHub Contents API ~100 MB). */
+export const MAX_SINGLE_PICTURE_CHUNK_BYTES = 95 * 1024 * 1024
 /** Max bytes for lean JSON + pictures in one sync (GitHub Contents API limit is much higher). */
 export const MAX_GIST_BYTES = 9 * 1024 * 1024
 export const MAX_SYNC_BUNDLE_BYTES = MAX_GIST_BYTES
+
+export function pictureChunkPath(index: number): string {
+  return `${SYNC_PICTURE_CHUNK_PREFIX}${index}.json`
+}
 
 const GITHUB_API = 'https://api.github.com'
 
@@ -38,6 +47,7 @@ export interface GitHubSyncResult {
   workflowRunUrl: string | null
   picturesOmitted: boolean
   pictureCount: number
+  pictureChunkCount: number
   pictureExportFailed: string[]
   pendingPictureCount: number
   exportedAt: string
@@ -52,24 +62,33 @@ export function jsonArraySizeAfterAddingEntry(currentSize: number, entryCount: n
   return currentSize + 1 + entryJsonLength
 }
 
-export async function collectDeployPicturesWithinBudget(
-  budgetBytes: number,
+/** Pack pending pictures into multiple JSON chunks so one sync can upload all photos. */
+export async function collectDeployPictureChunks(
+  maxChunkBytes: number,
   onProgress?: GitHubSyncOptions['onProgress'],
 ): Promise<{
-  pictures: DeployPictureEntry[]
+  chunks: DeployPictureEntry[][]
   picturesOmitted: boolean
   failedFileNames: string[]
   pendingCount: number
 }> {
   const { rows, failedFileNames, pendingCount } = await listPendingDeployPictureRows()
   if (!rows.length) {
-    return { pictures: [], picturesOmitted: false, failedFileNames, pendingCount }
+    return { chunks: [], picturesOmitted: false, failedFileNames, pendingCount }
   }
 
-  const included: DeployPictureEntry[] = []
+  const chunks: DeployPictureEntry[][] = []
+  let current: DeployPictureEntry[] = []
   let arrayJsonSize = 2
   let picturesOmitted = false
   const total = rows.length
+
+  const flushCurrent = () => {
+    if (!current.length) return
+    chunks.push(current)
+    current = []
+    arrayJsonSize = 2
+  }
 
   for (let index = 0; index < rows.length; index++) {
     const row = rows[index]!
@@ -79,37 +98,57 @@ export async function collectDeployPicturesWithinBudget(
       10 + Math.floor(((index + 1) / total) * 8),
     )
 
-    if (
-      jsonArraySizeAfterAddingEntry(
-        arrayJsonSize,
-        included.length,
-        estimateDeployPictureJsonBytes(row.blob.size),
-      ) > budgetBytes
-    ) {
-      picturesOmitted = true
-      continue
-    }
-
     try {
       const entry = await encodeDeployPictureEntry(row)
       const entryJsonLength = JSON.stringify(entry).length
-      const nextSize = jsonArraySizeAfterAddingEntry(arrayJsonSize, included.length, entryJsonLength)
-      if (nextSize > budgetBytes) {
+      const soloSize = jsonArraySizeAfterAddingEntry(2, 0, entryJsonLength)
+      if (soloSize > MAX_SINGLE_PICTURE_CHUNK_BYTES) {
         picturesOmitted = true
+        failedFileNames.push(row.fileName)
         continue
       }
-      arrayJsonSize = nextSize
-      included.push(entry)
+
+      const nextSize = jsonArraySizeAfterAddingEntry(arrayJsonSize, current.length, entryJsonLength)
+      if (current.length > 0 && nextSize > maxChunkBytes) {
+        flushCurrent()
+      }
+
+      const addSize = jsonArraySizeAfterAddingEntry(arrayJsonSize, current.length, entryJsonLength)
+      arrayJsonSize = addSize
+      current.push(entry)
     } catch {
       failedFileNames.push(row.fileName)
     }
   }
 
-  if (included.length < rows.length - failedFileNames.length) {
+  flushCurrent()
+
+  const encodedCount = chunks.reduce((sum, chunk) => sum + chunk.length, 0)
+  if (encodedCount < rows.length - failedFileNames.length) {
     picturesOmitted = true
   }
 
-  return { pictures: included, picturesOmitted, failedFileNames, pendingCount }
+  return { chunks, picturesOmitted, failedFileNames, pendingCount }
+}
+
+/** @deprecated Use collectDeployPictureChunks — kept for tests. */
+export async function collectDeployPicturesWithinBudget(
+  budgetBytes: number,
+  onProgress?: GitHubSyncOptions['onProgress'],
+): Promise<{
+  pictures: DeployPictureEntry[]
+  picturesOmitted: boolean
+  failedFileNames: string[]
+  pendingCount: number
+}> {
+  const { chunks, picturesOmitted, failedFileNames, pendingCount } =
+    await collectDeployPictureChunks(budgetBytes, onProgress)
+  return {
+    pictures: chunks.flat(),
+    picturesOmitted,
+    failedFileNames,
+    pendingCount,
+  }
 }
 
 function reportProgress(
@@ -258,22 +297,39 @@ async function deleteRepoFileIfExists(
 /** Upload deploy bundle files to the sync staging branch (same repo token CI uses). */
 export async function uploadSyncStagingBundle(
   leanJson: string,
-  picturesJson: string | null,
+  pictureChunkJsons: string[],
   exportedAt: string,
   token: string,
   repo: string,
 ): Promise<void> {
   await ensureSyncStagingBranch(token, repo)
   const message = `chore: sync staging bundle ${exportedAt}`
-  await putRepoFile(token, repo, SYNC_BUNDLE_PATH, leanJson, message, SYNC_STAGING_BRANCH)
-  if (picturesJson) {
-    await putRepoFile(token, repo, SYNC_PICTURES_PATH, picturesJson, message, SYNC_STAGING_BRANCH)
-  } else {
+  await deleteRepoFileIfExists(
+    token,
+    repo,
+    SYNC_PICTURES_PATH,
+    `${message} (clear legacy pictures)`,
+    SYNC_STAGING_BRANCH,
+  )
+  const staleChunkSlots = Math.max(pictureChunkJsons.length + 8, 32)
+  for (let index = 0; index < staleChunkSlots; index++) {
+    if (index < pictureChunkJsons.length) continue
     await deleteRepoFileIfExists(
       token,
       repo,
-      SYNC_PICTURES_PATH,
-      `${message} (clear pictures)`,
+      pictureChunkPath(index),
+      `${message} (clear stale picture chunk ${index})`,
+      SYNC_STAGING_BRANCH,
+    )
+  }
+  await putRepoFile(token, repo, SYNC_BUNDLE_PATH, leanJson, message, SYNC_STAGING_BRANCH)
+  for (let index = 0; index < pictureChunkJsons.length; index++) {
+    await putRepoFile(
+      token,
+      repo,
+      pictureChunkPath(index),
+      pictureChunkJsons[index]!,
+      message,
       SYNC_STAGING_BRANCH,
     )
   }
@@ -363,22 +419,27 @@ export async function syncDeployToGitHub(
     )
   }
 
-  const pictureBudget = MAX_GIST_BYTES - leanJson.length
-  const pictureExport = await collectDeployPicturesWithinBudget(pictureBudget, onProgress)
+  const pictureExport = await collectDeployPictureChunks(MAX_PICTURE_CHUNK_BYTES, onProgress)
   if (pictureExport.failedFileNames.length) {
     throw new Error(
       `${pictureExport.failedFileNames.length} local picture(s) could not be read for sync. Re-add them from the map and try again.`,
     )
   }
 
+  const allPictures = pictureExport.chunks.flat()
   reportProgress(onProgress, 'Preparing deploy bundle…', 18)
-  const bundle = { ...leanCore, pictures: pictureExport.pictures }
+  const bundle = { ...leanCore, pictures: allPictures }
   const picturesOmitted = pictureExport.picturesOmitted
-  const picturesJson =
-    pictureExport.pictures.length > 0 ? JSON.stringify(pictureExport.pictures) : ''
+  const pictureChunkJsons = pictureExport.chunks.map((chunk) => JSON.stringify(chunk))
 
-  reportProgress(onProgress, 'Uploading bundle to GitHub…', 32)
-  await uploadSyncStagingBundle(leanJson, picturesJson || null, bundle.exportedAt, token, repo)
+  reportProgress(
+    onProgress,
+    pictureChunkJsons.length > 1
+      ? `Uploading bundle (${pictureChunkJsons.length} picture batches)…`
+      : 'Uploading bundle to GitHub…',
+    32,
+  )
+  await uploadSyncStagingBundle(leanJson, pictureChunkJsons, bundle.exportedAt, token, repo)
 
   // apply-deploy-bundle already merges new pictures into manifest.json. Rebuilding from R2
   // replaces that manifest with lossy filename matching (duplicate cloud aliases, index
@@ -399,10 +460,11 @@ export async function syncDeployToGitHub(
     stagingRef: SYNC_STAGING_BRANCH,
     workflowRunUrl: run?.html_url ?? null,
     picturesOmitted,
-    pictureCount: bundle.pictures.length,
+    pictureCount: allPictures.length,
+    pictureChunkCount: pictureChunkJsons.length,
     pictureExportFailed: pictureExport.failedFileNames,
     pendingPictureCount: pictureExport.pendingCount,
     exportedAt: bundle.exportedAt,
-    deployedFileNames: bundle.pictures.map((pic) => pic.fileName),
+    deployedFileNames: allPictures.map((pic) => pic.fileName),
   }
 }

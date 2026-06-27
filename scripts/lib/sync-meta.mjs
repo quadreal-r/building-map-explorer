@@ -1,5 +1,6 @@
 /**
  * sync-meta.json — lets browsers detect Settings sync from another computer.
+ * sync-history.json — append-only log of each sync with summary deltas.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -7,6 +8,77 @@ import { buildPortfolioSummary } from './portfolio-stats.mjs'
 
 export const SYNC_META_VERSION = 1
 export const SYNC_META_FILE = 'sync-meta.json'
+export const SYNC_HISTORY_FILE = 'sync-history.json'
+
+const SUMMARY_DELTA_FIELDS = [
+  { key: 'buildingCount', label: 'Buildings' },
+  { key: 'rtuCount', label: 'RTU markers' },
+  { key: 'utilityCount', label: 'Utility markers' },
+  { key: 'polygonCount', label: 'Polygons' },
+  { key: 'manifestPictureCount', label: 'RTU pictures (manifest)' },
+  { key: 'scheduleYearCount', label: 'Schedule replacement years' },
+  { key: 'scheduleNoteCount', label: 'Schedule notes' },
+  { key: 'pricingRowCount', label: 'Pricing rows' },
+]
+
+export function buildSummaryDeltas(before, after) {
+  return SUMMARY_DELTA_FIELDS.map(({ key, label }) => {
+    const b = before?.[key] ?? 0
+    const a = after?.[key] ?? 0
+    return { label, before: b, after: a, delta: a - b }
+  }).filter((line) => line.delta !== 0)
+}
+
+export function buildSyncHistoryChanges(before, after, picturesUploaded = 0) {
+  const changes = before ? buildSummaryDeltas(before, after) : []
+  if (picturesUploaded > 0) {
+    changes.push({
+      label: 'Pictures uploaded (this sync)',
+      before: 0,
+      after: picturesUploaded,
+      delta: picturesUploaded,
+    })
+  }
+  return changes
+}
+
+export function readSyncHistoryFile(path) {
+  if (!existsSync(path)) return { version: 1, entries: [] }
+  try {
+    const parsed = JSON.parse(readFileSync(path, 'utf8'))
+    return {
+      version: parsed.version ?? 1,
+      entries: Array.isArray(parsed.entries) ? parsed.entries : [],
+    }
+  } catch {
+    return { version: 1, entries: [] }
+  }
+}
+
+export function writeSyncHistoryFile(path, history) {
+  writeFileSync(path, `${JSON.stringify(history, null, 2)}\n`, 'utf8')
+}
+
+/** Append one row set to sync-history.json when sync-meta is written. */
+export function appendSyncHistoryEntry(dataDir, meta) {
+  const historyPath = join(dataDir, SYNC_HISTORY_FILE)
+  const history = readSyncHistoryFile(historyPath)
+  const last = history.entries[history.entries.length - 1]
+  if (last?.exportedAt === meta.exportedAt && last?.syncedAt === meta.syncedAt) {
+    return history
+  }
+  const picturesUploaded = meta.summary?.picturesUploaded ?? 0
+  const changes = buildSyncHistoryChanges(last?.summary, meta.summary, picturesUploaded)
+  history.entries.push({
+    syncedAt: meta.syncedAt,
+    exportedAt: meta.exportedAt,
+    source: meta.source,
+    summary: meta.summary,
+    changes,
+  })
+  writeSyncHistoryFile(historyPath, history)
+  return history
+}
 
 export function buildSyncMetaFromBundle(bundle, options = {}) {
   const syncedAt = options.syncedAt ?? new Date().toISOString()

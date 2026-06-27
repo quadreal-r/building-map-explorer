@@ -12,6 +12,17 @@ export function applyStoredRotation(map: google.maps.Map): void {
   map.setTilt(tilt)
 }
 
+/** Reset heading/tilt to north-up while keeping the current map center and zoom. */
+export function resetMapRotationPreserveView(map: google.maps.Map): void {
+  const center = map.getCenter()
+  const zoom = map.getZoom()
+  useMapRotationStore.getState().resetRotation()
+  map.setHeading(0)
+  map.setTilt(0)
+  if (center) map.setCenter(center)
+  if (zoom != null) map.setZoom(zoom)
+}
+
 /** Keep map aligned with stored rotation when Maps resets heading (e.g. InfoWindow auto-pan). */
 export function installRotationGuard(map: google.maps.Map): google.maps.MapsEventListener {
   const enforce = () => {

@@ -1,11 +1,16 @@
-name: Deploy to GitHub Pages
+# Run from GitHub → Actions → "Manual deploy (commit, push & Pages)" → Run workflow
+# Rebuilds the app from main, bumps the version stamp, commits & pushes, deploys GitHub Pages.
+
+name: Manual deploy (commit, push & Pages)
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      commit_message:
+        description: Optional extra note appended to the version commit
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: write
@@ -13,12 +18,11 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: manual-deploy
+  cancel-in-progress: false
 
 jobs:
   sync-json-to-r2:
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip ci]')))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -42,10 +46,11 @@ jobs:
         run: node scripts/upload-json-to-r2.mjs
 
   build:
-    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v5
         with:
@@ -55,7 +60,6 @@ jobs:
       - run: npm ci
 
       - name: Bump version stamp
-        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: node scripts/bump-version.mjs
 
       - run: npm run typecheck
@@ -74,7 +78,6 @@ jobs:
           VITE_JSON_DATA_BASE_URL: ${{ secrets.VITE_JSON_DATA_BASE_URL }}
 
       - name: Sync RTU pictures to Cloudflare R2
-        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         env:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -93,21 +96,29 @@ jobs:
         run: cp dist/index.html dist/404.html
 
       - uses: actions/upload-pages-artifact@v4
-        if: github.ref == 'refs/heads/main'
         with:
           path: dist
 
-      - name: Commit version stamp
-        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+      - name: Commit and push version stamp
+        env:
+          EXTRA_NOTE: ${{ inputs.commit_message }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add version.build.json src/generated/buildVersion.ts
-          git diff --staged --quiet || git commit -m "chore: bump deploy version stamp [skip ci]"
-          git push
+          if git diff --staged --quiet; then
+            echo "Version stamp unchanged — nothing to commit."
+            exit 0
+          fi
+          NOTE=""
+          if [ -n "$EXTRA_NOTE" ]; then
+            NOTE=" — ${EXTRA_NOTE}"
+          fi
+          git commit -m "chore: manual deploy version stamp${NOTE} [skip ci]"
+          git pull --rebase origin main
+          git push origin main
 
   deploy:
-    if: github.ref == 'refs/heads/main' && (github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]'))
     needs: build
     runs-on: ubuntu-latest
     environment:

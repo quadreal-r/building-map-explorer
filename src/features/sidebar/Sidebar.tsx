@@ -6,7 +6,7 @@ import { collectFilterOptions, reconcileFilterDropdowns, applyFilterSelection } 
 import { resolveManagerDisplayName } from '@/lib/managerNames'
 import { buildPolygonBuildingIndex } from '@/lib/polygonBuildings'
 import { useFilterStore } from '@/stores/filterStore'
-import { useLayerStore } from '@/stores/layerStore'
+import { areAllLayersHidden, useLayerStore } from '@/stores/layerStore'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { DEFAULT_DQ_FILTERS, type Building, type LayerKey, type PortfolioData } from '@/types/domain'
@@ -54,6 +54,9 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
 
   const layers = useLayerStore((s) => s.layers)
   const toggleLayer = useLayerStore((s) => s.toggleLayer)
+  const hideAllLayers = useLayerStore((s) => s.hideAllLayers)
+  const showAllLayers = useLayerStore((s) => s.showAllLayers)
+  const allLayersHidden = areAllLayersHidden(layers)
 
   const sidebarCollapsed = useSelectionStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useSelectionStore((s) => s.toggleSidebar)
@@ -202,6 +205,14 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
               {LAYER_LABELS[key]}
             </button>
           ))}
+          <button
+            type="button"
+            className="layer-action-btn"
+            onClick={allLayersHidden ? showAllLayers : hideAllLayers}
+            title={allLayersHidden ? 'Turn on all map layers' : 'Turn off all map layers'}
+          >
+            {allLayersHidden ? 'Show All' : 'Hide All'}
+          </button>
         </div>
 
         <BuildingList buildings={listBuildings} portfolio={portfolio} onNotesChange={onNotesChange} />

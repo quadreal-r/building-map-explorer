@@ -20,20 +20,8 @@ interface StoredRtuPricing {
   rows?: RtuPricingRow[]
 }
 
-/** Pull portfolio, schedule, and pricing from Cloudflare R2 into this browser. */
-export async function pullRemoteUpdatesToLocal(): Promise<PortfolioData> {
-  const baseUrl = getJsonDataBaseUrl()
-  if (!baseUrl) {
-    throw new Error('Remote JSON is not configured on this site.')
-  }
-
-  const portfolio = await loadRemotePortfolio(baseUrl)
-  if (!portfolio) {
-    throw new Error('Could not load portfolio from Cloudflare.')
-  }
-
-  persistPortfolio(portfolio, { markSynced: true })
-
+/** Pull RTU schedule and pricing from Cloudflare when available. */
+export async function pullRemoteScheduleAndPricing(): Promise<void> {
   const schedule = await fetchRemoteJson<StoredRtuSchedule>('rtu-schedule.json')
   if (schedule) {
     localStorage.setItem(SCHEDULE_KEY, JSON.stringify(schedule))
@@ -55,6 +43,22 @@ export async function pullRemoteUpdatesToLocal(): Promise<PortfolioData> {
       pricing.sourceFile ?? 'remote',
     )
   }
+}
+
+/** Pull portfolio, schedule, and pricing from Cloudflare R2 into this browser. */
+export async function pullRemoteUpdatesToLocal(): Promise<PortfolioData> {
+  const baseUrl = getJsonDataBaseUrl()
+  if (!baseUrl) {
+    throw new Error('Remote JSON is not configured on this site.')
+  }
+
+  const portfolio = await loadRemotePortfolio(baseUrl)
+  if (!portfolio) {
+    throw new Error('Could not load portfolio from Cloudflare.')
+  }
+
+  persistPortfolio(portfolio, { markSynced: true })
+  await pullRemoteScheduleAndPricing()
 
   const { clearRtuPictureManifestCache } = await import('@/lib/rtuPictures')
   clearRtuPictureManifestCache()
