@@ -120,11 +120,7 @@ Requires the same R2 credentials in `.env.local` as RTU pictures (`R2_ACCOUNT_ID
 
 ## Commit and push
 
-There is no npm script for git. See [HELP.md](HELP.md#to-commit-and-push) for the full workflow.
-
-- **Code changes:** `git add` → `git commit` → `git push origin main` (triggers GitHub Pages deploy)
-- **Map data (recommended):** Settings → **Sync to Cloudflare & GitHub** (CI may commit for you)
-- **Map data (manual):** `npm run apply-deploy-bundle`, then commit `supabase/data` and `manifest.json`
+There is no npm script for git. See [HELP.md](HELP.md#push-a-new-build-full-checklist) for the full **push new build** checklist (code, map data, documents, and deploy).
 
 ## Database setup
 

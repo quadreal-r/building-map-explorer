@@ -135,6 +135,60 @@ If RTU names on the map include a long description (e.g. `RTU-04 Hybrid/Dual Fue
 - Do not commit `deploy-bundle.json` (gitignored; can be very large)
 - After **Settings → Sync**, run `git pull origin main` before your next code push (see [Git workflow](#git-workflow-code-changes))
 
+## Push a new build (full checklist)
+
+Use this when local dev looks good and you want **online to match** (code + JSON in git).
+
+**Important:** The live site is built from **GitHub `main`**, not your laptop. Uncommitted local code will not appear online even if the version stamp looks similar.
+
+### A. Code / UI changes only
+
+```powershell
+cd C:\Users\Robert\Projects\building-map-explorer
+git pull origin main
+npm run lint
+npm run typecheck
+npm run test
+git status
+git add .
+git commit -m "feat: short description of what changed"
+git push origin main
+```
+
+That push starts **Deploy to GitHub Pages** (uploads JSON to R2, builds, publishes).
+
+### B. Map data + pictures (from the app)
+
+**Settings → Sync to Cloudflare & GitHub** — no git needed if sync succeeds. Then hard-refresh the live site after ~2 minutes.
+
+Before your next code push, run `git pull origin main` (CI may have committed for you).
+
+### C. RTU documents (PDFs on R2)
+
+After adding or rebuilding the manifest:
+
+```powershell
+npm run build-rtu-documents-manifest -- --write
+npm run upload-rtu-documents-r2 -- --from-folder "C:/path/to/RTU-Documents" --all-files --skip-existing
+npm run upload-json-to-r2
+git add public/database/rtu-documents/documents-manifest.json
+git commit -m "chore: update RTU documents manifest"
+git push origin main
+```
+
+### D. After any deploy
+
+1. Watch Actions: https://github.com/quadreal-r/building-map-explorer/actions
+2. When green, open https://quadreal-r.github.io/building-map-explorer/
+3. Hard-refresh (Ctrl+Shift+R)
+4. Optional: **Actions → Manual deploy (commit, push & Pages)** for an extra Pages deploy + version bump
+
+### Shortcut for the agent
+
+Say: **"Everything is good now, push the code"** — the agent should pull, test, commit, and push to `main`.
+
+Cursor also loads `.cursor/rules/push-new-build.mdc` when you ask to deploy or push a build.
+
 ## Tips
 - For complex requests: When you do "/programmer do this feature" press the plus button on the left side of the chat box and select "plan" and then on the far right of the chat box where it says "auto", click that, uncheck auto, then change that to "Opus" and then send your request. It will build out a plan for your feature, the plan should open when its done and you will see a button that says "Build plan" and the agent select next to it "Auto" (leave it on auto) then press build plan. This will generally give you better results for what you want to do 
     - If the request is fairly simple, you don't have to do this whole plan process, you can just do "/programmer do this thing" directly

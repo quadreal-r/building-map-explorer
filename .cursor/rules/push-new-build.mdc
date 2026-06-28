@@ -1,0 +1,47 @@
+---
+description: Push local code to GitHub and deploy a new build to GitHub Pages + Cloudflare R2
+alwaysApply: false
+---
+
+# Push new build (building-map-explorer)
+
+When the user asks to push, deploy, publish, or sync code to the live site:
+
+## Remember
+
+- **Live site builds from GitHub `main`**, not uncommitted local files. Same version stamp can still differ if local code was not pushed.
+- **Never commit** `.env.local` or `deploy-bundle.json`.
+
+## Standard code push (app UI + repo JSON)
+
+1. `git pull origin main` (Settings sync may have committed on remote)
+2. `npm run lint && npm run typecheck && npm run test`
+3. `git status` — review changes; stage only intended files
+4. `git commit -m "…"` with a clear message
+5. `git push origin main` → triggers `.github/workflows/deploy.yml` (R2 JSON upload + build + GitHub Pages)
+
+## Map data + pictures (no code deploy needed)
+
+Settings → **Sync to Cloudflare & GitHub** (runs `sync-deploy.yml`). User should hard-refresh after ~2 minutes.
+
+## After push to main
+
+- Watch: https://github.com/quadreal-r/building-map-explorer/actions
+- Live: https://quadreal-r.github.io/building-map-explorer/
+- Hard-refresh when deploy finishes (~5–10 min)
+- Optional: Actions → **Manual deploy (commit, push & Pages)** for an explicit Pages deploy + version bump
+
+## Documents / R2 extras (when changed)
+
+```powershell
+npm run upload-rtu-documents-r2 -- --from-folder "…" --all-files --skip-existing
+npm run upload-json-to-r2
+```
+
+Requires `VITE_RTU_DOCUMENTS_BASE_URL` in GitHub secrets for document links online.
+
+## User shortcut phrase
+
+If they say **"Everything is good now, push the code"**: pull, test, commit, push to `main`, report Actions URL.
+
+Full human checklist: [HELP.md](../../HELP.md#push-a-new-build-full-checklist)
