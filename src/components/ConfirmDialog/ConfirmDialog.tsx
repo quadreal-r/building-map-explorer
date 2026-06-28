@@ -1,4 +1,5 @@
 import { Modal } from '@/components/Modal/Modal'
+import { suppressMapClickClearOnce } from '@/lib/mapMarqueeSelect'
 import { useConfirmStore } from '@/stores/confirmStore'
 import styles from './ConfirmDialog.module.css'
 
@@ -24,7 +25,10 @@ export function ConfirmDialog() {
         <button
           type="button"
           className={styles.cancel}
-          onClick={() => resolve(false)}
+          onClick={() => {
+            suppressMapClickClearOnce()
+            resolve(false)
+          }}
           autoFocus
         >
           Cancel
@@ -32,7 +36,10 @@ export function ConfirmDialog() {
         <button
           type="button"
           className={styles.confirm}
-          onClick={() => resolve(true)}
+          onClick={() => {
+            suppressMapClickClearOnce()
+            resolve(true)
+          }}
         >
           OK
         </button>

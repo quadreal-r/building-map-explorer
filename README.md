@@ -95,6 +95,29 @@ Production RTU photos are stored in **Cloudflare R2**, not in the git repo. The 
 
 Without `VITE_RTU_PICTURES_BASE_URL`, the app falls back to same-origin `public/database/rtu-pictures/` (local dev only).
 
+## RTU documents (Cloudflare R2)
+
+PDFs and other RTU files live in the separate **`rtu-documents`** R2 bucket. The app loads links from `VITE_RTU_DOCUMENTS_BASE_URL`; `public/database/rtu-documents/documents-manifest.json` maps each RTU to its filenames (same `building|RTU` keys as the picture manifest).
+
+1. Upload files to the `rtu-documents` R2 bucket (public read via R2 dev URL or custom domain).
+2. Add entries to `documents-manifest.json` and sync JSON to Cloudflare (`npm run upload-json-to-r2` or Settings sync).
+3. Set `VITE_RTU_DOCUMENTS_BASE_URL` in production builds (GitHub secret, same pattern as pictures).
+
+Open any RTU on the map — the popup shows a **Documents** section with clickable links.
+
+**Bulk upload (more than 100 files — dashboard limit):**
+
+```bash
+# 1. Add filenames to documents-manifest.json (or use --all-files)
+# 2. Upload from a local folder:
+npm run upload-rtu-documents-r2 -- --from-folder "C:/Users/Robert/Documents/RTU-Docs" --skip-existing
+
+# Upload every PDF/DOC/XLS in a folder (then update manifest + upload-json-to-r2):
+npm run upload-rtu-documents-r2 -- --from-folder "C:/path/to/docs" --all-files --skip-existing
+```
+
+Requires the same R2 credentials in `.env.local` as RTU pictures (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`).
+
 ## Commit and push
 
 There is no npm script for git. See [HELP.md](HELP.md#to-commit-and-push) for the full workflow.

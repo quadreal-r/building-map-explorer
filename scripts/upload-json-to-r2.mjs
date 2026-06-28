@@ -44,6 +44,10 @@ export const PORTFOLIO_JSON_FILES = [
     objectKey: 'manifest.json',
   },
   {
+    localPath: join(ROOT, 'public', 'database', 'rtu-documents', 'documents-manifest.json'),
+    objectKey: 'documents-manifest.json',
+  },
+  {
     localPath: join(ROOT, 'supabase', 'data', 'sync-meta.json'),
     objectKey: 'sync-meta.json',
   },

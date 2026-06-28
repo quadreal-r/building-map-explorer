@@ -45,7 +45,11 @@ import {
   rtuDropTargetKey,
   unregisterRtuDropTarget,
 } from '@/features/map/rtuDropTargetHighlight'
-import { closeAllMapPopups, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
+import {
+  closeAllMapPopups,
+  MAP_CLOSE_POPUPS_EVENT,
+  shouldSuppressInfoWindowCloseReset,
+} from '@/lib/mapPopups'
 import { collectSearchHits } from '@/lib/searchHits'
 import { getDetailMarkerIcon, getMarkerIcon } from '@/lib/markerStyles'
 import {
@@ -63,6 +67,7 @@ import {
   applyPendingMarkerPositions,
   buildMarkerStructureKey,
   syncMarkersFromPortfolio,
+  syncDetailMarkerAppearance,
   markMarkerDragJustEnded,
   shouldSuppressMarkerClick,
 } from '@/features/map/mapMarkersState'
@@ -215,6 +220,7 @@ export function useMapMarkers({
       detailMarkersRef,
       activeDetailInfoRef,
       activeRtuPicturesRef,
+      activeInfoMarkerRef,
       infoWindowRef,
       refreshDetailVisibility,
     )
@@ -279,6 +285,12 @@ export function useMapMarkers({
 
     infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 360, disableAutoPan: true })
     infoWindowRef.current.addListener('closeclick', () => {
+      if (shouldSuppressInfoWindowCloseReset()) return
+      const marker = activeInfoMarkerRef.current
+      if (marker) {
+        const entry = detailMarkersRef.current.find((e) => e.marker === marker)
+        if (entry) syncDetailMarkerAppearance(entry, false)
+      }
       activeInfoMarkerRef.current = null
       activeDetailInfoRef.current = null
       clearActiveRtuPictures()
@@ -357,7 +369,6 @@ export function useMapMarkers({
 
       addAppMarkerListener(marker, 'dragend', () => {
         if (isGroupDragActive()) {
-          // Lock in the definitive final position before committing.
           const pos = getAppMarkerPosition(marker)
           if (pos) applyGroupDragDelta({ lat: pos.lat(), lng: pos.lng() })
           commitGroupDrag()
@@ -542,6 +553,7 @@ export function useMapMarkers({
       for (const entry of buildingMarkersRef.current) {
         unregisterMarqueeTarget(buildingDragKey(entry.building.address))
         setAppMarkerMap(entry.marker, null)
+        setAppMarkerMap(entry.label, null)
       }
       for (const entry of detailMarkersRef.current) {
         if (entry.type === 'rtu' && entry.building && entry.data.name) {
@@ -614,19 +626,20 @@ export function useMapMarkers({
   useEffect(() => {
     return onRtuPicturesChanged(() => {
       void refreshRtuPictureBadges()
-      void refreshRtuPicturesView()
     })
-  }, [refreshRtuPictureBadges, refreshRtuPicturesView])
+  }, [refreshRtuPictureBadges])
 
   useEffect(() => {
     const closePopups = () => {
       infoWindowRef.current?.close()
       activeInfoMarkerRef.current = null
+      activeDetailInfoRef.current = null
+      clearActiveRtuPictures()
       stopSoloMove()
     }
     window.addEventListener(MAP_CLOSE_POPUPS_EVENT, closePopups)
     return () => window.removeEventListener(MAP_CLOSE_POPUPS_EVENT, closePopups)
-  }, [stopSoloMove])
+  }, [stopSoloMove, clearActiveRtuPictures])
 
   useEffect(() => {
     if (!map) return

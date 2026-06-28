@@ -46,6 +46,7 @@ jobs:
         run: node scripts/upload-json-to-r2.mjs
 
   build:
+    needs: sync-json-to-r2
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -75,6 +76,7 @@ jobs:
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
           VITE_GOOGLE_MAPS_MAP_ID: ${{ secrets.VITE_GOOGLE_MAPS_MAP_ID }}
           VITE_RTU_PICTURES_BASE_URL: ${{ secrets.VITE_RTU_PICTURES_BASE_URL }}
+          VITE_RTU_DOCUMENTS_BASE_URL: ${{ secrets.VITE_RTU_DOCUMENTS_BASE_URL }}
           VITE_JSON_DATA_BASE_URL: ${{ secrets.VITE_JSON_DATA_BASE_URL }}
 
       - name: Sync RTU pictures to Cloudflare R2

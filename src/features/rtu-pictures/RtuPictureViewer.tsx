@@ -381,6 +381,38 @@ export function RtuPictureViewer({
         onPointerUp={onStagePointerUp}
         onContextMenu={onStageContextMenu}
       >
+        {total > 1 ? (
+          <>
+            <button
+              type="button"
+              className={`${styles.stageNav} ${styles.stageNavPrev}`}
+              disabled={index <= 0}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+                onIndexChange(index - 1)
+              }}
+              aria-label="Previous picture"
+              title="Previous picture (←)"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              className={`${styles.stageNav} ${styles.stageNavNext}`}
+              disabled={index >= total - 1}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+                onIndexChange(index + 1)
+              }}
+              aria-label="Next picture"
+              title="Next picture (→)"
+            >
+              ›
+            </button>
+          </>
+        ) : null}
         <canvas ref={canvasRef} className={styles.canvas} />
         {loading ? <p className={styles.stageMessage}>Loading…</p> : null}
         {loadError ? (

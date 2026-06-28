@@ -3,6 +3,9 @@ import {
   appendSyncHistoryEntry,
   buildSyncHistoryChanges,
   buildSyncHistorySheetRows,
+  loadLocalSyncHistory,
+  mergeSyncHistories,
+  recordLocalSyncHistoryEntry,
 } from '@/lib/syncHistory'
 import type { SyncHistory, SyncMetaSummary } from '@/types/syncMeta'
 
@@ -66,6 +69,45 @@ describe('syncHistory', () => {
     expect(second.entries[1]?.changes).toEqual(
       expect.arrayContaining([expect.objectContaining({ label: 'RTU markers', delta: 1 })]),
     )
+  })
+
+  it('merges histories from multiple sources', () => {
+    const a: SyncHistory = {
+      version: 1,
+      entries: [
+        {
+          syncedAt: '2026-06-27T10:00:00.000Z',
+          exportedAt: '2026-06-27T09:59:00.000Z',
+          source: 'settings-sync',
+          summary: baseSummary,
+          changes: [],
+        },
+      ],
+    }
+    const b: SyncHistory = {
+      version: 1,
+      entries: [
+        {
+          syncedAt: '2026-06-27T11:00:00.000Z',
+          exportedAt: '2026-06-27T10:59:00.000Z',
+          source: 'git-push',
+          summary: { ...baseSummary, rtuCount: 1001 },
+          changes: [{ label: 'RTU markers', before: 1000, after: 1001, delta: 1 }],
+        },
+      ],
+    }
+    const merged = mergeSyncHistories(a, b)
+    expect(merged.entries).toHaveLength(2)
+  })
+
+  it('records local sync history in localStorage', () => {
+    localStorage.clear()
+    recordLocalSyncHistoryEntry({
+      exportedAt: '2026-06-27T12:00:00.000Z',
+      summary: baseSummary,
+    })
+    expect(loadLocalSyncHistory().entries).toHaveLength(1)
+    localStorage.clear()
   })
 
   it('builds Excel rows newest first', () => {

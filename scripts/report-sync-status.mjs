@@ -13,6 +13,11 @@ import {
   collectManifestFileNames,
   diffManifestFileNames,
 } from './lib/build-manifest-from-files.mjs'
+import {
+  buildDocumentsManifestFromFileNames,
+  collectDocumentFilesFromDir,
+  collectDocumentsManifestFileNames,
+} from './lib/build-documents-manifest-from-files.mjs'
 import { manifestEntryToCloudFileName } from './lib/cloud-picture-filename.mjs'
 import { getProjectRoot, loadDotEnvLocal } from './lib/load-dotenv-local.mjs'
 import { countManifestPictures } from './lib/portfolio-stats.mjs'
@@ -20,13 +25,16 @@ import {
   parseBulkRtuPictureFileName,
   parseStoredRtuPictureFileName,
 } from './lib/rtu-picture-match.mjs'
-import { isR2Configured, listR2PictureFileNames } from './lib/r2-client.mjs'
+import { isR2Configured, listR2PictureFileNames, listR2DocumentFileNames, getR2DocumentsPublicBaseUrl } from './lib/r2-client.mjs'
 import { SYNC_META_FILE, SYNC_HISTORY_FILE } from './lib/sync-meta.mjs'
 import { buildSyncHistorySheetRows } from './lib/sync-history-sheet.mjs'
 
 const ROOT = getProjectRoot()
 const REPORT_DIR = join(ROOT, 'reports')
 const MANIFEST_PATH = join(ROOT, 'public', 'database', 'rtu-pictures', 'manifest.json')
+const DOCUMENTS_MANIFEST_PATH = join(ROOT, 'public', 'database', 'rtu-documents', 'documents-manifest.json')
+const DEFAULT_DOCS_FOLDER =
+  'C:/Users/Robert/OneDrive - Quadreal Property Group/#OI-Industrial East - @(RTU) Roof Top Units (All Industrial)/RTUs per Building/RTU-Documents'
 const LOCAL_SYNC_META_PATH = join(ROOT, 'supabase', 'data', SYNC_META_FILE)
 const LOCAL_SYNC_HISTORY_PATH = join(ROOT, 'supabase', 'data', SYNC_HISTORY_FILE)
 
@@ -124,6 +132,25 @@ function buildPictureRows(manifest, cdnStatusByFile) {
   return rows
 }
 
+function buildDocumentRows(manifest, cdnStatusByFile) {
+  const rows = []
+  for (const [rtuKey, files] of Object.entries(manifest?.entries ?? {})) {
+    const { buildingAddress, rtuName } = splitRtuKey(rtuKey)
+    for (const fileName of files) {
+      const onCdn = Boolean(cdnStatusByFile.get(fileName))
+      rows.push({
+        rtuKey,
+        buildingAddress,
+        rtuName,
+        fileName,
+        syncStatus: onCdn ? 'Synced on CDN' : 'Missing from CDN',
+      })
+    }
+  }
+  rows.sort((a, b) => a.rtuKey.localeCompare(b.rtuKey) || a.fileName.localeCompare(b.fileName))
+  return rows
+}
+
 function buildWorkbook({
   generatedAt,
   cloudSyncMeta,
@@ -133,10 +160,16 @@ function buildWorkbook({
   manifestDiff,
   cdnBase,
   jsonBase,
+  documentRows = [],
+  documentDraft = null,
+  documentsManifestDiff = { added: [], removed: [] },
+  docsCdnBase = '',
 }) {
   const wb = XLSX.utils.book_new()
   const synced = pictureRows.filter((row) => row.syncStatus === 'Synced on CDN')
   const missing = pictureRows.filter((row) => row.syncStatus === 'Missing from CDN')
+  const docsSynced = documentRows.filter((row) => row.syncStatus === 'Synced on CDN')
+  const docsMissing = documentRows.filter((row) => row.syncStatus === 'Missing from CDN')
 
   const summaryRows = [
     ['RTU picture sync status report'],
@@ -151,7 +184,25 @@ function buildWorkbook({
     ['GitHub-only manifest files', manifestDiff.removed.length],
     ['Cloudflare-only manifest files', manifestDiff.added.length],
     [],
+    ['RTU documents (rtu-documents bucket)'],
+    ['Documents CDN base', docsCdnBase || '(not configured)'],
+    ['Documents in manifest', documentRows.length],
+    ['Documents synced on CDN', docsSynced.length],
+    ['Documents missing from CDN', docsMissing.length],
+    ['GitHub-only document manifest files', documentsManifestDiff.removed.length],
+    ['Cloudflare-only document manifest files', documentsManifestDiff.added.length],
   ]
+
+  if (documentDraft) {
+    summaryRows.push(
+      ['Folder draft: files scanned', documentDraft.documentCount],
+      ['Folder draft: matched links', documentDraft.linkedCount],
+      ['Folder draft: RTU keys', documentDraft.rtuCount],
+      ['Folder draft: unmatched files', documentDraft.unmatched.length],
+    )
+  }
+
+  summaryRows.push([])
 
   if (cloudSyncMeta) {
     summaryRows.push(['Cloudflare sync-meta', ''])
@@ -272,6 +323,52 @@ function buildWorkbook({
     'Sync history',
   )
 
+  if (documentRows.length) {
+    XLSX.utils.book_append_sheet(
+      wb,
+      XLSX.utils.aoa_to_sheet([
+        ['RTU key', 'Building', 'RTU name', 'Filename', 'Sync status'],
+        ...documentRows.map((row) => [
+          row.rtuKey,
+          row.buildingAddress,
+          row.rtuName,
+          row.fileName,
+          row.syncStatus,
+        ]),
+      ]),
+      'RTU documents',
+    )
+  }
+
+  if (documentDraft?.unmatched?.length) {
+    XLSX.utils.book_append_sheet(
+      wb,
+      XLSX.utils.aoa_to_sheet([
+        ['Filename', 'Reason', 'Doc building label', 'Street #', 'Unit cores'],
+        ...documentDraft.unmatched.map((row) => [
+          row.fileName,
+          row.reason,
+          row.buildingLabel,
+          row.buildingNum,
+          row.unitCores,
+        ]),
+      ]),
+      'Doc draft unmatched',
+    )
+  }
+
+  if (documentsManifestDiff.removed.length || documentsManifestDiff.added.length) {
+    XLSX.utils.book_append_sheet(
+      wb,
+      XLSX.utils.aoa_to_sheet([
+        ['Filename', 'In GitHub manifest', 'In Cloudflare manifest'],
+        ...documentsManifestDiff.removed.map((name) => [name, 'Yes', 'No']),
+        ...documentsManifestDiff.added.map((name) => [name, 'No', 'Yes']),
+      ]),
+      'Documents manifest diff',
+    )
+  }
+
   return wb
 }
 
@@ -329,6 +426,46 @@ async function main() {
   const cloudNames = collectManifestFileNames(authoritativeManifest)
   const manifestDiff = diffManifestFileNames(githubNames, cloudNames)
 
+  const docsCdnBase = normalizeBaseUrl(getR2DocumentsPublicBaseUrl())
+  const githubDocumentsManifest = readJsonFile(DOCUMENTS_MANIFEST_PATH) ?? { entries: {} }
+  const cloudDocumentsManifest = jsonBase
+    ? await fetchJson(`${jsonBase}documents-manifest.json`)
+    : null
+  const authoritativeDocumentsManifest = cloudDocumentsManifest ?? githubDocumentsManifest
+
+  let documentDraft = null
+  if (existsSync(DEFAULT_DOCS_FOLDER)) {
+    const draftFiles = collectDocumentFilesFromDir(DEFAULT_DOCS_FOLDER)
+    if (draftFiles.length) {
+      console.log(`Drafting documents manifest from ${draftFiles.length} folder file(s)…`)
+      documentDraft = buildDocumentsManifestFromFileNames(draftFiles, ROOT)
+    }
+  }
+
+  const allDocNames = new Set(collectDocumentsManifestFileNames(authoritativeDocumentsManifest))
+  let docsOnCdnSet = new Set()
+  if (isR2Configured()) {
+    try {
+      console.log('Listing R2 documents bucket…')
+      docsOnCdnSet = new Set(await listR2DocumentFileNames())
+    } catch (error) {
+      console.warn(`R2 documents list failed: ${error instanceof Error ? error.message : error}`)
+    }
+  }
+  if (!docsOnCdnSet.size && docsCdnBase && allDocNames.size) {
+    console.log(`Verifying ${allDocNames.size} document filenames on CDN (HEAD)…`)
+    const { onCdn } = await verifyOnCdn([...allDocNames], docsCdnBase)
+    docsOnCdnSet = onCdn
+  }
+  const docsCdnStatusByFile = new Map(
+    [...allDocNames].map((name) => [name, docsOnCdnSet.has(name)]),
+  )
+  const documentRows = buildDocumentRows(authoritativeDocumentsManifest, docsCdnStatusByFile)
+
+  const githubDocNames = collectDocumentsManifestFileNames(githubDocumentsManifest)
+  const cloudDocNames = collectDocumentsManifestFileNames(authoritativeDocumentsManifest)
+  const documentsManifestDiff = diffManifestFileNames(githubDocNames, cloudDocNames)
+
   const generatedAt = new Date().toISOString()
   const stamp = generatedAt.slice(0, 10)
   mkdirSync(REPORT_DIR, { recursive: true })
@@ -342,6 +479,10 @@ async function main() {
     manifestDiff,
     cdnBase,
     jsonBase,
+    documentRows,
+    documentDraft,
+    documentsManifestDiff,
+    docsCdnBase,
   })
 
   const xlsxPath = join(REPORT_DIR, `sync-status-${stamp}.xlsx`)
@@ -358,6 +499,9 @@ async function main() {
       missingFromCdn: pictureRows.filter((row) => row.syncStatus === 'Missing from CDN').length,
       githubManifestPictures: countManifestPictures(githubManifest),
       cloudManifestPictures: countManifestPictures(authoritativeManifest),
+      manifestDocuments: documentRows.length,
+      documentsSyncedOnCdn: documentRows.filter((row) => row.syncStatus === 'Synced on CDN').length,
+      documentsMissingFromCdn: documentRows.filter((row) => row.syncStatus === 'Missing from CDN').length,
     },
     missingFromCdn: pictureRows
       .filter((row) => row.syncStatus === 'Missing from CDN')
@@ -374,6 +518,15 @@ async function main() {
   console.log(`  ${jsonPath}`)
   console.log(`\nSynced on CDN: ${jsonSummary.totals.syncedOnCdn}`)
   console.log(`Missing from CDN: ${jsonSummary.totals.missingFromCdn}`)
+  if (documentDraft) {
+    console.log(
+      `\nDocuments folder draft: ${documentDraft.linkedCount} link(s), ${documentDraft.unmatched.length} unmatched`,
+    )
+  }
+  if (documentRows.length) {
+    console.log(`Documents in manifest: ${jsonSummary.totals.manifestDocuments}`)
+    console.log(`Documents synced on CDN: ${jsonSummary.totals.documentsSyncedOnCdn}`)
+  }
 }
 
 main().catch((error) => {

@@ -127,7 +127,7 @@ export function updateBldgLabelColor(bg: string, accent: string): void {
       const rules = sheet.cssRules ?? []
       for (let j = 0; j < rules.length; j++) {
         const rule = rules[j] as CSSStyleRule
-        if (rule.selectorText === '.bldg-label') {
+        if (rule.selectorText === '.bldg-label' || rule.selectorText === '.bldg-marker-label') {
           rule.style.setProperty('background', `${bg}eb`, 'important')
           rule.style.setProperty('border', `1px solid ${accent}66`, 'important')
         }

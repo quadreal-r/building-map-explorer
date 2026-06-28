@@ -9,6 +9,8 @@
  *   R2_PUBLIC_URL or VITE_RTU_PICTURES_BASE_URL (public CDN base, trailing slash optional)
  *   R2_KEY_PREFIX (optional object key prefix, e.g. rtu-pictures/)
  *   R2_JSON_BUCKET or R2_JSON_BUCKET_NAME (portfolio JSON bucket, default json)
+ *   R2_DOCUMENTS_BUCKET or R2_DOCUMENTS_BUCKET_NAME (RTU documents bucket, default rtu-documents)
+ *   VITE_RTU_DOCUMENTS_BASE_URL (public CDN base for rtu-documents bucket)
  */
 import { CopyObjectCommand, HeadObjectCommand, ListObjectsV2Command, PutObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
@@ -46,6 +48,114 @@ export function getR2Bucket() {
 
 export function getR2JsonBucket() {
   return readEnv('R2_JSON_BUCKET', 'R2_JSON_BUCKET_NAME', 'CLOUDFLARE_R2_JSON_BUCKET') ?? 'json'
+}
+
+export function getR2DocumentsBucket() {
+  return (
+    readEnv('R2_DOCUMENTS_BUCKET', 'R2_DOCUMENTS_BUCKET_NAME', 'CLOUDFLARE_R2_DOCUMENTS_BUCKET') ??
+    'rtu-documents'
+  )
+}
+
+export function getR2DocumentsKeyPrefix() {
+  const prefix = readEnv('R2_DOCUMENTS_KEY_PREFIX', 'R2_DOCUMENTS_PREFIX') ?? ''
+  if (!prefix) return ''
+  return prefix.endsWith('/') ? prefix : `${prefix}/`
+}
+
+export function r2DocumentsObjectKey(fileName) {
+  return `${getR2DocumentsKeyPrefix()}${fileName}`
+}
+
+export function guessDocumentContentType(fileName) {
+  const ext = fileName.split('.').pop()?.toLowerCase()
+  const map = {
+    pdf: 'application/pdf',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    xls: 'application/vnd.ms-excel',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    txt: 'text/plain',
+    csv: 'text/csv',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+  }
+  return map[ext] ?? 'application/octet-stream'
+}
+
+export async function uploadRtuDocumentToR2(fileName, body, contentType) {
+  const client = createR2Client()
+  const bucket = getR2DocumentsBucket()
+  if (!client || !bucket) {
+    throw new Error(
+      'R2 documents bucket is not configured. Set R2 credentials and R2_DOCUMENTS_BUCKET.',
+    )
+  }
+
+  await client.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: r2DocumentsObjectKey(fileName),
+      Body: body,
+      ContentType: contentType ?? guessDocumentContentType(fileName),
+      CacheControl: 'public, max-age=31536000, immutable',
+    }),
+  )
+}
+
+export function isR2DocumentsConfigured() {
+  return Boolean(createR2Client() && getR2DocumentsBucket())
+}
+
+export function getR2DocumentsPublicBaseUrl() {
+  const url = readEnv(
+    'R2_DOCUMENTS_PUBLIC_URL',
+    'VITE_RTU_DOCUMENTS_BASE_URL',
+    'R2_DOCUMENTS_PUBLIC_BASE_URL',
+  )
+  if (!url) return null
+  return url.endsWith('/') ? url : `${url}/`
+}
+
+/** List document basenames in the rtu-documents bucket (strips optional key prefix). */
+export async function listR2DocumentFileNames() {
+  const client = createR2Client()
+  const bucket = getR2DocumentsBucket()
+  if (!client || !bucket) {
+    throw new Error(
+      'R2 documents bucket is not configured. Set R2 credentials and R2_DOCUMENTS_BUCKET.',
+    )
+  }
+
+  const prefix = getR2DocumentsKeyPrefix()
+  const names = []
+  let continuationToken
+
+  do {
+    const response = await client.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: prefix || undefined,
+        ContinuationToken: continuationToken,
+      }),
+    )
+
+    for (const item of response.Contents ?? []) {
+      const key = item.Key
+      if (!key) continue
+      const baseName = key.includes('/')
+        ? key.slice(key.lastIndexOf('/') + 1)
+        : prefix && key.startsWith(prefix)
+          ? key.slice(prefix.length)
+          : key
+      if (baseName) names.push(baseName)
+    }
+
+    continuationToken = response.IsTruncated ? response.NextContinuationToken : undefined
+  } while (continuationToken)
+
+  return [...new Set(names)].sort()
 }
 
 export function isR2JsonConfigured() {

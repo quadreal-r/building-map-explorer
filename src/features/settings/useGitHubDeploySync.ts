@@ -4,10 +4,16 @@ import {
   syncDeployToGitHub,
   type GitHubSyncProgress,
 } from '@/lib/githubDeploySync'
+import { buildLocalSyncSummary } from '@/lib/portfolioStats'
+import { recordLocalSyncHistoryEntry } from '@/lib/syncHistory'
 import { recordLocalSyncPush } from '@/lib/remoteSyncState'
 import { exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
 import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
-import { clearRtuPictureManifestCache, reconcilePendingDeployWithCloud } from '@/lib/rtuPictures'
+import {
+  clearRtuPictureManifestCache,
+  loadRtuPictureManifest,
+  reconcilePendingDeployWithCloud,
+} from '@/lib/rtuPictures'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import { loadStoredPortfolio, persistPortfolio } from '@/hooks/usePortfolioData'
 import {
@@ -21,6 +27,36 @@ import {
 import { usePortfolioStore } from '@/stores/portfolioStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import type { PortfolioData } from '@/types/domain'
+import type { SyncMetaSummary } from '@/types/syncMeta'
+
+function countManifestPictures(entries: Record<string, string[]> | undefined): number {
+  let total = 0
+  for (const files of Object.values(entries ?? {})) {
+    total += files.length
+  }
+  return total
+}
+
+function buildSyncSummaryForPush(
+  portfolio: PortfolioData,
+  manifestPictureCount: number,
+  picturesUploaded: number,
+  pictureChunkCount: number,
+): SyncMetaSummary {
+  const scheduleSnapshot = readScheduleSnapshotFromStorage()
+  const pricingSnapshot = readPricingSnapshotFromStorage()
+  const scheduleYears = scheduleSnapshot
+    ? Object.keys(scheduleSnapshot.replacementYears ?? {}).length
+    : 0
+  const scheduleNotes = scheduleSnapshot ? Object.keys(scheduleSnapshot.notes ?? {}).length : 0
+  const pricingRows = pricingSnapshot?.rows?.length ?? 0
+  return {
+    ...buildLocalSyncSummary(portfolio, scheduleYears, scheduleNotes, pricingRows),
+    manifestPictureCount,
+    picturesUploaded,
+    ...(pictureChunkCount > 0 ? { pictureChunkCount } : {}),
+  }
+}
 
 export interface GitHubDeploySyncProps {
   portfolio: PortfolioData
@@ -131,6 +167,16 @@ export function useGitHubDeploySync({
           pricingFingerprint: pricingSnapshot
             ? pricingSyncFingerprint(pricingSnapshot)
             : undefined,
+        })
+        const manifest = await loadRtuPictureManifest()
+        recordLocalSyncHistoryEntry({
+          exportedAt: result.exportedAt,
+          summary: buildSyncSummaryForPush(
+            syncedPortfolio,
+            countManifestPictures(manifest.entries),
+            result.pictureCount,
+            result.pictureChunkCount,
+          ),
         })
         clearRtuPictureManifestCache()
         void reconcilePendingDeployWithCloud().finally(() => {

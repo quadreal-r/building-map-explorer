@@ -119,6 +119,62 @@ function buildLabelContent(
   return wrap
 }
 
+export interface BuildingMarkerLabel {
+  text: string
+  color?: string
+  fontSize?: string
+  fontWeight?: string
+  fontFamily?: string
+  className?: string
+}
+
+/** Building pin + address label in one marker (pin tip on the map coordinate). */
+export function buildBuildingMarkerContent(
+  icon: google.maps.Symbol,
+  label: BuildingMarkerLabel,
+  gap = 4,
+): HTMLElement {
+  const root = document.createElement('div')
+  root.style.display = 'inline-flex'
+  root.style.flexDirection = 'column'
+  root.style.alignItems = 'center'
+  root.style.pointerEvents = 'auto'
+  root.style.lineHeight = '0'
+  root.style.cursor = 'pointer'
+
+  root.appendChild(buildSymbolContent(icon))
+
+  const span = document.createElement('span')
+  span.textContent = label.text
+  span.style.color = label.color ?? '#fff'
+  span.style.fontSize = label.fontSize ?? '11px'
+  span.style.fontWeight = label.fontWeight ?? '500'
+  span.style.fontFamily = label.fontFamily ?? 'Inter,sans-serif'
+  span.style.whiteSpace = 'nowrap'
+  span.style.lineHeight = '1.2'
+  span.style.marginTop = `${gap}px`
+  if (label.className) span.className = label.className
+  root.appendChild(span)
+
+  return root
+}
+
+export function buildingMarkerPinHeight(icon: google.maps.Symbol): number {
+  return symbolPixelSize(icon.scale ?? 9)
+}
+
+export function setBuildingMarkerContent(
+  marker: AppMapMarker,
+  icon: google.maps.Symbol,
+  label: BuildingMarkerLabel,
+  gap = 4,
+): void {
+  marker.content = buildBuildingMarkerContent(icon, label, gap)
+  marker.anchorLeft = '50%'
+  marker.anchorTop = `${buildingMarkerPinHeight(icon)}px`
+  marker.gmpClickable = true
+}
+
 export interface DetailMarkerContentOptions {
   icon: google.maps.Symbol
   label?: google.maps.MarkerLabel
@@ -199,6 +255,7 @@ export interface CreateAppMarkerOptions {
   /** Advanced marker anchor offset from content top-left (default bottom-center). */
   anchorLeft?: string
   anchorTop?: string
+  collisionBehavior?: google.maps.CollisionBehavior
 }
 
 export function createAppMarker(options: CreateAppMarkerOptions): AppMapMarker {
@@ -233,6 +290,7 @@ export function createAppMarker(options: CreateAppMarkerOptions): AppMapMarker {
     content,
     anchorLeft: options.anchorLeft,
     anchorTop: options.anchorTop,
+    collisionBehavior: options.collisionBehavior,
   })
 
   markerMeta.set(marker, {
@@ -294,6 +352,9 @@ export function setAppMarkerCursor(marker: AppMapMarker, cursor: string | null):
   const el = marker.content
   if (el instanceof HTMLElement) {
     el.style.cursor = cursor ?? ''
+    for (const child of el.querySelectorAll<HTMLElement>('*')) {
+      child.style.cursor = cursor ?? ''
+    }
   }
 }
 

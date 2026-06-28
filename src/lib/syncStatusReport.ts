@@ -10,7 +10,7 @@ import {
 } from '@/lib/deploySyncSnapshot'
 import { loadStoredPortfolio, isPortfolioDirtyLocally } from '@/hooks/usePortfolioData'
 import { fetchRemoteSyncMeta } from '@/lib/syncMeta'
-import { buildSyncHistorySheetRows, fetchRemoteSyncHistory } from '@/lib/syncHistory'
+import { buildSyncHistorySheetRows, fetchSyncHistory } from '@/lib/syncHistory'
 import { loadRemoteSyncState } from '@/lib/remoteSyncState'
 import { parseBulkRtuPictureFileName } from '@/lib/rtuPictureMatch'
 import {
@@ -63,7 +63,7 @@ export async function downloadSyncStatusExcel(): Promise<void> {
     syncState,
   ] = await Promise.all([
     fetchRemoteSyncMeta(),
-    fetchRemoteSyncHistory(),
+    fetchSyncHistory(),
     loadRtuPictureManifest(),
     collectUnsyncedChangesSummary(),
     listPendingDeployPictureRows(),

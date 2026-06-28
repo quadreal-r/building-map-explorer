@@ -45,7 +45,11 @@ export default defineConfig(({ command }) => ({
     sourcemap: true,
   },
   server: {
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true,
     open: '/',
+    // Keep the dev process alive through transient client disconnects (hard refresh, tab close).
     watch: {
       // OneDrive / sync folders can touch .env and config files and trigger restart storms.
       ignored: [
@@ -53,6 +57,9 @@ export default defineConfig(({ command }) => ({
         '**/.env*',
         '**/dist/**',
         '**/dist-portable/**',
+        '**/reports/**',
+        '**/supabase/data/**',
+        '**/public/database/**',
         (watchPath: string) => !path.resolve(watchPath).startsWith(projectRoot),
       ],
     },

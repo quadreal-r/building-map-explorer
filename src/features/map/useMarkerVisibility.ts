@@ -5,6 +5,7 @@ import {
   setAppMarkerIcon,
   setAppMarkerVisible,
   setAppMarkerZIndex,
+  setAppMarkerCursor,
 } from '@/lib/appMapMarker'
 import { getColor } from '@/lib/colors'
 import { isGroupDragActive } from '@/lib/mapGroupDragSession'
@@ -13,7 +14,11 @@ import { getMarkerIcon } from '@/lib/markerStyles'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { areAllLayersHidden, useLayerStore } from '@/stores/layerStore'
 import { buildingDragKey } from '@/lib/dragSelection'
-import { syncDetailMarkerAppearance, fitMapToBuildingMarkers, MAP_BUILDING_FIT_PADDING } from '@/features/map/mapMarkersState'
+import {
+  syncDetailMarkerAppearance,
+  fitMapToBuildingMarkers,
+  MAP_BUILDING_FIT_PADDING,
+} from '@/features/map/mapMarkersState'
 import type { BuildingMarkerEntry, DetailMarkerEntry } from '@/features/map/mapMarkersState'
 import type { Building } from '@/types/domain'
 
@@ -70,6 +75,9 @@ export function useMarkerVisibility(
       const isSelected = selected.has(buildingDragKey(entry.building.address))
       setAppMarkerIcon(entry.marker, getMarkerIcon(color, isSelected))
       setAppMarkerZIndex(entry.marker, isSelected ? 999 : 10)
+      if (useSelectionStore.getState().dragMode) {
+        setAppMarkerCursor(entry.marker, 'grab')
+      }
     }
     for (const entry of detailMarkersRef.current) {
       const isSelected = selected.has(entry.dragKey)

@@ -2,6 +2,21 @@ import { afterMapViewChange } from '@/lib/mapRotation'
 
 export const MAP_CLOSE_POPUPS_EVENT = 'map:closePopups'
 
+let suppressInfoWindowCloseResetCount = 0
+
+/** Ignore the next InfoWindow closeclick state reset (marker badge refresh / setContent). */
+export function suppressInfoWindowCloseReset(): void {
+  suppressInfoWindowCloseResetCount++
+}
+
+export function releaseInfoWindowCloseReset(): void {
+  if (suppressInfoWindowCloseResetCount > 0) suppressInfoWindowCloseResetCount--
+}
+
+export function shouldSuppressInfoWindowCloseReset(): boolean {
+  return suppressInfoWindowCloseResetCount > 0
+}
+
 /** Close building, RTU/detail, and polygon InfoWindows. */
 export function closeAllMapPopups(): void {
   window.dispatchEvent(new CustomEvent(MAP_CLOSE_POPUPS_EVENT))

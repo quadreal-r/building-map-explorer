@@ -62,6 +62,8 @@ export async function pullRemoteUpdatesToLocal(): Promise<PortfolioData> {
 
   const { clearRtuPictureManifestCache } = await import('@/lib/rtuPictures')
   clearRtuPictureManifestCache()
+  const { clearRtuDocumentsManifestCache } = await import('@/lib/rtuDocuments')
+  clearRtuDocumentsManifestCache()
 
   return portfolio
 }

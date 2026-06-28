@@ -14,8 +14,10 @@ import {
   buildBuildingInfoHtml,
   buildDetailEditHtml,
   buildDetailInfoHtml,
+  buildRtuDocumentsContainerHtml,
   copyPopupText,
 } from '@/lib/mapInfoWindow'
+import { suppressMapClickClearOnce } from '@/lib/mapMarqueeSelect'
 import { closeAllMapPopups, ensureInfoWindowVisible } from '@/lib/mapPopups'
 import { afterMapViewChange } from '@/lib/mapRotation'
 import {
@@ -27,6 +29,7 @@ import {
   rtuPictureKey,
   type RtuPicture,
 } from '@/lib/rtuPictures'
+import { listRtuDocuments } from '@/lib/rtuDocuments'
 import {
   countPendingPicturesNearRtu,
   findNearestPendingPictureToRtu,
@@ -127,7 +130,7 @@ export function useInfoWindowActions(
   )
 
   const openBuildingInfo = useCallback(
-    (building: Building, marker: AppMapMarker) => {
+    (building: Building, marker: AppMapMarker, options?: { collapsed?: boolean }) => {
       if (!map || !infoWindowRef.current) return
       if (activeInfoMarkerRef.current === marker) {
         closeAllMapPopups()
@@ -138,8 +141,9 @@ export function useInfoWindowActions(
       clearActiveRtuPictures()
       const tenantPolygons = polygonsForBuilding(polygonIndexRef.current, building.address)
       const managerRenames = useSettingsStore.getState().managerRenames
+      const collapsed = options?.collapsed ?? false
       infoWindowRef.current.setContent(
-        buildBuildingInfoHtml(building, tenantPolygons, managerRenames),
+        buildBuildingInfoHtml(building, tenantPolygons, managerRenames, { collapsed }),
       )
       infoWindowRef.current.open({ map, anchor: marker })
       ensureInfoWindowVisible(map, infoWindowRef.current)
@@ -156,6 +160,33 @@ export function useInfoWindowActions(
     }),
     [],
   )
+
+  const refreshRtuDocumentsInPopup = useCallback(async () => {
+    const ctx = activeDetailInfoRef.current
+    if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'info') return
+    const buildingAddress = ctx.entry.building?.address
+    const rtuName = ctx.entry.data.name ?? ''
+    if (!buildingAddress || !rtuName) return
+
+    const root = document.querySelector('[data-iw-documents-root]')
+    if (!root) return
+
+    try {
+      const documents = await listRtuDocuments(buildingAddress, rtuName)
+      const stillOpen = activeDetailInfoRef.current
+      if (
+        !stillOpen ||
+        stillOpen.view !== 'info' ||
+        stillOpen.entry.type !== 'rtu' ||
+        stillOpen.entry.data.name !== rtuName
+      ) {
+        return
+      }
+      root.outerHTML = buildRtuDocumentsContainerHtml(documents)
+    } catch {
+      root.outerHTML = buildRtuDocumentsContainerHtml([])
+    }
+  }, [activeDetailInfoRef])
 
   const openDetailInfo = useCallback(
     (entry: DetailMarkerEntry) => {
@@ -193,11 +224,40 @@ export function useInfoWindowActions(
       const container = document.querySelector('.gm-style-iw-d')
       if (!container) return
 
+      const keepPopupOpenOnMapClick = (e: Event) => {
+        suppressMapClickClearOnce()
+        e.stopPropagation()
+      }
+      container.addEventListener('click', keepPopupOpenOnMapClick)
+      container.addEventListener('mousedown', keepPopupOpenOnMapClick)
+
+      const ctx = activeDetailInfoRef.current
+      if (ctx?.entry.type === 'rtu' && ctx.view === 'info') {
+        void refreshRtuDocumentsInPopup()
+      }
+
       container.querySelector('[data-iw-action="close"]')?.addEventListener('click', () => {
         iw.close()
         activeInfoMarkerRef.current = null
         activeDetailInfoRef.current = null
         clearActiveRtuPictures()
+      })
+
+      container.querySelector('[data-iw-action="toggle-building"]')?.addEventListener('click', () => {
+        const root = container.querySelector('.iw')
+        const toggle = container.querySelector('[data-iw-action="toggle-building"]') as
+          | HTMLButtonElement
+          | null
+        const label = toggle?.querySelector('.iw-toggle-label')
+        const icon = toggle?.querySelector('.iw-toggle-icon')
+        if (!root || !toggle) return
+        const isCollapsed = root.classList.toggle('iw--collapsed')
+        const nextLabel = isCollapsed ? 'Show building details' : 'Hide building details'
+        if (label) label.textContent = nextLabel
+        if (icon) icon.textContent = isCollapsed ? '▾' : '▴'
+        toggle.title = nextLabel
+        toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true')
+        if (map) ensureInfoWindowVisible(map, iw)
       })
 
       container.querySelector('[data-iw-action="copy-all"]')?.addEventListener('click', () => {
@@ -464,25 +524,38 @@ export function useInfoWindowActions(
               showToastSuccess(
                 '- Picture hidden - use Settings - Sync to Cloudflare & GitHub to hide for everyone.',
               )
-              await refreshRtuPicturesView()
+              try {
+                await refreshRtuPicturesView()
+              } catch (error) {
+                showToastError(
+                  error instanceof Error ? error.message : 'Failed to refresh pictures',
+                )
+              }
               return
             }
 
             if (!(await confirm(`Delete picture "${fileName}"?`))) return
 
-            const result = await deleteRtuPicture(
-              buildingAddress,
-              ctx.entry.data.name,
-              fileName,
-            )
-            if (result === 'deleted') {
-              showToastSuccess('- Picture deleted')
-              await refreshRtuPicturesView()
+            try {
+              const result = await deleteRtuPicture(
+                buildingAddress,
+                ctx.entry.data.name,
+                fileName,
+              )
+              if (result === 'deleted') {
+                showToastSuccess('- Picture deleted')
+                await refreshRtuPicturesView()
+              }
+            } catch (error) {
+              showToastError(
+                error instanceof Error ? error.message : 'Failed to delete picture',
+              )
             }
           })()
         })
     })
   }, [
+    map,
     infoWindowRef,
     activeInfoMarkerRef,
     activeDetailInfoRef,
@@ -493,6 +566,7 @@ export function useInfoWindowActions(
     startSoloMove,
     clearActiveRtuPictures,
     refreshRtuPicturesView,
+    refreshRtuDocumentsInPopup,
     detailHtmlOptions,
   ])
 

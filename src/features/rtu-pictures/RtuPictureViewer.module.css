@@ -207,6 +207,46 @@
   touch-action: none;
 }
 
+.stageNav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 72px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(15, 17, 19, 0.72);
+  color: #f3f4f6;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+
+.stageNav:hover:not(:disabled) {
+  background: rgba(29, 59, 88, 0.92);
+  border-color: #5fb0ff;
+  color: #fff;
+}
+
+.stageNav:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
+.stageNavPrev {
+  left: 12px;
+}
+
+.stageNavNext {
+  right: 12px;
+}
+
 .stageText {
   cursor: text;
 }

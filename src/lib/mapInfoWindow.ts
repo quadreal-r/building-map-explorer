@@ -3,6 +3,7 @@ import { getColor } from '@/lib/colors'
 import { resolveManagerDisplayName } from '@/lib/managerNames'
 import { hasPlaceholderGps, hasVacant, mlCount } from '@/lib/dataQuality'
 import { getRtuAge, getRtuYear } from '@/lib/rtu'
+import type { RtuDocument } from '@/lib/rtuDocuments'
 import type { RtuPicture } from '@/lib/rtuPictures'
 import { showToastSuccess } from '@/lib/toast'
 import type { Building, LayerKey, Polygon, Rtu, Utility } from '@/types/domain'
@@ -26,6 +27,16 @@ const RTU_PICTURE_IMG_ONERROR =
 
 function closeButton(): string {
   return '<button class="iw-close" data-iw-action="close" title="Close">✕</button>'
+}
+
+function buildingToggleButton(collapsed: boolean): string {
+  const label = collapsed ? 'Show building details' : 'Hide building details'
+  const icon = collapsed ? '▾' : '▴'
+  return `<button type="button" class="iw-toggle-btn" data-iw-action="toggle-building" title="${label}" aria-expanded="${collapsed ? 'false' : 'true'}"><span class="iw-toggle-label">${label}</span><span class="iw-toggle-icon" aria-hidden="true">${icon}</span></button>`
+}
+
+export interface BuildingInfoHtmlOptions {
+  collapsed?: boolean
 }
 
 function moveButton(attrs: Record<string, string>): string {
@@ -53,6 +64,26 @@ function editTextButton(): string {
 
 function assignPendingPictureButton(count: number): string {
   return `<button type="button" class="iw-pic-btn" data-iw-action="picture-assign-pending" title="Assign the closest pending photo within range">📎 Assign pending photo${count > 1 ? ` (${count} nearby)` : ''}</button>`
+}
+
+/** Cloudflare R2 rtu-documents bucket — list rendered in the RTU popup. */
+export function buildRtuDocumentsContainerHtml(documents: RtuDocument[] | 'loading'): string {
+  const body =
+    documents === 'loading'
+      ? '<div class="iw-documents-empty">Loading…</div>'
+      : documents.length === 0
+        ? '<div class="iw-documents-empty">No documents on Cloudflare for this RTU.</div>'
+        : `<ul class="iw-documents-list">${documents
+            .map(
+              (doc) =>
+                `<li><a class="iw-documents-link" href="${escapeHtml(doc.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(doc.fileName)}">${escapeHtml(doc.label)}</a></li>`,
+            )
+            .join('')}</ul>`
+
+  return `<div class="iw-documents" data-iw-documents-root>
+    <div class="iw-documents-head">Documents <span class="iw-documents-sub">Cloudflare R2</span></div>
+    ${body}
+  </div>`
 }
 
 function copySource(text: string): string {
@@ -194,7 +225,10 @@ export function buildBuildingInfoHtml(
   building: Building,
   tenantPolygons: Polygon[] = [],
   managerRenames: Record<string, string> = {},
+  options?: BuildingInfoHtmlOptions,
 ): string {
+  const collapsed = options?.collapsed ?? false
+  const rootClass = collapsed ? 'iw iw--collapsed' : 'iw'
   const bColor = getColor(building.park)
   const managerLabel = resolveManagerDisplayName(building.manager ?? '', managerRenames) || '—'
 
@@ -264,7 +298,7 @@ export function buildBuildingInfoHtml(
   const moveBtn = moveButton({ 'iw-kind': 'building', 'iw-address': building.address })
   const plainText = buildBuildingInfoPlainText(building, tenantPolygons, managerRenames)
 
-  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(building.address)}</div><div class="iw-badges">${badges}</div>${closeButton()}</div><div class="iw-body">${stats}${rtuHtml}${tenantHtml}</div>${actionFooter(`${copyButton()}${moveBtn}`)}</div>`
+  return `<div class="${rootClass}">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(building.address)}</div><div class="iw-badges">${badges}</div>${buildingToggleButton(collapsed)}${closeButton()}</div><div class="iw-body">${stats}${rtuHtml}${tenantHtml}</div>${actionFooter(`${copyButton()}${moveBtn}`)}</div>`
 }
 
 export function buildDetailInfoHtml(
@@ -329,7 +363,9 @@ export function buildDetailInfoHtml(
       ? assignPendingPictureButton(options!.pendingPictureAssignCount!)
       : ''
 
-  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${badgeHtml}${closeButton()}</div><div class="iw-body">${rows}</div>${actionFooter(`${copyButton()}${assignPendingBtn}${pictureBtn}${editTextBtn}${moveBtn}${deleteBtn}`)}</div>`
+  const documentsHtml = layerKey === 'rtu' ? buildRtuDocumentsContainerHtml('loading') : ''
+
+  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${badgeHtml}${closeButton()}</div><div class="iw-body">${rows}${documentsHtml}</div>${actionFooter(`${copyButton()}${assignPendingBtn}${pictureBtn}${editTextBtn}${moveBtn}${deleteBtn}`)}</div>`
 }
 
 export function buildPolygonInfoHtml(
