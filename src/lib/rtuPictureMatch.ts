@@ -3,6 +3,8 @@
  * Mirrors scripts/lib/rtu-picture-match.mjs for app bulk import.
  */
 
+import type { Building, Rtu } from '@/types/domain'
+
 const IMAGE_FILE_RE = /\.(jpe?g|png|webp|heif|heic|tif{1,2})$/i
 const RTU_PREFIX_RE = /^(?:RTU?s?|RTU#|RT|S)[-_\s#]*/i
 const YEAR_TOKEN_RE = /(?:^|[-_\s])(19\d{2}|20\d{2})(?=$|[-_\s])/g
@@ -31,8 +33,8 @@ export interface ParsedBulkRtuFileName {
 }
 
 export interface RtuCatalogEntry {
-  building: import('@/types/domain').Building
-  rtu: import('@/types/domain').Rtu
+  building: Building
+  rtu: Rtu
   streetNumber: string
   unitId: string
   unitCore: string | null
@@ -141,7 +143,7 @@ export function parseBulkRtuPictureFileName(fileName: string): ParsedBulkRtuFile
 }
 
 export function buildRtuCatalog(
-  buildings: import('@/types/domain').Building[],
+  buildings: Building[],
 ): RtuCatalogEntry[] {
   const entries: RtuCatalogEntry[] = []
   for (const building of buildings) {

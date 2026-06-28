@@ -238,7 +238,6 @@ export function useMapMarkers({
       soloMoveListenerRef,
       callbacksRef,
       polygonIndexRef,
-      portfolioRef,
       clearActiveRtuPictures,
       refreshRtuPicturesView,
     )
@@ -557,6 +556,8 @@ export function useMapMarkers({
       infoWindowRef.current = null
       stopSoloMove()
     }
+    // markerStructureKey already tracks buildings/utilities changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     map,
     markerStructureKey,

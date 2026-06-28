@@ -47,7 +47,7 @@ import {
   type MapMarkersCallbacks,
   type PolygonBuildingIndex,
 } from '@/features/map/mapMarkersState'
-import type { Building, LayerKey, Polygon, Rtu, Utility } from '@/types/domain'
+import type { Building, LayerKey, Rtu } from '@/types/domain'
 
 export function useInfoWindowActions(
   map: google.maps.Map | null,
@@ -61,7 +61,6 @@ export function useInfoWindowActions(
   soloMoveListenerRef: MutableRefObject<google.maps.MapsEventListener | null>,
   callbacksRef: MutableRefObject<MapMarkersCallbacks>,
   polygonIndexRef: MutableRefObject<PolygonBuildingIndex>,
-  portfolioRef: MutableRefObject<{ buildings: Building[]; utilities: Utility[]; polygons: Polygon[] }>,
   clearActiveRtuPictures: () => void,
   refreshRtuPicturesView: () => Promise<void>,
 ) {
@@ -147,7 +146,7 @@ export function useInfoWindowActions(
       activeInfoMarkerRef.current = marker
       afterMapViewChange(map)
     },
-    [map, infoWindowRef, activeInfoMarkerRef, activeDetailInfoRef, polygonIndexRef, portfolioRef, clearActiveRtuPictures],
+    [map, infoWindowRef, activeInfoMarkerRef, activeDetailInfoRef, polygonIndexRef, clearActiveRtuPictures],
   )
 
   const detailHtmlOptions = useCallback(

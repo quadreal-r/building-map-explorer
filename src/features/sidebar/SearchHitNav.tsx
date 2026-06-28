@@ -20,7 +20,8 @@ function SearchHitNavInner({ hits }: { hits: SearchHit[] }) {
     if (hits.length >= 1) {
       openSearchHit(hits[0]!)
     }
-    // Intentionally mount-only: parent remounts via key={search} when the query changes.
+    // Parent remounts via key={search} when the query changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only per search query
   }, [])
 
   if (hits.length <= 1) return null

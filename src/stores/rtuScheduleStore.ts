@@ -6,7 +6,7 @@ import {
   scheduleSyncFingerprint,
 } from '@/lib/deploySyncSnapshot'
 import { fetchRemoteJson, usesRemoteJsonData } from '@/lib/jsonDataUrls'
-import { importEquipmentSchedule } from '@/lib/equipmentSheet'
+import { importEquipmentSchedule, type EquipmentImportResult } from '@/lib/equipmentSheet'
 import type { Building } from '@/types/domain'
 import bundledSchedule from '../../supabase/data/rtu-schedule.json'
 
@@ -24,7 +24,7 @@ interface RtuScheduleState {
   sourceFile: string | null
   loaded: boolean
   load: () => Promise<void>
-  applyEquipmentImport: (result: import('@/lib/equipmentSheet').EquipmentImportResult, sourceFile: string) => void
+  applyEquipmentImport: (result: EquipmentImportResult, sourceFile: string) => void
   importWorkbook: (
     file: File,
     buildings: Building[],

@@ -12,6 +12,7 @@ import {
   getRtuPictureManifestUrl,
   rtuPictureFileUrl,
 } from '@/lib/rtuPictureUrls'
+import type { DeployPictureEntry } from '@/types/deployBundle'
 
 export interface RtuPictureManifest {
   /** Keys: `${buildingAddress}|${rtuName}` -> filenames in rtu-pictures folder */
@@ -242,7 +243,7 @@ export async function exportIndexedDbPictureRows(): Promise<StoredRtuPictureRow[
 }
 
 export interface DeployPictureExportResult {
-  pictures: import('@/types/deployBundle').DeployPictureEntry[]
+  pictures: DeployPictureEntry[]
   failedFileNames: string[]
   pendingCount: number
 }
@@ -309,7 +310,7 @@ export async function listPendingDeployPictureRows(): Promise<{
 
 export async function encodeDeployPictureEntry(
   row: PendingDeployPictureRow,
-): Promise<import('@/types/deployBundle').DeployPictureEntry> {
+): Promise<DeployPictureEntry> {
   const base64 = await blobToBase64(row.blob)
   return {
     fileName: row.fileName,

@@ -281,7 +281,7 @@ export function usePolygons({
         })
       })
     },
-    [map, startEdit, stopEdit],
+    [map, startEdit, stopEdit, buildings],
   )
 
   const openPopupRef = useRef(openPopup)

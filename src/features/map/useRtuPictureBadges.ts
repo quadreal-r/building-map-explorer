@@ -76,7 +76,7 @@ export function useRtuPictureBadges(
     })
 
     refreshDetailVisibility()
-  }, [map, portfolio, detailMarkersRef, refreshDetailVisibility])
+  }, [map, detailMarkersRef, refreshDetailVisibility])
 
   return { clearActiveRtuPictures, refreshRtuPicturesView, refreshRtuPictureBadges }
 }

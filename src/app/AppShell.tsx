@@ -78,7 +78,7 @@ export function AppShell() {
       usePortfolioStore.getState().setPortfolio(result.portfolio, { markSaved: true })
       unsyncedChanges.refresh()
     },
-    [queryClient, unsyncedChanges.refresh],
+    [queryClient, unsyncedChanges],
   )
 
   // Both import and patch use the same update path
