@@ -112,6 +112,30 @@
         "picturesUploaded": 0
       },
       "changes": []
+    },
+    {
+      "syncedAt": "2026-06-28T22:36:38.208Z",
+      "exportedAt": "2026-06-28T22:35:58.605Z",
+      "source": "settings-sync",
+      "summary": {
+        "buildingCount": 102,
+        "rtuCount": 1073,
+        "utilityCount": 257,
+        "polygonCount": 447,
+        "scheduleYearCount": 463,
+        "scheduleNoteCount": 348,
+        "pricingRowCount": 25,
+        "manifestPictureCount": 1621,
+        "picturesUploaded": 0
+      },
+      "changes": [
+        {
+          "label": "RTU pictures (manifest)",
+          "before": 1637,
+          "after": 1621,
+          "delta": -16
+        }
+      ]
     }
   ]
 }

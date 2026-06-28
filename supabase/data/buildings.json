@@ -474,8 +474,8 @@
     "park": "Dixie Business Park (x 34)",
     "address": "1820 Courtneypark Drive",
     "bu": "65179",
-    "lat": 43.66926027369989,
-    "lng": -79.65013786308386,
+    "lat": 43.6692923,
+    "lng": -79.6500963,
     "sqft": "88,185",
     "cluster": "Dixie 1 (x 12)",
     "manager": "Evelyn Lu",
@@ -484,44 +484,44 @@
       {
         "name": "RTU-01",
         "desc": "Building: 1820 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-01\r\nModel: ZF036N08N2AAA2A\r\nSerial: N1C3553040\r\nMake: YORK\r\nDate Installed: Nov 19, 2013\r\nHeating Capacity: 80,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\nHeating Capacity 80,000 BTU's",
-        "lat": 43.66945837369989,
-        "lng": -79.65073626308386
+        "lat": 43.6694904,
+        "lng": -79.6506947
       },
       {
         "name": "RTU-02",
         "desc": "Building: 1820 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-02\r\nModel: ZJ060N10N5AAA1B\r\nSerial: N0D8805562\r\nMake: YORK\r\nDate Installed: Nov 19, 2008\r\nHeating Capacity: 100,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 100,000 BTU's",
-        "lat": 43.66952167369989,
-        "lng": -79.65065696308386
+        "lat": 43.6695537,
+        "lng": -79.6506154
       },
       {
         "name": "RTU-03",
         "desc": "Building: 1820 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-03\r\nModel: ZF072N10N5AAA1A\r\nSerial: N1E3756096\r\nMake: YORK\r\nDate Installed: Nov 19, 2013\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 72,000 BTU (6 Ton)\r\nHeating Capacity 125,000 BTU's",
-        "lat": 43.66950707369989,
-        "lng": -79.65061616308385
+        "lat": 43.6695391,
+        "lng": -79.6505746
       },
       {
         "name": "RTU-04",
         "desc": "Building: 1820 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-04\r\nModel: ZF090N15N2AAA5A\r\nSerial: N1D3653884\r\nMake: YORK\r\nDate Installed: Nov 19, 2013\r\nHeating Capacity: 180,000 BTU's\r\nCooling Capacity: 90,000 BTU (7.5 Ton)\r\nHeating Capacity 180,000 BTU's",
-        "lat": 43.66954697369989,
-        "lng": -79.65061096308385
+        "lat": 43.669579,
+        "lng": -79.6505694
       },
       {
         "name": "RTU-05",
         "desc": "Building: 1820 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-05\r\nModel: ZJ060N10N5AAA1B\r\nSerial: N0D8805563\r\nMake: YORK\r\nDate Installed: Nov 19, 2008\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 125,000 BTU's",
-        "lat": 43.66964747369989,
-        "lng": -79.65049546308386
+        "lat": 43.6696795,
+        "lng": -79.6504539
       },
       {
         "name": "RTU-06",
         "desc": "Building: 1820 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-06\r\nModel: ZF060N10N5AAA2A\r\nSerial: N1B3491413\r\nMake: YORK\r\nDate Installed: Nov 19, 2013\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 125,000 BTU's",
-        "lat": 43.66968777369989,
-        "lng": -79.65046266308386
+        "lat": 43.6697198,
+        "lng": -79.6504211
       },
       {
         "name": "RTU-07",
         "desc": "Building: 1820 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-07\r\nModel: ZF036N08N2AAA2A\r\nSerial: N1C3553039\r\nMake: YORK\r\nDate Installed: Nov 19, 2013\r\nHeating Capacity: 80,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\nHeating Capacity 80,000 BTU's",
-        "lat": 43.66973577369989,
-        "lng": -79.65039496308385
+        "lat": 43.6697678,
+        "lng": -79.6503534
       }
     ]
   },
@@ -529,8 +529,8 @@
     "park": "Dixie Business Park (x 34)",
     "address": "1840 Courtneypark Drive",
     "bu": "65180",
-    "lat": 43.66983775688403,
-    "lng": -79.64932963846763,
+    "lat": 43.669857,
+    "lng": -79.649334,
     "sqft": "99,390",
     "cluster": "Dixie 1 (x 12)",
     "manager": "Evelyn Lu",
@@ -539,32 +539,32 @@
       {
         "name": "RTU-01",
         "desc": "Building: 1840 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-01\r\nModel: D2NZ024N05606A\r\nSerial: N0A9569971\r\nMake: YORK\r\nDate Installed: Nov 19, 2009\r\nHeating Capacity: 60,000 BTU's\r\nCooling Capacity: 24,000 BTU (2 Ton)\r\nHeating Capacity 60,000 BTU's",
-        "lat": 43.67010515688403,
-        "lng": -79.64997873846764
+        "lat": 43.6701244,
+        "lng": -79.6499831
       },
       {
         "name": "RTU-05",
         "desc": "Building: 1840 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-05\r\nModel: KGB024S4DW1P\r\nSerial: 5615F03332\r\nMake: LENNOX\r\nDate Installed: Nov 19, 2015\r\nHeating Capacity: 65,000 BTU's\r\nCooling Capacity: 24,000 BTU (2 Ton)\r\nHeating Capacity 65,000 BTU's",
-        "lat": 43.669582156884026,
-        "lng": -79.64885893846764
+        "lat": 43.6696014,
+        "lng": -79.6488633
       },
       {
         "name": "RTU-02 Hybrid",
         "desc": "Building: 1840 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-02 Hybrid\r\nModel: LDT092H5EH2J✓\r\nSerial: 5625K04328✓\r\nMake: LENNOX\r\nDate Installed: Nov 01, 2025\r\nHeating Capacity: 180,000 BTU's\r\nCooling Capacity: 90,000 BTU (7.5 Ton)\r\nHeating Capacity 180,000 BTU's",
-        "lat": 43.67015295688403,
-        "lng": -79.64991083846763
+        "lat": 43.6701722,
+        "lng": -79.6499152
       },
       {
         "name": "RTU-03 Hybrid",
         "desc": "Building: 1840 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-03 Hybrid\r\nModel: LDT092H5EH2J✓\r\nSerial: 5625K03243✓\r\nMake: LENNOX\r\nDate Installed: Nov 01, 2025\r\nHeating Capacity: 180,000 BTU's\r\nCooling Capacity: 90,000 BTU (7.5 Ton)\r\nHeating Capacity 180,000 BTU's",
-        "lat": 43.67020255688403,
-        "lng": -79.64985503846763
+        "lat": 43.6702218,
+        "lng": -79.6498594
       },
       {
         "name": "RTU-04",
         "desc": "Building: 1840 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-04\r\nModel: D2NZ036D07206A\r\nSerial: N0N8523390\r\nMake: YORK\r\nDate Installed: Nov 19, 2008\r\nHeating Capacity: 72,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\nHeating Capacity 72,000 BTU's",
-        "lat": 43.67030725688403,
-        "lng": -79.64974283846763
+        "lat": 43.6703265,
+        "lng": -79.6497472
       }
     ]
   },
@@ -572,8 +572,8 @@
     "park": "Dixie Business Park (x 34)",
     "address": "1870 - 1880 Courtneypark Drive",
     "bu": "65181",
-    "lat": 43.67081107323162,
-    "lng": -79.64939249643169,
+    "lat": 43.6708345,
+    "lng": -79.649369,
     "sqft": "60,943",
     "cluster": "Dixie 1 (x 12)",
     "manager": "Evelyn Lu",
@@ -582,80 +582,80 @@
       {
         "name": "RTU-03",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-03\r\nModel: GBC060AWEMB07C\r\nSerial: 21191246PA\r\nMake: TRANE\r\nDate Installed: Sep 09, 2021\r\nHeating Capacity: 115,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 115,000 BTU's",
-        "lat": 43.670776873231624,
-        "lng": -79.64922129643169
+        "lat": 43.6708003,
+        "lng": -79.6491978
       },
       {
         "name": "RTU-11",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-11\r\nModel: ZF060N10N5AAA4A\r\nSerial: N1E5707228\r\nMake: YORK\r\nDate Installed: Nov 19, 2015\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 125,000 BTU's",
-        "lat": 43.67094147323162,
-        "lng": -79.6490009964317
+        "lat": 43.6709649,
+        "lng": -79.6489775
       },
       {
         "name": "RTU-10",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-10\r\nModel: ZE036H10B5C1AAA1A2\r\nSerial: N2E1027113\r\nMake: YORK\r\nDate Installed: Sep 09, 2021\r\nHeating Capacity: 100,000 BTU\r\nCooling Capacity: 36,000 (3 Ton)",
-        "lat": 43.67090817323162,
-        "lng": -79.6489698964317
+        "lat": 43.6709316,
+        "lng": -79.6489464
       },
       {
         "name": "RTU-09",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-09\r\nModel: 48VL-E2406030\r\nSerial: 4719F47143\r\nMake: CARRIER\r\nDate Installed: Nov 19, 2019\r\nHeating Capacity: 60,000 BTU's\r\nCooling Capacity: 24,000 BTU (2 Ton)\r\nHeating Capacity 60,000 BTU's\r\nas per Salman email from Aug 23. 20204",
-        "lat": 43.67069117323162,
-        "lng": -79.6486894964317
+        "lat": 43.6707146,
+        "lng": -79.648666
       },
       {
         "name": "RTU-08",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-08\r\nModel: 4YCC4030A1070AC\r\nSerial: 213014915L\r\nMake: TRANE\r\nDate Installed: Sep 09, 2021\r\nHeating Capacity: 70,000 BTU\r\nCooling Capacity: 30,000 BTU (2.5 Ton)",
-        "lat": 43.67085107323162,
-        "lng": -79.6491428964317
+        "lat": 43.6708745,
+        "lng": -79.6491194
       },
       {
         "name": "RTU-05",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-05\r\nModel: ZF060N10N5AAA1A\r\nSerial: N1H0229018\r\nMake: YORK\r\nDate Installed: Nov 19, 2010\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 125,000 BTU's",
-        "lat": 43.67080277323162,
-        "lng": -79.6491814964317
+        "lat": 43.6708262,
+        "lng": -79.649158
       },
       {
         "name": "RTU-04",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-04\r\nModel: ZE036H10B5C1AAA1A2\r\nSerial: N2G1197907\r\nMake: YORK\r\nDate Installed: Sep 09, 2021\r\nHeating Capacity: 100,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\nHeating Capacity 100,000 BTU's",
-        "lat": 43.67082767323162,
-        "lng": -79.6492464964317
+        "lat": 43.6708511,
+        "lng": -79.649223
       },
       {
         "name": "RTU-07",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-07\r\nModel: ZE048H12B5A1ABA1A2\r\nSerial: N1N9511011\r\nMake: YORK\r\nDate Installed: Sep 09, 2019\r\nHeating Capacity: 125,000 BTU\r\nCooling Capacity: 48,000 (4 Ton)",
-        "lat": 43.67079377323162,
-        "lng": -79.6491045964317
+        "lat": 43.6708172,
+        "lng": -79.6490811
       },
       {
         "name": "RTU-06",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-06\r\nModel: ZF078N15N5AAA7A\r\nSerial: N1A5445423\r\nMake: YORK\r\nDate Installed: Nov 19, 2015\r\nHeating Capacity: 180,000 BTU's\r\nCooling Capacity: 78,000 BTU (6.5 Ton)",
-        "lat": 43.67067037323162,
-        "lng": -79.6489978964317
+        "lat": 43.6706938,
+        "lng": -79.6489744
       },
       {
         "name": "RTU-01",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-01\r\nModel: ZF060N10N5AAA4A\r\nSerial: N1E5686131\r\nMake: YORK\r\nDate Installed: Nov 19, 2015\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 125,000 BTU's",
-        "lat": 43.67058927323162,
-        "lng": -79.64908799643169
+        "lat": 43.6706127,
+        "lng": -79.6490645
       },
       {
         "name": "RTU-02",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-02\r\nModel: ZF078N18D5A1AAA1A1\r\nSerial: N1B7394141\r\nMake: YORK\r\nDate Installed: Nov 19, 2017\r\nHeating Capacity: 180,000 BTU's\r\nCooling Capacity: 78,000 BTU (6.5 Ton)\r\nHeating Capacity 180,000 BTU's",
-        "lat": 43.67067637323162,
-        "lng": -79.6490837964317
+        "lat": 43.6706998,
+        "lng": -79.6490603
       },
       {
         "name": "RTU-12",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-12\r\nModel: KGA060S4DH4J\r\nSerial: 5615F03634\r\nMake: LENNOX\r\nDate Installed: Nov 19, 2015\r\nHeating Capacity: 150,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 150,000 BTU's",
-        "lat": 43.67118017323162,
-        "lng": -79.64875409643169
+        "lat": 43.6712036,
+        "lng": -79.6487306
       },
       {
         "name": "RTU-13",
         "desc": "Building: 1870 - 1880 Courtneypark Drive\r\nSystem: Roof Top Units\r\nDescription: RTU-13\r\nModel: KGA060S4DH4J\r\nSerial: 5615F03633\r\nMake: LENNOX\r\nDate Installed: Nov 19, 2015\r\nHeating Capacity: 150,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 150,000 BTU's",
-        "lat": 43.671278473231624,
-        "lng": -79.64862119643169
+        "lat": 43.6713019,
+        "lng": -79.6485977
       }
     ]
   },

@@ -290,8 +290,8 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1880&1870 Courtneypark Dr E",
-    "lat": 43.67108957323162,
-    "lng": -79.64894599643169
+    "lat": 43.671113,
+    "lng": -79.6489225
   },
   {
     "type": "Sprinkler Rooms",
@@ -1109,8 +1109,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1870-1880 Courtneypark Dr.",
-    "lat": 43.671089973231624,
-    "lng": -79.6489564964317
+    "lat": 43.6711134,
+    "lng": -79.648933
   },
   {
     "type": "Electrical Rooms",
@@ -1123,15 +1123,15 @@
     "type": "Electrical Rooms",
     "name": "Elec.R Interior Accessed",
     "desc": "1840 Courtneypark Dr E",
-    "lat": 43.669682456884026,
-    "lng": -79.64948103846764
+    "lat": 43.6697017,
+    "lng": -79.6494854
   },
   {
     "type": "Electrical Rooms",
     "name": "Elec.R Interior Accessed",
     "desc": "1820 Courtneypark Dr E",
-    "lat": 43.669090773699885,
-    "lng": -79.65039706308386
+    "lat": 43.6691228,
+    "lng": -79.6503555
   },
   {
     "type": "Electrical Rooms",
