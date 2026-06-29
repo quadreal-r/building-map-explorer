@@ -28,6 +28,7 @@
     "upload-rtu-picture-cloud-aliases": "node scripts/upload-rtu-picture-cloud-aliases.mjs",
     "upload-json-to-r2": "node scripts/upload-json-to-r2.mjs",
     "build-rtu-picture-manifest": "node scripts/build-rtu-picture-manifest.mjs",
+    "reset-rtu-pictures": "node scripts/reset-rtu-pictures-from-folder.mjs",
     "build-rtu-documents-manifest": "node scripts/build-rtu-documents-manifest.mjs",
     "reconcile-rtu-picture-manifest": "node scripts/reconcile-rtu-picture-manifest.mjs",
     "report-rtu-picture-gaps": "node scripts/report-rtu-picture-manifest-gaps.mjs",

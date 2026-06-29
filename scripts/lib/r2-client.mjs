@@ -12,7 +12,7 @@
  *   R2_DOCUMENTS_BUCKET or R2_DOCUMENTS_BUCKET_NAME (RTU documents bucket, default rtu-documents)
  *   VITE_RTU_DOCUMENTS_BASE_URL (public CDN base for rtu-documents bucket)
  */
-import { CopyObjectCommand, HeadObjectCommand, ListObjectsV2Command, PutObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { CopyObjectCommand, DeleteObjectsCommand, HeadObjectCommand, ListObjectsV2Command, PutObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 function readEnv(...keys) {
   for (const key of keys) {
@@ -258,6 +258,72 @@ export async function listR2PictureFileNames() {
   } while (continuationToken)
 
   return [...new Set(names)].sort()
+}
+
+/** List full R2 object keys (includes optional key prefix). */
+export async function listAllR2PictureObjectKeys() {
+  const client = createR2Client()
+  const bucket = getR2Bucket()
+  if (!client || !bucket) {
+    throw new Error(
+      'R2 is not configured. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_BUCKET_NAME.',
+    )
+  }
+
+  const prefix = getR2KeyPrefix()
+  const keys = []
+  let continuationToken
+
+  do {
+    const response = await client.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: prefix || undefined,
+        ContinuationToken: continuationToken,
+      }),
+    )
+
+    for (const item of response.Contents ?? []) {
+      if (item.Key) keys.push(item.Key)
+    }
+
+    continuationToken = response.IsTruncated ? response.NextContinuationToken : undefined
+  } while (continuationToken)
+
+  return keys
+}
+
+/** Delete all objects in the RTU pictures bucket (respects R2_KEY_PREFIX when set). */
+export async function deleteAllR2PictureObjects({ dryRun = false, onProgress } = {}) {
+  const client = createR2Client()
+  const bucket = getR2Bucket()
+  if (!client || !bucket) {
+    throw new Error('R2 is not configured.')
+  }
+
+  const keys = await listAllR2PictureObjectKeys()
+  if (!keys.length) return { deleted: 0, total: 0 }
+
+  if (dryRun) return { deleted: 0, total: keys.length, dryRun: true }
+
+  let deleted = 0
+  const batchSize = 1000
+  for (let i = 0; i < keys.length; i += batchSize) {
+    const batch = keys.slice(i, i + batchSize)
+    await client.send(
+      new DeleteObjectsCommand({
+        Bucket: bucket,
+        Delete: {
+          Objects: batch.map((Key) => ({ Key })),
+          Quiet: true,
+        },
+      }),
+    )
+    deleted += batch.length
+    onProgress?.(deleted, keys.length)
+  }
+
+  return { deleted, total: keys.length }
 }
 
 /** True when the object exists at the manifest file name (with optional key prefix). */
