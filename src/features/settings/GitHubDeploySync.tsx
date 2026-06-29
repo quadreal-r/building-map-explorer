@@ -85,8 +85,8 @@ export function GitHubDeploySyncButton({
       {sync.completed && sync.cooldownSec > 0 ? (
         <p className={styles.hint}>
           Live site updates may take 5–10 minutes (data ~2 min, app rebuild longer). Hard-refresh when
-          the timer ends. Download the sync status report to see pictures added/removed and build
-          version.
+          the timer ends. Download the sync status report for CDN picture status (missing from
+          cloud), pictures added/removed, and build version.
         </p>
       ) : null}
     </>

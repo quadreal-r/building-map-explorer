@@ -254,7 +254,7 @@ function buildWorkbook({
     'Install year',
     'Manifest filename',
     'CDN filename',
-    'Sync status',
+    'CDN status',
   ]
   XLSX.utils.book_append_sheet(
     wb,
@@ -282,7 +282,7 @@ function buildWorkbook({
     'Install year',
     'Manifest filename',
     'Filename',
-    'Sync status',
+    'CDN status',
   ]
   XLSX.utils.book_append_sheet(
     wb,
@@ -342,7 +342,7 @@ function buildWorkbook({
     XLSX.utils.book_append_sheet(
       wb,
       XLSX.utils.aoa_to_sheet([
-        ['RTU key', 'Building', 'RTU name', 'Filename', 'Sync status'],
+        ['RTU key', 'Building', 'RTU name', 'Filename', 'CDN status'],
         ...documentRows.map((row) => [
           row.rtuKey,
           row.buildingAddress,

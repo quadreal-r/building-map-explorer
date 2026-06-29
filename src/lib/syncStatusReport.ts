@@ -13,14 +13,18 @@ import { loadStoredPortfolio, isPortfolioDirtyLocally } from '@/hooks/usePortfol
 import { fetchRemoteSyncMeta } from '@/lib/syncMeta'
 import { buildSyncHistorySheetRows, fetchSyncHistory } from '@/lib/syncHistory'
 import { loadRemoteSyncState } from '@/lib/remoteSyncState'
-import { parseBulkRtuPictureFileName } from '@/lib/rtuPictureMatch'
 import {
   countPendingPicturesNeedingCloudUpload,
   listPendingDeployPictureRows,
   loadRtuPictureManifest,
-  parseRtuPictureIndex,
 } from '@/lib/rtuPictures'
 import { manifestEntryToCloudFileName } from '@/lib/rtuPictureAssignNaming'
+import {
+  buildPictureCdnRows,
+  PICTURE_CDN_HEADER,
+  pictureCdnRowToSheetRow,
+  verifyRtuPicturesOnCdn,
+} from '@/lib/rtuPictureCdnStatus'
 import type { SyncMetaSummary } from '@/types/syncMeta'
 
 function splitRtuKey(rtuKey: string): { buildingAddress: string; rtuName: string } {
@@ -31,20 +35,6 @@ function splitRtuKey(rtuKey: string): { buildingAddress: string; rtuName: string
 
 function stampFileName(): string {
   return new Date().toISOString().slice(0, 10)
-}
-
-function pictureSlotFromFileName(fileName: string): {
-  pictureIndex: number | null
-  installYear: number | null
-} {
-  const bulk = parseBulkRtuPictureFileName(fileName)
-  if (bulk) {
-    return {
-      pictureIndex: bulk.pictureIndex,
-      installYear: bulk.installYear ?? null,
-    }
-  }
-  return { pictureIndex: parseRtuPictureIndex(fileName), installYear: null }
 }
 
 function fingerprintStatus(current: string | null, lastPushed: string | null): string {
@@ -171,6 +161,24 @@ export async function downloadSyncStatusExcel(): Promise<void> {
     ])
   }
 
+  const cloudFileNames = new Set<string>()
+  for (const [rtuKey, files] of Object.entries(manifest.entries ?? {})) {
+    const { buildingAddress, rtuName } = splitRtuKey(rtuKey)
+    for (const fileName of files) {
+      cloudFileNames.add(fileName)
+      cloudFileNames.add(manifestEntryToCloudFileName(fileName, buildingAddress, rtuName))
+    }
+  }
+  const cdnStatusByFile = await verifyRtuPicturesOnCdn(cloudFileNames)
+  const pictureRows = buildPictureCdnRows(manifest, cdnStatusByFile)
+  const syncedOnCdn = pictureRows.filter((row) => row.cdnStatus === 'On CDN')
+  const missingFromCdn = pictureRows.filter((row) => row.cdnStatus === 'Missing from CDN')
+
+  summaryRows.push([])
+  summaryRows.push(['CDN picture check (HEAD)', ''])
+  summaryRows.push(['Pictures on CDN', syncedOnCdn.length])
+  summaryRows.push(['Pictures missing from CDN', missingFromCdn.length])
+
   summaryRows.push([])
   summaryRows.push(['Unsynced summary lines', ''])
 
@@ -213,40 +221,40 @@ export async function downloadSyncStatusExcel(): Promise<void> {
     'Local unsynced',
   )
 
-  const manifestHeader = [
-    'RTU key',
-    'Building',
-    'RTU name',
-    'Picture index',
-    'Install year',
-    'Manifest filename',
-    'CDN filename',
-    'Status',
-  ]
-  const manifestRows: (string | number)[][] = []
-  for (const [rtuKey, files] of Object.entries(manifest.entries ?? {})) {
-    const { buildingAddress, rtuName } = splitRtuKey(rtuKey)
-    for (const fileName of files) {
-      const cloudFileName = manifestEntryToCloudFileName(fileName, buildingAddress, rtuName)
-      const { pictureIndex, installYear } = pictureSlotFromFileName(fileName)
-      manifestRows.push([
-        rtuKey,
-        buildingAddress,
-        rtuName,
-        pictureIndex ?? '',
-        installYear ?? '',
-        fileName,
-        cloudFileName,
-        'Listed in Cloudflare manifest',
-      ])
-    }
-  }
-  manifestRows.sort((a, b) => String(a[0]).localeCompare(String(b[0])))
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.aoa_to_sheet([
+      [...PICTURE_CDN_HEADER],
+      ...syncedOnCdn.map(pictureCdnRowToSheetRow),
+    ]),
+    'Synced on CDN',
+  )
 
   XLSX.utils.book_append_sheet(
     wb,
-    XLSX.utils.aoa_to_sheet([manifestHeader, ...manifestRows]),
-    'Cloudflare manifest',
+    XLSX.utils.aoa_to_sheet([
+      [...PICTURE_CDN_HEADER],
+      ...missingFromCdn.map(pictureCdnRowToSheetRow),
+    ]),
+    'Missing from CDN',
+  )
+
+  const byRtu = new Map<string, { synced: number; missing: number }>()
+  for (const row of pictureRows) {
+    const entry = byRtu.get(row.rtuKey) ?? { synced: 0, missing: 0 }
+    if (row.cdnStatus === 'On CDN') entry.synced += 1
+    else entry.missing += 1
+    byRtu.set(row.rtuKey, entry)
+  }
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.aoa_to_sheet([
+      ['RTU key', 'On CDN', 'Missing from CDN'],
+      ...[...byRtu.entries()]
+        .sort((a, b) => b[1].missing - a[1].missing || a[0].localeCompare(b[0]))
+        .map(([rtuKey, counts]) => [rtuKey, counts.synced, counts.missing]),
+    ]),
+    'By RTU',
   )
 
   XLSX.utils.book_append_sheet(
