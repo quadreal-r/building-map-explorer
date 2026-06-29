@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx'
 import { collectUnsyncedChangesSummary } from '@/lib/unsyncedChanges'
+import { BUILD_VERSION_LABEL } from '@/generated/buildVersion'
 import {
   isDeployDataDirtyLocally,
   portfolioSyncFingerprint,
@@ -20,6 +21,7 @@ import {
   parseRtuPictureIndex,
 } from '@/lib/rtuPictures'
 import { manifestEntryToCloudFileName } from '@/lib/rtuPictureAssignNaming'
+import type { SyncMetaSummary } from '@/types/syncMeta'
 
 function splitRtuKey(rtuKey: string): { buildingAddress: string; rtuName: string } {
   const pipe = rtuKey.indexOf('|')
@@ -49,6 +51,37 @@ function fingerprintStatus(current: string | null, lastPushed: string | null): s
   if (!current) return 'n/a'
   if (!lastPushed) return 'never pushed from this browser'
   return current === lastPushed ? 'matches last push' : 'differs from last push'
+}
+
+function appendSyncMetaDetailRows(
+  rows: (string | number)[][],
+  summary: SyncMetaSummary,
+): void {
+  rows.push(['buildings', summary.buildingCount])
+  rows.push(['RTUs', summary.rtuCount])
+  rows.push(['manifest pictures', summary.manifestPictureCount])
+  rows.push(['pictures uploaded (last sync)', summary.picturesUploaded])
+  if (summary.picturesAdded != null && summary.picturesAdded > 0) {
+    rows.push(['pictures added (manifest)', summary.picturesAdded])
+  }
+  if (summary.picturesRemoved != null && summary.picturesRemoved > 0) {
+    rows.push(['pictures removed (manifest)', summary.picturesRemoved])
+  }
+  if (summary.picturesHidden != null && summary.picturesHidden > 0) {
+    rows.push(['pictures hidden (last sync)', summary.picturesHidden])
+  }
+  if (summary.pictureChunkCount != null && summary.pictureChunkCount > 0) {
+    rows.push(['picture upload batches (last sync)', summary.pictureChunkCount])
+  }
+  if (summary.buildVersionLabel) {
+    rows.push(['app build on live (repo)', summary.buildVersionLabel])
+  }
+  if (summary.clientBuildVersionLabel) {
+    rows.push(['app build when exported', summary.clientBuildVersionLabel])
+  }
+  rows.push(['pricing rows', summary.pricingRowCount])
+  rows.push(['schedule replacement years', summary.scheduleYearCount])
+  rows.push(['schedule notes', summary.scheduleNoteCount])
 }
 
 /** Download Excel: Cloudflare sync-meta + sync history + local unsynced items on this browser. */
@@ -85,22 +118,23 @@ export async function downloadSyncStatusExcel(): Promise<void> {
     summaryRows.push(['exportedAt', cloudMeta.exportedAt])
     summaryRows.push(['syncedAt', cloudMeta.syncedAt])
     summaryRows.push(['source', cloudMeta.source])
-    summaryRows.push(['buildings', cloudMeta.summary.buildingCount])
-    summaryRows.push(['RTUs', cloudMeta.summary.rtuCount])
-    summaryRows.push(['manifest pictures', cloudMeta.summary.manifestPictureCount])
-    summaryRows.push(['pictures uploaded (last sync)', cloudMeta.summary.picturesUploaded])
-    if (cloudMeta.summary.pictureChunkCount != null && cloudMeta.summary.pictureChunkCount > 0) {
-      summaryRows.push(['picture upload batches (last sync)', cloudMeta.summary.pictureChunkCount])
-    }
-    summaryRows.push(['pricing rows', cloudMeta.summary.pricingRowCount])
-    summaryRows.push(['schedule replacement years', cloudMeta.summary.scheduleYearCount])
-    summaryRows.push(['schedule notes', cloudMeta.summary.scheduleNoteCount])
+    appendSyncMetaDetailRows(summaryRows, cloudMeta.summary)
   } else {
     summaryRows.push(['(Cloudflare sync-meta not available)', ''])
   }
 
   summaryRows.push([])
   summaryRows.push(['This browser', ''])
+  summaryRows.push(['app build (running now)', BUILD_VERSION_LABEL])
+  if (
+    cloudMeta?.summary.buildVersionLabel &&
+    cloudMeta.summary.buildVersionLabel !== BUILD_VERSION_LABEL
+  ) {
+    summaryRows.push([
+      'app build mismatch',
+      `Live may show older UI — run npm run push-live, then Settings sync`,
+    ])
+  }
   summaryRows.push(['Last successful push exportedAt', syncState.lastPushedExportedAt ?? ''])
   summaryRows.push(['Portfolio dirty (localStorage)', isPortfolioDirtyLocally() ? 'yes' : 'no'])
   summaryRows.push(['Schedule/pricing dirty', isDeployDataDirtyLocally() ? 'yes' : 'no'])

@@ -402,7 +402,7 @@ function SettingsForm({
                 Clear stale local picture copies
               </SettingsToolButton>
               <SettingsToolButton
-                tooltip="Download Excel: Cloudflare sync-meta, sync history, manifest list, and local unsynced photos."
+                tooltip="Download Excel: sync history, pictures added/removed, build version, manifest, and local unsynced photos."
                 onClick={handleDownloadSyncReport}
                 disabled={uploadBusy}
               >

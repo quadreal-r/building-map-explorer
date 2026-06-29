@@ -12,6 +12,7 @@ import type { PortfolioData } from '@/types/domain'
 
 export const DEFAULT_GITHUB_REPO = 'quadreal-r/building-map-explorer'
 export const SYNC_DEPLOY_WORKFLOW = 'sync-deploy.yml'
+export const PAGES_DEPLOY_WORKFLOW = 'deploy.yml'
 export const SYNC_STAGING_BRANCH = 'bme-sync-staging'
 export const SYNC_BUNDLE_PATH = 'sync/deploy-bundle.json'
 export const SYNC_PICTURES_PATH = 'sync/deploy-pictures.json'
@@ -45,6 +46,7 @@ export interface GitHubSyncProgress {
 export interface GitHubSyncResult {
   stagingRef: string
   workflowRunUrl: string | null
+  pagesDeployTriggered: boolean
   picturesOmitted: boolean
   pictureCount: number
   pictureChunkCount: number
@@ -357,6 +359,19 @@ export async function triggerSyncDeployWorkflow(
   )
 }
 
+/** Rebuild GitHub Pages from latest main (app UI + bundled assets). */
+export async function triggerPagesDeployWorkflow(token: string, repo: string): Promise<void> {
+  await githubFetch(
+    `/repos/${repo}/actions/workflows/${PAGES_DEPLOY_WORKFLOW}/dispatches`,
+    token,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: 'main' }),
+    },
+  )
+}
+
 export async function waitForSyncWorkflowRun(
   startedAfterMs: number,
   token: string,
@@ -456,6 +471,16 @@ export async function syncDeployToGitHub(
   await triggerSyncDeployWorkflow(rebuildManifest, token, repo)
 
   const run = await waitForSyncWorkflowRun(startedAt, token, repo, onProgress)
+
+  let pagesDeployTriggered = false
+  try {
+    reportProgress(onProgress, 'Starting GitHub Pages app rebuild…', 96)
+    await triggerPagesDeployWorkflow(token, repo)
+    pagesDeployTriggered = true
+  } catch {
+    /* push to main may already have started deploy.yml */
+  }
+
   reportProgress(onProgress, 'Upload complete', 100)
 
   if (bundle.pictures.length > 0) {
@@ -465,6 +490,7 @@ export async function syncDeployToGitHub(
   return {
     stagingRef: SYNC_STAGING_BRANCH,
     workflowRunUrl: run?.html_url ?? null,
+    pagesDeployTriggered,
     picturesOmitted,
     pictureCount: allPictures.length,
     pictureChunkCount: pictureChunkJsons.length,

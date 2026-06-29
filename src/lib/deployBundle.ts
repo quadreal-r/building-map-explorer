@@ -5,6 +5,7 @@ import {
   type DeployBundle,
   type DeployPictureEntry,
 } from '@/types/deployBundle'
+import { BUILD_VERSION_LABEL } from '@/generated/buildVersion'
 import type { PortfolioData } from '@/types/domain'
 import { exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
 import { isValidStoredPortfolio } from '@/hooks/usePortfolioData'
@@ -96,6 +97,7 @@ function collectDeployBundleCore(portfolio: PortfolioData): Omit<DeployBundle, '
     schedule: readScheduleFromStorage(),
     pricing: readPricingFromStorage(),
     hiddenRtuPictures: exportHiddenRtuPicturesForDeploy(),
+    clientBuildVersionLabel: BUILD_VERSION_LABEL,
   }
 }
 

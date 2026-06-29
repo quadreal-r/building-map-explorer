@@ -88,13 +88,14 @@ describe('mapInfoWindow', () => {
     expect(html).not.toContain('<strong>GPS</strong>')
   })
 
-  it('supports collapsed building popup with expand toggle', () => {
-    const html = buildBuildingInfoHtml(building, tenantPolygons, {}, { collapsed: true })
-    expect(html).toContain('class="iw iw--collapsed"')
-    expect(html).toContain('data-iw-action="toggle-building"')
-    expect(html).toContain('Show building details')
-    expect(html).toContain('iw-toggle-label')
-    expect(html).toContain('aria-expanded="false"')
+  it('always shows building details without collapse toggle', () => {
+    const html = buildBuildingInfoHtml(building, tenantPolygons)
+    expect(html).toContain('class="iw"')
+    expect(html).not.toContain('iw--collapsed')
+    expect(html).not.toContain('data-iw-action="toggle-building"')
+    expect(html).not.toContain('Hide building details')
+    expect(html).toContain('<strong>BU #</strong>')
+    expect(html).toContain('<strong>Manager</strong>')
   })
 
   it('builds building plain text matching popup layout', () => {

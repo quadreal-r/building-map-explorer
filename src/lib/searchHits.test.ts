@@ -30,7 +30,7 @@ describe('collectSearchHits', () => {
     expect(hits.some((h) => h.kind === 'rtu')).toBe(true)
   })
 
-  it('opens building popup for address search', () => {
+  it('finds building hits for address search', () => {
     const hits = collectSearchHits(buildings, polygons, '6975 Creditview')
     expect(hits.length).toBeGreaterThan(0)
     expect(hits[0]!.kind).toBe('building')

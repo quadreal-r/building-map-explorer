@@ -684,26 +684,27 @@ export function useMapMarkers({
       if (!map) return
       const entry = buildingMarkersRef.current.find((m) => m.building.address === detail.address)
       if (!entry) return
+      closeAllMapPopups()
+      callbacksRef.current.onSelectBuilding(entry.building)
+      highlightBuilding(entry.building)
       panToPreserveRotation(
         map,
         { lat: entry.building.lat, lng: entry.building.lng },
         MAP_DETAIL_ZOOM,
         { onlyZoomIn: true },
       )
-      callbacksRef.current.onSelectBuilding(entry.building)
-      openBuildingInfo(entry.building, entry.marker)
+      refreshDetailVisibility()
+      setTimeout(() => {
+        document
+          .querySelector('.building-item.active')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }, 60)
     }
     window.addEventListener('map:openBuilding', handler)
     return () => window.removeEventListener('map:openBuilding', handler)
-  }, [map, openBuildingInfo])
+  }, [map, highlightBuilding, refreshDetailVisibility])
 
   const visibleAddressesRef = useRef('')
-  const lastFocusedBuildingRef = useRef<string | null>(null)
-  const openBuildingInfoRef = useRef(openBuildingInfo)
-
-  useEffect(() => {
-    openBuildingInfoRef.current = openBuildingInfo
-  })
 
   useEffect(() => {
     if (!map) return
@@ -733,37 +734,11 @@ export function useMapMarkers({
     ) {
       return
     }
-    if (!currentBuilding) {
-      lastFocusedBuildingRef.current = null
-      return
-    }
+    if (!currentBuilding) return
 
-    const address = currentBuilding.address
-    const isNewSelection = lastFocusedBuildingRef.current !== address
-    lastFocusedBuildingRef.current = address
-
-    highlightBuilding(currentBuilding)
     if (consumeSuppressBuildingMapFocus()) return
-    if (!map || !isNewSelection || useSelectionStore.getState().dragMode) return
-
-    const entry = buildingMarkersRef.current.find(
-      (m) => m.building.address === currentBuilding.address,
-    )
-    if (entry) {
-      panToPreserveRotation(
-        map,
-        { lat: currentBuilding.lat, lng: currentBuilding.lng },
-        MAP_DETAIL_ZOOM,
-        { onlyZoomIn: true },
-      )
-      openBuildingInfoRef.current(currentBuilding, entry.marker)
-      setTimeout(() => {
-        document
-          .querySelector('.building-item.active')
-          ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-      }, 60)
-    }
-  }, [currentBuilding, map, highlightBuilding])
+    highlightBuilding(currentBuilding)
+  }, [currentBuilding, highlightBuilding])
 
   useEffect(() => {
     refreshDetailVisibility()

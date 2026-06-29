@@ -5,6 +5,7 @@ import {
   type GitHubSyncProgress,
 } from '@/lib/githubDeploySync'
 import { buildLocalSyncSummary } from '@/lib/portfolioStats'
+import { BUILD_VERSION_LABEL } from '@/generated/buildVersion'
 import { recordLocalSyncHistoryEntry } from '@/lib/syncHistory'
 import { recordLocalSyncPush } from '@/lib/remoteSyncState'
 import { exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
@@ -42,6 +43,7 @@ function buildSyncSummaryForPush(
   manifestPictureCount: number,
   picturesUploaded: number,
   pictureChunkCount: number,
+  pictureDeltas?: { picturesAdded?: number; picturesRemoved?: number; picturesHidden?: number },
 ): SyncMetaSummary {
   const scheduleSnapshot = readScheduleSnapshotFromStorage()
   const pricingSnapshot = readPricingSnapshotFromStorage()
@@ -55,6 +57,12 @@ function buildSyncSummaryForPush(
     manifestPictureCount,
     picturesUploaded,
     ...(pictureChunkCount > 0 ? { pictureChunkCount } : {}),
+    ...(pictureDeltas?.picturesAdded != null ? { picturesAdded: pictureDeltas.picturesAdded } : {}),
+    ...(pictureDeltas?.picturesRemoved != null
+      ? { picturesRemoved: pictureDeltas.picturesRemoved }
+      : {}),
+    ...(pictureDeltas?.picturesHidden != null ? { picturesHidden: pictureDeltas.picturesHidden } : {}),
+    clientBuildVersionLabel: BUILD_VERSION_LABEL,
   }
 }
 
@@ -132,7 +140,12 @@ export function useGitHubDeploySync({
           repo: githubRepo,
           onProgress: setProgress,
         })
-        const parts = ['✓ Sync complete — portfolio JSON uploaded to Cloudflare and GitHub Pages will redeploy.']
+        const parts = [
+          '✓ Sync complete — portfolio JSON uploaded to Cloudflare.',
+          result.pagesDeployTriggered
+            ? 'GitHub Pages app rebuild started.'
+            : 'GitHub Pages may rebuild from the main push.',
+        ]
         if (result.pictureCount > 0) {
           const batchNote =
             result.pictureChunkCount > 1
@@ -151,6 +164,9 @@ export function useGitHubDeploySync({
         if (result.workflowRunUrl) {
           parts.push(`Workflow: ${result.workflowRunUrl}`)
         }
+        parts.push(
+          `This browser build is ${BUILD_VERSION_LABEL}. Run npm run push-live first if you changed app code (UI) locally.`,
+        )
         showToastSuccess(parts.join(' '))
         const syncedPortfolio = loadStoredPortfolio() ?? portfolio
         const scheduleSnapshot = readScheduleSnapshotFromStorage()

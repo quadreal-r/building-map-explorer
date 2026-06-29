@@ -21,6 +21,7 @@ import {
 } from './lib/r2-client.mjs'
 import { parseBulkRtuPictureFileName } from './lib/rtu-picture-filename.mjs'
 import { buildSyncMetaFromBundle, writeSyncMetaFile, appendSyncHistoryEntry } from './lib/sync-meta.mjs'
+import { readBuildVersionLabel } from './lib/read-build-version.mjs'
 import { uploadPortfolioJsonToR2 } from './upload-json-to-r2.mjs'
 import {
   RTU_GPS_MATCH_FEET,
@@ -144,6 +145,29 @@ function readHiddenJson(path) {
   }
 }
 
+function manifestEntryKeys(manifest) {
+  const keys = new Set()
+  for (const [rtuKey, files] of Object.entries(manifest?.entries ?? {})) {
+    if (!Array.isArray(files)) continue
+    for (const fileName of files) keys.add(`${rtuKey}\0${fileName}`)
+  }
+  return keys
+}
+
+function diffManifestKeys(before, after) {
+  const beforeKeys = manifestEntryKeys(before)
+  const afterKeys = manifestEntryKeys(after)
+  let added = 0
+  let removed = 0
+  for (const key of afterKeys) {
+    if (!beforeKeys.has(key)) added += 1
+  }
+  for (const key of beforeKeys) {
+    if (!afterKeys.has(key)) removed += 1
+  }
+  return { added, removed }
+}
+
 const bundlePath = resolveBundlePath()
 console.log(`Reading ${bundlePath}`)
 const bundle = JSON.parse(readFileSync(bundlePath, 'utf8'))
@@ -194,6 +218,7 @@ if (existsSync(manifestPath)) {
     manifest = { entries: {} }
   }
 }
+const manifestBefore = JSON.parse(JSON.stringify(manifest))
 
 const pictures = bundle.pictures ?? []
 let r2Uploads = 0
@@ -244,8 +269,10 @@ for (const pic of pictures) {
 }
 
 const hiddenPath = join(PICS_DIR, 'hidden.json')
+const hiddenBefore = new Set(readHiddenJson(hiddenPath))
 const bundleHidden = (bundle.hiddenRtuPictures ?? []).filter((item) => typeof item === 'string')
-const mergedHidden = [...new Set([...readHiddenJson(hiddenPath), ...bundleHidden])]
+const picturesHidden = bundleHidden.filter((key) => !hiddenBefore.has(key)).length
+const mergedHidden = [...new Set([...hiddenBefore, ...bundleHidden])]
 writeJson(hiddenPath, mergedHidden)
 if (mergedHidden.length) {
   const removed = applyHiddenPicturesToManifest(manifest, mergedHidden)
@@ -257,14 +284,34 @@ if (mergedHidden.length) {
 
 writeJson(manifestPath, manifest)
 
+const { added: picturesAdded, removed: picturesRemoved } = diffManifestKeys(manifestBefore, manifest)
+const buildVersionLabel = readBuildVersionLabel(ROOT)
+
 const syncMeta = buildSyncMetaFromBundle(bundle, {
   manifest,
   picturesUploaded: r2Uploads + localWrites,
   pictureChunkCount: bundle.pictureChunkCount ?? 0,
+  picturesAdded,
+  picturesRemoved,
+  picturesHidden,
+  buildVersionLabel,
 })
 writeSyncMetaFile(join(DATA_DIR, 'sync-meta.json'), syncMeta)
 appendSyncHistoryEntry(DATA_DIR, syncMeta)
 console.log(`Sync meta: exported ${syncMeta.exportedAt}`)
+if (buildVersionLabel) {
+  console.log(`App build version (repo): ${buildVersionLabel}`)
+}
+if (bundle.clientBuildVersionLabel && bundle.clientBuildVersionLabel !== buildVersionLabel) {
+  console.log(
+    `Browser build when exported: ${bundle.clientBuildVersionLabel} (push code with npm run push-live to match live UI)`,
+  )
+}
+if (picturesAdded || picturesRemoved || picturesHidden) {
+  console.log(
+    `Picture manifest: +${picturesAdded} added, -${picturesRemoved} removed, ${picturesHidden} newly hidden`,
+  )
+}
 
 if (isR2Configured()) {
   console.log(

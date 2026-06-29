@@ -29,16 +29,6 @@ function closeButton(): string {
   return '<button class="iw-close" data-iw-action="close" title="Close">✕</button>'
 }
 
-function buildingToggleButton(collapsed: boolean): string {
-  const label = collapsed ? 'Show building details' : 'Hide building details'
-  const icon = collapsed ? '▾' : '▴'
-  return `<button type="button" class="iw-toggle-btn" data-iw-action="toggle-building" title="${label}" aria-expanded="${collapsed ? 'false' : 'true'}"><span class="iw-toggle-label">${label}</span><span class="iw-toggle-icon" aria-hidden="true">${icon}</span></button>`
-}
-
-export interface BuildingInfoHtmlOptions {
-  collapsed?: boolean
-}
-
 function moveButton(attrs: Record<string, string>): string {
   const dataAttrs = Object.entries(attrs)
     .map(([key, value]) => ` data-${key}="${escapeHtml(value)}"`)
@@ -225,10 +215,7 @@ export function buildBuildingInfoHtml(
   building: Building,
   tenantPolygons: Polygon[] = [],
   managerRenames: Record<string, string> = {},
-  options?: BuildingInfoHtmlOptions,
 ): string {
-  const collapsed = options?.collapsed ?? false
-  const rootClass = collapsed ? 'iw iw--collapsed' : 'iw'
   const bColor = getColor(building.park)
   const managerLabel = resolveManagerDisplayName(building.manager ?? '', managerRenames) || '—'
 
@@ -298,7 +285,7 @@ export function buildBuildingInfoHtml(
   const moveBtn = moveButton({ 'iw-kind': 'building', 'iw-address': building.address })
   const plainText = buildBuildingInfoPlainText(building, tenantPolygons, managerRenames)
 
-  return `<div class="${rootClass}">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(building.address)}</div><div class="iw-badges">${badges}</div>${buildingToggleButton(collapsed)}${closeButton()}</div><div class="iw-body">${stats}${rtuHtml}${tenantHtml}</div>${actionFooter(`${copyButton()}${moveBtn}`)}</div>`
+  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(building.address)}</div><div class="iw-badges">${badges}</div>${closeButton()}</div><div class="iw-body">${stats}${rtuHtml}${tenantHtml}</div>${actionFooter(`${copyButton()}${moveBtn}`)}</div>`
 }
 
 export function buildDetailInfoHtml(

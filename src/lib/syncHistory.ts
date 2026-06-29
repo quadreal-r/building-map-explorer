@@ -91,6 +91,33 @@ export function buildSyncHistoryChanges(
       delta: chunkCount - (before?.pictureChunkCount ?? 0),
     })
   }
+  const picturesAdded = after.picturesAdded ?? 0
+  if (picturesAdded > 0) {
+    changes.push({
+      label: 'Pictures added (manifest)',
+      before: (after.manifestPictureCount ?? 0) - picturesAdded,
+      after: after.manifestPictureCount ?? 0,
+      delta: picturesAdded,
+    })
+  }
+  const picturesRemoved = after.picturesRemoved ?? 0
+  if (picturesRemoved > 0) {
+    changes.push({
+      label: 'Pictures removed (manifest)',
+      before: (after.manifestPictureCount ?? 0) + picturesRemoved,
+      after: after.manifestPictureCount ?? 0,
+      delta: -picturesRemoved,
+    })
+  }
+  const picturesHidden = after.picturesHidden ?? 0
+  if (picturesHidden > 0) {
+    changes.push({
+      label: 'Pictures hidden (this sync)',
+      before: 0,
+      after: picturesHidden,
+      delta: picturesHidden,
+    })
+  }
   return changes
 }
 

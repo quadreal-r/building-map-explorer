@@ -48,6 +48,33 @@ export function buildSyncHistoryChanges(before, after, picturesUploaded = 0) {
       delta: chunkCount - (before?.pictureChunkCount ?? 0),
     })
   }
+  const picturesAdded = after?.picturesAdded ?? 0
+  if (picturesAdded > 0) {
+    changes.push({
+      label: 'Pictures added (manifest)',
+      before: (after?.manifestPictureCount ?? 0) - picturesAdded,
+      after: after?.manifestPictureCount ?? 0,
+      delta: picturesAdded,
+    })
+  }
+  const picturesRemoved = after?.picturesRemoved ?? 0
+  if (picturesRemoved > 0) {
+    changes.push({
+      label: 'Pictures removed (manifest)',
+      before: (after?.manifestPictureCount ?? 0) + picturesRemoved,
+      after: after?.manifestPictureCount ?? 0,
+      delta: -picturesRemoved,
+    })
+  }
+  const picturesHidden = after?.picturesHidden ?? 0
+  if (picturesHidden > 0) {
+    changes.push({
+      label: 'Pictures hidden (this sync)',
+      before: 0,
+      after: picturesHidden,
+      delta: picturesHidden,
+    })
+  }
   return changes
 }
 
@@ -92,6 +119,8 @@ export function appendSyncHistoryEntry(dataDir, meta) {
 export function buildSyncMetaFromBundle(bundle, options = {}) {
   const syncedAt = options.syncedAt ?? new Date().toISOString()
   const manifest = options.manifest ?? { entries: {} }
+  const repoBuild = options.buildVersionLabel ?? null
+  const clientBuild = bundle.clientBuildVersionLabel ?? options.clientBuildVersionLabel ?? null
   return {
     version: SYNC_META_VERSION,
     exportedAt: bundle.exportedAt,
@@ -104,6 +133,13 @@ export function buildSyncMetaFromBundle(bundle, options = {}) {
       manifest,
       options.picturesUploaded ?? bundle.pictures?.length ?? 0,
       options.pictureChunkCount ?? bundle.pictureChunkCount ?? 0,
+      {
+        ...(options.picturesAdded != null ? { picturesAdded: options.picturesAdded } : {}),
+        ...(options.picturesRemoved != null ? { picturesRemoved: options.picturesRemoved } : {}),
+        ...(options.picturesHidden != null ? { picturesHidden: options.picturesHidden } : {}),
+        ...(repoBuild ? { buildVersionLabel: repoBuild } : {}),
+        ...(clientBuild ? { clientBuildVersionLabel: clientBuild } : {}),
+      },
     ),
   }
 }

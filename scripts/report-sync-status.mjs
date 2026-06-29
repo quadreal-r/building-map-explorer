@@ -214,8 +214,23 @@ function buildWorkbook({
     summaryRows.push(['RTUs', s.rtuCount ?? ''])
     summaryRows.push(['manifest pictures', s.manifestPictureCount ?? ''])
     summaryRows.push(['pictures uploaded last sync', s.picturesUploaded ?? ''])
+    if (s.picturesAdded != null && s.picturesAdded > 0) {
+      summaryRows.push(['pictures added (manifest)', s.picturesAdded])
+    }
+    if (s.picturesRemoved != null && s.picturesRemoved > 0) {
+      summaryRows.push(['pictures removed (manifest)', s.picturesRemoved])
+    }
+    if (s.picturesHidden != null && s.picturesHidden > 0) {
+      summaryRows.push(['pictures hidden last sync', s.picturesHidden])
+    }
     if (s.pictureChunkCount != null && s.pictureChunkCount > 0) {
       summaryRows.push(['picture upload batches last sync', s.pictureChunkCount])
+    }
+    if (s.buildVersionLabel) {
+      summaryRows.push(['app build on live (repo)', s.buildVersionLabel])
+    }
+    if (s.clientBuildVersionLabel) {
+      summaryRows.push(['app build when exported', s.clientBuildVersionLabel])
     }
     summaryRows.push(['pricing rows', s.pricingRowCount ?? ''])
     summaryRows.push(['schedule replacement years', s.scheduleYearCount ?? ''])

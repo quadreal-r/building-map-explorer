@@ -9,6 +9,7 @@ import { Tag } from '@/components/Tag/Tag'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { buildPolygonBuildingIndex, polygonsForBuilding } from '@/lib/polygonBuildings'
+import { requestBuildingMapFocus } from '@/lib/searchHits'
 import type { Building, PortfolioData } from '@/types/domain'
 
 export interface BuildingListProps {
@@ -19,7 +20,6 @@ export interface BuildingListProps {
 
 export function BuildingList({ buildings, portfolio, onNotesChange }: BuildingListProps) {
   const currentBuilding = useSelectionStore((s) => s.currentBuilding)
-  const selectBuilding = useSelectionStore((s) => s.selectBuilding)
   const managerRenames = useSettingsStore((s) => s.managerRenames)
   const polygonIndex = buildPolygonBuildingIndex(portfolio.buildings, portfolio.polygons)
 
@@ -88,9 +88,9 @@ export function BuildingList({ buildings, portfolio, onNotesChange }: BuildingLi
                 <div
                   key={b.address}
                   className={`building-item${isActive ? ' active' : ''}`}
-                  onClick={() => selectBuilding(b)}
+                  onClick={() => requestBuildingMapFocus(b.address)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') selectBuilding(b)
+                    if (e.key === 'Enter') requestBuildingMapFocus(b.address)
                   }}
                   role="button"
                   tabIndex={0}

@@ -34,4 +34,6 @@ export interface DeployBundle {
   pictureChunkCount?: number
   /** Hidden RTU picture keys hidden from the map (manifest/R2 pictures). */
   hiddenRtuPictures?: string[]
+  /** Browser build stamp when the bundle was exported (Settings sync). */
+  clientBuildVersionLabel?: string
 }

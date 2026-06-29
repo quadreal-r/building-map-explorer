@@ -40,16 +40,34 @@ export interface SummaryDeltaLine {
   delta: number
 }
 
+type NumericSyncSummaryKey =
+  | 'buildingCount'
+  | 'rtuCount'
+  | 'utilityCount'
+  | 'polygonCount'
+  | 'manifestPictureCount'
+  | 'picturesUploaded'
+  | 'pictureChunkCount'
+  | 'picturesAdded'
+  | 'picturesRemoved'
+  | 'picturesHidden'
+  | 'scheduleYearCount'
+  | 'scheduleNoteCount'
+  | 'pricingRowCount'
+
 export function buildSummaryDeltas(
   local: SyncMetaSummary,
   remote: SyncMetaSummary,
 ): SummaryDeltaLine[] {
-  const fields: Array<{ key: keyof SyncMetaSummary; label: string }> = [
+  const fields: Array<{ key: NumericSyncSummaryKey; label: string }> = [
     { key: 'buildingCount', label: 'Buildings' },
     { key: 'rtuCount', label: 'RTU markers' },
     { key: 'utilityCount', label: 'Utility markers' },
     { key: 'polygonCount', label: 'Polygons' },
     { key: 'manifestPictureCount', label: 'RTU pictures (manifest)' },
+    { key: 'picturesAdded', label: 'Pictures added (manifest)' },
+    { key: 'picturesRemoved', label: 'Pictures removed (manifest)' },
+    { key: 'picturesHidden', label: 'Pictures hidden' },
     { key: 'scheduleYearCount', label: 'Schedule replacement years' },
     { key: 'scheduleNoteCount', label: 'Schedule notes' },
     { key: 'pricingRowCount', label: 'Pricing rows' },

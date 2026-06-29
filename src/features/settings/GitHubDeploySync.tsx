@@ -48,8 +48,11 @@ export function GitHubDeploySyncFields({
         />
       </div>
       <p className={styles.hint}>
-        Token needs <b>repo</b> and <b>workflow</b> scopes (Contents read/write). Add the same token as
-        repo secret <code>BME_SYNC_PAT</code> (GitHub → Settings → Secrets → Actions).
+        Sync uploads map data and pictures to Cloudflare, commits portfolio JSON to GitHub, and
+        triggers a GitHub Pages rebuild. <b>App UI changes</b> (e.g. removed buttons) must be on{' '}
+        <code>main</code> first — run <code>npm run push-live</code> from the project folder, then
+        sync. Token needs <b>repo</b> and <b>workflow</b> scopes. Add the same token as repo secret{' '}
+        <code>BME_SYNC_PAT</code>.
       </p>
     </div>
   )
@@ -81,8 +84,9 @@ export function GitHubDeploySyncButton({
       </button>
       {sync.completed && sync.cooldownSec > 0 ? (
         <p className={styles.hint}>
-          Live site and Cloudflare updates may take up to 2 minutes. Hard-refresh the map when the
-          timer ends.
+          Live site updates may take 5–10 minutes (data ~2 min, app rebuild longer). Hard-refresh when
+          the timer ends. Download the sync status report to see pictures added/removed and build
+          version.
         </p>
       ) : null}
     </>

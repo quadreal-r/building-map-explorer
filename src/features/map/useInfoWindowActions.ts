@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import type { MutableRefObject } from 'react'
 import { confirm } from '@/stores/confirmStore'
 import {
@@ -67,6 +67,9 @@ export function useInfoWindowActions(
   clearActiveRtuPictures: () => void,
   refreshRtuPicturesView: () => Promise<void>,
 ) {
+  /** Drop prior InfoWindow DOM listeners so repeated opens do not stack handlers. */
+  const infoWindowActionsAbortRef = useRef<AbortController | null>(null)
+
   const stopSoloMove = useCallback(() => {
     const solo = soloMoveRef.current
     if (!solo) return
@@ -130,7 +133,7 @@ export function useInfoWindowActions(
   )
 
   const openBuildingInfo = useCallback(
-    (building: Building, marker: AppMapMarker, options?: { collapsed?: boolean }) => {
+    (building: Building, marker: AppMapMarker) => {
       if (!map || !infoWindowRef.current) return
       if (activeInfoMarkerRef.current === marker) {
         closeAllMapPopups()
@@ -141,9 +144,8 @@ export function useInfoWindowActions(
       clearActiveRtuPictures()
       const tenantPolygons = polygonsForBuilding(polygonIndexRef.current, building.address)
       const managerRenames = useSettingsStore.getState().managerRenames
-      const collapsed = options?.collapsed ?? false
       infoWindowRef.current.setContent(
-        buildBuildingInfoHtml(building, tenantPolygons, managerRenames, { collapsed }),
+        buildBuildingInfoHtml(building, tenantPolygons, managerRenames),
       )
       infoWindowRef.current.open({ map, anchor: marker })
       ensureInfoWindowVisible(map, infoWindowRef.current)
@@ -221,82 +223,64 @@ export function useInfoWindowActions(
     const iw = infoWindowRef.current
     if (!iw) return
     google.maps.event.addListenerOnce(iw, 'domready', () => {
-      const container = document.querySelector('.gm-style-iw-d')
+      infoWindowActionsAbortRef.current?.abort()
+      const abortController = new AbortController()
+      infoWindowActionsAbortRef.current = abortController
+      const { signal } = abortController
+
+      const container =
+        map?.getDiv().querySelector('.gm-style-iw-d') ??
+        document.querySelector('.gm-style-iw-d')
       if (!container) return
 
       const keepPopupOpenOnMapClick = (e: Event) => {
         suppressMapClickClearOnce()
         e.stopPropagation()
       }
-      container.addEventListener('click', keepPopupOpenOnMapClick)
-      container.addEventListener('mousedown', keepPopupOpenOnMapClick)
+      container.addEventListener('click', keepPopupOpenOnMapClick, { signal })
+      container.addEventListener('mousedown', keepPopupOpenOnMapClick, { signal })
 
       const ctx = activeDetailInfoRef.current
       if (ctx?.entry.type === 'rtu' && ctx.view === 'info') {
         void refreshRtuDocumentsInPopup()
       }
 
-      container.querySelector('[data-iw-action="close"]')?.addEventListener('click', () => {
-        iw.close()
-        activeInfoMarkerRef.current = null
-        activeDetailInfoRef.current = null
-        clearActiveRtuPictures()
-      })
+      container.querySelector('[data-iw-action="close"]')?.addEventListener(
+        'click',
+        () => {
+          iw.close()
+          activeInfoMarkerRef.current = null
+          activeDetailInfoRef.current = null
+          clearActiveRtuPictures()
+        },
+        { signal },
+      )
 
-      container.querySelector('[data-iw-action="toggle-building"]')?.addEventListener('click', () => {
-        const root = container.querySelector('.iw')
-        const toggle = container.querySelector('[data-iw-action="toggle-building"]') as
-          | HTMLButtonElement
-          | null
-        const label = toggle?.querySelector('.iw-toggle-label')
-        const icon = toggle?.querySelector('.iw-toggle-icon')
-        if (!root || !toggle) return
-        const isCollapsed = root.classList.toggle('iw--collapsed')
-        const nextLabel = isCollapsed ? 'Show building details' : 'Hide building details'
-        if (label) label.textContent = nextLabel
-        if (icon) icon.textContent = isCollapsed ? '▾' : '▴'
-        toggle.title = nextLabel
-        toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true')
-        if (map) ensureInfoWindowVisible(map, iw)
-      })
+      container.querySelector('[data-iw-action="copy-all"]')?.addEventListener(
+        'click',
+        () => {
+          const source = container.querySelector('.iw-copy-source') as HTMLTextAreaElement | null
+          if (source?.value) copyPopupText(source.value)
+        },
+        { signal },
+      )
 
-      container.querySelector('[data-iw-action="copy-all"]')?.addEventListener('click', () => {
-        const source = container.querySelector('.iw-copy-source') as HTMLTextAreaElement | null
-        if (source?.value) copyPopupText(source.value)
-      })
-
-      container.querySelector('[data-iw-action="move"]')?.addEventListener('click', (e) => {
-        const btn = e.currentTarget as HTMLElement
-        const kind = btn.getAttribute('data-iw-kind')
-        if (kind === 'building') {
-          const address = btn.getAttribute('data-iw-address') ?? ''
-          const entry = buildingMarkersRef.current.find((m) => m.building.address === address)
-          if (!entry) return
-          startSoloMove(entry.marker, entry.label)
-          return
-        }
-        if (kind === 'detail') {
-          const layerKey = btn.getAttribute('data-iw-layer') as LayerKey
-          const name = btn.getAttribute('data-iw-name') ?? ''
-          const buildingAddr = btn.getAttribute('data-iw-building') ?? ''
-          const entry = detailMarkersRef.current.find(
-            (dm) =>
-              dm.type === layerKey &&
-              dm.data.name === name &&
-              (buildingAddr ? dm.building?.address === buildingAddr : !dm.building),
-          )
-          if (!entry) return
-          startSoloMove(entry.marker)
-        }
-      })
-
-      const delBtn = container.querySelector('[data-iw-action="delete"]')
-      if (delBtn) {
-        delBtn.addEventListener('click', () => {
-          void (async () => {
-            const layerKey = delBtn.getAttribute('data-iw-layer') as LayerKey
-            const name = delBtn.getAttribute('data-iw-name') ?? ''
-            const buildingAddr = delBtn.getAttribute('data-iw-building') ?? ''
+      container.querySelector('[data-iw-action="move"]')?.addEventListener(
+        'click',
+        (e) => {
+          const btn = e.currentTarget as HTMLElement
+          const kind = btn.getAttribute('data-iw-kind')
+          if (kind === 'building') {
+            const address = btn.getAttribute('data-iw-address') ?? ''
+            const entry = buildingMarkersRef.current.find((m) => m.building.address === address)
+            if (!entry) return
+            startSoloMove(entry.marker, entry.label)
+            return
+          }
+          if (kind === 'detail') {
+            const layerKey = btn.getAttribute('data-iw-layer') as LayerKey
+            const name = btn.getAttribute('data-iw-name') ?? ''
+            const buildingAddr = btn.getAttribute('data-iw-building') ?? ''
             const entry = detailMarkersRef.current.find(
               (dm) =>
                 dm.type === layerKey &&
@@ -304,129 +288,177 @@ export function useInfoWindowActions(
                 (buildingAddr ? dm.building?.address === buildingAddr : !dm.building),
             )
             if (!entry) return
-            if (!(await confirm(`Delete marker "${name}"?`))) return
-            iw.close()
-            activeInfoMarkerRef.current = null
-            callbacksRef.current.onDeleteDetail?.(entry.type, entry.data, entry.building)
-          })()
-        })
+            startSoloMove(entry.marker)
+          }
+        },
+        { signal },
+      )
+
+      const delBtn = container.querySelector('[data-iw-action="delete"]')
+      if (delBtn) {
+        delBtn.addEventListener(
+          'click',
+          () => {
+            void (async () => {
+              const layerKey = delBtn.getAttribute('data-iw-layer') as LayerKey
+              const name = delBtn.getAttribute('data-iw-name') ?? ''
+              const buildingAddr = delBtn.getAttribute('data-iw-building') ?? ''
+              const entry = detailMarkersRef.current.find(
+                (dm) =>
+                  dm.type === layerKey &&
+                  dm.data.name === name &&
+                  (buildingAddr ? dm.building?.address === buildingAddr : !dm.building),
+              )
+              if (!entry) return
+              if (!(await confirm(`Delete marker "${name}"?`))) return
+              iw.close()
+              activeInfoMarkerRef.current = null
+              callbacksRef.current.onDeleteDetail?.(entry.type, entry.data, entry.building)
+            })()
+          },
+          { signal },
+        )
       }
 
-      container.querySelector('[data-iw-action="edit-text"]')?.addEventListener('click', () => {
-        const ctx = activeDetailInfoRef.current
-        if (!ctx || ctx.entry.type !== 'rtu') return
-        ctx.view = 'edit'
-        iw.setContent(
-          buildDetailEditHtml(ctx.entry.data as Rtu, {
-            buildingAddress: ctx.entry.building?.address,
-          }),
-        )
-      })
-
-      container.querySelector('[data-iw-action="edit-cancel"]')?.addEventListener('click', () => {
-        const ctx = activeDetailInfoRef.current
-        if (!ctx || ctx.view !== 'edit') return
-        ctx.view = 'info'
-        const { type, data } = ctx.entry
-        const pendingPictureAssignCount =
-          type === 'rtu'
-            ? countPendingPicturesNearRtu(
-                usePendingRtuPictureStore.getState().items,
-                (data as Rtu).lat,
-                (data as Rtu).lng,
-              )
-            : 0
-        iw.setContent(
-          buildDetailInfoHtml(type, data, detailHtmlOptions(ctx.entry, pendingPictureAssignCount)),
-        )
-      })
-
-      container.querySelector('[data-iw-action="edit-save"]')?.addEventListener('click', () => {
-        void (async () => {
+      container.querySelector('[data-iw-action="edit-text"]')?.addEventListener(
+        'click',
+        () => {
           const ctx = activeDetailInfoRef.current
-          if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'edit' || !ctx.entry.building) return
-          const nameInput = container.querySelector('[data-iw-field="name"]') as HTMLInputElement | null
-          const descInput = container.querySelector(
-            '[data-iw-field="description"]',
-          ) as HTMLTextAreaElement | null
-          if (!nameInput || !descInput) return
-          const oldName =
-            container.querySelector('.iw-edit')?.getAttribute('data-iw-rtu-name') ??
-            ctx.entry.data.name ??
-            ''
-          try {
-            await callbacksRef.current.onEditDetail?.(
-              'rtu',
-              ctx.entry.building,
-              oldName,
-              { name: nameInput.value, description: descInput.value },
-            )
-          } catch {
-            return
-          }
-          iw.close()
-          activeInfoMarkerRef.current = null
-          activeDetailInfoRef.current = null
-        })()
-      })
+          if (!ctx || ctx.entry.type !== 'rtu') return
+          ctx.view = 'edit'
+          iw.setContent(
+            buildDetailEditHtml(ctx.entry.data as Rtu, {
+              buildingAddress: ctx.entry.building?.address,
+            }),
+          )
+        },
+        { signal },
+      )
 
-      container.querySelector('[data-iw-action="pictures"]')?.addEventListener('click', () => {
-        const ctx = activeDetailInfoRef.current
-        if (!ctx || ctx.entry.type !== 'rtu') return
-        ctx.view = 'pictures'
-        ctx.pictureIndex = 0
-        void refreshRtuPicturesView()
-      })
+      container.querySelector('[data-iw-action="edit-cancel"]')?.addEventListener(
+        'click',
+        () => {
+          const ctx = activeDetailInfoRef.current
+          if (!ctx || ctx.view !== 'edit') return
+          ctx.view = 'info'
+          const { type, data } = ctx.entry
+          const pendingPictureAssignCount =
+            type === 'rtu'
+              ? countPendingPicturesNearRtu(
+                  usePendingRtuPictureStore.getState().items,
+                  (data as Rtu).lat,
+                  (data as Rtu).lng,
+                )
+              : 0
+          iw.setContent(
+            buildDetailInfoHtml(type, data, detailHtmlOptions(ctx.entry, pendingPictureAssignCount)),
+          )
+        },
+        { signal },
+      )
+
+      container.querySelector('[data-iw-action="edit-save"]')?.addEventListener(
+        'click',
+        () => {
+          void (async () => {
+            const ctx = activeDetailInfoRef.current
+            if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'edit' || !ctx.entry.building) return
+            const nameInput = container.querySelector('[data-iw-field="name"]') as HTMLInputElement | null
+            const descInput = container.querySelector(
+              '[data-iw-field="description"]',
+            ) as HTMLTextAreaElement | null
+            if (!nameInput || !descInput) return
+            const oldName =
+              container.querySelector('.iw-edit')?.getAttribute('data-iw-rtu-name') ??
+              ctx.entry.data.name ??
+              ''
+            try {
+              await callbacksRef.current.onEditDetail?.(
+                'rtu',
+                ctx.entry.building,
+                oldName,
+                { name: nameInput.value, description: descInput.value },
+              )
+            } catch {
+              return
+            }
+            iw.close()
+            activeInfoMarkerRef.current = null
+            activeDetailInfoRef.current = null
+          })()
+        },
+        { signal },
+      )
+
+      container.querySelector('[data-iw-action="pictures"]')?.addEventListener(
+        'click',
+        () => {
+          const ctx = activeDetailInfoRef.current
+          if (!ctx || ctx.entry.type !== 'rtu') return
+          ctx.view = 'pictures'
+          ctx.pictureIndex = 0
+          void refreshRtuPicturesView()
+        },
+        { signal },
+      )
 
       container
         .querySelector('[data-iw-action="picture-assign-pending"]')
-        ?.addEventListener('click', () => {
-          const ctx = activeDetailInfoRef.current
-          if (!ctx || ctx.entry.type !== 'rtu' || !ctx.entry.building) return
-          const rtu = ctx.entry.data as Rtu
-          const building = ctx.entry.building
-          const items = usePendingRtuPictureStore.getState().items
-          const nearest = findNearestPendingPictureToRtu(items, rtu.lat, rtu.lng)
-          if (!nearest) {
-            showToastError(
-              `No pending photos within ${RTU_PICTURE_DROP_FEET} ft of ${rtu.name}. Drag photo markers closer first.`,
-            )
-            return
-          }
-          void usePendingRtuPictureStore
-            .getState()
-            .assignToRtu(nearest.item.id, building, rtu)
-            .then((result) => {
-              showToastSuccess(
-                `- Assigned ${nearest.item.originalName} - ${result.fileName} (${rtu.name})`,
+        ?.addEventListener(
+          'click',
+          () => {
+            const ctx = activeDetailInfoRef.current
+            if (!ctx || ctx.entry.type !== 'rtu' || !ctx.entry.building) return
+            const rtu = ctx.entry.data as Rtu
+            const building = ctx.entry.building
+            const items = usePendingRtuPictureStore.getState().items
+            const nearest = findNearestPendingPictureToRtu(items, rtu.lat, rtu.lng)
+            if (!nearest) {
+              showToastError(
+                `No pending photos within ${RTU_PICTURE_DROP_FEET} ft of ${rtu.name}. Drag photo markers closer first.`,
               )
-              const remaining = countPendingPicturesNearRtu(
-                usePendingRtuPictureStore.getState().items,
-                rtu.lat,
-                rtu.lng,
-              )
-              if (ctx.view === 'info') {
-                infoWindowRef.current?.setContent(
-                  buildDetailInfoHtml('rtu', rtu, detailHtmlOptions(ctx.entry, remaining)),
+              return
+            }
+            void usePendingRtuPictureStore
+              .getState()
+              .assignToRtu(nearest.item.id, building, rtu)
+              .then((result) => {
+                showToastSuccess(
+                  `- Assigned ${nearest.item.originalName} - ${result.fileName} (${rtu.name})`,
                 )
-              }
-            })
-            .catch((error) => {
-              showToastError(error instanceof Error ? error.message : 'Failed to assign picture')
-            })
-        })
+                const remaining = countPendingPicturesNearRtu(
+                  usePendingRtuPictureStore.getState().items,
+                  rtu.lat,
+                  rtu.lng,
+                )
+                if (ctx.view === 'info') {
+                  infoWindowRef.current?.setContent(
+                    buildDetailInfoHtml('rtu', rtu, detailHtmlOptions(ctx.entry, remaining)),
+                  )
+                }
+              })
+              .catch((error) => {
+                showToastError(error instanceof Error ? error.message : 'Failed to assign picture')
+              })
+          },
+          { signal },
+        )
 
       container
         .querySelector('[data-iw-action="pictures-back"]')
-        ?.addEventListener('click', () => {
-          const ctx = activeDetailInfoRef.current
-          if (!ctx) return
-          clearActiveRtuPictures()
-          ctx.view = 'info'
-          ctx.pictureIndex = 0
-          const { type, data } = ctx.entry
-          iw.setContent(buildDetailInfoHtml(type, data, detailHtmlOptions(ctx.entry)))
-        })
+        ?.addEventListener(
+          'click',
+          () => {
+            const ctx = activeDetailInfoRef.current
+            if (!ctx) return
+            clearActiveRtuPictures()
+            ctx.view = 'info'
+            ctx.pictureIndex = 0
+            const { type, data } = ctx.entry
+            iw.setContent(buildDetailInfoHtml(type, data, detailHtmlOptions(ctx.entry)))
+          },
+          { signal },
+        )
 
       const stepPicture = (delta: number) => {
         const ctx = activeDetailInfoRef.current
@@ -438,121 +470,137 @@ export function useInfoWindowActions(
 
       container
         .querySelector('[data-iw-action="picture-prev"]')
-        ?.addEventListener('click', () => stepPicture(-1))
+        ?.addEventListener('click', () => stepPicture(-1), { signal })
       container
         .querySelector('[data-iw-action="picture-next"]')
-        ?.addEventListener('click', () => stepPicture(1))
+        ?.addEventListener('click', () => stepPicture(1), { signal })
 
       container
         .querySelector('[data-iw-action="picture-open-viewer"]')
-        ?.addEventListener('click', () => {
-          const ctx = activeDetailInfoRef.current
-          if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'pictures') return
-          const buildingAddress = ctx.entry.building?.address
-          if (!buildingAddress) return
-          void listRtuPictures(buildingAddress, ctx.entry.data.name).then((pictures) => {
-            if (!pictures.length) return
-            activeRtuPicturesRef.current = pictures
-            const pictureIndex = Math.min(ctx.pictureIndex, pictures.length - 1)
-            useUiStore.getState().openRtuPictureViewer({
-              pictures: pictures.map((p) => ({
-                fileName: p.fileName,
-                fullUrl: p.fullUrl,
-                thumbUrl: p.thumbUrl,
-                index: p.index,
-              })),
-              index: pictureIndex,
-              buildingAddress,
-              rtuName: ctx.entry.data.name,
+        ?.addEventListener(
+          'click',
+          () => {
+            const ctx = activeDetailInfoRef.current
+            if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'pictures') return
+            const buildingAddress = ctx.entry.building?.address
+            if (!buildingAddress) return
+            void listRtuPictures(buildingAddress, ctx.entry.data.name).then((pictures) => {
+              if (!pictures.length) return
+              activeRtuPicturesRef.current = pictures
+              const pictureIndex = Math.min(ctx.pictureIndex, pictures.length - 1)
+              useUiStore.getState().openRtuPictureViewer({
+                pictures: pictures.map((p) => ({
+                  fileName: p.fileName,
+                  fullUrl: p.fullUrl,
+                  thumbUrl: p.thumbUrl,
+                  index: p.index,
+                })),
+                index: pictureIndex,
+                buildingAddress,
+                rtuName: ctx.entry.data.name,
+              })
             })
-          })
-        })
+          },
+          { signal },
+        )
 
       container
         .querySelector('[data-iw-action="picture-add"]')
-        ?.addEventListener('click', () => {
-          const input = container.querySelector(
-            '[data-iw-picture-input]',
-          ) as HTMLInputElement | null
-          input?.click()
-        })
+        ?.addEventListener(
+          'click',
+          () => {
+            const input = container.querySelector(
+              '[data-iw-picture-input]',
+            ) as HTMLInputElement | null
+            input?.click()
+          },
+          { signal },
+        )
 
       const fileInput = container.querySelector(
         '[data-iw-picture-input]',
       ) as HTMLInputElement | null
-      fileInput?.addEventListener('change', () => {
-        void (async () => {
-          const ctx = activeDetailInfoRef.current
-          if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'pictures') return
-          const buildingAddress = ctx.entry.building?.address
-          if (!buildingAddress || !fileInput.files?.length) return
-          const added = await addRtuPicturesFromFiles(
-            buildingAddress,
-            ctx.entry.data.name,
-            [...fileInput.files],
-          )
-          fileInput.value = ''
-          if (added.length) {
-            ctx.pictureIndex = added.length - 1
-            showToastSuccess(`- ${added.length} picture${added.length === 1 ? '' : 's'} added`)
-          }
-          await refreshRtuPicturesView()
-        })()
-      })
+      fileInput?.addEventListener(
+        'change',
+        () => {
+          void (async () => {
+            const ctx = activeDetailInfoRef.current
+            if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'pictures') return
+            const buildingAddress = ctx.entry.building?.address
+            if (!buildingAddress || !fileInput.files?.length) return
+            const added = await addRtuPicturesFromFiles(
+              buildingAddress,
+              ctx.entry.data.name,
+              [...fileInput.files],
+            )
+            fileInput.value = ''
+            if (added.length) {
+              ctx.pictureIndex = added.length - 1
+              showToastSuccess(`- ${added.length} picture${added.length === 1 ? '' : 's'} added`)
+            }
+            await refreshRtuPicturesView()
+          })()
+        },
+        { signal },
+      )
 
       container
         .querySelector('[data-iw-action="picture-delete"]')
-        ?.addEventListener('click', () => {
-          void (async () => {
-            const ctx = activeDetailInfoRef.current
-            const btn = container.querySelector(
-              '[data-iw-action="picture-delete"]',
-            ) as HTMLElement | null
-            if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'pictures' || !btn) return
+        ?.addEventListener(
+          'click',
+          () => {
+            void (async () => {
+              const ctx = activeDetailInfoRef.current
+              const btn = container.querySelector(
+                '[data-iw-action="picture-delete"]',
+              ) as HTMLElement | null
+              if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'pictures' || !btn) return
 
-            const fileName = btn.getAttribute('data-iw-picture-file') ?? ''
-            const isStatic = btn.getAttribute('data-iw-picture-static') === '1'
-            const buildingAddress = ctx.entry.building?.address
-            if (!buildingAddress || !fileName) return
+              const fileName = btn.getAttribute('data-iw-picture-file') ?? ''
+              const isStatic = btn.getAttribute('data-iw-picture-static') === '1'
+              const buildingAddress = ctx.entry.building?.address
+              if (!buildingAddress || !fileName) return
 
-            if (isStatic) {
-              hideRtuManifestPicture(
-                rtuPictureKey(buildingAddress, ctx.entry.data.name),
-                fileName,
-              )
-              notifyRtuPicturesChanged()
-              showToastSuccess(
-                '- Picture hidden - use Settings - Sync to Cloudflare & GitHub to hide for everyone.',
-              )
+              if (isStatic) {
+                hideRtuManifestPicture(
+                  rtuPictureKey(buildingAddress, ctx.entry.data.name),
+                  fileName,
+                )
+                notifyRtuPicturesChanged()
+                showToastSuccess(
+                  '- Picture hidden - use Settings - Sync to Cloudflare & GitHub to hide for everyone.',
+                )
+                try {
+                  await refreshRtuPicturesView()
+                } catch (error) {
+                  showToastError(
+                    error instanceof Error ? error.message : 'Failed to refresh pictures',
+                  )
+                }
+                return
+              }
+
+              if (!(await confirm(`Delete picture "${fileName}"?`))) return
+
               try {
-                await refreshRtuPicturesView()
+                const result = await deleteRtuPicture(
+                  buildingAddress,
+                  ctx.entry.data.name,
+                  fileName,
+                )
+                if (result === 'deleted') {
+                  showToastSuccess('- Picture deleted')
+                  await refreshRtuPicturesView()
+                }
               } catch (error) {
                 showToastError(
-                  error instanceof Error ? error.message : 'Failed to refresh pictures',
+                  error instanceof Error ? error.message : 'Failed to delete picture',
                 )
               }
-              return
-            }
-
-            if (!(await confirm(`Delete picture "${fileName}"?`))) return
-
-            try {
-              const result = await deleteRtuPicture(
-                buildingAddress,
-                ctx.entry.data.name,
-                fileName,
-              )
-              if (result === 'deleted') {
-                showToastSuccess('- Picture deleted')
-                await refreshRtuPicturesView()
-              }
-            } catch (error) {
-              showToastError(
-                error instanceof Error ? error.message : 'Failed to delete picture',
-              )
-            }
-          })()
-        })
+            })()
+          },
+          { signal },
+        )
     })
   }, [
     map,

@@ -22,6 +22,25 @@ const baseSummary: SyncMetaSummary = {
 }
 
 describe('syncHistory', () => {
+  it('records picture add/remove/hide deltas between syncs', () => {
+    const after: SyncMetaSummary = {
+      ...baseSummary,
+      manifestPictureCount: 1603,
+      picturesUploaded: 3,
+      picturesAdded: 2,
+      picturesRemoved: 1,
+      picturesHidden: 1,
+    }
+    const changes = buildSyncHistoryChanges(baseSummary, after, 3)
+    expect(changes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: 'Pictures added (manifest)', delta: 2 }),
+        expect.objectContaining({ label: 'Pictures removed (manifest)', delta: -1 }),
+        expect.objectContaining({ label: 'Pictures hidden (this sync)', delta: 1 }),
+      ]),
+    )
+  })
+
   it('records summary deltas between syncs', () => {
     const after: SyncMetaSummary = {
       ...baseSummary,

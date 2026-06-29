@@ -106,6 +106,11 @@ export function collectSearchHits(
   return hits
 }
 
+/** Pan/zoom to a building and select it without opening the info popup. */
+export function requestBuildingMapFocus(address: string): void {
+  window.dispatchEvent(new CustomEvent('map:openBuilding', { detail: { address } }))
+}
+
 export function openSearchHit(hit: SearchHit): void {
   queueMicrotask(() => {
     window.dispatchEvent(
@@ -138,11 +143,7 @@ export function openSearchHit(hit: SearchHit): void {
     }
 
     if (hit.kind === 'building' && hit.address) {
-      window.dispatchEvent(
-        new CustomEvent('map:openBuilding', {
-          detail: { address: hit.address },
-        }),
-      )
+      requestBuildingMapFocus(hit.address)
     }
   })
 }
