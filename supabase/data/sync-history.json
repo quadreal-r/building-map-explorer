@@ -153,6 +153,28 @@
         "picturesUploaded": 0
       },
       "changes": []
+    },
+    {
+      "syncedAt": "2026-06-29T12:48:56.728Z",
+      "exportedAt": "2026-06-29T12:48:26.289Z",
+      "source": "settings-sync",
+      "summary": {
+        "buildingCount": 102,
+        "rtuCount": 1073,
+        "utilityCount": 257,
+        "polygonCount": 447,
+        "scheduleYearCount": 463,
+        "scheduleNoteCount": 348,
+        "pricingRowCount": 25,
+        "manifestPictureCount": 1621,
+        "picturesUploaded": 0,
+        "picturesAdded": 0,
+        "picturesRemoved": 0,
+        "picturesHidden": 0,
+        "buildVersionLabel": "v2026.06.29 (2)",
+        "clientBuildVersionLabel": "v2026.06.29 (2)"
+      },
+      "changes": []
     }
   ]
 }
