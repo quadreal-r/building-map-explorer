@@ -1,14 +1,19 @@
 /**
  * Read deploy bundle from the sync staging branch (used by sync-deploy CI).
  *
+ * Writes lean deploy-bundle.json (no picture base64) and deploy-pictures-N.json
+ * chunk files locally so apply-deploy-bundle can process photos without hitting
+ * JavaScript's max string size when many chunks accumulated on staging.
+ *
  * Env: STAGING_REF — git ref, e.g. origin/bme-sync-staging
  * Usage: node scripts/load-sync-staging-bundle.mjs
  */
 import { execSync } from 'node:child_process'
-import { writeFileSync } from 'node:fs'
+import { readdirSync, unlinkSync, writeFileSync } from 'node:fs'
 
 const stagingRef = process.env.STAGING_REF?.trim()
 const outPath = 'deploy-bundle.json'
+const chunkFilePrefix = 'deploy-pictures-'
 
 function fail(message) {
   console.error(`::error::${message}`)
@@ -44,27 +49,42 @@ function parsePictureChunk(text, label) {
   }
 }
 
-function loadPictureChunks() {
-  const pictures = []
+function clearLocalPictureChunks() {
+  for (const name of readdirSync('.')) {
+    if (name.startsWith(chunkFilePrefix) && name.endsWith('.json')) {
+      unlinkSync(name)
+    }
+  }
+}
+
+function writePictureChunksFromStaging() {
+  clearLocalPictureChunks()
+  let pictureCount = 0
+  let pictureChunkCount = 0
   let index = 0
+
   while (true) {
-    const chunkText = gitShow(`sync/deploy-pictures-${index}.json`)
+    const stagingPath = `sync/deploy-pictures-${index}.json`
+    const chunkText = gitShow(stagingPath)
     if (!chunkText?.trim()) break
-    pictures.push(...parsePictureChunk(chunkText, `sync/deploy-pictures-${index}.json`))
+    const chunk = parsePictureChunk(chunkText, stagingPath)
+    writeFileSync(`${chunkFilePrefix}${index}.json`, `${JSON.stringify(chunk)}\n`)
+    pictureCount += chunk.length
+    pictureChunkCount += 1
     index += 1
   }
 
-  let pictureChunkCount = index
-
-  if (pictures.length === 0) {
+  if (pictureChunkCount === 0) {
     const legacyText = gitShow('sync/deploy-pictures.json')
     if (legacyText?.trim()) {
-      pictures.push(...parsePictureChunk(legacyText, 'sync/deploy-pictures.json'))
+      const chunk = parsePictureChunk(legacyText, 'sync/deploy-pictures.json')
+      writeFileSync(`${chunkFilePrefix}0.json`, `${JSON.stringify(chunk)}\n`)
+      pictureCount = chunk.length
       pictureChunkCount = 1
     }
   }
 
-  return { pictures, pictureChunkCount }
+  return { pictureCount, pictureChunkCount }
 }
 
 const bundleText = gitShow('sync/deploy-bundle.json')
@@ -83,13 +103,13 @@ if (!bundle.portfolio?.buildings?.length) {
   fail('Deploy bundle is missing portfolio.buildings.')
 }
 
-const { pictures, pictureChunkCount } = loadPictureChunks()
-bundle.pictures = pictures
+const { pictureCount, pictureChunkCount } = writePictureChunksFromStaging()
+bundle.pictures = []
 if (pictureChunkCount > 0) {
   bundle.pictureChunkCount = pictureChunkCount
 }
 
 writeFileSync(outPath, `${JSON.stringify(bundle)}\n`)
 console.log(
-  `Deploy bundle OK: ${bundle.portfolio.buildings.length} buildings, ${bundle.pictures.length} picture(s) → ${outPath}`,
+  `Deploy bundle OK: ${bundle.portfolio.buildings.length} buildings, ${pictureCount} picture(s) in ${pictureChunkCount} chunk file(s) → ${outPath}`,
 )

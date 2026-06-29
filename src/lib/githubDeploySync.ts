@@ -313,9 +313,10 @@ export async function uploadSyncStagingBundle(
     `${message} (clear legacy pictures)`,
     SYNC_STAGING_BRANCH,
   )
-  const staleChunkSlots = Math.max(pictureChunkJsons.length + 8, 32)
-  for (let index = 0; index < staleChunkSlots; index++) {
-    if (index < pictureChunkJsons.length) continue
+  const staleChunkCleanupLimit = Math.max(pictureChunkJsons.length + 16, 128)
+  for (let index = pictureChunkJsons.length; index < staleChunkCleanupLimit; index++) {
+    const sha = await getRepoFileSha(token, repo, pictureChunkPath(index), SYNC_STAGING_BRANCH)
+    if (!sha) break
     await deleteRepoFileIfExists(
       token,
       repo,

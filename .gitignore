@@ -20,6 +20,7 @@ supabase/seed-part*.sql
 # Large one-off export from local dev — apply with scripts/apply-deploy-bundle.mjs instead
 deploy-bundle.json
 /deploy-bundle-*.json
+deploy-pictures-*.json
 Exported json for deploy/
 reports/
 supabase/data/deploy-bundle.json

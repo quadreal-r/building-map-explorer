@@ -9,6 +9,7 @@
 import {
   existsSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
   writeFileSync,
 } from 'node:fs'
@@ -42,6 +43,29 @@ function parsePictureIndex(fileName) {
   if (stored) return Number(stored[1])
   const bulk = parseBulkRtuPictureFileName(fileName)
   return bulk?.pictureIndex ?? null
+}
+
+/** Inline bundle pictures, or deploy-pictures-N.json from load-sync-staging-bundle.mjs */
+function* iterateDeployPictures(bundle) {
+  if (bundle.pictures?.length) {
+    yield* bundle.pictures
+    return
+  }
+  const chunkFiles = readdirSync(process.cwd())
+    .filter((name) => /^deploy-pictures-\d+\.json$/.test(name))
+    .sort((a, b) => {
+      const ai = Number(a.match(/(\d+)/)?.[1] ?? 0)
+      const bi = Number(b.match(/(\d+)/)?.[1] ?? 0)
+      return ai - bi
+    })
+  for (const fileName of chunkFiles) {
+    const chunk = JSON.parse(readFileSync(join(process.cwd(), fileName), 'utf8'))
+    if (!Array.isArray(chunk)) {
+      console.error(`Warning: ${fileName} is not a JSON array — skipped`)
+      continue
+    }
+    yield* chunk
+  }
 }
 
 function resolveBundlePath() {
@@ -220,12 +244,13 @@ if (existsSync(manifestPath)) {
 }
 const manifestBefore = JSON.parse(JSON.stringify(manifest))
 
-const pictures = bundle.pictures ?? []
 let r2Uploads = 0
 let localWrites = 0
 let gpsWarnings = 0
+let pictureCount = 0
 
-for (const pic of pictures) {
+for (const pic of iterateDeployPictures(bundle)) {
+  pictureCount += 1
   if (!pic.fileName || !pic.base64) continue
   const buffer = Buffer.from(pic.base64, 'base64')
 
