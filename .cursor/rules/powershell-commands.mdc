@@ -1,0 +1,144 @@
+---
+description: PowerShell command cheat sheet for building-map-explorer (dev, test, deploy, sync)
+alwaysApply: false
+---
+
+# PowerShell commands — building-map-explorer
+
+Project folder:
+
+```powershell
+cd C:\Users\Robert\Projects\building-map-explorer
+```
+
+Local app URL after dev server starts: **http://127.0.0.1:5173/** (or http://localhost:5173/)
+
+---
+
+## Dev server
+
+| Command | When to use |
+|---------|-------------|
+| `npm run dev` | Normal local dev (keep terminal open) |
+| `npm run dev:restart` | Port 5173 stuck / blank page — kills port and restarts |
+| `npm run dev:window` | Dev in its own window (survives closing Cursor terminal) |
+| `npm run dev:onedrive` | File-watching issues in OneDrive-synced folders |
+| `npm run preview` | Preview production build locally |
+
+Restart manually: **Ctrl+C** in dev terminal, then `npm run dev`.
+
+---
+
+## Quality checks (run before push)
+
+```powershell
+npm run typecheck
+npm run lint
+npm run test
+```
+
+All three in one line:
+
+```powershell
+npm run typecheck; npm run lint; npm run test
+```
+
+Watch tests while coding:
+
+```powershell
+npm run test:watch
+```
+
+---
+
+## Deploy to live site
+
+**App UI / code changes** (buttons, features, `src/`):
+
+```powershell
+npm run push-live
+```
+
+Custom commit message:
+
+```powershell
+npm run push-live -- "fix: describe your change"
+```
+
+**Map data + pictures** (portfolio JSON, RTU photos in IndexedDB):
+
+- In the app: **Settings → Sync to Cloudflare & GitHub**
+- Needs GitHub token in Settings (`repo` + `workflow` scopes)
+
+**Full update (UI + map data):**
+
+1. `npm run push-live`
+2. Settings → **Sync to Cloudflare & GitHub**
+3. Hard-refresh live site after ~5–10 min
+
+Live site: https://quadreal-r.github.io/building-map-explorer/  
+Actions: https://github.com/quadreal-r/building-map-explorer/actions
+
+---
+
+## Git (manual push)
+
+If you prefer git over `push-live`:
+
+```powershell
+git pull origin main
+git status
+git add .
+git commit -m "fix: short description"
+git push origin main
+```
+
+Push rejected (remote ahead — often after Settings sync):
+
+```powershell
+git pull origin main
+git push origin main
+```
+
+**Never commit:** `.env.local`, `deploy-bundle.json`
+
+---
+
+## Sync reports & data
+
+| Command | Purpose |
+|---------|---------|
+| `npm run report-sync-status` | Excel report in `reports/` (CDN, manifest, sync history) |
+| Settings → **Download sync status report** | Same from browser (includes build version, pictures added/removed) |
+| `npm run apply-deploy-bundle` | Apply exported `deploy-bundle.json` locally |
+| `npm run upload-json-to-r2` | Upload portfolio JSON to Cloudflare R2 |
+| `npm run upload-rtu-pictures-r2` | Sync RTU pictures folder to R2 |
+
+---
+
+## Build & misc
+
+```powershell
+npm run build              # Production build
+npm run format               # Prettier write
+npm run format:check         # Prettier check only
+npm install                  # After pulling new dependencies
+```
+
+Copy env on first setup:
+
+```powershell
+copy .env.example .env.local
+```
+
+---
+
+## Cursor / agent shortcuts
+
+| Phrase | Agent should |
+|--------|----------------|
+| "start server" / "run dev" | `npm run dev` or `npm run dev:restart` |
+| "push the code" / "push live" | `npm run push-live` or git pull → test → commit → push |
+| "/programmer …" | Implement feature, run tests, ask you to verify before commit |
+
+Related rules: `@push-new-build` for full deploy checklist.

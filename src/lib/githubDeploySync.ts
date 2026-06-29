@@ -472,13 +472,14 @@ export async function syncDeployToGitHub(
 
   const run = await waitForSyncWorkflowRun(startedAt, token, repo, onProgress)
 
+  // Optional: user PAT can dispatch deploy.yml (CI push to main already triggers it when data commits).
   let pagesDeployTriggered = false
   try {
-    reportProgress(onProgress, 'Starting GitHub Pages app rebuild…', 96)
+    reportProgress(onProgress, 'Requesting GitHub Pages rebuild…', 96)
     await triggerPagesDeployWorkflow(token, repo)
     pagesDeployTriggered = true
   } catch {
-    /* push to main may already have started deploy.yml */
+    /* non-fatal — sync-deploy push to main may have started deploy.yml already */
   }
 
   reportProgress(onProgress, 'Upload complete', 100)
