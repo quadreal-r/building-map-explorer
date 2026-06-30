@@ -409,15 +409,15 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1555 Bonhill Rd",
-    "lat": 43.6629073,
-    "lng": -79.6556244
+    "lat": 43.662880148884554,
+    "lng": -79.65565523962815
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "6325 Dixie Rd",
-    "lat": 43.66262475804307,
-    "lng": -79.65604283437945
+    "lat": 43.6626469,
+    "lng": -79.6560054
   },
   {
     "type": "Sprinkler Rooms",
@@ -1004,8 +1004,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "6325 Dixie Rd",
-    "lat": 43.66231805804308,
-    "lng": -79.65560793437945
+    "lat": 43.6623402,
+    "lng": -79.6555705
   },
   {
     "type": "Electrical Rooms",
@@ -1018,8 +1018,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1555 Bonhill Rd",
-    "lat": 43.6625756,
-    "lng": -79.6552016
+    "lat": 43.66254844888455,
+    "lng": -79.65523243962815
   },
   {
     "type": "Electrical Rooms",
