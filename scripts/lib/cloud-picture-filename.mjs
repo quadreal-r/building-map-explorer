@@ -1,4 +1,5 @@
 import { buildingStreetNumber } from './rtu-picture-filename.mjs'
+import { parseBulkRtuPictureFileName } from './rtu-picture-match.mjs'
 
 export function pictureFileRtuLabel(rtuName) {
   const primary = rtuName.split('/')[0]?.trim() ?? rtuName.trim()
@@ -26,9 +27,12 @@ export function buildCloudRtuPictureFileName(buildingAddress, rtuName, pictureIn
 
 export function manifestEntryToCloudFileName(fileName, buildingAddress, rtuName) {
   if (!/[\s()]/.test(fileName)) return fileName
+  const bulk = parseBulkRtuPictureFileName(fileName)
   const paren = fileName.match(/\((\d+)\)\.[^.]+$/i)
   const dash = fileName.match(/-(\d+)\.[^.]+$/i)
-  const index = paren ? Number(paren[1]) : dash ? Number(dash[1]) : 1
+  const index =
+    bulk?.pictureIndex ??
+    (paren ? Number(paren[1]) : dash ? Number(dash[1]) : 1)
   const ext = fileName.split('.').pop() ?? 'jpg'
   return buildCloudRtuPictureFileName(buildingAddress, rtuName, index, ext)
 }

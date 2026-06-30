@@ -783,9 +783,10 @@ export async function loadRtuPictureManifest(): Promise<RtuPictureManifest> {
           return manifestCache
         }
         console.warn(
-          '[rtuPictures] Cloudflare manifest.json unavailable; using empty manifest (not bundled fallback).',
+          '[rtuPictures] Cloudflare manifest.json unavailable; falling back to bundled copy.',
         )
-        manifestCache = { entries: {} }
+        const bundled = await fetchManifestFromUrl(BUNDLED_MANIFEST_URL)
+        manifestCache = bundled ?? { entries: {} }
         return manifestCache
       } else if (remoteUrl !== BUNDLED_MANIFEST_URL) {
         const remote = await fetchManifestFromUrl(remoteUrl)

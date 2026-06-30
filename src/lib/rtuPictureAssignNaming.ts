@@ -1,4 +1,5 @@
 import { buildingStreetNumber } from '@/lib/rtuPictures'
+import { parseBulkRtuPictureFileName } from '@/lib/rtuPictureMatch'
 
 /** Keep RTU name as shown in the app; only strip unsafe filename characters. */
 export function formatRtuNameForPictureFile(rtuName: string): string {
@@ -62,9 +63,12 @@ export function manifestEntryToCloudFileName(
   rtuName: string,
 ): string {
   if (!/[\s()]/.test(fileName)) return fileName
+  const bulk = parseBulkRtuPictureFileName(fileName)
   const paren = fileName.match(/\((\d+)\)\.[^.]+$/i)
   const dash = fileName.match(/-(\d+)\.[^.]+$/i)
-  const index = paren ? Number(paren[1]) : dash ? Number(dash[1]) : 1
+  const index =
+    bulk?.pictureIndex ??
+    (paren ? Number(paren[1]) : dash ? Number(dash[1]) : 1)
   const ext = fileName.split('.').pop() ?? 'jpg'
   return buildCloudRtuPictureFileName(buildingAddress, rtuName, index, ext)
 }
