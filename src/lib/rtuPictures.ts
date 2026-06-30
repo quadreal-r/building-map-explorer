@@ -857,10 +857,9 @@ export async function listRtuPictures(
     if (isRtuManifestPictureHidden(manifestKey, fileName)) continue
     const index = parseRtuPictureIndex(fileName)
     if (index == null || index < 1) continue
-    const cloudFileName = manifestEntryToCloudFileName(fileName, buildingAddress, rtuName)
-    const url = rtuPictureFileUrl(cloudFileName)
+    const url = rtuPictureFileUrl(fileName)
     byIndex.set(index, {
-      fileName: cloudFileName,
+      fileName,
       index,
       thumbUrl: url,
       fullUrl: url,

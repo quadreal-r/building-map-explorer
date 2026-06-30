@@ -326,6 +326,39 @@ export async function deleteAllR2PictureObjects({ dryRun = false, onProgress } =
   return { deleted, total: keys.length }
 }
 
+/** Delete specific picture objects by basename (adds R2_KEY_PREFIX). */
+export async function deleteR2PicturesByFileNames(fileNames, { dryRun = false, onProgress } = {}) {
+  const client = createR2Client()
+  const bucket = getR2Bucket()
+  if (!client || !bucket) {
+    throw new Error('R2 is not configured.')
+  }
+
+  const keys = [...new Set(fileNames)].map((fileName) => r2ObjectKey(fileName))
+  if (!keys.length) return { deleted: 0, total: 0 }
+
+  if (dryRun) return { deleted: 0, total: keys.length, dryRun: true }
+
+  let deleted = 0
+  const batchSize = 1000
+  for (let i = 0; i < keys.length; i += batchSize) {
+    const batch = keys.slice(i, i + batchSize)
+    await client.send(
+      new DeleteObjectsCommand({
+        Bucket: bucket,
+        Delete: {
+          Objects: batch.map((Key) => ({ Key })),
+          Quiet: true,
+        },
+      }),
+    )
+    deleted += batch.length
+    onProgress?.(deleted, keys.length)
+  }
+
+  return { deleted, total: keys.length }
+}
+
 /** True when the object exists at the manifest file name (with optional key prefix). */
 export async function r2PictureExists(fileName) {
   const client = createR2Client()

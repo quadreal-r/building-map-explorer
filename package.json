@@ -33,6 +33,7 @@
     "build-rtu-documents-manifest": "node scripts/build-rtu-documents-manifest.mjs",
     "reconcile-rtu-picture-manifest": "node scripts/reconcile-rtu-picture-manifest.mjs",
     "report-rtu-picture-gaps": "node scripts/report-rtu-picture-manifest-gaps.mjs",
+    "prune-r2-pictures": "node scripts/prune-r2-pictures-by-allowlist.mjs",
     "report-sync-status": "node scripts/report-sync-status.mjs",
     "push-live": "node scripts/push-live.mjs",
     "restore-point": "node scripts/restore-point.mjs"
