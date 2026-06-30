@@ -24,6 +24,8 @@ import { clearLocalRtuPictureStorage, clearStaleLocalRtuPictures } from '@/lib/r
 import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
 import { downloadSyncStatusExcel } from '@/lib/syncStatusReport'
 import { usesRemoteJsonData } from '@/lib/jsonDataUrls'
+import { pullRemoteUpdatesToLocal } from '@/lib/pullRemoteUpdates'
+import { collectUnsyncedChangesSummary } from '@/lib/unsyncedChanges'
 import { confirm } from '@/stores/confirmStore'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import { usePendingRtuPictureStore } from '@/stores/pendingRtuPictureStore'
@@ -276,6 +278,38 @@ function SettingsForm({
     })()
   }
 
+  const handleLoadFromCloudflare = () => {
+    if (!usesRemoteJsonData()) {
+      showToastError(
+        'This build does not load portfolio JSON from Cloudflare. Add VITE_JSON_DATA_BASE_URL to .env.local (same URL as GitHub Pages secrets) and restart the dev server.',
+      )
+      return
+    }
+    void (async () => {
+      const unsynced = await collectUnsyncedChangesSummary()
+      if (unsynced.length > 0) {
+        if (
+          !(await confirm(
+            'This browser has unsynced edits. Loading from Cloudflare will replace them with the last synced copy (GitHub / other PC). Continue?',
+          ))
+        ) {
+          return
+        }
+      }
+      setUploadBusy(true)
+      try {
+        const pulled = await pullRemoteUpdatesToLocal()
+        onPortfolioPatch(pulled)
+        invalidateUnsyncedChanges()
+        showToastSuccess('✓ Loaded portfolio, schedule, and pricing from Cloudflare.')
+      } catch (error) {
+        showToastError(error instanceof Error ? error.message : 'Could not load from Cloudflare')
+      } finally {
+        setUploadBusy(false)
+      }
+    })()
+  }
+
   const handleClearStaleLocalPictures = () => {
     if (!usesRemoteJsonData()) {
       showToastError('Cloudflare JSON is not configured for this build.')
@@ -429,6 +463,13 @@ function SettingsForm({
           <GitHubDeploySyncFields sync={githubSync} disabled={uploadBusy} />
           {usesRemoteJsonData() ? (
             <div className={styles.tools} style={{ marginTop: 8 }}>
+              <SettingsToolButton
+                tooltip="Replace this browser’s portfolio, schedule, and pricing with the copy on Cloudflare (from the last Settings sync on any PC). Use after syncing on another machine or on the live GitHub site."
+                onClick={handleLoadFromCloudflare}
+                disabled={uploadBusy}
+              >
+                Load portfolio from Cloudflare
+              </SettingsToolButton>
               <SettingsToolButton
                 tooltip="Remove browser copies of RTU photos that are already listed in the Cloudflare manifest. Use this if the unsynced warning keeps coming back after sync."
                 onClick={handleClearStaleLocalPictures}
