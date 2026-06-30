@@ -277,6 +277,35 @@
         "picturesUploaded": 0
       },
       "changes": []
+    },
+    {
+      "syncedAt": "2026-06-30T03:46:47.147Z",
+      "exportedAt": "2026-06-30T01:13:42.598Z",
+      "source": "settings-sync",
+      "summary": {
+        "buildingCount": 102,
+        "rtuCount": 1073,
+        "utilityCount": 257,
+        "polygonCount": 447,
+        "scheduleYearCount": 463,
+        "scheduleNoteCount": 348,
+        "pricingRowCount": 25,
+        "manifestPictureCount": 1546,
+        "picturesUploaded": 0,
+        "picturesAdded": 0,
+        "picturesRemoved": 0,
+        "picturesHidden": 0,
+        "buildVersionLabel": "v2026.06.30 (4)",
+        "clientBuildVersionLabel": "v2026.06.29 (6)"
+      },
+      "changes": [
+        {
+          "label": "RTU pictures (manifest)",
+          "before": 0,
+          "after": 1546,
+          "delta": 1546
+        }
+      ]
     }
   ]
 }
