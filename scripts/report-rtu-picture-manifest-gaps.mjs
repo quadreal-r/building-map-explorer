@@ -15,11 +15,14 @@ import {
   parseBulkRtuPictureFileName,
   rtuPictureKey,
 } from './lib/rtu-picture-filename.mjs'
+import { shouldPreferPictureFile } from './lib/rtu-picture-match.mjs'
+import { buildManifestFromFileNames } from './lib/build-manifest-from-files.mjs'
 import { loadBuildingsJson } from './lib/rtu-gps-validate.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
-const DEFAULT_FOLDER = 'C:/Users/Robert/Pictures/RTU-Pictures'
+const DEFAULT_FOLDER =
+  'C:/Users/Robert/OneDrive - Quadreal Property Group/#OI-Industrial East - @(RTU) Roof Top Units (All Industrial)/RTUs per Building/_RTU-Pictures-All'
 const REPORT_DIR = join(ROOT, 'reports')
 
 function parseArgs(argv) {
@@ -331,6 +334,9 @@ function main() {
     fileSizeByName: Object.fromEntries(
       [...byName.entries()].map(([name, info]) => [name, info.sizeBytes]),
     ),
+    filePathsByName: Object.fromEntries(
+      [...byName.entries()].map(([name, info]) => [name, info.filePath]),
+    ),
     duplicateBasenames,
     sameSizeGroups,
   }
@@ -339,11 +345,12 @@ function main() {
   const stamp = new Date().toISOString().slice(0, 10)
   const jsonPath = join(REPORT_DIR, `rtu-picture-manifest-gaps-${stamp}.json`)
   const mdPath = join(REPORT_DIR, `rtu-picture-manifest-gaps-${stamp}.md`)
-  const xlsxPath = join(REPORT_DIR, `rtu-picture-manifest-review-${stamp}.xlsx`)
+  const xlsxPath = join(REPORT_DIR, `rtu-pictures-not-included-${stamp}.xlsx`)
 
   writeFileSync(jsonPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8')
   writeFileSync(mdPath, renderMarkdown(report), 'utf8')
-  XLSX.writeFile(buildExcelWorkbook(report), xlsxPath)
+  const manifestBuild = buildManifestFromFileNames(fileNames, ROOT)
+  XLSX.writeFile(buildExcelWorkbook(report, manifestBuild), xlsxPath)
 
   console.log(`Report written:\n  ${xlsxPath}\n  ${mdPath}\n  ${jsonPath}`)
   console.log(renderMarkdownSummary(report))
@@ -359,20 +366,93 @@ function unmatchedCategory(row) {
   return row.reason
 }
 
-function buildExcelWorkbook(report) {
+function buildNotIncludedRows(report, manifestBuild) {
+  const unmatchedRows = manifestBuild.unmatched.map((row) => {
+    const detail = report.allUnmatched.find((u) => u.fileName === row.fileName) ?? {}
+    return {
+      inclusionType: 'unmatched',
+      fileName: row.fileName,
+      reason: row.reason ?? 'Not matched to portfolio',
+      category: unmatchedCategory({ ...detail, reason: row.reason }),
+      buildingNum: detail.buildingNum ?? buildingNumFromFileName(row.fileName) ?? '',
+      parsedUnit: detail.parsed?.unitId ?? '',
+      pictureIndex: detail.parsed?.pictureIndex ?? '',
+      rtuName: '',
+      buildingAddress: (detail.buildingAddresses ?? []).join('; '),
+      keptFile: '',
+      sizeLabel: report.fileSizeByName?.[row.fileName]
+        ? formatBytes(report.fileSizeByName[row.fileName])
+        : '',
+      filePath: report.filePathsByName?.[row.fileName] ?? '',
+      notes: detail.ambiguousMatches
+        ? `Ambiguous matches: ${detail.ambiguousMatches.join('; ')}`
+        : detail.buildingExists === false
+          ? 'Building number not in portfolio database'
+          : detail.buildingExists
+            ? `Building exists; RTU names in DB: ${[...new Set(detail.rtuNamesAtBuilding ?? [])].join('; ')}`
+            : '',
+    }
+  })
+
+  const conflictRows = manifestBuild.slotConflicts.map((row) => {
+    const keptFile = row.existing ?? ''
+    const skippedFile = row.fileName
+    const parsed = parseRtuPictureKeyFromManifestKey(row.key)
+    const keptSize = report.fileSizeByName?.[keptFile]
+    const skippedSize = report.fileSizeByName?.[skippedFile]
+    const sameByteSize =
+      keptSize != null && skippedSize != null && keptSize === skippedSize
+    const replaced = shouldPreferPictureFile(keptFile, skippedFile)
+    return {
+      inclusionType: 'index_conflict',
+      fileName: skippedFile,
+      reason: replaced
+        ? `Duplicate picture slot — replaced in manifest by "${keptFile}" (more explicit filename)`
+        : `Duplicate picture slot — manifest kept "${keptFile}" for the same RTU and picture index`,
+      category: replaced
+        ? 'Index conflict (replaced by clearer name)'
+        : 'Index conflict (duplicate slot)',
+      buildingNum: parsed?.buildingAddress ? buildingStreetNumber(parsed.buildingAddress) : '',
+      parsedUnit: '',
+      pictureIndex: row.index ?? '',
+      rtuName: parsed?.rtuName ?? '',
+      buildingAddress: parsed?.buildingAddress ?? '',
+      keptFile,
+      sizeLabel: skippedSize != null ? formatBytes(skippedSize) : '',
+      filePath: report.filePathsByName?.[skippedFile] ?? '',
+      notes: sameByteSize
+        ? 'Same byte size as kept file — likely duplicate copy'
+        : 'Different size from kept file — may be a different photo; rename to a new index',
+    }
+  })
+
+  return [...unmatchedRows, ...conflictRows].sort((a, b) =>
+    a.fileName.localeCompare(b.fileName),
+  )
+}
+
+function parseRtuPictureKeyFromManifestKey(key) {
+  const pipe = key.indexOf('|')
+  if (pipe < 0) return null
+  return { buildingAddress: key.slice(0, pipe), rtuName: key.slice(pipe + 1) }
+}
+
+function buildExcelWorkbook(report, manifestBuild) {
   const wb = XLSX.utils.book_new()
+  const notIncluded = buildNotIncludedRows(report, manifestBuild)
 
   const summaryRows = [
-    ['RTU Picture Manifest Review'],
+    ['RTU pictures not included in manifest'],
     ['Generated', report.generatedAt],
     ['Source folder', report.sourceFolder],
     [],
     ['Metric', 'Count'],
     ['Image files scanned', report.totals.imageFiles],
-    ['Matched to manifest', report.totals.matched],
-    ['Unmatched', report.totals.unmatched],
-    ['Skipped (index conflict)', report.totals.indexConflictsSkipped],
-    ['RTUs with at least one picture', report.totals.rtusInManifest],
+    ['Included in manifest', manifestBuild.pictureCount],
+    ['Not included (total)', notIncluded.length],
+    ['  — Unmatched', manifestBuild.unmatched.length],
+    ['  — Index conflict (skipped)', manifestBuild.slotConflicts.length],
+    ['RTUs with at least one picture', manifestBuild.rtuCount],
     [],
     ['Unmatched by reason', 'Count'],
     ...Object.entries(report.unmatchedByReason),
@@ -388,6 +468,36 @@ function buildExcelWorkbook(report) {
     ['Same-size file groups (2+ files)', report.sameSizeGroups.length],
   ]
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryRows), 'Summary')
+
+  const notIncludedSheet = [
+    [
+      'File name',
+      'Reason',
+      'Category',
+      'Building #',
+      'RTU name',
+      'Building address',
+      'Picture index',
+      'Kept in manifest instead',
+      'Size',
+      'File path',
+      'Notes',
+    ],
+    ...notIncluded.map((row) => [
+      row.fileName,
+      row.reason,
+      row.category,
+      row.buildingNum,
+      row.rtuName,
+      row.buildingAddress,
+      row.pictureIndex,
+      row.keptFile,
+      row.sizeLabel,
+      row.filePath,
+      row.notes,
+    ]),
+  ]
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(notIncludedSheet), 'Not included')
 
   const unmatchedSheet = [
     [

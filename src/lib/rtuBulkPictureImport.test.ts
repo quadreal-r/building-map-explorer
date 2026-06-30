@@ -110,25 +110,16 @@ describe('RTU bulk matching', () => {
     const catalog = buildRtuCatalog(buildings)
     const parsed = parseBulkRtuPictureFileName('1590-RTU-04-1.jpg')!
     const candidates = findRtuCandidates(catalog, parsed)
-    expect(candidates).toHaveLength(1)
-    expect(candidates[0]!.rtu.name).toBe('RTU- 04')
-  })
-
-  it('accepts GPS within 100 feet', () => {
-    const catalog = buildRtuCatalog(buildings)
-    const parsed = parseBulkRtuPictureFileName('1590-RTU-04-1.jpg')!
-    const candidates = findRtuCandidates(catalog, parsed)
-    const { entry } = pickRtuMatch(candidates, { lat: 43.634099, lng: -79.6119392 })
+    const { entry } = pickRtuMatch(candidates, parsed)
     expect(entry?.rtu.name).toBe('RTU- 04')
   })
 
-  it('still matches but warns when GPS is beyond 100 feet', () => {
+  it('matches by filename only without GPS', () => {
     const catalog = buildRtuCatalog(buildings)
     const parsed = parseBulkRtuPictureFileName('1590-RTU-04-1.jpg')!
     const candidates = findRtuCandidates(catalog, parsed)
-    const { entry, gpsWarning } = pickRtuMatch(candidates, { lat: 43.64, lng: -79.62 })
+    const { entry } = pickRtuMatch(candidates, parsed)
     expect(entry?.rtu.name).toBe('RTU- 04')
-    expect(gpsWarning).toMatch(/GPS is \d+ ft/)
   })
 
   it('normalizes RT and RTU unit ids', () => {
@@ -155,7 +146,7 @@ describe('formatBulkRtuPictureImportReport', () => {
         },
       ],
       failures: [{ file: 'bad.jpg', reason: 'Filename does not match bulk RTU pattern' }],
-      warnings: [{ file: '1590-RTU-04-1.jpg', message: 'Linked by filename only (no GPS in photo)' }],
+      warnings: [],
       completedAt: '2026-06-23T12:00:00.000Z',
     })
 

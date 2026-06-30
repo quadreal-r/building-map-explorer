@@ -27,16 +27,21 @@ export function areAllLayersHidden(layers: LayerVisibility): boolean {
 
 interface LayerState {
   layers: LayerVisibility
+  /** When false, RTU markers hide the numeric picture-count badge. */
+  showRtuPictureCount: boolean
   toggleLayer: (key: LayerKey) => void
   setLayer: (key: LayerKey, visible: boolean) => void
   setLayers: (layers: LayerVisibility) => void
   resetLayers: () => void
   hideAllLayers: () => void
   showAllLayers: () => void
+  toggleShowRtuPictureCount: () => void
+  setShowRtuPictureCount: (visible: boolean) => void
 }
 
 export const useLayerStore = create<LayerState>((set) => ({
   layers: { ...DEFAULT_LAYERS },
+  showRtuPictureCount: true,
 
   toggleLayer: (key) =>
     set((state) => ({
@@ -55,4 +60,9 @@ export const useLayerStore = create<LayerState>((set) => ({
   hideAllLayers: () => set({ layers: { ...ALL_LAYERS_OFF } }),
 
   showAllLayers: () => set({ layers: { ...DEFAULT_LAYERS } }),
+
+  toggleShowRtuPictureCount: () =>
+    set((state) => ({ showRtuPictureCount: !state.showRtuPictureCount })),
+
+  setShowRtuPictureCount: (visible) => set({ showRtuPictureCount: visible }),
 }))

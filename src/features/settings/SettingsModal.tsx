@@ -20,12 +20,13 @@ import {
 } from '@/lib/managerNames'
 import { saveDatabase } from '@/lib/saveDatabase'
 import { exportDeployBundleToDisk } from '@/lib/deployBundle'
-import { clearStaleLocalRtuPictures } from '@/lib/rtuPictures'
+import { clearLocalRtuPictureStorage, clearStaleLocalRtuPictures } from '@/lib/rtuPictures'
 import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
 import { downloadSyncStatusExcel } from '@/lib/syncStatusReport'
 import { usesRemoteJsonData } from '@/lib/jsonDataUrls'
 import { confirm } from '@/stores/confirmStore'
 import { showToastError, showToastSuccess } from '@/lib/toast'
+import { usePendingRtuPictureStore } from '@/stores/pendingRtuPictureStore'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import type { PortfolioData } from '@/types/domain'
@@ -248,6 +249,33 @@ function SettingsForm({
       .finally(() => setUploadBusy(false))
   }
 
+  const handleClearAllLocalPictures = () => {
+    void (async () => {
+      if (
+        !(await confirm(
+          'Remove every RTU photo stored in this browser? Map picture counts will disappear until you bulk-import and sync again. Cloudflare is not changed.',
+        ))
+      ) {
+        return
+      }
+      setUploadBusy(true)
+      try {
+        usePendingRtuPictureStore.getState().clear()
+        const removed = await clearLocalRtuPictureStorage()
+        invalidateUnsyncedChanges()
+        showToastSuccess(
+          removed > 0
+            ? `✓ Cleared ${removed} local RTU photo(s) from this browser.`
+            : '✓ No local RTU photos on this browser.',
+        )
+      } catch (error) {
+        showToastError(error instanceof Error ? error.message : 'Could not clear local pictures')
+      } finally {
+        setUploadBusy(false)
+      }
+    })()
+  }
+
   const handleClearStaleLocalPictures = () => {
     if (!usesRemoteJsonData()) {
       showToastError('Cloudflare JSON is not configured for this build.')
@@ -386,6 +414,13 @@ function SettingsForm({
               mode="import"
             />
             <RtuPictureGpsAssign onBusyChange={setUploadBusy} />
+            <SettingsToolButton
+              tooltip="Remove all RTU photos cached in this browser (IndexedDB). Use after clearing Cloudflare pictures so map counts go to zero. Does not change Cloudflare."
+              onClick={handleClearAllLocalPictures}
+              disabled={uploadBusy}
+            >
+              Clear all local RTU pictures
+            </SettingsToolButton>
           </div>
         </section>
 

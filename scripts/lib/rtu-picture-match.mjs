@@ -19,6 +19,21 @@ const DESCRIPTOR_PATTERNS = [
   /\s+heat\s+pump.*$/gi,
 ]
 
+/** Non-index/year tags on filenames, e.g. (Removed), (Old). */
+const PICTURE_METADATA_PAREN_RE = /\((?!(\d{4}|\d+)\))[^)]+\)\s*$/i
+
+export function stripPictureMetadataFromRest(rest) {
+  let value = rest.trim()
+  while (PICTURE_METADATA_PAREN_RE.test(value)) {
+    value = value.replace(PICTURE_METADATA_PAREN_RE, '').trim()
+  }
+  return value
+}
+
+export function hasRtuDescriptorInName(rtuName) {
+  return DESCRIPTOR_PATTERNS.some((pattern) => pattern.test(rtuName))
+}
+
 export function buildingStreetNumber(address) {
   const match = address.match(/\d+/)
   return match?.[0] ?? 'unknown'
@@ -87,6 +102,7 @@ export function parseBulkRtuPictureFileName(fileName) {
   if (!buildingMatch) return null
 
   let rest = buildingMatch[2].trim()
+  rest = stripPictureMetadataFromRest(rest)
   let pictureIndex = 1
   let installYear
 
@@ -101,6 +117,8 @@ export function parseBulkRtuPictureFileName(fileName) {
     pictureIndex = Number(parenIndex[1])
     rest = rest.slice(0, parenIndex.index).trim()
   }
+
+  rest = stripPictureMetadataFromRest(rest)
 
   if (!/^(?:RTU?s?|RTU#|RT|S)/i.test(rest)) return null
 
@@ -186,6 +204,47 @@ function findCandidatesByCore(catalog, buildingNum, unitCore) {
   return catalog.filter((entry) => entry.streetNumber === buildingNum && entry.unitCore === unitCore)
 }
 
+function normalizeUnitIdForMatch(unitId) {
+  return unitId.replace(/^0+/, '').toUpperCase() || unitId.toUpperCase()
+}
+
+/** Score how well a portfolio RTU matches a parsed filename (building # + unit only). */
+export function scoreRtuFilenameMatch(entry, parsed) {
+  if (entry.unitCore !== parsed.unitCore) return -1
+
+  const dbId = extractRtuUnitId(stripRtuDescriptors(entry.rtu.name))
+  const fileId = parsed.unitId
+  let score = 0
+
+  if (dbId === fileId) score += 100
+  else if (normalizeUnitIdForMatch(dbId) === normalizeUnitIdForMatch(fileId)) score += 90
+  else return -1
+
+  const fileHasHybrid = /hybrid/i.test(parsed.rtuToken)
+  const dbHasHybrid = hasRtuDescriptorInName(entry.rtu.name)
+  if (dbHasHybrid && !fileHasHybrid) score -= 25
+
+  return score
+}
+
+/** Pick one RTU when several share the same building # and unit core (no GPS). */
+export function resolveRtuCandidates(candidates, parsed) {
+  if (!candidates.length) return null
+
+  const scored = candidates
+    .map((entry) => ({ entry, score: scoreRtuFilenameMatch(entry, parsed) }))
+    .filter((row) => row.score >= 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score
+      const aDesc = hasRtuDescriptorInName(a.entry.rtu.name) ? 1 : 0
+      const bDesc = hasRtuDescriptorInName(b.entry.rtu.name) ? 1 : 0
+      if (aDesc !== bDesc) return aDesc - bDesc
+      return a.entry.rtu.name.localeCompare(b.entry.rtu.name)
+    })
+
+  return scored[0]?.entry ?? null
+}
+
 export function matchFileToRtu(catalog, fileName) {
   const stored = parseStoredRtuPictureFileName(fileName)
   if (stored) {
@@ -218,8 +277,9 @@ export function matchFileToRtu(catalog, fileName) {
   }
 
   const candidates = findCandidatesByCore(catalog, bulk.buildingNum, bulk.unitCore)
-  if (candidates.length === 1) {
-    return { entry: candidates[0], pictureIndex: bulk.pictureIndex }
+  const entry = resolveRtuCandidates(candidates, bulk)
+  if (entry) {
+    return { entry, pictureIndex: bulk.pictureIndex }
   }
   if (!candidates.length) {
     return { error: 'No RTU match in portfolio' }

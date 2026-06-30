@@ -81,7 +81,11 @@ export function useMarkerVisibility(
     }
     for (const entry of detailMarkersRef.current) {
       const isSelected = selected.has(entry.dragKey)
-      syncDetailMarkerAppearance(entry, isSelected)
+      syncDetailMarkerAppearance(
+        entry,
+        isSelected,
+        useLayerStore.getState().showRtuPictureCount,
+      )
     }
   }, [buildingMarkersRef, detailMarkersRef])
 

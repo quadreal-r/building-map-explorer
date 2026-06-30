@@ -53,6 +53,8 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
   const managerRenames = useSettingsStore((s) => s.managerRenames)
 
   const layers = useLayerStore((s) => s.layers)
+  const showRtuPictureCount = useLayerStore((s) => s.showRtuPictureCount)
+  const toggleShowRtuPictureCount = useLayerStore((s) => s.toggleShowRtuPictureCount)
   const toggleLayer = useLayerStore((s) => s.toggleLayer)
   const hideAllLayers = useLayerStore((s) => s.hideAllLayers)
   const showAllLayers = useLayerStore((s) => s.showAllLayers)
@@ -205,6 +207,19 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
               {LAYER_LABELS[key]}
             </button>
           ))}
+          <button
+            type="button"
+            className={`layer-btn${showRtuPictureCount ? ' active' : ''}`}
+            onClick={toggleShowRtuPictureCount}
+            title={
+              showRtuPictureCount
+                ? 'Hide picture count on RTU markers'
+                : 'Show picture count on RTU markers'
+            }
+          >
+            <span className="dot" style={{ background: '#38bdf8' }} />
+            Pic count
+          </button>
           <button
             type="button"
             className="layer-action-btn"

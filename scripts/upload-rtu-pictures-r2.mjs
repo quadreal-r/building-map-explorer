@@ -1,6 +1,6 @@
 /**
  * Upload RTU picture files to Cloudflare R2.
- * Validates EXIF GPS against RTU marker positions (100 ft) before upload.
+ * Pictures are matched to RTUs by building number and unit id in the manifest (no GPS check).
  *
  * Usage:
  *   node scripts/upload-rtu-pictures-r2.mjs
@@ -24,12 +24,9 @@ import {
 } from './lib/r2-client.mjs'
 import { loadDotEnvLocal, ROOT } from './lib/load-dotenv-local.mjs'
 import {
-  RTU_GPS_MATCH_FEET,
   findRtuInPortfolio,
-  gpsWarningForRtu,
   loadBuildingsJson,
   parseRtuPictureKey,
-  readImageGpsFromFile,
 } from './lib/rtu-gps-validate.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -148,9 +145,6 @@ async function main() {
   let uploaded = 0
   let skipped = 0
   let skippedOnR2 = 0
-  let gpsWarnings = 0
-  let noGps = 0
-  const warningLines = []
 
   for (const fileName of fileNames) {
     if (
@@ -176,19 +170,6 @@ async function main() {
         : null
       if (!match) {
         console.warn(`Warning: manifest RTU not in portfolio — ${fileName} → ${rtuKey}`)
-      } else {
-        const photoGps = await readImageGpsFromFile(filePath)
-        if (!photoGps) {
-          noGps += 1
-        } else {
-          const warning = gpsWarningForRtu(photoGps, match.rtu)
-          if (warning) {
-            gpsWarnings += 1
-            const line = `${fileName} @ ${parsed.buildingAddress} — ${warning}`
-            warningLines.push(line)
-            console.warn(`GPS warning: ${line}`)
-          }
-        }
       }
     }
 
@@ -203,13 +184,6 @@ async function main() {
   console.log(
     `\nDone. Uploaded ${uploaded} file(s) to R2${skipped ? `, skipped ${skipped} missing locally` : ''}${skippedOnR2 ? `, skipped ${skippedOnR2} already on R2` : ''}.`,
   )
-  console.log(
-    `GPS check (${RTU_GPS_MATCH_FEET} ft): ${gpsWarnings} warning(s), ${noGps} without EXIF GPS.`,
-  )
-  if (warningLines.length) {
-    console.log('\nGPS warnings (upload continued):')
-    for (const line of warningLines) console.log(`  ${line}`)
-  }
   if (publicBase) {
     console.log(`\nPublic base URL: ${publicBase}`)
     if (uploaded) {

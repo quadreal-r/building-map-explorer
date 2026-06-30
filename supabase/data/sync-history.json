@@ -243,6 +243,40 @@
           "delta": -1621
         }
       ]
+    },
+    {
+      "syncedAt": "2026-06-30T00:49:18.802Z",
+      "exportedAt": "2026-06-30T00:49:18.802Z",
+      "source": "manifest-cleared",
+      "summary": {
+        "buildingCount": 102,
+        "rtuCount": 1073,
+        "utilityCount": 257,
+        "polygonCount": 447,
+        "scheduleYearCount": 463,
+        "scheduleNoteCount": 348,
+        "pricingRowCount": 25,
+        "manifestPictureCount": 0,
+        "picturesUploaded": 0
+      },
+      "changes": []
+    },
+    {
+      "syncedAt": "2026-06-30T00:50:46.361Z",
+      "exportedAt": "2026-06-30T00:50:46.361Z",
+      "source": "manifest-cleared",
+      "summary": {
+        "buildingCount": 102,
+        "rtuCount": 1073,
+        "utilityCount": 257,
+        "polygonCount": 447,
+        "scheduleYearCount": 463,
+        "scheduleNoteCount": 348,
+        "pricingRowCount": 25,
+        "manifestPictureCount": 0,
+        "picturesUploaded": 0
+      },
+      "changes": []
     }
   ]
 }

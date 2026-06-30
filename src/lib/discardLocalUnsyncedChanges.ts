@@ -8,8 +8,8 @@ import { clearDeployDataDirty } from '@/lib/deploySyncSnapshot'
 import { clearLocalHiddenRtuPictures } from '@/lib/hiddenRtuPictures'
 import { pullRemoteScheduleAndPricing } from '@/lib/pullRemoteUpdates'
 import {
+  clearLocalRtuPictureStorage,
   clearRtuPictureManifestCache,
-  discardPendingLocalRtuPictures,
   notifyRtuPicturesChanged,
 } from '@/lib/rtuPictures'
 import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
@@ -41,7 +41,7 @@ export async function discardLocalUnsyncedChanges(): Promise<DiscardLocalUnsynce
   }
 
   usePendingRtuPictureStore.getState().clear()
-  await discardPendingLocalRtuPictures()
+  await clearLocalRtuPictureStorage()
   clearLocalHiddenRtuPictures()
 
   usePortfolioStore.getState().setPortfolio(portfolio, { markSaved: true })

@@ -119,10 +119,10 @@ export function BulkRtuPictureImport({ portfolio, onBusyChange }: BulkRtuPicture
         <SettingsToolButton
           tooltip={
             <>
-              Select a folder of RTU photos. Filenames like 1590-RTU-04-1.jpg, 20-RTU-03.jpg, or
-              150-RTU-02 (3).jpg match RTU markers by building number and unit id. When GPS is in
-              the photo, it should be within 100 ft of the RTU marker; farther photos still import
-              with a warning. Files or folders with &quot;old&quot; in the name are skipped.
+              Select a folder of RTU photos. Filenames like 2320-RTU-04-1.jpg, 2320-RTU-04 (2).jpg,
+              2320-RTU-04 Hybrid.jpg, or 2320-RTU-04-1(2015).jpg match by building street number
+              and RTU unit id only (GPS is ignored). RTU-04 does not match RTU-04B. Files or folders
+              with &quot;old&quot; in the name are skipped.
             </>
           }
           onClick={() => inputRef.current?.click()}

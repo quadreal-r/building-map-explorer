@@ -22,6 +22,20 @@ const DESCRIPTOR_PATTERNS = [
   /\s+heat\s+pump.*$/gi,
 ]
 
+const PICTURE_METADATA_PAREN_RE = /\((?!(\d{4}|\d+)\))[^)]+\)\s*$/i
+
+export function stripPictureMetadataFromRest(rest: string): string {
+  let value = rest.trim()
+  while (PICTURE_METADATA_PAREN_RE.test(value)) {
+    value = value.replace(PICTURE_METADATA_PAREN_RE, '').trim()
+  }
+  return value
+}
+
+export function hasRtuDescriptorInName(rtuName: string): boolean {
+  return DESCRIPTOR_PATTERNS.some((pattern) => pattern.test(rtuName))
+}
+
 export interface ParsedBulkRtuFileName {
   buildingNum: string
   rtuToken: string
@@ -88,6 +102,7 @@ export function parseBulkRtuPictureFileName(fileName: string): ParsedBulkRtuFile
   if (!buildingMatch) return null
 
   let rest = buildingMatch[2]!.trim()
+  rest = stripPictureMetadataFromRest(rest)
   let pictureIndex = 1
   let installYear: number | undefined
 
@@ -102,6 +117,8 @@ export function parseBulkRtuPictureFileName(fileName: string): ParsedBulkRtuFile
     pictureIndex = Number(parenIndex[1])
     rest = rest.slice(0, parenIndex.index).trim()
   }
+
+  rest = stripPictureMetadataFromRest(rest)
 
   if (!/^(?:RTU?s?|RTU#|RT|S)/i.test(rest)) return null
 
@@ -175,6 +192,51 @@ export function findRtuCandidates(
   )
 }
 
+function normalizeUnitIdForMatch(unitId: string): string {
+  return unitId.replace(/^0+/, '').toUpperCase() || unitId.toUpperCase()
+}
+
+export function scoreRtuFilenameMatch(
+  entry: RtuCatalogEntry,
+  parsed: ParsedBulkRtuFileName,
+): number {
+  if (entry.unitCore !== parsed.unitCore) return -1
+
+  const dbId = extractRtuUnitId(stripRtuDescriptors(entry.rtu.name))
+  const fileId = parsed.unitId
+  let score = 0
+
+  if (dbId === fileId) score += 100
+  else if (normalizeUnitIdForMatch(dbId) === normalizeUnitIdForMatch(fileId)) score += 90
+  else return -1
+
+  const fileHasHybrid = /hybrid/i.test(parsed.rtuToken)
+  const dbHasHybrid = hasRtuDescriptorInName(entry.rtu.name)
+  if (dbHasHybrid && !fileHasHybrid) score -= 25
+
+  return score
+}
+
+export function resolveRtuCandidates(
+  candidates: RtuCatalogEntry[],
+  parsed: ParsedBulkRtuFileName,
+): RtuCatalogEntry | null {
+  if (!candidates.length) return null
+
+  const scored = candidates
+    .map((entry) => ({ entry, score: scoreRtuFilenameMatch(entry, parsed) }))
+    .filter((row) => row.score >= 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score
+      const aDesc = hasRtuDescriptorInName(a.entry.rtu.name) ? 1 : 0
+      const bDesc = hasRtuDescriptorInName(b.entry.rtu.name) ? 1 : 0
+      if (aDesc !== bDesc) return aDesc - bDesc
+      return a.entry.rtu.name.localeCompare(b.entry.rtu.name)
+    })
+
+  return scored[0]?.entry ?? null
+}
+
 export function matchFileToRtu(
   catalog: RtuCatalogEntry[],
   fileName: string,
@@ -186,8 +248,9 @@ export function matchFileToRtu(
   }
 
   const candidates = findRtuCandidates(catalog, bulk)
-  if (candidates.length === 1) {
-    return { entry: candidates[0], pictureIndex: bulk.pictureIndex }
+  const entry = resolveRtuCandidates(candidates, bulk)
+  if (entry) {
+    return { entry, pictureIndex: bulk.pictureIndex }
   }
   if (!candidates.length) return { error: 'No RTU match in portfolio' }
   return { error: `Ambiguous bulk name (${candidates.length} RTUs)` }

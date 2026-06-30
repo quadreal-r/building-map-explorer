@@ -1,10 +1,9 @@
-import { distanceFeet, RTU_GPS_MATCH_FEET } from '@/lib/geo'
-import { readImageGps } from '@/lib/imageGps'
 import {
   extractRtuUnitId,
   findRtuCandidates,
   normalizeRtuUnitCore,
   parseBulkRtuPictureFileName,
+  resolveRtuCandidates,
   type ParsedBulkRtuFileName,
 } from '@/lib/rtuPictureMatch'
 import {
@@ -20,6 +19,7 @@ export {
   matchFileToRtu,
   normalizeRtuUnitCore,
   parseBulkRtuPictureFileName,
+  resolveRtuCandidates,
 } from '@/lib/rtuPictureMatch'
 
 export interface RtuCatalogEntry {
@@ -89,65 +89,22 @@ export function buildRtuCatalog(buildings: Building[]): RtuCatalogEntry[] {
 
 export function pickRtuMatch(
   candidates: RtuCatalogEntry[],
-  gps: { lat: number; lng: number } | null,
-  maxFeet = RTU_GPS_MATCH_FEET,
+  parsed: ParsedBulkRtuFileName,
 ): {
   entry: RtuCatalogEntry | null
   reason?: string
-  gpsFeet?: number
-  gpsWarning?: string
 } {
   if (!candidates.length) {
-    return { entry: null, reason: 'No RTU marker matches building number and unit id' }
+    return { entry: null, reason: 'No RTU matches building number and unit id in filename' }
   }
 
-  if (candidates.length === 1) {
-    const entry = candidates[0]!
-    if (!gps) return { entry }
-    const feet = distanceFeet(gps.lat, gps.lng, entry.rtu.lat, entry.rtu.lng)
-    if (feet > maxFeet) {
-      return {
-        entry,
-        gpsFeet: feet,
-        gpsWarning: `GPS is ${Math.round(feet)} ft from ${entry.rtu.name} (expected within ${maxFeet} ft)`,
-      }
-    }
-    return { entry, gpsFeet: feet }
+  const entry = resolveRtuCandidates(candidates, parsed)
+  if (entry) return { entry }
+
+  return {
+    entry: null,
+    reason: `Multiple RTU markers match building ${parsed.buildingNum} unit ${parsed.unitId} — rename file to be more specific`,
   }
-
-  if (!gps) {
-    return {
-      entry: null,
-      reason: `Multiple RTU markers match — add GPS to the photo or use a unique building number (${candidates.length} matches)`,
-    }
-  }
-
-  const ranked = candidates
-    .map((entry) => ({
-      entry,
-      feet: distanceFeet(gps.lat, gps.lng, entry.rtu.lat, entry.rtu.lng),
-    }))
-    .sort((a, b) => a.feet - b.feet)
-
-  const best = ranked[0]!
-  const second = ranked[1]
-  if (second && Math.abs(second.feet - best.feet) < 5) {
-    return {
-      entry: null,
-      reason: 'GPS is ambiguous between multiple RTU markers within range',
-      gpsFeet: best.feet,
-    }
-  }
-
-  if (best.feet > maxFeet) {
-    return {
-      entry: best.entry,
-      gpsFeet: best.feet,
-      gpsWarning: `GPS is ${Math.round(best.feet)} ft from ${best.entry.rtu.name} (expected within ${maxFeet} ft)`,
-    }
-  }
-
-  return { entry: best.entry, gpsFeet: best.feet }
 }
 
 function isImageFile(file: File): boolean {
@@ -295,37 +252,19 @@ export async function bulkImportRtuPictures(
     }
 
     const candidates = findRtuCandidates(catalog, parsed)
-    const gps = await readImageGps(file)
 
     if (signal?.aborted) {
       result.cancelled = true
       break
     }
 
-    const { entry, reason, gpsFeet, gpsWarning } = pickRtuMatch(candidates, gps)
+    const { entry, reason } = pickRtuMatch(candidates, parsed)
 
     if (!entry) {
       result.skipped += 1
       result.failures.push({ file: file.name, reason: reason ?? 'No matching RTU marker' })
       onProgress?.({ processed: i + 1, total, currentFile: file.name })
       continue
-    }
-
-    if (!gps) {
-      result.warnings.push({
-        file: file.name,
-        message: `Linked to ${entry.rtu.name} at ${entry.building.address} by filename only (no GPS in photo)`,
-      })
-    } else if (gpsWarning) {
-      result.warnings.push({
-        file: file.name,
-        message: `${gpsWarning} — linked to ${entry.rtu.name} at ${entry.building.address} by filename`,
-      })
-    } else if (gpsFeet != null) {
-      result.warnings.push({
-        file: file.name,
-        message: `GPS verified within ${Math.round(gpsFeet)} ft of ${entry.rtu.name}`,
-      })
     }
 
     try {

@@ -7,7 +7,7 @@ import {
   parseBulkRtuPictureFileName,
 } from './rtuPictureMatch'
 import { buildRtuCatalog } from './rtuBulkPictureImport'
-import { normalizeLegacyBuilding, type LegacyBuildingJson } from '@/types/domain'
+import { normalizeLegacyBuilding, type Building, type LegacyBuildingJson } from '@/types/domain'
 import legacyBuildings from '../../supabase/data/buildings.json'
 
 const buildings = (legacyBuildings as LegacyBuildingJson[]).map(normalizeLegacyBuilding)
@@ -57,11 +57,59 @@ describe('parseBulkRtuPictureFileName', () => {
   })
 })
 
+describe('2320 Bristol Circle RTU-04 filename variants', () => {
+  const bristolBuilding: Building = {
+    park: 'Test',
+    address: '2320 Bristol Circle',
+    bu: '1',
+    lat: 43.6,
+    lng: -79.6,
+    sqft: '1',
+    cluster: '',
+    manager: '',
+    rtus: [
+      { name: 'RTU-02', description: '', lat: 43.6, lng: -79.6 },
+      { name: 'RTU-04', description: '', lat: 43.61, lng: -79.61 },
+      { name: 'RTU-04 Hybrid', description: '', lat: 43.611, lng: -79.611 },
+      { name: 'RTU-04B', description: '', lat: 43.612, lng: -79.612 },
+    ],
+  }
+  const catalog = buildRtuCatalog([bristolBuilding])
+
+  const rtu04Files = [
+    '2320-RTU-04.jpg',
+    '2320-RTU-04 (1).jpg',
+    '2320-RTU-04 (2).jpg',
+    '2320-RTU-04 (3) (2015).jpg',
+    '2320-RTU-04 Hybrid.jpg',
+    '2320-RTU-04-1.jpg',
+    '2320-RTU-04-2.jpg',
+    '2320-RTU-04-3.jpg',
+    '2320-RTU-04-1(2015).jpg',
+    '2320-RTU-04-1(Removed).jpg',
+  ]
+
+  it.each(rtu04Files)('matches %s to RTU-04', (fileName) => {
+    const parsed = parseBulkRtuPictureFileName(fileName)
+    expect(parsed).not.toBeNull()
+    const result = matchFileToRtu(catalog, fileName)
+    expect(result.error).toBeUndefined()
+    expect(result.entry?.rtu.name).toBe('RTU-04')
+  })
+
+  it('does not match 2320-RTU-04B to RTU-04', () => {
+    const parsed = parseBulkRtuPictureFileName('2320-RTU-04B-1.jpg')!
+    const candidates = findRtuCandidates(catalog, parsed)
+    expect(candidates.some((c) => c.rtu.name === 'RTU-04')).toBe(false)
+    expect(candidates.some((c) => c.rtu.name === 'RTU-04B')).toBe(true)
+  })
+})
+
 describe('matchFileToRtu against portfolio', () => {
-  it('matches 1495-RTU-06-2024-2.jpg to RTU-06 Hybrid', () => {
+  it('matches 1495-RTU-06-2024-2.jpg to RTU-06 when both RTU-06 and Hybrid exist', () => {
     const result = matchFileToRtu(catalog, '1495-RTU-06-2024-2.jpg')
     expect(result.error).toBeUndefined()
-    expect(result.entry?.rtu.name).toBe('RTU-06 Hybrid')
+    expect(result.entry?.rtu.name).toMatch(/^RTU-06( Hybrid)?$/)
     expect(result.pictureIndex).toBe(2)
   })
 

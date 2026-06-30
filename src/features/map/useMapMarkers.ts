@@ -213,6 +213,20 @@ export function useMapMarkers({
     })
   }, [refreshDetailVisibility])
 
+  useEffect(() => {
+    return useLayerStore.subscribe((state, prevState) => {
+      if (state.showRtuPictureCount === prevState.showRtuPictureCount) return
+      const showPictureCount = state.showRtuPictureCount
+      const activeMarker = activeInfoMarkerRef.current
+      for (const entry of detailMarkersRef.current) {
+        if (entry.type !== 'rtu') continue
+        if (activeMarker && entry.marker === activeMarker) continue
+        syncDetailMarkerAppearance(entry, false, showPictureCount)
+      }
+      refreshDetailVisibility()
+    })
+  }, [refreshDetailVisibility])
+
   const { clearActiveRtuPictures, refreshRtuPicturesView, refreshRtuPictureBadges } =
     useRtuPictureBadges(
       map,
@@ -289,7 +303,9 @@ export function useMapMarkers({
       const marker = activeInfoMarkerRef.current
       if (marker) {
         const entry = detailMarkersRef.current.find((e) => e.marker === marker)
-        if (entry) syncDetailMarkerAppearance(entry, false)
+        if (entry) {
+          syncDetailMarkerAppearance(entry, false, useLayerStore.getState().showRtuPictureCount)
+        }
       }
       activeInfoMarkerRef.current = null
       activeDetailInfoRef.current = null

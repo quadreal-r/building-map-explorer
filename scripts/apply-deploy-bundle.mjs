@@ -25,11 +25,8 @@ import { buildSyncMetaFromBundle, writeSyncMetaFile, appendSyncHistoryEntry } fr
 import { readBuildVersionLabel } from './lib/read-build-version.mjs'
 import { uploadPortfolioJsonToR2 } from './upload-json-to-r2.mjs'
 import {
-  RTU_GPS_MATCH_FEET,
   findRtuInPortfolio,
-  gpsWarningForRtu,
   parseRtuPictureKey,
-  readImageGpsFromBuffer,
 } from './lib/rtu-gps-validate.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -246,7 +243,6 @@ const manifestBefore = JSON.parse(JSON.stringify(manifest))
 
 let r2Uploads = 0
 let localWrites = 0
-let gpsWarnings = 0
 let pictureCount = 0
 
 for (const pic of iterateDeployPictures(bundle)) {
@@ -261,13 +257,6 @@ for (const pic of iterateDeployPictures(bundle)) {
       : null
     if (!match) {
       console.warn(`Warning: bundle RTU not in portfolio — ${pic.fileName} → ${pic.rtuKey}`)
-    } else {
-      const photoGps = await readImageGpsFromBuffer(buffer)
-      const warning = gpsWarningForRtu(photoGps, match.rtu)
-      if (warning) {
-        gpsWarnings += 1
-        console.warn(`GPS warning: ${pic.fileName} @ ${parsed.buildingAddress} — ${warning}`)
-      }
     }
   }
 
@@ -341,7 +330,7 @@ if (picturesAdded || picturesRemoved || picturesHidden) {
 if (isR2Configured()) {
   console.log(
     `RTU pictures: uploaded ${r2Uploads} file(s) to Cloudflare R2` +
-      (gpsWarnings ? ` (${gpsWarnings} GPS warning(s) beyond ${RTU_GPS_MATCH_FEET} ft)` : ''),
+      (localWrites ? `; wrote ${localWrites} locally` : ''),
   )
 } else if (localWrites) {
   console.log(`RTU pictures: wrote ${localWrites} file(s) to ${PICS_DIR} (R2 not configured)`)

@@ -122,15 +122,23 @@ export function detailIconFor(
   })
 }
 
+export function detailMarkerPictureCount(
+  entry: DetailMarkerEntry,
+  showPictureCount: boolean,
+): number {
+  return showPictureCount && entry.type === 'rtu' ? (entry.pictureCount ?? 0) : 0
+}
+
 export function syncDetailMarkerAppearance(
   entry: DetailMarkerEntry,
   isSelected = false,
+  showPictureCount = true,
 ): void {
   setDetailMarkerContent(entry.marker, {
     icon: detailIconFor(entry, isSelected),
     label: detailLabelFor(entry),
     labelOffsetY: entry.type === 'rtu' ? -7 : -4,
-    pictureCount: entry.type === 'rtu' ? (entry.pictureCount ?? 0) : 0,
+    pictureCount: detailMarkerPictureCount(entry, showPictureCount),
   })
   if (entry.type === 'rtu' && entry.building && entry.data.name) {
     registerRtuDropTarget(

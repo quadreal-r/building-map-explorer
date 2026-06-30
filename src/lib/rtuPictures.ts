@@ -694,6 +694,23 @@ export async function clearStaleLocalRtuPictures(): Promise<{
   return { removed, remaining }
 }
 
+/** Remove every RTU picture stored in this browser (IndexedDB). Returns rows deleted. */
+export async function clearAllLocalRtuPictures(): Promise<number> {
+  const rows = await idbGetAllRows()
+  const fileNames = rows.map((row) => row.fileName)
+  if (fileNames.length) await idbDeleteMany(fileNames)
+  if (fileNames.length) notifyRtuPicturesChanged()
+  return fileNames.length
+}
+
+/** Wipe browser RTU picture storage and manifest cache (map badges + viewer). */
+export async function clearLocalRtuPictureStorage(): Promise<number> {
+  clearRtuPictureManifestCache()
+  const removed = await clearAllLocalRtuPictures()
+  notifyRtuPicturesChanged()
+  return removed
+}
+
 /** Drop all RTU pictures on this PC that were never synced to Cloudflare. */
 export async function discardPendingLocalRtuPictures(): Promise<number> {
   const rows = await idbGetAllRows()
@@ -766,8 +783,10 @@ export async function loadRtuPictureManifest(): Promise<RtuPictureManifest> {
           return manifestCache
         }
         console.warn(
-          '[rtuPictures] Cloudflare manifest.json unavailable; falling back to bundled copy.',
+          '[rtuPictures] Cloudflare manifest.json unavailable; using empty manifest (not bundled fallback).',
         )
+        manifestCache = { entries: {} }
+        return manifestCache
       } else if (remoteUrl !== BUNDLED_MANIFEST_URL) {
         const remote = await fetchManifestFromUrl(remoteUrl)
         if (remote) {
