@@ -416,8 +416,8 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "6325 Dixie Rd",
-    "lat": 43.6626469,
-    "lng": -79.6560054
+    "lat": 43.66262475804307,
+    "lng": -79.65604283437945
   },
   {
     "type": "Sprinkler Rooms",
@@ -1004,8 +1004,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "6325 Dixie Rd",
-    "lat": 43.6623402,
-    "lng": -79.6555705
+    "lat": 43.66231805804308,
+    "lng": -79.65560793437945
   },
   {
     "type": "Electrical Rooms",
