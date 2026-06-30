@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "exportedAt": "2026-06-30T01:13:42.598Z",
-  "syncedAt": "2026-06-30T01:14:13.263Z",
-  "source": "settings-sync",
+  "exportedAt": "2026-06-30T00:37:56.861Z",
+  "syncedAt": "2026-06-30T00:37:56.861Z",
+  "source": "manifest-cleared",
   "summary": {
     "buildingCount": 102,
     "rtuCount": 1073,
@@ -11,12 +11,7 @@
     "scheduleYearCount": 463,
     "scheduleNoteCount": 348,
     "pricingRowCount": 25,
-    "manifestPictureCount": 1413,
-    "picturesUploaded": 0,
-    "picturesAdded": 0,
-    "picturesRemoved": 0,
-    "picturesHidden": 0,
-    "buildVersionLabel": "v2026.06.29 (7)",
-    "clientBuildVersionLabel": "v2026.06.29 (6)"
+    "manifestPictureCount": 0,
+    "picturesUploaded": 0
   }
 }
