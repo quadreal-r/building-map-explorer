@@ -7,7 +7,7 @@ const RTU_PREFIX_RE = /^(?:RTU?s?|RTU#|RT|S)[-_\s#]*/i
 const YEAR_TOKEN_RE = /(?:^|[-_\s])(19\d{2}|20\d{2})(?=$|[-_\s])/g
 
 const DESCRIPTOR_PATTERNS = [
-  /\s+hybrid\b/gi,
+  /(?:\s+|-)hybrid\b/gi,
   /\s+cooling\s+only\b/gi,
   /\s*\(\s*air\s+heater\s*\)/gi,
   /\s*\(\s*no\s+label\s*\)/gi,
@@ -214,11 +214,16 @@ export function scoreRtuFilenameMatch(entry, parsed) {
 
   const dbId = extractRtuUnitId(stripRtuDescriptors(entry.rtu.name))
   const fileId = parsed.unitId
-  let score = 0
+  let score = 80
 
-  if (dbId === fileId) score += 100
-  else if (normalizeUnitIdForMatch(dbId) === normalizeUnitIdForMatch(fileId)) score += 90
-  else return -1
+  if (dbId === fileId) score += 20
+  else if (normalizeUnitIdForMatch(dbId) === normalizeUnitIdForMatch(fileId)) score += 10
+  else if (
+    parsed.unitCore != null &&
+    normalizeUnitIdForMatch(dbId) === normalizeUnitIdForMatch(parsed.unitCore)
+  ) {
+    score += 10
+  }
 
   const fileHasHybrid = /hybrid/i.test(parsed.rtuToken)
   const dbHasHybrid = hasRtuDescriptorInName(entry.rtu.name)
