@@ -25,14 +25,19 @@ export function buildCloudRtuPictureFileName(buildingAddress, rtuName, pictureIn
   return `${buildingNum}-RTU-${unit}-${pictureIndex}.${safeExt}`
 }
 
+function isCanonicalR2ManifestFileName(fileName) {
+  const base = fileName.replace(/^.*[/\\]/, '')
+  return /^\d+-RTU/i.test(base)
+}
+
 export function manifestEntryToCloudFileName(fileName, buildingAddress, rtuName) {
   if (!/[\s()]/.test(fileName)) return fileName
-  const bulk = parseBulkRtuPictureFileName(fileName)
+  if (isCanonicalR2ManifestFileName(fileName) && parseBulkRtuPictureFileName(fileName)) {
+    return fileName
+  }
   const paren = fileName.match(/\((\d+)\)\.[^.]+$/i)
   const dash = fileName.match(/-(\d+)\.[^.]+$/i)
-  const index =
-    bulk?.pictureIndex ??
-    (paren ? Number(paren[1]) : dash ? Number(dash[1]) : 1)
+  const index = paren ? Number(paren[1]) : dash ? Number(dash[1]) : 1
   const ext = fileName.split('.').pop() ?? 'jpg'
   return buildCloudRtuPictureFileName(buildingAddress, rtuName, index, ext)
 }

@@ -12,6 +12,7 @@ import {
   getRtuPictureManifestUrl,
   rtuPictureFileUrl,
 } from '@/lib/rtuPictureUrls'
+import { isRtuPictureReachableOnCdn } from '@/lib/rtuPictureReachability'
 import type { DeployPictureEntry } from '@/types/deployBundle'
 
 export interface RtuPictureManifest {
@@ -453,22 +454,7 @@ async function cloudFilenameBlockedForNewUpload(
 }
 
 async function cloudRtuPictureReachable(fileName: string): Promise<boolean> {
-  const url = rtuPictureFileUrl(fileName)
-  try {
-    const response = await fetch(url, { method: 'HEAD', cache: 'no-store' })
-    if (response.ok) return true
-  } catch {
-    /* HEAD may be blocked by CORS -- try image load */
-  }
-
-  if (!/\.(jpe?g|png|webp|gif)(\?|$)/i.test(fileName)) return false
-
-  return new Promise((resolve) => {
-    const img = new Image()
-    img.onload = () => resolve(true)
-    img.onerror = () => resolve(false)
-    img.src = `${url}${url.includes('?') ? '&' : '?'}reach=${Date.now()}`
-  })
+  return isRtuPictureReachableOnCdn(fileName)
 }
 
 function splitRtuPictureKey(rtuKey: string): { buildingAddress: string; rtuName: string } {

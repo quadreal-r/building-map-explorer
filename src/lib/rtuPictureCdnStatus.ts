@@ -2,6 +2,7 @@ import { manifestEntryToCloudFileName } from '@/lib/rtuPictureAssignNaming'
 import { parseBulkRtuPictureFileName } from '@/lib/rtuPictureMatch'
 import { parseRtuPictureIndex } from '@/lib/rtuPictures'
 import { rtuPictureFileUrl } from '@/lib/rtuPictureUrls'
+import { isRtuPictureReachableOnCdn } from '@/lib/rtuPictureReachability'
 
 export interface PictureCdnRow {
   rtuKey: string
@@ -52,11 +53,8 @@ export async function verifyRtuPicturesOnCdn(
       const fileName = queue.shift()
       if (!fileName) continue
       try {
-        const response = await fetch(rtuPictureFileUrl(fileName), {
-          method: 'HEAD',
-          cache: 'no-store',
-        })
-        status.set(fileName, response.ok)
+        const reachable = await isRtuPictureReachableOnCdn(fileName)
+        status.set(fileName, reachable)
       } catch {
         status.set(fileName, false)
       }

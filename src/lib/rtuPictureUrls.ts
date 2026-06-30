@@ -24,6 +24,11 @@ export function getRtuPicturesBaseUrl(): string {
   return normalizeBaseUrl(`${import.meta.env.BASE_URL}database/rtu-pictures/`)
 }
 
+/** True when RTU pictures load from a configured Cloudflare R2 public URL. */
+export function usesRemoteRtuPicturesCdn(): boolean {
+  return Boolean(readRtuPicturesBaseUrlFromEnv())
+}
+
 /** Manifest on R2 JSON bucket when configured, else same-origin static file. */
 export function getRtuPictureManifestUrl(): string {
   const jsonBase = readJsonDataBaseUrlFromEnv()

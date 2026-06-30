@@ -32,14 +32,37 @@ describe('buildCloudRtuPictureFileName', () => {
     )
   })
 
-  it('maps legacy manifest names to cloud filenames', () => {
+  it('keeps new-naming bulk manifest names as the CDN filename', () => {
     expect(
       manifestEntryToCloudFileName(
         '2320-RTU-04 Hybrid (1).jpg',
         '2320 Bristol Circle',
         'RTU-04 Hybrid',
       ),
-    ).toBe('2320-RTU-04-1.jpg')
+    ).toBe('2320-RTU-04 Hybrid (1).jpg')
+    expect(
+      manifestEntryToCloudFileName(
+        '100-RTU-01 (1) (Audit-2024).jpg',
+        '100 Leek Crescent',
+        'RTU- 01',
+      ),
+    ).toBe('100-RTU-01 (1) (Audit-2024).jpg')
+  })
+
+  it('maps legacy underscore IndexedDB names to hyphen cloud filenames', () => {
+    expect(
+      manifestEntryToCloudFileName(
+        '100_RTU-01_(1).jpg',
+        '100 Leek Crescent',
+        'RTU- 01',
+      ),
+    ).toBe('100-RTU-01-1.jpg')
+  })
+
+  it('maps unlabeled legacy spaced names to hyphen cloud filenames', () => {
+    expect(
+      manifestEntryToCloudFileName('RTU-01 (1).jpg', '100 Leek Crescent', 'RTU- 01'),
+    ).toBe('100-RTU-01-1.jpg')
   })
 })
 

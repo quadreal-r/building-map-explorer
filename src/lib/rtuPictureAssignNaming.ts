@@ -56,6 +56,12 @@ export function buildBulkRtuPictureFileName(
   return `${buildingNum}-${rtuLabel} (${pictureIndex}).${safeExt}`
 }
 
+/** True for new-naming R2 files like `100-RTU-01 (1) (Audit-2024).jpg` (not legacy `100_RTU-01_(1).jpg`). */
+function isCanonicalR2ManifestFileName(fileName: string): boolean {
+  const base = fileName.replace(/^.*[/\\]/, '')
+  return /^\d+-RTU/i.test(base)
+}
+
 /** Map legacy spaced manifest names to the cloud filename used on R2. */
 export function manifestEntryToCloudFileName(
   fileName: string,
@@ -63,12 +69,14 @@ export function manifestEntryToCloudFileName(
   rtuName: string,
 ): string {
   if (!/[\s()]/.test(fileName)) return fileName
-  const bulk = parseBulkRtuPictureFileName(fileName)
+  // New-naming bulk files on R2 use the manifest name as-is (e.g. "100-RTU-01 (1) (Audit-2024).jpg").
+  if (isCanonicalR2ManifestFileName(fileName) && parseBulkRtuPictureFileName(fileName)) {
+    return fileName
+  }
   const paren = fileName.match(/\((\d+)\)\.[^.]+$/i)
   const dash = fileName.match(/-(\d+)\.[^.]+$/i)
   const index =
-    bulk?.pictureIndex ??
-    (paren ? Number(paren[1]) : dash ? Number(dash[1]) : 1)
+    paren ? Number(paren[1]) : dash ? Number(dash[1]) : 1
   const ext = fileName.split('.').pop() ?? 'jpg'
   return buildCloudRtuPictureFileName(buildingAddress, rtuName, index, ext)
 }

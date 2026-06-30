@@ -338,10 +338,6 @@ function SettingsForm({
   }
 
   const handleDownloadSyncReport = () => {
-    if (!usesRemoteJsonData()) {
-      showToastError('Cloudflare JSON is not configured for this build.')
-      return
-    }
     setUploadBusy(true)
     void downloadSyncStatusExcel()
       .then(() => {
@@ -461,31 +457,33 @@ function SettingsForm({
         <section>
           <div className={styles.sectionLabel}>Cloudflare &amp; GitHub sync</div>
           <GitHubDeploySyncFields sync={githubSync} disabled={uploadBusy} />
-          {usesRemoteJsonData() ? (
-            <div className={styles.tools} style={{ marginTop: 8 }}>
-              <SettingsToolButton
-                tooltip="Replace this browser’s portfolio, schedule, and pricing with the copy on Cloudflare (from the last Settings sync on any PC). Use after syncing on another machine or on the live GitHub site."
-                onClick={handleLoadFromCloudflare}
-                disabled={uploadBusy}
-              >
-                Load portfolio from Cloudflare
-              </SettingsToolButton>
-              <SettingsToolButton
-                tooltip="Remove browser copies of RTU photos that are already listed in the Cloudflare manifest. Use this if the unsynced warning keeps coming back after sync."
-                onClick={handleClearStaleLocalPictures}
-                disabled={uploadBusy}
-              >
-                Clear stale local picture copies
-              </SettingsToolButton>
-              <SettingsToolButton
-                tooltip="Download Excel: sync history, pictures added/removed, build version, manifest, and local unsynced photos."
-                onClick={handleDownloadSyncReport}
-                disabled={uploadBusy}
-              >
-                Download sync status report (Excel)
-              </SettingsToolButton>
-            </div>
-          ) : null}
+          <div className={styles.tools} style={{ marginTop: 8 }}>
+            {usesRemoteJsonData() ? (
+              <>
+                <SettingsToolButton
+                  tooltip="Replace this browser’s portfolio, schedule, and pricing with the copy on Cloudflare (from the last Settings sync on any PC). Use after syncing on another machine or on the live GitHub site."
+                  onClick={handleLoadFromCloudflare}
+                  disabled={uploadBusy}
+                >
+                  Load portfolio from Cloudflare
+                </SettingsToolButton>
+                <SettingsToolButton
+                  tooltip="Remove browser copies of RTU photos that are already listed in the Cloudflare manifest. Use this if the unsynced warning keeps coming back after sync."
+                  onClick={handleClearStaleLocalPictures}
+                  disabled={uploadBusy}
+                >
+                  Clear stale local picture copies
+                </SettingsToolButton>
+              </>
+            ) : null}
+            <SettingsToolButton
+              tooltip="Download Excel sync report. For a full per-file CDN audit run npm run report-sync-status in the project folder."
+              onClick={handleDownloadSyncReport}
+              disabled={uploadBusy}
+            >
+              Download sync status report (Excel)
+            </SettingsToolButton>
+          </div>
         </section>
 
         <section>

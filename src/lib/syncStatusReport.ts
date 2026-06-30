@@ -18,12 +18,13 @@ import {
   listPendingDeployPictureRows,
   loadRtuPictureManifest,
 } from '@/lib/rtuPictures'
-import { manifestEntryToCloudFileName } from '@/lib/rtuPictureAssignNaming'
+import {
+  buildBrowserPictureCdnStatus,
+} from '@/lib/browserPictureCdnStatus'
 import {
   buildPictureCdnRows,
   PICTURE_CDN_HEADER,
   pictureCdnRowToSheetRow,
-  verifyRtuPicturesOnCdn,
 } from '@/lib/rtuPictureCdnStatus'
 import type { SyncMetaSummary } from '@/types/syncMeta'
 
@@ -161,23 +162,23 @@ export async function downloadSyncStatusExcel(): Promise<void> {
     ])
   }
 
-  const cloudFileNames = new Set<string>()
-  for (const [rtuKey, files] of Object.entries(manifest.entries ?? {})) {
-    const { buildingAddress, rtuName } = splitRtuKey(rtuKey)
-    for (const fileName of files) {
-      cloudFileNames.add(fileName)
-      cloudFileNames.add(manifestEntryToCloudFileName(fileName, buildingAddress, rtuName))
-    }
-  }
-  const cdnStatusByFile = await verifyRtuPicturesOnCdn(cloudFileNames)
+  const { statusByFile: cdnStatusByFile, verificationNote } = await buildBrowserPictureCdnStatus(
+    manifest,
+    cloudMeta,
+  )
   const pictureRows = buildPictureCdnRows(manifest, cdnStatusByFile)
   const syncedOnCdn = pictureRows.filter((row) => row.cdnStatus === 'On CDN')
   const missingFromCdn = pictureRows.filter((row) => row.cdnStatus === 'Missing from CDN')
 
   summaryRows.push([])
-  summaryRows.push(['CDN picture check (HEAD)', ''])
+  summaryRows.push(['CDN picture check', ''])
+  summaryRows.push(['Verification method', verificationNote])
   summaryRows.push(['Pictures on CDN', syncedOnCdn.length])
   summaryRows.push(['Pictures missing from CDN', missingFromCdn.length])
+  summaryRows.push([
+    'Full per-file CDN audit',
+    'npm run report-sync-status (uses R2 API — always accurate)',
+  ])
 
   summaryRows.push([])
   summaryRows.push(['Unsynced summary lines', ''])
