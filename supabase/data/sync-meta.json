@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-01T13:07:39.358Z",
-  "syncedAt": "2026-07-01T13:08:14.525Z",
-  "source": "settings-sync",
+  "exportedAt": "2026-07-01T12:53:21.603Z",
+  "syncedAt": "2026-07-01T18:52:11.341Z",
+  "source": "nogps-picture-prune",
   "summary": {
     "buildingCount": 102,
     "rtuCount": 1073,
@@ -11,12 +11,8 @@
     "scheduleYearCount": 463,
     "scheduleNoteCount": 348,
     "pricingRowCount": 25,
-    "manifestPictureCount": 1546,
+    "manifestPictureCount": 1276,
     "picturesUploaded": 0,
-    "picturesAdded": 0,
-    "picturesRemoved": 0,
-    "picturesHidden": 18,
-    "buildVersionLabel": "v2026.07.01 (2)",
-    "clientBuildVersionLabel": "v2026.07.01 (2)"
+    "picturesRemoved": 270
   }
 }

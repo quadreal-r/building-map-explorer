@@ -36,7 +36,8 @@
     "prune-r2-pictures": "node scripts/prune-r2-pictures-by-allowlist.mjs",
     "report-sync-status": "node scripts/report-sync-status.mjs",
     "push-live": "node scripts/push-live.mjs",
-    "restore-point": "node scripts/restore-point.mjs"
+    "restore-point": "node scripts/restore-point.mjs",
+    "delete-rtu-pictures-from-list": "node scripts/delete-rtu-pictures-from-list.mjs"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.10",
