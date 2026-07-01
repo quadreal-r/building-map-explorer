@@ -325,85 +325,85 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1495 Bonhill Rd",
-    "lat": 43.6622499,
-    "lng": -79.6542589
+    "lat": 43.662227687769246,
+    "lng": -79.65426750240677
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1535 Meyerside Dr",
-    "lat": 43.6617694,
-    "lng": -79.6535131
+    "lat": 43.661747187769244,
+    "lng": -79.65352170240676
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1633-1655 Meyerside",
-    "lat": 43.6640515,
-    "lng": -79.6506777
+    "lat": 43.66403622710658,
+    "lng": -79.6507076234304
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1675-1705 Meyerside",
-    "lat": 43.664962,
-    "lng": -79.6498164
+    "lat": 43.66494672710658,
+    "lng": -79.64984632343041
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1715 Meyerside",
-    "lat": 43.6649683,
-    "lng": -79.6492133
+    "lat": 43.6649558622064,
+    "lng": -79.64924006795826
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1745 Meyerside",
-    "lat": 43.6659017,
-    "lng": -79.6481446
+    "lat": 43.6658892622064,
+    "lng": -79.64817136795826
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1775 Meyerside Dr",
-    "lat": 43.6661306,
-    "lng": -79.6478456
+    "lat": 43.6661181622064,
+    "lng": -79.64787236795826
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1795 Meyerside Dr",
-    "lat": 43.6667779,
-    "lng": -79.6471479
+    "lat": 43.6667654622064,
+    "lng": -79.64717466795825
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1815 Meyerside Dr",
-    "lat": 43.6670675,
-    "lng": -79.6468055
+    "lat": 43.6670550622064,
+    "lng": -79.64683226795826
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1835 Meyerside Dr",
-    "lat": 43.6677116,
-    "lng": -79.6460989
+    "lat": 43.6676991622064,
+    "lng": -79.64612566795826
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1865 Meyerside Dr",
-    "lat": 43.6682588,
-    "lng": -79.645475
+    "lat": 43.668246362206396,
+    "lng": -79.64550176795827
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1885 Meyerside Dr - 6350 Netherhart Dr",
-    "lat": 43.6685844,
-    "lng": -79.645194
+    "lat": 43.6685719622064,
+    "lng": -79.64522076795826
   },
   {
     "type": "Sprinkler Rooms",
@@ -507,8 +507,8 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1577 Meyerside-1500 Bonhill",
-    "lat": 43.6626958,
-    "lng": -79.6521793
+    "lat": 43.66268052710658,
+    "lng": -79.6522092234304
   },
   {
     "type": "Sprinkler Rooms",
@@ -1032,78 +1032,78 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1865 Meyerside Dr",
-    "lat": 43.668569,
-    "lng": -79.6459768
+    "lat": 43.6685565622064,
+    "lng": -79.64600356795826
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1835 Meyerside Dr",
-    "lat": 43.6680129,
-    "lng": -79.6466045
+    "lat": 43.6680004622064,
+    "lng": -79.64663126795826
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1815 Meyerside Dr",
-    "lat": 43.6673463,
-    "lng": -79.6473255
+    "lat": 43.6673338622064,
+    "lng": -79.64735226795825
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1795 Meyerside Dr",
-    "lat": 43.6670859,
-    "lng": -79.6476667
+    "lat": 43.667073462206396,
+    "lng": -79.64769346795826
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1775 Meyerside Dr.",
-    "lat": 43.6664617,
-    "lng": -79.6484625
+    "lat": 43.6664492622064,
+    "lng": -79.64848926795825
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1745 Meyerside Dr",
-    "lat": 43.6659359,
-    "lng": -79.6482423
+    "lat": 43.6659234622064,
+    "lng": -79.64826906795827
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1715 Meyerside Rd",
-    "lat": 43.66507,
-    "lng": -79.6492619
+    "lat": 43.6650575622064,
+    "lng": -79.64928866795826
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1675-1705 Meyerside Rd",
-    "lat": 43.6650168,
-    "lng": -79.6498776
+    "lat": 43.665001527106575,
+    "lng": -79.6499075234304
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1633-1655 Meyerside Rd\r\r\n1500 Bonhill Rd\r\r\n1577 Meyerside Dr",
-    "lat": 43.6640964,
-    "lng": -79.6507616
+    "lat": 43.66408112710658,
+    "lng": -79.6507915234304
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1535 Meyerside Dr",
-    "lat": 43.6613473,
-    "lng": -79.6540447
+    "lat": 43.66132508776925,
+    "lng": -79.65405330240677
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1495 Bonhill Rd",
-    "lat": 43.6615412,
-    "lng": -79.6544409
+    "lat": 43.66151898776925,
+    "lng": -79.65444950240676
   },
   {
     "type": "Electrical Rooms",
@@ -1200,8 +1200,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1885 Meyerside Dr - 6350 Netherhart Dr",
-    "lat": 43.6688304,
-    "lng": -79.6456272
+    "lat": 43.6688179622064,
+    "lng": -79.64565396795827
   },
   {
     "type": "Electrical Rooms",
@@ -1221,8 +1221,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1577 Meyerside-1500 Bonhill",
-    "lat": 43.663282,
-    "lng": -79.6520134
+    "lat": 43.66326672710658,
+    "lng": -79.6520433234304
   },
   {
     "type": "Electrical Rooms",
@@ -1361,15 +1361,15 @@
     "type": "Fire Hydrants",
     "name": "1745 Meyerside Drive #2 (location approx.)",
     "desc": "1745 Meyerside Drive",
-    "lat": 43.6663936,
-    "lng": -79.648776
+    "lat": 43.6663811622064,
+    "lng": -79.64880276795826
   },
   {
     "type": "Fire Hydrants",
     "name": "1745 Meyerside",
     "desc": "1745 Meyerside Drive",
-    "lat": 43.6660556,
-    "lng": -79.6498202
+    "lat": 43.6660431622064,
+    "lng": -79.64984696795825
   },
   {
     "type": "Fire Hydrants",
@@ -1690,15 +1690,15 @@
     "type": "Fire Hydrants",
     "name": "1577 Meyerside-1500 Bonhill (Aprox. Location)",
     "desc": "1577 Meyerside-1500 Bonhill",
-    "lat": 43.663078,
-    "lng": -79.6532952
+    "lat": 43.66306272710658,
+    "lng": -79.6533251234304
   },
   {
     "type": "Fire Hydrants",
     "name": "1633-1655 Meyerside (Aprox. Location)",
     "desc": "1633-1655 Meyerside Drive",
-    "lat": 43.6642879,
-    "lng": -79.6516139
+    "lat": 43.66427262710658,
+    "lng": -79.6516438234304
   },
   {
     "type": "Natural Gas Shut-Off",
