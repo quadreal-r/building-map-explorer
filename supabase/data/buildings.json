@@ -1771,8 +1771,8 @@
     "park": "Dixie Business Park (x 34)",
     "address": "6325 Dixie Road",
     "bu": "65204",
-    "lat": 43.6622005,
-    "lng": -79.6557365,
+    "lat": 43.6621714658186,
+    "lng": -79.65577053242494,
     "sqft": "36,234",
     "cluster": "Dixie 4 (x 4)",
     "manager": "Evelyn Lu",
@@ -1781,92 +1781,92 @@
       {
         "name": "RTU-16",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-16\r\nModel: GBC060WEMB07C\r\nSerial: 21222915PA\r\nMake: TRANE\r\nDate Installed: Jun 21, 2021\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 125,000 BTU's",
-        "lat": 43.6620391,
-        "lng": -79.6552296
+        "lat": 43.662010065818606,
+        "lng": -79.65526363242493
       },
       {
         "name": "RTU-15",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-15\r\nModel: GBC060AWEMB07C\r\nSerial: 21191256PA\r\nMake: TRANE\r\nDate Installed: Sep 01, 2021\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 125,000 BTU's",
-        "lat": 43.6618616,
-        "lng": -79.655305
+        "lat": 43.66183256581861,
+        "lng": -79.65533903242493
       },
       {
         "name": "RTU-14",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-14\r\nModel: 48A06A2A1A0B0A0\r\nSerial: 5122C07672\r\nMake: CARRIER\r\nDate Installed: Feb 16, 2022\r\nHeating Capacity: 110,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 110,000 BTU's",
-        "lat": 43.6619249,
-        "lng": -79.6553867
+        "lat": 43.66189586581861,
+        "lng": -79.65542073242493
       },
       {
         "name": "RTU-13",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-13\r\nModel: KGA036S4DM2Y\r\nSerial: 5613D04688\r\nMake: LENNOX\r\nDate Installed: Apr 01, 2013\r\nHeating Capacity: 105,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\nHeating Capacity 105,000 BTU's",
-        "lat": 43.6619114,
-        "lng": -79.6554352
+        "lat": 43.661882365818606,
+        "lng": -79.65546923242493
       },
       {
         "name": "RTU-12",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-12\r\nModel: TGA060S2DH1J\r\nSerial: 5608A04193\r\nMake: LENNOX\r\nDate Installed: Nov 19, 2008\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 125,000 BTU's",
-        "lat": 43.6619899,
-        "lng": -79.6554858
+        "lat": 43.66196086581861,
+        "lng": -79.65551983242493
       },
       {
         "name": "RTU-11",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-11\r\nModel: 48VL-C2406030\r\nSerial: 1619C28660\r\nMake: CARRIER\r\nDate Installed: Apr 01, 2019\r\nHeating Capacity: 60,000 BTU's\r\nCooling Capacity: 24,000 BTU (2 Ton)\r\nHeating Capacity 60,000 BTU's",
-        "lat": 43.6620411,
-        "lng": -79.6555311
+        "lat": 43.66201206581861,
+        "lng": -79.65556513242494
       },
       {
         "name": "RTU-10",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-10\r\nModel: 48TCEA04A2A5A0B0A0\r\nSerial: 0711G50098\r\nMake: CARRIER\r\nDate Installed: Jan 01, 2011\r\nHeating Capacity: 115,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\nHeating Capacity 115,000 BTU's",
-        "lat": 43.6620147,
-        "lng": -79.6555769
+        "lat": 43.661985665818605,
+        "lng": -79.65561093242493
       },
       {
         "name": "RTU-09",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-09\r\nModel: 48TCEA05A2A5A0B0A0\r\nSerial: 2611C52558\r\nMake: CARRIER\r\nDate Installed: Nov 19, 2011\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 48,000 BTU (4 Ton)\r\nHeating Capacity 125,000 BTU's",
-        "lat": 43.662076,
-        "lng": -79.6556499
+        "lat": 43.662046965818604,
+        "lng": -79.65568393242494
       },
       {
         "name": "RTU-08",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-08\r\nModel: KGA036S4DM2Y\r\nSerial: 5613C06847\r\nMake: LENNOX\r\nDate Installed: Mar 01, 2013\r\nHeating Capacity: 100,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\nHeating Capacity 100,000 BTU's",
-        "lat": 43.662172,
-        "lng": -79.6556775
+        "lat": 43.6621429658186,
+        "lng": -79.65571153242493
       },
       {
         "name": "RTU-07",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-07\r\nModel: D3NZ030N05606A\r\nSerial: N0L9302671\r\nMake: YORK\r\nDate Installed: Nov 19, 2009\r\nHeating Capacity: 80,000 BTU's\r\nCooling Capacity: 30,000 BTU (2.5 Ton)\r\nHeating Capacity 80,000 BTU's",
-        "lat": 43.6622341,
-        "lng": -79.6557451
+        "lat": 43.662205065818604,
+        "lng": -79.65577913242494
       },
       {
         "name": "RTU-06",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-06\r\nModel: ZJ036N08N2AAA1C\r\nSerial: N1A0559519\r\nMake: YORK\r\nDate Installed: Nov 19, 2010\r\nHeating Capacity: 100,000 BTU's\r\nCooling Capacity: 36,000 BTU (3 Ton)\r\nHeating Capacity 100,000 BTU's",
-        "lat": 43.6621895,
-        "lng": -79.6557788
+        "lat": 43.6621604658186,
+        "lng": -79.65581283242493
       },
       {
         "name": "RTU-05",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-05\r\nModel: 48A05A2A1A0B0A0\r\nSerial: 5122C07310\r\nMake: CARRIER\r\nDate Installed: Dec 01, 2022\r\nHeating Capacity: 110,000 BTU's\r\nCooling Capacity: 48,000 BTU (4 Ton)\r\nHeating Capacity 110,000 BTU's",
-        "lat": 43.6622598,
-        "lng": -79.6558705
+        "lat": 43.662230765818606,
+        "lng": -79.65590453242494
       },
       {
         "name": "RTU-04",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-04\r\nModel: LGT092H5EH2J\r\nSerial: 5626A04620\r\nMake: LENNOX\r\nDate Installed: May 19, 2026\r\nHeating Capacity: 240,000 BTU's\r\nCooling Capacity: 90,000 BTU (7.5 Ton)\r\nHeating Capacity 240,000 BTU's",
-        "lat": 43.6623523,
-        "lng": -79.6559021
+        "lat": 43.66232326581861,
+        "lng": -79.65593613242494
       },
       {
         "name": "RTU-03",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-03\r\nModel: ZF060H12B5A1ABA1A1A\r\nSerial: N1N6283308\r\nMake: YORK\r\nDate Installed: Dec 01, 2016\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 125,000 BTU's",
-        "lat": 43.6624174,
-        "lng": -79.6559837
+        "lat": 43.66238836581861,
+        "lng": -79.65601773242493
       },
       {
         "name": "RTU-01",
         "desc": "Building: 6325 Dixie Road\r\nSystem: Roof Top Units\r\nDescription: RTU-01\r\nModel: 48FCEA06A2A1A0A0A0\r\nSerial: 3219C89955\r\nMake: CARRIER\r\nDate Installed: Aug 19, 2019\r\nHeating Capacity: 125,000 BTU's\r\nCooling Capacity: 60,000 BTU (5 Ton)\r\nHeating Capacity 125,000 BTU's",
-        "lat": 43.6625307,
-        "lng": -79.656131
+        "lat": 43.6625016658186,
+        "lng": -79.65616503242494
       }
     ]
   },
