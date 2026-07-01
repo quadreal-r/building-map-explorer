@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-01T12:53:21.603Z",
-  "syncedAt": "2026-07-01T12:54:01.709Z",
+  "exportedAt": "2026-07-01T13:07:39.358Z",
+  "syncedAt": "2026-07-01T13:08:14.525Z",
   "source": "settings-sync",
   "summary": {
     "buildingCount": 102,
@@ -15,8 +15,8 @@
     "picturesUploaded": 0,
     "picturesAdded": 0,
     "picturesRemoved": 0,
-    "picturesHidden": 0,
-    "buildVersionLabel": "v2026.07.01 (1)",
-    "clientBuildVersionLabel": "v2026.06.30 (11)"
+    "picturesHidden": 18,
+    "buildVersionLabel": "v2026.07.01 (2)",
+    "clientBuildVersionLabel": "v2026.07.01 (2)"
   }
 }
