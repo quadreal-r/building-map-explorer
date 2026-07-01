@@ -298,10 +298,14 @@ function SettingsForm({
       }
       setUploadBusy(true)
       try {
-        const pulled = await pullRemoteUpdatesToLocal()
+        const { portfolio: pulled, source } = await pullRemoteUpdatesToLocal()
         onPortfolioPatch(pulled)
         invalidateUnsyncedChanges()
-        showToastSuccess('✓ Loaded portfolio, schedule, and pricing from Cloudflare.')
+        showToastSuccess(
+          source === 'cloudflare'
+            ? '✓ Loaded portfolio, schedule, and pricing from Cloudflare.'
+            : '✓ Loaded portfolio from the app bundle (Cloudflare fetch blocked — CORS on the R2 JSON bucket may be missing).',
+        )
       } catch (error) {
         showToastError(error instanceof Error ? error.message : 'Could not load from Cloudflare')
       } finally {

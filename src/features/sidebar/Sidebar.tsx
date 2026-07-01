@@ -10,8 +10,11 @@ import { areAllLayersHidden, useLayerStore } from '@/stores/layerStore'
 import { useSelectionStore } from '@/stores/selectionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { DEFAULT_DQ_FILTERS, type Building, type LayerKey, type PortfolioData } from '@/types/domain'
+import { useRtuPictureCountSummary } from '@/hooks/useRtuPictureCountSummary'
+import { useUiStore } from '@/stores/uiStore'
 import { AdvancedFilters } from './AdvancedFilters'
 import { BuildingList } from './BuildingList'
+import { PictureCountModal } from './PictureCountModal'
 import { SearchHitNav } from './SearchHitNav'
 import { StatsStrip } from './StatsStrip'
 import styles from './Sidebar.module.css'
@@ -55,6 +58,11 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
   const layers = useLayerStore((s) => s.layers)
   const showRtuPictureCount = useLayerStore((s) => s.showRtuPictureCount)
   const toggleShowRtuPictureCount = useLayerStore((s) => s.toggleShowRtuPictureCount)
+  const pictureCountModalOpen = useUiStore((s) => s.pictureCountModalOpen)
+  const openPictureCountModal = useUiStore((s) => s.openPictureCountModal)
+  const closePictureCountModal = useUiStore((s) => s.closePictureCountModal)
+  const { summary: pictureCountSummary, loading: pictureCountLoading } =
+    useRtuPictureCountSummary(listBuildings)
   const toggleLayer = useLayerStore((s) => s.toggleLayer)
   const hideAllLayers = useLayerStore((s) => s.hideAllLayers)
   const showAllLayers = useLayerStore((s) => s.showAllLayers)
@@ -211,14 +219,27 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
             type="button"
             className={`layer-btn${showRtuPictureCount ? ' active' : ''}`}
             onClick={toggleShowRtuPictureCount}
+            onDoubleClick={(event) => {
+              event.preventDefault()
+              openPictureCountModal()
+            }}
             title={
               showRtuPictureCount
-                ? 'Hide picture count on RTU markers'
-                : 'Show picture count on RTU markers'
+                ? 'Hide picture count on RTU markers (double-click for report)'
+                : 'Show picture count on RTU markers (double-click for report)'
             }
           >
             <span className="dot" style={{ background: '#38bdf8' }} />
             Pic count
+          </button>
+          <button
+            type="button"
+            className={`layer-btn${pictureCountModalOpen ? ' active' : ''}`}
+            onClick={openPictureCountModal}
+            title="Open picture count report"
+          >
+            <span className="dot" style={{ background: '#38bdf8' }} />
+            Pic report
           </button>
           <button
             type="button"
@@ -230,7 +251,21 @@ export function Sidebar({ allBuildings, listBuildings, filteredBuildings, portfo
           </button>
         </div>
 
-        <BuildingList buildings={listBuildings} portfolio={portfolio} onNotesChange={onNotesChange} />
+        <BuildingList
+          buildings={listBuildings}
+          portfolio={portfolio}
+          onNotesChange={onNotesChange}
+          showPictureCounts={showRtuPictureCount}
+          parkPictureTotals={pictureCountSummary?.parkPictureTotals}
+          buildingPictureTotals={pictureCountSummary?.buildingPictureTotals}
+        />
+        <PictureCountModal
+          open={pictureCountModalOpen}
+          onClose={closePictureCountModal}
+          summary={pictureCountSummary}
+          loading={pictureCountLoading}
+          buildingCount={listBuildings.length}
+        />
       </aside>
     </>
   )

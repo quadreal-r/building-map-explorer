@@ -1,5 +1,10 @@
-import { loadRemotePortfolio, persistPortfolio } from '@/hooks/usePortfolioData'
-import { fetchRemoteJson, getJsonDataBaseUrl } from '@/lib/jsonDataUrls'
+import {
+  loadFreshPortfolioSnapshot,
+  persistPortfolio,
+  type PortfolioSnapshotSource,
+} from '@/hooks/usePortfolioData'
+import { clearDeployDataDirty } from '@/lib/deploySyncSnapshot'
+import { fetchRemoteJson } from '@/lib/jsonDataUrls'
 import { useRtuPricingStore } from '@/stores/rtuPricingStore'
 import { useRtuScheduleStore } from '@/stores/rtuScheduleStore'
 import type { PortfolioData } from '@/types/domain'
@@ -45,25 +50,29 @@ export async function pullRemoteScheduleAndPricing(): Promise<void> {
   }
 }
 
-/** Pull portfolio, schedule, and pricing from Cloudflare R2 into this browser. */
-export async function pullRemoteUpdatesToLocal(): Promise<PortfolioData> {
-  const baseUrl = getJsonDataBaseUrl()
-  if (!baseUrl) {
-    throw new Error('Remote JSON is not configured on this site.')
-  }
+export interface PullRemoteUpdatesResult {
+  portfolio: PortfolioData
+  source: PortfolioSnapshotSource
+}
 
-  const portfolio = await loadRemotePortfolio(baseUrl)
-  if (!portfolio) {
-    throw new Error('Could not load portfolio from Cloudflare.')
+/** Pull portfolio, schedule, and pricing from Cloudflare (or bundled fallback) into this browser. */
+export async function pullRemoteUpdatesToLocal(): Promise<PullRemoteUpdatesResult> {
+  const { portfolio, source } = await loadFreshPortfolioSnapshot()
+  if (!portfolio.buildings.length) {
+    throw new Error('Could not load portfolio data.')
   }
 
   persistPortfolio(portfolio, { markSynced: true })
-  await pullRemoteScheduleAndPricing()
+  clearDeployDataDirty()
+
+  if (source === 'cloudflare') {
+    await pullRemoteScheduleAndPricing()
+  }
 
   const { clearRtuPictureManifestCache } = await import('@/lib/rtuPictures')
   clearRtuPictureManifestCache()
   const { clearRtuDocumentsManifestCache } = await import('@/lib/rtuDocuments')
   clearRtuDocumentsManifestCache()
 
-  return portfolio
+  return { portfolio, source }
 }

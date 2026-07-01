@@ -36,6 +36,7 @@ interface UiState {
   addMarkerClickHandler: AddMarkerClickHandler | null
   polygonDrawMode: boolean
   rtuPictureViewer: RtuPictureViewerState | null
+  pictureCountModalOpen: boolean
   openModal: (id: ModalId) => void
   closeModal: (id: ModalId) => void
   toggleModal: (id: ModalId) => void
@@ -52,6 +53,8 @@ interface UiState {
   closeRtuPictureViewer: (fromPopState?: boolean) => void
   setRtuPictureViewerIndex: (index: number) => void
   updateRtuPictureViewerPictures: (pictures: RtuPictureViewerItem[], index?: number) => void
+  openPictureCountModal: () => void
+  closePictureCountModal: () => void
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
@@ -61,6 +64,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   addMarkerClickHandler: null,
   polygonDrawMode: false,
   rtuPictureViewer: null,
+  pictureCountModalOpen: false,
 
   openModal: (id) =>
     set((state) => ({
@@ -120,4 +124,6 @@ export const useUiStore = create<UiState>((set, get) => ({
           }
         : {},
     ),
+  openPictureCountModal: () => set({ pictureCountModalOpen: true }),
+  closePictureCountModal: () => set({ pictureCountModalOpen: false }),
 }))

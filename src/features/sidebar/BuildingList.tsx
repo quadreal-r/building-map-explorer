@@ -10,15 +10,26 @@ import { useSelectionStore } from '@/stores/selectionStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { buildPolygonBuildingIndex, polygonsForBuilding } from '@/lib/polygonBuildings'
 import { requestBuildingMapFocus } from '@/lib/searchHits'
+import { formatPictureCountSuffix } from '@/lib/rtuPictureCountSummary'
 import type { Building, PortfolioData } from '@/types/domain'
 
 export interface BuildingListProps {
   buildings: Building[]
   portfolio: PortfolioData
   onNotesChange: (portfolio: PortfolioData) => void
+  showPictureCounts?: boolean
+  parkPictureTotals?: Map<string, number>
+  buildingPictureTotals?: Map<string, number>
 }
 
-export function BuildingList({ buildings, portfolio, onNotesChange }: BuildingListProps) {
+export function BuildingList({
+  buildings,
+  portfolio,
+  onNotesChange,
+  showPictureCounts = false,
+  parkPictureTotals,
+  buildingPictureTotals,
+}: BuildingListProps) {
   const currentBuilding = useSelectionStore((s) => s.currentBuilding)
   const managerRenames = useSettingsStore((s) => s.managerRenames)
   const polygonIndex = buildPolygonBuildingIndex(portfolio.buildings, portfolio.polygons)
@@ -72,6 +83,9 @@ export function BuildingList({ buildings, portfolio, onNotesChange }: BuildingLi
                 }}
               />
               {park}
+              {showPictureCounts
+                ? formatPictureCountSuffix(parkPictureTotals?.get(park) ?? 0)
+                : null}
             </div>
             {items.map((b) => {
               const sold = b.sold || b.address.includes('SOLD')
@@ -95,7 +109,12 @@ export function BuildingList({ buildings, portfolio, onNotesChange }: BuildingLi
                   role="button"
                   tabIndex={0}
                 >
-                  <div className="building-addr">{b.address}</div>
+                  <div className="building-addr">
+                    {b.address}
+                    {showPictureCounts
+                      ? formatPictureCountSuffix(buildingPictureTotals?.get(b.address) ?? 0)
+                      : null}
+                  </div>
                   <div className="building-tags">
                     {sqftDisp ? <Tag variant="sqft">{sqftDisp}</Tag> : null}
                     {b.rtus?.length ? <Tag variant="rtu">{b.rtus.length} RTUs</Tag> : null}

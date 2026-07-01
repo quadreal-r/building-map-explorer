@@ -1,0 +1,149 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: min(70vh, 640px);
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.summaryCard {
+  background: var(--surface2, #143d78);
+  border: 1px solid var(--border, #2e6ec0);
+  border-radius: 6px;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.summaryValue {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.summaryLabel {
+  display: block;
+  margin-top: 2px;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted, #90b8e0);
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  border: 1px solid var(--border, #2e6ec0);
+  border-radius: 999px;
+  background: var(--surface2, #143d78);
+  color: var(--text-secondary, #c8dff8);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.tabActive {
+  border-color: #38bdf8;
+  color: #fff;
+  background: rgba(56, 189, 248, 0.18);
+}
+
+.tableWrap {
+  overflow: auto;
+  border: 1px solid var(--border, #2e6ec0);
+  border-radius: 6px;
+  background: var(--surface2, #143d78);
+  flex: 1;
+  min-height: 180px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.table th,
+.table td {
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(46, 110, 192, 0.35);
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  background: #12386e;
+  color: var(--text-muted, #90b8e0);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.countCell {
+  font-family: 'DM Mono', monospace;
+  color: #38bdf8;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.nameCell {
+  color: var(--text-primary, #e8f0fe);
+}
+
+.mutedCell {
+  color: var(--text-muted, #90b8e0);
+}
+
+.focusLink {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.focusLink:hover {
+  color: #7db8ff;
+  text-decoration: underline;
+}
+
+.empty {
+  margin: 0;
+  padding: 16px;
+  font-size: 11px;
+  color: var(--text-muted, #90b8e0);
+  text-align: center;
+}
+
+.loading {
+  margin: 0;
+  padding: 16px;
+  font-size: 11px;
+  color: var(--text-muted, #90b8e0);
+  text-align: center;
+}
+
+.hint {
+  margin: 0;
+  font-size: 10px;
+  color: var(--text-muted, #90b8e0);
+}

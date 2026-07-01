@@ -157,6 +157,8 @@ git push origin main
 
 That push starts **Deploy to GitHub Pages** (uploads JSON to R2, builds, publishes).
 
+Or use **`npm run push-live`** — tests, commits, pushes, and triggers **Manual deploy** on GitHub Actions (recommended for app UI changes).
+
 ### B. Map data + pictures (from the app)
 
 **Settings → Sync to Cloudflare & GitHub** — no git needed if sync succeeds. Then hard-refresh the live site after ~2 minutes.
@@ -181,7 +183,7 @@ git push origin main
 1. Watch Actions: https://github.com/quadreal-r/building-map-explorer/actions
 2. When green, open https://quadreal-r.github.io/building-map-explorer/
 3. Hard-refresh (Ctrl+Shift+R)
-4. Optional: **Actions → Manual deploy (commit, push & Pages)** for an extra Pages deploy + version bump
+4. **Manual deploy** runs automatically when you use `npm run push-live`; or open Actions → **Manual deploy (commit, push & Pages)** to run it again
 
 ### Shortcut for the agent
 

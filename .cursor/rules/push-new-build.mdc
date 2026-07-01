@@ -15,7 +15,7 @@ When the user asks to push, deploy, publish, or sync code to the live site:
 
 ## Full live update (app UI + map data)
 
-1. `npm run push-live` — tests, commits all app code, pushes to `main` → triggers **Deploy to GitHub Pages**
+1. `npm run push-live` — tests, commits app code, pushes to `main`, triggers **Manual deploy (commit, push & Pages)** on GitHub Actions (R2 JSON + build + Pages). Uses `[skip ci]` on the commit so deploy does not run twice.
 2. Settings → **Sync to Cloudflare & GitHub** — portfolio JSON, pictures, sync-meta (triggers **sync-deploy** + Pages rebuild)
 3. Hard-refresh live site after Actions finish (~5–10 min)
 4. **Download sync status report** (Settings) to see pictures added/removed, build version, and history
@@ -37,7 +37,7 @@ Settings → **Sync to Cloudflare & GitHub** (runs `sync-deploy.yml`). User shou
 - Watch: https://github.com/quadreal-r/building-map-explorer/actions
 - Live: https://quadreal-r.github.io/building-map-explorer/
 - Hard-refresh when deploy finishes (~5–10 min)
-- Optional: Actions → **Manual deploy (commit, push & Pages)** for an explicit Pages deploy + version bump
+- `npm run push-live` triggers **Manual deploy** automatically; use `--push-only` to skip that and rely on the push hook instead
 
 ## Documents / R2 extras (when changed)
 

@@ -65,6 +65,12 @@ Custom commit message:
 npm run push-live -- "fix: describe your change"
 ```
 
+Push without Manual deploy (push hook only):
+
+```powershell
+npm run push-live -- --push-only "fix: describe your change"
+```
+
 **Map data + pictures** (portfolio JSON, RTU photos in IndexedDB):
 
 - In the app: **Settings → Sync to Cloudflare & GitHub**

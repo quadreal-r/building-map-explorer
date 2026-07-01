@@ -94,7 +94,7 @@ export function useRemoteSyncUpdateCheck(
     if (!meta) return null
     setLoading(true)
     try {
-      const next = await pullRemoteUpdatesToLocal()
+      const { portfolio: next } = await pullRemoteUpdatesToLocal()
       onPortfolioLoaded(next)
       acknowledgeRemoteSync(meta.exportedAt)
       setOpen(false)
