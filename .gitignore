@@ -29,3 +29,16 @@ public/database/rtu-pictures/*
 !public/database/rtu-pictures/manifest.json
 !public/database/rtu-pictures/hidden.json
 !public/database/rtu-pictures/.gitkeep
+# Python bytecode
+__pycache__/
+*.pyc
+# Local one-off utility scripts (keep on disk, not in repo)
+scripts/export-nogps-pictures.py
+scripts/export-rtu-picture-duplicates.py
+scripts/move-nogps-pictures.py
+scripts/patch-lamacoid-assignment.py
+scripts/patch-rtu-photo-renamer.py
+scripts/configure-r2-json-cors.mjs
+# Local RTU picture lists
+nogps-list.txt
+nogps-not-on-cdn.txt
