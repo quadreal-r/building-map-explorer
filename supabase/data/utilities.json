@@ -157,15 +157,15 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1645 Bonhill Rd",
-    "lat": 43.6659217,
-    "lng": -79.6538625
+    "lat": 43.66589531522803,
+    "lng": -79.6538793095715
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1695 Bonhill Rd",
-    "lat": 43.6672046,
-    "lng": -79.6518403
+    "lat": 43.66717582312764,
+    "lng": -79.65187359265218
   },
   {
     "type": "Sprinkler Rooms",
@@ -269,36 +269,36 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1680 Courtneypark",
-    "lat": 43.6659864,
-    "lng": -79.654123
+    "lat": 43.66596001522803,
+    "lng": -79.65413980957149
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1700 Courtneypark Dr",
-    "lat": 43.667693,
-    "lng": -79.6526436
+    "lat": 43.66767126295036,
+    "lng": -79.65267181785711
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1800 Courtneypark Dr E",
-    "lat": 43.6691971,
-    "lng": -79.650945
+    "lat": 43.66917394768713,
+    "lng": -79.65099137728662
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1880&1870 Courtneypark Dr E",
-    "lat": 43.671113,
-    "lng": -79.6489225
+    "lat": 43.671096113964914,
+    "lng": -79.64893851708425
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1745 Bonhill Road",
-    "lat": 43.6679693,
-    "lng": -79.6508764
+    "lat": 43.66794294847124,
+    "lng": -79.65090699218197
   },
   {
     "type": "Sprinkler Rooms",
@@ -318,8 +318,8 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1775 Bonhill Rd",
-    "lat": 43.6686245,
-    "lng": -79.6500619
+    "lat": 43.668590906362105,
+    "lng": -79.650114376196
   },
   {
     "type": "Sprinkler Rooms",
@@ -486,8 +486,8 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1750 Courtneypark",
-    "lat": 43.668472,
-    "lng": -79.6517399
+    "lat": 43.66845026295036,
+    "lng": -79.6517681178571
   },
   {
     "type": "Sprinkler Rooms",
@@ -1011,8 +1011,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1600 Courtneypark Dr E",
-    "lat": 43.6646338,
-    "lng": -79.6545503
+    "lat": 43.66460689053799,
+    "lng": -79.65458026323749
   },
   {
     "type": "Electrical Rooms",
@@ -1025,8 +1025,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1550 Courtneypark Dr E\r\r\nElec. R Interior Access",
-    "lat": 43.6645916,
-    "lng": -79.6560855
+    "lat": 43.66457141776187,
+    "lng": -79.65610797236305
   },
   {
     "type": "Electrical Rooms",
@@ -1109,8 +1109,8 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1870-1880 Courtneypark Dr.",
-    "lat": 43.6711134,
-    "lng": -79.648933
+    "lat": 43.67109651396492,
+    "lng": -79.64894901708425
   },
   {
     "type": "Electrical Rooms",
@@ -1130,64 +1130,64 @@
     "type": "Electrical Rooms",
     "name": "Elec.R Interior Accessed",
     "desc": "1820 Courtneypark Dr E",
-    "lat": 43.6691228,
-    "lng": -79.6503555
+    "lat": 43.669096674389316,
+    "lng": -79.65040518819211
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1800 Courtneypark Dr E",
-    "lat": 43.6692094,
-    "lng": -79.6509718
+    "lat": 43.66918624768713,
+    "lng": -79.65101817728662
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1775 Bonhill Rd",
-    "lat": 43.6686345,
-    "lng": -79.6500674
+    "lat": 43.66860090636211,
+    "lng": -79.650119876196
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1750 Courtneypark Dr E",
-    "lat": 43.6684958,
-    "lng": -79.6517788
+    "lat": 43.66847406295036,
+    "lng": -79.65180701785711
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1745 Bonhill Rd",
-    "lat": 43.6679787,
-    "lng": -79.6508956
+    "lat": 43.66795234847124,
+    "lng": -79.65092619218197
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1700 Courtneypark Dr E",
-    "lat": 43.6677119,
-    "lng": -79.6526677
+    "lat": 43.66769016295036,
+    "lng": -79.6526959178571
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1695 Bonhill Rd",
-    "lat": 43.6671912,
-    "lng": -79.6518217
+    "lat": 43.66716242312764,
+    "lng": -79.65185499265218
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1680 Courtneypark Dr E",
-    "lat": 43.6659695,
-    "lng": -79.6541028
+    "lat": 43.66594311522803,
+    "lng": -79.6541196095715
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1645 Bonhill Rd",
-    "lat": 43.6659114,
-    "lng": -79.6538401
+    "lat": 43.66588501522803,
+    "lng": -79.65385690957149
   },
   {
     "type": "Electrical Rooms",
@@ -1417,71 +1417,71 @@
     "type": "Fire Hydrants",
     "name": "1680 Courtneypark #1",
     "desc": "1680 Courtneypark Dr E",
-    "lat": 43.665833,
-    "lng": -79.6543077
+    "lat": 43.665814126821274,
+    "lng": -79.65431338166195
   },
   {
     "type": "Fire Hydrants",
     "name": "1680 Courtneypark #2",
     "desc": "1680 Courtneypark Dr E",
-    "lat": 43.6665653,
-    "lng": -79.654516
+    "lat": 43.666553154045154,
+    "lng": -79.6545141907875
   },
   {
     "type": "Fire Hydrants",
     "name": "1680 Courtneypark #3",
     "desc": "1680 Courtneypark Dr E",
-    "lat": 43.6672071,
-    "lng": -79.6538059
+    "lat": 43.66719495404515,
+    "lng": -79.65380409078749
   },
   {
     "type": "Fire Hydrants",
     "name": "1700 Courtneypark Dr E #2 (location approx.)",
     "desc": "1700 Courtneypark Dr E",
-    "lat": 43.6668667,
-    "lng": -79.6528928
+    "lat": 43.66684031522803,
+    "lng": -79.6529096095715
   },
   {
     "type": "Fire Hydrants",
     "name": "1700 Courtneypark",
     "desc": "1700 Courtneypark Dr E",
-    "lat": 43.6678103,
-    "lng": -79.6530474
+    "lat": 43.66779815404515,
+    "lng": -79.6530455907875
   },
   {
     "type": "Fire Hydrants",
     "name": "1800 Courtneypark",
     "desc": "1800 Courtneypark Dr E",
-    "lat": 43.6692649,
-    "lng": -79.6514234
+    "lat": 43.669252754045154,
+    "lng": -79.65142159078749
   },
   {
     "type": "Fire Hydrants",
     "name": "1700 Courtneypark Dr E #3 (location approx.)",
     "desc": "1700 Courtneypark Dr E",
-    "lat": 43.6674374,
-    "lng": -79.6521362
+    "lat": 43.66741852682127,
+    "lng": -79.65214188166195
   },
   {
     "type": "Fire Hydrants",
     "name": "1800 Courtneypark Dr E #2 (location approx.)",
     "desc": "1800 Courtneypark Dr E",
-    "lat": 43.6682482,
-    "lng": -79.651249
+    "lat": 43.66821534716544,
+    "lng": -79.65130617906657
   },
   {
     "type": "Fire Hydrants",
     "name": "1800 Courtneypark Dr E #3 (location approx.)",
     "desc": "1800 Courtneypark Dr E",
-    "lat": 43.6689334,
-    "lng": -79.6504176
+    "lat": 43.66890054716544,
+    "lng": -79.65047477906656
   },
   {
     "type": "Fire Hydrants",
     "name": "1800 Courtneypark Dr E #4 (location approx.)",
     "desc": "1800 Courtneypark Dr E",
-    "lat": 43.6700145,
-    "lng": -79.6505142
+    "lat": 43.67000235404515,
+    "lng": -79.6505123907875
   },
   {
     "type": "Fire Hydrants",
