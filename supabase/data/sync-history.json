@@ -498,6 +498,43 @@
           "delta": -270
         }
       ]
+    },
+    {
+      "syncedAt": "2026-07-01T19:29:38.784Z",
+      "exportedAt": "2026-07-01T12:53:21.603Z",
+      "source": "renamed-folder-upload",
+      "summary": {
+        "buildingCount": 102,
+        "rtuCount": 1073,
+        "utilityCount": 257,
+        "polygonCount": 447,
+        "scheduleYearCount": 463,
+        "scheduleNoteCount": 348,
+        "pricingRowCount": 25,
+        "manifestPictureCount": 1560,
+        "picturesUploaded": 288,
+        "picturesAdded": 284
+      },
+      "changes": [
+        {
+          "label": "RTU pictures (manifest)",
+          "before": 1276,
+          "after": 1560,
+          "delta": 284
+        },
+        {
+          "label": "Pictures uploaded (this sync)",
+          "before": 0,
+          "after": 288,
+          "delta": 288
+        },
+        {
+          "label": "Pictures added (manifest)",
+          "before": 1276,
+          "after": 1560,
+          "delta": 284
+        }
+      ]
     }
   ]
 }
