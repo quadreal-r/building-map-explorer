@@ -8,14 +8,6 @@ on:
         required: false
         default: bme-sync-staging
         type: string
-      rebuild_manifest:
-        description: Rebuild manifest.json from R2 after applying bundle (usually leave false)
-        required: false
-        default: 'false'
-        type: choice
-        options:
-          - 'true'
-          - 'false'
 
 permissions:
   contents: write
@@ -68,23 +60,9 @@ jobs:
           CLOUDFLARE_R2_BUCKET: ${{ secrets.CLOUDFLARE_R2_BUCKET }}
           R2_PUBLIC_URL: ${{ secrets.VITE_RTU_PICTURES_BASE_URL }}
           R2_KEY_PREFIX: ${{ secrets.R2_KEY_PREFIX }}
+          R2_DOCUMENTS_BUCKET: ${{ secrets.R2_DOCUMENTS_BUCKET }}
+          VITE_RTU_DOCUMENTS_BASE_URL: ${{ secrets.VITE_RTU_DOCUMENTS_BASE_URL }}
         run: node scripts/apply-deploy-bundle.mjs deploy-bundle.json
-
-      - name: Rebuild RTU picture manifest from R2
-        if: inputs.rebuild_manifest == 'true'
-        env:
-          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
-          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-          R2_BUCKET: ${{ secrets.R2_BUCKET }}
-          CLOUDFLARE_R2_BUCKET: ${{ secrets.CLOUDFLARE_R2_BUCKET }}
-          R2_PUBLIC_URL: ${{ secrets.VITE_RTU_PICTURES_BASE_URL }}
-          R2_KEY_PREFIX: ${{ secrets.R2_KEY_PREFIX }}
-        run: node scripts/build-rtu-picture-manifest.mjs
 
       - name: Upload portfolio JSON to Cloudflare R2
         env:
@@ -102,6 +80,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add supabase/data public/database/rtu-pictures/manifest.json
+          git add public/database/rtu-documents/documents-manifest.json
           if [ -f public/database/rtu-pictures/hidden.json ]; then
             git add public/database/rtu-pictures/hidden.json
           fi
@@ -112,3 +91,6 @@ jobs:
           git commit -m "chore: sync portfolio and RTU pictures from Settings"
           git pull --rebase origin main
           git push origin main
+
+      - name: Delete sync staging branch
+        run: git push origin --delete "${{ inputs.staging_ref }}" || true

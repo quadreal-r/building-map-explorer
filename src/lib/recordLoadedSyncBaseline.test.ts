@@ -4,6 +4,10 @@ import {
   scheduleSyncFingerprint,
 } from '@/lib/deploySyncSnapshot'
 import { loadRemoteSyncState } from '@/lib/remoteSyncState'
+import {
+  isDeployDataDirty,
+  markSchedulePricingDirty,
+} from '@/lib/syncState'
 import { recordLoadedSyncBaseline } from '@/lib/recordLoadedSyncBaseline'
 import { STORAGE_KEYS } from '@/lib/storageKeys'
 import type { PortfolioData } from '@/types/domain'
@@ -67,8 +71,8 @@ describe('recordLoadedSyncBaseline', () => {
     localStorage.setItem(STORAGE_KEYS.rtuPricing, JSON.stringify(pricing))
   })
 
-  it('records fingerprints from loaded local data and clears deploy dirty state', async () => {
-    localStorage.setItem(STORAGE_KEYS.deployUnsaved, '1')
+  it('records fingerprints from loaded local data and clears pre-baseline deploy dirty state', async () => {
+    markSchedulePricingDirty()
 
     const recorded = await recordLoadedSyncBaseline(portfolio, { hiddenKeys: [] })
     expect(recorded).toBe(true)
@@ -77,6 +81,6 @@ describe('recordLoadedSyncBaseline', () => {
     expect(state.lastPushedExportedAt).toBe('2026-07-02T12:00:00.000Z')
     expect(state.lastPushedScheduleFingerprint).toBe(scheduleSyncFingerprint(schedule))
     expect(state.lastPushedPricingFingerprint).toBe(pricingSyncFingerprint(pricing))
-    expect(localStorage.getItem(STORAGE_KEYS.deployUnsaved)).toBeNull()
+    expect(isDeployDataDirty()).toBe(false)
   })
 })

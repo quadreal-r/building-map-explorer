@@ -7,7 +7,6 @@ import {
 import { buildLocalSyncSummary } from '@/lib/portfolioStats'
 import { BUILD_VERSION_LABEL } from '@/generated/buildVersion'
 import { recordLocalSyncHistoryEntry } from '@/lib/syncHistory'
-import { recordLocalSyncPush } from '@/lib/remoteSyncState'
 import { buildSyncConflictMessage, getSyncConflictWarning } from '@/lib/syncConflictCheck'
 import { confirm } from '@/stores/confirmStore'
 import { exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
@@ -25,8 +24,8 @@ import {
   readScheduleSnapshotFromStorage,
   scheduleSyncFingerprint,
   pricingSyncFingerprint,
-  syncDeployDirtyFlag,
 } from '@/lib/deploySyncSnapshot'
+import { recordSyncBaseline } from '@/lib/syncState'
 import { usePortfolioStore } from '@/stores/portfolioStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import type { PortfolioData } from '@/types/domain'
@@ -86,7 +85,9 @@ export function useGitHubDeploySync({
 }: GitHubDeploySyncProps) {
   const githubPat = useSettingsStore((s) => s.githubPat)
   const githubRepo = useSettingsStore((s) => s.githubRepo)
+  const rememberGitHubPat = useSettingsStore((s) => s.rememberGitHubPat)
   const setGitHubPat = useSettingsStore((s) => s.setGitHubPat)
+  const setRememberGitHubPat = useSettingsStore((s) => s.setRememberGitHubPat)
   const setGitHubRepo = useSettingsStore((s) => s.setGitHubRepo)
   const saveSettings = useSettingsStore((s) => s.saveSettings)
 
@@ -116,7 +117,10 @@ export function useGitHubDeploySync({
 
   const handlePatChange = (value: string) => {
     setGitHubPat(value)
-    void saveSettings()
+  }
+
+  const handleRememberPatChange = (remember: boolean) => {
+    setRememberGitHubPat(remember)
   }
 
   const handleRepoChange = (value: string) => {
@@ -180,7 +184,8 @@ export function useGitHubDeploySync({
         const pricingSnapshot = readPricingSnapshotFromStorage()
         persistPortfolio(syncedPortfolio, { markSynced: true })
         usePortfolioStore.getState().setPortfolio(syncedPortfolio, { markSaved: true })
-        recordLocalSyncPush(result.exportedAt, {
+        await recordSyncBaseline(syncedPortfolio, {
+          exportedAt: result.exportedAt,
           hiddenKeys: exportHiddenRtuPicturesForDeploy(),
           portfolioFingerprint: portfolioSyncFingerprint(syncedPortfolio),
           scheduleFingerprint: scheduleSnapshot
@@ -190,7 +195,6 @@ export function useGitHubDeploySync({
             ? pricingSyncFingerprint(pricingSnapshot)
             : undefined,
         })
-        syncDeployDirtyFlag()
         const manifest = await loadRtuPictureManifest()
         recordLocalSyncHistoryEntry({
           exportedAt: result.exportedAt,
@@ -231,12 +235,14 @@ export function useGitHubDeploySync({
   return {
     githubPat,
     githubRepo,
+    rememberGitHubPat,
     syncing,
     completed,
     cooldownSec,
     buttonLabel,
     progressPct,
     handlePatChange,
+    handleRememberPatChange,
     handleRepoChange,
     handleSync,
   }

@@ -1,63 +1,9 @@
 /** Fingerprints for portfolio / schedule / pricing included in Settings sync. */
 
-import { loadRemoteSyncState } from '@/lib/remoteSyncState'
 import { STORAGE_KEYS } from '@/lib/storageKeys'
 import type { RtuPricingRow } from '@/lib/rtuPricingSheet'
 import type { PortfolioData, Utility } from '@/types/domain'
 import { normalizePortfolioData } from '@/types/domain'
-
-export const DEPLOY_UNSAVED_KEY = STORAGE_KEYS.deployUnsaved
-
-export function markDeployDataDirty(): void {
-  if (typeof localStorage === 'undefined') return
-  localStorage.setItem(DEPLOY_UNSAVED_KEY, '1')
-}
-
-export function clearDeployDataDirty(): void {
-  if (typeof localStorage === 'undefined') return
-  localStorage.removeItem(DEPLOY_UNSAVED_KEY)
-}
-
-function deployUnsavedFlag(): boolean {
-  if (typeof localStorage === 'undefined') return false
-  return localStorage.getItem(DEPLOY_UNSAVED_KEY) === '1'
-}
-
-/** RTU replacement schedule differs from the last successful Settings sync on this PC. */
-export function isDeployScheduleDirtyLocally(): boolean {
-  if (typeof localStorage === 'undefined') return false
-  const schedule = readScheduleSnapshotFromStorage()
-  if (!schedule) return deployUnsavedFlag()
-
-  const { lastPushedScheduleFingerprint } = loadRemoteSyncState()
-  if (lastPushedScheduleFingerprint) {
-    return scheduleSyncFingerprint(schedule) !== lastPushedScheduleFingerprint
-  }
-  return deployUnsavedFlag()
-}
-
-/** RTU pricing differs from the last successful Settings sync on this PC. */
-export function isDeployPricingDirtyLocally(): boolean {
-  if (typeof localStorage === 'undefined') return false
-  const pricing = readPricingSnapshotFromStorage()
-  if (!pricing) return deployUnsavedFlag()
-
-  const { lastPushedPricingFingerprint } = loadRemoteSyncState()
-  if (lastPushedPricingFingerprint) {
-    return pricingSyncFingerprint(pricing) !== lastPushedPricingFingerprint
-  }
-  return deployUnsavedFlag()
-}
-
-export function isDeployDataDirtyLocally(): boolean {
-  return isDeployScheduleDirtyLocally() || isDeployPricingDirtyLocally()
-}
-
-/** Align the legacy dirty flag with schedule/pricing fingerprints after localStorage writes. */
-export function syncDeployDirtyFlag(): void {
-  if (isDeployDataDirtyLocally()) markDeployDataDirty()
-  else clearDeployDataDirty()
-}
 
 export interface DeployScheduleSnapshot {
   replacementYears: Record<string, string>
@@ -179,3 +125,9 @@ export function pricingSyncFingerprint(pricing: DeployPricingSnapshot): string {
       .sort((a, b) => a.tonnageKey - b.tonnageKey),
   })
 }
+
+export {
+  isScheduleDirty as isDeployScheduleDirtyLocally,
+  isPricingDirty as isDeployPricingDirtyLocally,
+  isDeployDataDirty as isDeployDataDirtyLocally,
+} from '@/lib/syncState'

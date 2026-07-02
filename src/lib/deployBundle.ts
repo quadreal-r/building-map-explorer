@@ -8,6 +8,7 @@ import {
 import { BUILD_VERSION_LABEL } from '@/generated/buildVersion'
 import type { PortfolioData } from '@/types/domain'
 import { exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
+import { exportLocalDocumentsManifestForDeploy } from '@/lib/localDocumentsManifest'
 import { isValidStoredPortfolio } from '@/hooks/usePortfolioData'
 import { useRtuPricingStore } from '@/stores/rtuPricingStore'
 import { useRtuScheduleStore } from '@/stores/rtuScheduleStore'
@@ -90,7 +91,8 @@ function readPricingFromStorage(): DeployBundle['pricing'] {
   }
 }
 
-function collectDeployBundleCore(portfolio: PortfolioData): Omit<DeployBundle, 'pictures'> {
+function collectDeployBundleCore(portfolio: PortfolioData): Omit<DeployBundle, 'pictures' | 'documents'> {
+  const documentsManifest = exportLocalDocumentsManifestForDeploy()
   return {
     version: DEPLOY_BUNDLE_VERSION,
     exportedAt: new Date().toISOString(),
@@ -98,18 +100,22 @@ function collectDeployBundleCore(portfolio: PortfolioData): Omit<DeployBundle, '
     schedule: readScheduleFromStorage(),
     pricing: readPricingFromStorage(),
     hiddenRtuPictures: exportHiddenRtuPicturesForDeploy(),
+    ...(documentsManifest ? { documentsManifest } : {}),
     clientBuildVersionLabel: BUILD_VERSION_LABEL,
   }
 }
 
-/** Portfolio, schedule, and pricing only — no picture base64 (safe for one-click sync). */
-export function collectDeployBundleLean(portfolio: PortfolioData): Omit<DeployBundle, 'pictures'> {
+/** Portfolio, schedule, and pricing only — no picture/document base64 (safe for one-click sync). */
+export function collectDeployBundleLean(portfolio: PortfolioData): Omit<DeployBundle, 'pictures' | 'documents'> {
   return collectDeployBundleCore(portfolio)
 }
 
 /** Collect a deploy bundle from the current browser state (local dev is source of truth). */
 export async function collectDeployBundle(portfolio: PortfolioData): Promise<DeployBundle> {
   const pictureExport = await exportIndexedDbPicturesForDeployWithMeta()
+  const documentExport = await import('@/lib/rtuDocumentDeploy').then((m) =>
+    m.exportPendingDocumentsForDeploy(),
+  )
   if (pictureExport.failedFileNames.length) {
     console.warn(
       'Some local RTU pictures could not be read for sync:',
@@ -119,6 +125,7 @@ export async function collectDeployBundle(portfolio: PortfolioData): Promise<Dep
   return {
     ...collectDeployBundleCore(portfolio),
     pictures: pictureExport.pictures,
+    documents: documentExport.documents,
   }
 }
 
@@ -126,9 +133,13 @@ export async function collectDeployBundleWithMeta(
   portfolio: PortfolioData,
 ): Promise<{ bundle: DeployBundle; pictureExport: DeployPictureExportSummary }> {
   const pictureExport = await exportIndexedDbPicturesForDeployWithMeta()
+  const documentExport = await import('@/lib/rtuDocumentDeploy').then((m) =>
+    m.exportPendingDocumentsForDeploy(),
+  )
   const bundle: DeployBundle = {
     ...collectDeployBundleCore(portfolio),
     pictures: pictureExport.pictures,
+    documents: documentExport.documents,
   }
   return { bundle, pictureExport }
 }
@@ -233,10 +244,4 @@ export async function exportDeployBundleToDisk(
     pictureExportFailed: pictureExport.failedFileNames,
     pendingPictureCount: pictureExport.pendingCount,
   }
-}
-
-/** @deprecated Use exportDeployBundleToDisk — kept for tests. */
-export function downloadDeployBundle(bundle: DeployBundle): void {
-  const { json } = serializeDeployBundle(bundle)
-  downloadBlobAsFile(new Blob([json], { type: 'application/json' }), bundleFileName(bundle))
 }

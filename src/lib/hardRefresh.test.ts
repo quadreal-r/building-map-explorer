@@ -11,6 +11,7 @@ import {
   suppressNextBuildingMapFocus,
   wasHardRefreshViewApplied,
 } from '@/lib/hardRefresh'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 import { useMapRotationStore } from '@/stores/mapRotationStore'
 import { useMapViewStore } from '@/stores/mapViewStore'
 import { useSelectionStore } from '@/stores/selectionStore'
@@ -55,7 +56,7 @@ describe('hardRefresh', () => {
       zoom: 12,
       buildingAddress: '100 Main St',
     })
-    expect(sessionStorage.getItem('bme-hard-refresh-view')).toBeNull()
+    expect(sessionStorage.getItem(STORAGE_KEYS.hardRefreshView)).toBeNull()
   })
 
   it('prefers live map reader over store snapshot when capturing view', () => {

@@ -3,8 +3,9 @@ import { collectDeployBundleLean } from '@/lib/deployBundle'
 import { bundleFileName, serializeDeployBundle } from '@/lib/deployBundle'
 import type { DeployBundle } from '@/types/deployBundle'
 import type { PortfolioData } from '@/types/domain'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 
-const PORTFOLIO_KEY = 'bme-portfolio'
+const PORTFOLIO_KEY = STORAGE_KEYS.portfolio
 
 const minimalBundle: DeployBundle = {
   version: 1,
@@ -66,6 +67,15 @@ describe('collectDeployBundleLean', () => {
 
     const bundle = collectDeployBundleLean(staleFallback)
     expect(bundle.portfolio.buildings[0]?.rtus?.[0]?.description).toBe('Edited in popup')
+  })
+
+  it('includes local documents manifest additions in lean bundle', () => {
+    localStorage.setItem(
+      STORAGE_KEYS.localDocumentsManifest,
+      JSON.stringify({ entries: { '1 Main St|RTU-01': ['manual.pdf'] } }),
+    )
+    const bundle = collectDeployBundleLean(minimalBundle.portfolio)
+    expect(bundle.documentsManifest?.entries['1 Main St|RTU-01']).toEqual(['manual.pdf'])
   })
 })
 

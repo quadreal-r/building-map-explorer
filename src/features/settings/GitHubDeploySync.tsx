@@ -47,6 +47,23 @@ export function GitHubDeploySyncFields({
           disabled={sync.syncing || disabled}
         />
       </div>
+      <div className={styles.mgrRow}>
+        <label className={styles.mgrLabel} htmlFor="github-remember-pat">
+          <input
+            id="github-remember-pat"
+            type="checkbox"
+            checked={sync.rememberGitHubPat}
+            onChange={(e) => sync.handleRememberPatChange(e.target.checked)}
+            disabled={sync.syncing || disabled}
+          />{' '}
+          Remember token on this computer
+        </label>
+      </div>
+      <p className={styles.hint}>
+        By default the token stays in this browser tab only and is cleared when you close it.
+        Only enable remember on a private computer. The token is stored in this browser&apos;s
+        localStorage, not on Cloudflare or GitHub.
+      </p>
       <p className={styles.hint}>
         Sync uploads map data and pictures to Cloudflare, commits portfolio JSON to GitHub, and
         triggers a GitHub Pages rebuild. <b>App UI changes</b> (e.g. removed buttons) must be on{' '}

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { PortfolioData } from '@/types/domain'
-import { setPortfolioDirtyLocally } from '@/hooks/usePortfolioData'
+import { setPortfolioDirtyLocally, syncLegacyDirtyFlags } from '@/lib/syncState'
 import { STORAGE_KEYS } from '@/lib/storageKeys'
 
 const STORAGE_KEY = STORAGE_KEYS.portfolio
@@ -29,11 +29,12 @@ export const usePortfolioStore = create<PortfolioStoreState>((set, get) => ({
     get().persistToStorage(data)
     setPortfolioDirtyLocally(true)
     set({ portfolio: data, unsaved: true })
+    syncLegacyDirtyFlags()
   },
 
   markSaved: () => {
-    setPortfolioDirtyLocally(false)
     set({ unsaved: false })
+    syncLegacyDirtyFlags()
   },
   markUnsaved: () => set({ unsaved: true }),
 

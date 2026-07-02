@@ -1,9 +1,8 @@
 import { create } from 'zustand'
 import {
-  isDeployDataDirtyLocally,
   pricingSyncFingerprint,
-  syncDeployDirtyFlag,
 } from '@/lib/deploySyncSnapshot'
+import { isDeployDataDirty, markPricingDirtyIfNoBaseline, syncLegacyDirtyFlags } from '@/lib/syncState'
 import {
   DEFAULT_RTU_PRICING_ROWS,
   DEFAULT_RTU_PRICING_VERSION,
@@ -113,7 +112,7 @@ export const useRtuPricingStore = create<RtuPricingState>((set, get) => ({
 
     if (stored && remote?.rows?.length) {
       const preferLocal =
-        isDeployDataDirtyLocally() ||
+        isDeployDataDirty() ||
         pricingSyncFingerprint({
           version: stored.version ?? null,
           rows: stored.rows ?? [],
@@ -214,7 +213,8 @@ export const useRtuPricingStore = create<RtuPricingState>((set, get) => ({
     const { rows, version, sourceFile } = get()
     const payload: StoredRtuPricing = { rows, version, sourceFile }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-    syncDeployDirtyFlag()
+    markPricingDirtyIfNoBaseline()
+    syncLegacyDirtyFlags()
   },
 }))
 

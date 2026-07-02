@@ -1,8 +1,9 @@
 /** Per-browser and deployed hides for manifest (R2/static) RTU pictures the user dismisses. */
 
 import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 
-const STORAGE_KEY = 'bme-hidden-rtu-pictures'
+const STORAGE_KEY = STORAGE_KEYS.hiddenRtuPictures
 const BUNDLED_HIDDEN_URL = `${import.meta.env.BASE_URL}database/rtu-pictures/hidden.json`
 
 function pictureHideKey(rtuKey: string, fileName: string): string {

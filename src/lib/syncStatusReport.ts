@@ -2,14 +2,17 @@ import * as XLSX from 'xlsx'
 import { collectUnsyncedChangesSummary } from '@/lib/unsyncedChanges'
 import { BUILD_VERSION_LABEL } from '@/generated/buildVersion'
 import {
-  isDeployDataDirtyLocally,
+  isDeployDataDirty,
+  isPortfolioDirty,
+} from '@/lib/syncState'
+import {
   portfolioSyncFingerprint,
   pricingSyncFingerprint,
   readPricingSnapshotFromStorage,
   readScheduleSnapshotFromStorage,
   scheduleSyncFingerprint,
 } from '@/lib/deploySyncSnapshot'
-import { loadStoredPortfolio, isPortfolioDirtyLocally } from '@/hooks/usePortfolioData'
+import { loadStoredPortfolio } from '@/hooks/usePortfolioData'
 import { fetchRemoteSyncMeta } from '@/lib/syncMeta'
 import { buildSyncHistorySheetRows, fetchSyncHistory } from '@/lib/syncHistory'
 import { loadRemoteSyncState } from '@/lib/remoteSyncState'
@@ -127,8 +130,8 @@ export async function downloadSyncStatusExcel(): Promise<void> {
     ])
   }
   summaryRows.push(['Last successful push exportedAt', syncState.lastPushedExportedAt ?? ''])
-  summaryRows.push(['Portfolio dirty (localStorage)', isPortfolioDirtyLocally() ? 'yes' : 'no'])
-  summaryRows.push(['Schedule/pricing dirty', isDeployDataDirtyLocally() ? 'yes' : 'no'])
+  summaryRows.push(['Portfolio dirty', isPortfolioDirty() ? 'yes' : 'no'])
+  summaryRows.push(['Schedule/pricing dirty', isDeployDataDirty() ? 'yes' : 'no'])
   summaryRows.push(['Local pictures needing Cloudflare upload', pendingNeedingUpload])
 
   const storedPortfolio = loadStoredPortfolio()

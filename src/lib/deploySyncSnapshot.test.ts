@@ -1,17 +1,19 @@
 import { describe, expect, it, beforeEach } from 'vitest'
 import {
-  clearDeployDataDirty,
   isDeployDataDirtyLocally,
   isDeployPricingDirtyLocally,
   isDeployScheduleDirtyLocally,
   localPortfolioDiffersFromRemote,
-  markDeployDataDirty,
   portfolioSyncFingerprint,
   pricingSyncFingerprint,
   scheduleSyncFingerprint,
-  syncDeployDirtyFlag,
 } from '@/lib/deploySyncSnapshot'
 import { recordLocalSyncPush } from '@/lib/remoteSyncState'
+import {
+  markSchedulePricingDirty,
+  recordSyncBaseline,
+  syncLegacyDirtyFlags,
+} from '@/lib/syncState'
 import type { PortfolioData } from '@/types/domain'
 import { STORAGE_KEYS } from '@/lib/storageKeys'
 
@@ -128,12 +130,13 @@ describe('deploy dirty detection', () => {
     localStorage.clear()
   })
 
-  it('treats stale dirty flags as clean after a successful sync fingerprint baseline', () => {
+  it('treats stale pre-baseline dirty state as clean after a successful sync fingerprint baseline', async () => {
     localStorage.setItem(scheduleKey, JSON.stringify(schedule))
     localStorage.setItem(pricingKey, JSON.stringify(pricing))
-    markDeployDataDirty()
+    markSchedulePricingDirty()
 
-    recordLocalSyncPush('2026-07-01T12:00:00.000Z', {
+    await recordSyncBaseline(basePortfolio(), {
+      exportedAt: '2026-07-01T12:00:00.000Z',
       scheduleFingerprint: scheduleSyncFingerprint(schedule),
       pricingFingerprint: pricingSyncFingerprint(pricing),
     })
@@ -141,8 +144,8 @@ describe('deploy dirty detection', () => {
     expect(isDeployScheduleDirtyLocally()).toBe(false)
     expect(isDeployPricingDirtyLocally()).toBe(false)
     expect(isDeployDataDirtyLocally()).toBe(false)
-    syncDeployDirtyFlag()
-    expect(localStorage.getItem(STORAGE_KEYS.deployUnsaved)).toBeNull()
+    syncLegacyDirtyFlags()
+    expect(isDeployDataDirtyLocally()).toBe(false)
   })
 
   it('detects real pricing edits after sync', () => {
@@ -161,11 +164,14 @@ describe('deploy dirty detection', () => {
     expect(isDeployScheduleDirtyLocally()).toBe(false)
   })
 
-  it('keeps legacy dirty flag behavior before the first sync baseline exists', () => {
+  it('tracks schedule and pricing dirty before the first sync baseline exists', () => {
     localStorage.setItem(pricingKey, JSON.stringify(pricing))
-    markDeployDataDirty()
+    markSchedulePricingDirty()
     expect(isDeployPricingDirtyLocally()).toBe(true)
-    clearDeployDataDirty()
+
+    recordLocalSyncPush('2026-07-01T12:00:00.000Z', {
+      pricingFingerprint: pricingSyncFingerprint(pricing),
+    })
     expect(isDeployPricingDirtyLocally()).toBe(false)
   })
 })

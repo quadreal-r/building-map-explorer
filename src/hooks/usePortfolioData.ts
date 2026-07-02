@@ -18,6 +18,11 @@ import { repairPortfolioRtuNames } from '@/lib/rtuNameRepair'
 import { migrateIndexedDbRtuKeys, migrateLegacyPictureFileNames } from '@/lib/rtuPictures'
 import { getJsonDataBaseUrl, usesRemoteJsonData } from '@/lib/jsonDataUrls'
 import { localPortfolioDiffersFromRemote } from '@/lib/deploySyncSnapshot'
+import {
+  isPortfolioDirty,
+  setPortfolioDirtyLocally,
+  syncLegacyDirtyFlags,
+} from '@/lib/syncState'
 import { STORAGE_KEYS } from '@/lib/storageKeys'
 
 import staticBuildings from '../../supabase/data/buildings.json'
@@ -27,18 +32,12 @@ import staticPolygons from '../../supabase/data/polygons.json'
 export type { PortfolioData } from '@/types/domain'
 
 const STORAGE_KEY = STORAGE_KEYS.portfolio
-const UNSAVED_KEY = STORAGE_KEYS.portfolioUnsaved
 
 export function isPortfolioDirtyLocally(): boolean {
-  if (typeof localStorage === 'undefined') return false
-  return localStorage.getItem(UNSAVED_KEY) === '1'
+  return isPortfolioDirty()
 }
 
-export function setPortfolioDirtyLocally(dirty: boolean): void {
-  if (typeof localStorage === 'undefined') return
-  if (dirty) localStorage.setItem(UNSAVED_KEY, '1')
-  else localStorage.removeItem(UNSAVED_KEY)
-}
+export { setPortfolioDirtyLocally } from '@/lib/syncState'
 
 /** True when this browser has portfolio edits not present in the cloud JSON snapshot. */
 export function localPortfolioAheadOfRemote(
@@ -149,10 +148,7 @@ export async function loadPortfolioData(): Promise<PortfolioData> {
   if (jsonBase) {
     const remote = await loadRemotePortfolio(jsonBase)
     if (stored && remote) {
-      const preferLocal =
-        isPortfolioDirtyLocally() || localPortfolioAheadOfRemote(stored, remote)
-      if (preferLocal) {
-        if (!isPortfolioDirtyLocally()) setPortfolioDirtyLocally(true)
+      if (isPortfolioDirty(stored)) {
         const { portfolio } = await repairStoredPortfolioRtuNames(stored, { notify: true })
         return portfolio
       }
@@ -181,11 +177,10 @@ export function usePortfolioData() {
 
 export function persistPortfolio(data: PortfolioData, options?: { markSynced?: boolean }): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-  if (options?.markSynced) {
-    setPortfolioDirtyLocally(false)
-  } else {
+  if (!options?.markSynced) {
     setPortfolioDirtyLocally(true)
   }
+  syncLegacyDirtyFlags()
 }
 
 /** Shorten mistaken long RTU names and re-link IndexedDB pictures before sync. */
@@ -206,7 +201,7 @@ export async function repairStoredPortfolioRtuNames(
   picturesMigrated += await migrateLegacyPictureFileNames()
 
   if (renames.length && options?.persist !== false) {
-    persistPortfolio(repaired, { markSynced: !isPortfolioDirtyLocally() })
+    persistPortfolio(repaired, { markSynced: !isPortfolioDirty(repaired) })
   }
 
   if (options?.notify && (renames.length || picturesMigrated)) {

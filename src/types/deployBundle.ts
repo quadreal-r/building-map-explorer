@@ -11,6 +11,17 @@ export interface DeployPictureEntry {
   base64: string
 }
 
+export interface DeployDocumentEntry {
+  fileName: string
+  rtuKey: string
+  mimeType: string
+  base64: string
+}
+
+export interface DeployDocumentsManifestPayload {
+  entries: Record<string, string[]>
+}
+
 export interface DeploySchedulePayload {
   replacementYears?: Record<string, string>
   notes?: Record<string, string>
@@ -30,6 +41,12 @@ export interface DeployBundle {
   schedule: DeploySchedulePayload
   pricing: DeployPricingPayload
   pictures: DeployPictureEntry[]
+  /** Document files with base64 payload (Settings sync chunks or local export). */
+  documents?: DeployDocumentEntry[]
+  /** Document batches in sync/deploy-documents-N.json (Settings sync). */
+  documentChunkCount?: number
+  /** Local manifest additions merged into documents-manifest.json on deploy. */
+  documentsManifest?: DeployDocumentsManifestPayload
   /** Picture batches in sync/deploy-pictures-N.json (Settings sync). */
   pictureChunkCount?: number
   /** Hidden RTU picture keys hidden from the map (manifest/R2 pictures). */

@@ -100,6 +100,8 @@ After `npm test` passes, use the [Git workflow](#git-workflow-code-changes) abov
 
 ### Map / portfolio data changes
 
+See [docs/SYNC_ARCHITECTURE.md](docs/SYNC_ARCHITECTURE.md) for how app deploy vs Settings sync differ and how to fix stuck unsynced banners.
+
 **Recommended:** Settings → **Save & deploy** → **Sync to Cloudflare & GitHub**
 
 - Uploads your local changes via GitHub Actions

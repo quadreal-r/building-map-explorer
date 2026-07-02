@@ -1,5 +1,8 @@
+import { STORAGE_KEYS } from '@/lib/storageKeys'
+
 export const SEARCH_HISTORY_MAX = 6
-const STORAGE_KEY = 'bme-search-history'
+
+const STORAGE_KEY = STORAGE_KEYS.searchHistory
 
 export function loadSearchHistory(): string[] {
   if (typeof window === 'undefined') return []

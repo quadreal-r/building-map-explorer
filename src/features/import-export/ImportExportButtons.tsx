@@ -4,7 +4,7 @@ import { importCapitalRtuWorkbook } from '@/lib/capitalRtuWorkbook'
 import { detectExcelWorkbookKind } from '@/lib/excelWorkbookType'
 import { exportPortfolioExcel, importPortfolioExcel } from '@/lib/excel'
 import { importEquipmentSchedule } from '@/lib/equipmentSheet'
-import { markDeployDataDirty } from '@/lib/deploySyncSnapshot'
+import { markSchedulePricingDirty, syncLegacyDirtyFlags } from '@/lib/syncState'
 import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import { normalizePortfolioData } from '@/types/domain'
@@ -57,7 +57,8 @@ export function ImportExportButtons({
       const result = importCapitalRtuWorkbook(buffer, buildings)
       applyEquipmentImport(result.equipment, file.name)
       applyPricingImport(result.pricing.rows, result.pricing.version, file.name)
-      markDeployDataDirty()
+      markSchedulePricingDirty()
+      syncLegacyDirtyFlags()
       invalidateUnsyncedChanges()
       const { stats } = result.equipment
       showToastSuccess(
@@ -68,7 +69,8 @@ export function ImportExportButtons({
 
     const equipment = importEquipmentSchedule(buffer, buildings)
     applyEquipmentImport(equipment, file.name)
-    markDeployDataDirty()
+    markSchedulePricingDirty()
+    syncLegacyDirtyFlags()
     invalidateUnsyncedChanges()
     const { stats } = equipment
     showToastSuccess(

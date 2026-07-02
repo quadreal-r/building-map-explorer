@@ -1,8 +1,9 @@
 import { useMapRotationStore } from '@/stores/mapRotationStore'
 import { useMapViewStore } from '@/stores/mapViewStore'
 import { useSelectionStore } from '@/stores/selectionStore'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 
-export const HARD_REFRESH_VIEW_KEY = 'bme-hard-refresh-view'
+export const HARD_REFRESH_VIEW_KEY = STORAGE_KEYS.hardRefreshView
 
 export interface HardRefreshViewState {
   lat: number

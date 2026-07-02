@@ -8,9 +8,10 @@ import type {
   SyncMetaSummary,
 } from '@/types/syncMeta'
 import bundledSyncHistory from '../../supabase/data/sync-history.json'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 
 export const SYNC_HISTORY_FILE = 'sync-history.json'
-const LOCAL_SYNC_HISTORY_KEY = 'bme-sync-history'
+const LOCAL_SYNC_HISTORY_KEY = STORAGE_KEYS.syncHistory
 
 function entryKey(entry: Pick<SyncHistoryEntry, 'exportedAt' | 'syncedAt'>): string {
   return `${entry.exportedAt}|${entry.syncedAt}`

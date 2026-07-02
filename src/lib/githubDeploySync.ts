@@ -7,7 +7,7 @@ import {
   listPendingDeployPictureRows,
   markRtuPicturesDeployed,
 } from '@/lib/rtuPictures'
-import type { DeployPictureEntry } from '@/types/deployBundle'
+import type { DeployDocumentEntry, DeployPictureEntry } from '@/types/deployBundle'
 import type { PortfolioData } from '@/types/domain'
 
 export const DEFAULT_GITHUB_REPO = 'quadreal-r/building-map-explorer'
@@ -18,8 +18,11 @@ export const SYNC_BUNDLE_PATH = 'sync/deploy-bundle.json'
 export const SYNC_PICTURES_PATH = 'sync/deploy-pictures.json'
 /** Numbered picture chunks: sync/deploy-pictures-0.json, sync/deploy-pictures-1.json, … */
 export const SYNC_PICTURE_CHUNK_PREFIX = 'sync/deploy-pictures-'
+export const SYNC_DOCUMENT_CHUNK_PREFIX = 'sync/deploy-documents-'
 /** Target size per picture chunk JSON (base64 photos). Single larger photos may exceed this. */
 export const MAX_PICTURE_CHUNK_BYTES = 8 * 1024 * 1024
+/** Target size per document chunk JSON (base64 files). */
+export const MAX_DOCUMENT_CHUNK_BYTES = 8 * 1024 * 1024
 /** Hard limit for one picture chunk file (GitHub Contents API ~100 MB). */
 export const MAX_SINGLE_PICTURE_CHUNK_BYTES = 95 * 1024 * 1024
 /** Max bytes for lean JSON + pictures in one sync (GitHub Contents API limit is much higher). */
@@ -28,6 +31,10 @@ export const MAX_SYNC_BUNDLE_BYTES = MAX_GIST_BYTES
 
 export function pictureChunkPath(index: number): string {
   return `${SYNC_PICTURE_CHUNK_PREFIX}${index}.json`
+}
+
+export function documentChunkPath(index: number): string {
+  return `${SYNC_DOCUMENT_CHUNK_PREFIX}${index}.json`
 }
 
 const GITHUB_API = 'https://api.github.com'
@@ -51,6 +58,9 @@ export interface GitHubSyncResult {
   pictureCount: number
   pictureChunkCount: number
   pictureExportFailed: string[]
+  documentCount: number
+  documentChunkCount: number
+  documentExportFailed: string[]
   pendingPictureCount: number
   exportedAt: string
   deployedFileNames: string[]
@@ -133,24 +143,64 @@ export async function collectDeployPictureChunks(
   return { chunks, picturesOmitted, failedFileNames, pendingCount }
 }
 
-/** @deprecated Use collectDeployPictureChunks — kept for tests. */
-export async function collectDeployPicturesWithinBudget(
-  budgetBytes: number,
+/** Pack pending RTU documents into JSON chunks for Settings sync. */
+export async function collectDeployDocumentChunks(
+  maxChunkBytes: number,
   onProgress?: GitHubSyncOptions['onProgress'],
 ): Promise<{
-  pictures: DeployPictureEntry[]
-  picturesOmitted: boolean
+  chunks: DeployDocumentEntry[][]
+  documentsOmitted: boolean
   failedFileNames: string[]
   pendingCount: number
 }> {
-  const { chunks, picturesOmitted, failedFileNames, pendingCount } =
-    await collectDeployPictureChunks(budgetBytes, onProgress)
-  return {
-    pictures: chunks.flat(),
-    picturesOmitted,
-    failedFileNames,
-    pendingCount,
+  const { exportPendingDocumentsForDeploy } = await import('@/lib/rtuDocumentDeploy')
+  const { documents, failedFileNames, pendingCount } = await exportPendingDocumentsForDeploy()
+  if (!documents.length) {
+    return { chunks: [], documentsOmitted: false, failedFileNames, pendingCount }
   }
+
+  const chunks: DeployDocumentEntry[][] = []
+  let current: DeployDocumentEntry[] = []
+  let arrayJsonSize = 2
+  let documentsOmitted = false
+  const total = documents.length
+
+  const flushCurrent = () => {
+    if (!current.length) return
+    chunks.push(current)
+    current = []
+    arrayJsonSize = 2
+  }
+
+  for (let index = 0; index < documents.length; index++) {
+    const entry = documents[index]!
+    reportProgress(
+      onProgress,
+      `Preparing documents (${index + 1}/${total})…`,
+      18 + Math.floor(((index + 1) / total) * 4),
+    )
+    const entryJsonLength = JSON.stringify(entry).length
+    const soloSize = jsonArraySizeAfterAddingEntry(2, 0, entryJsonLength)
+    if (soloSize > MAX_SINGLE_PICTURE_CHUNK_BYTES) {
+      documentsOmitted = true
+      failedFileNames.push(entry.fileName)
+      continue
+    }
+    const nextSize = jsonArraySizeAfterAddingEntry(arrayJsonSize, current.length, entryJsonLength)
+    if (current.length > 0 && nextSize > maxChunkBytes) {
+      flushCurrent()
+    }
+    arrayJsonSize = jsonArraySizeAfterAddingEntry(arrayJsonSize, current.length, entryJsonLength)
+    current.push(entry)
+  }
+
+  flushCurrent()
+  const encodedCount = chunks.reduce((sum, chunk) => sum + chunk.length, 0)
+  if (encodedCount < documents.length - failedFileNames.length) {
+    documentsOmitted = true
+  }
+
+  return { chunks, documentsOmitted, failedFileNames, pendingCount }
 }
 
 function reportProgress(
@@ -300,6 +350,7 @@ async function deleteRepoFileIfExists(
 export async function uploadSyncStagingBundle(
   leanJson: string,
   pictureChunkJsons: string[],
+  documentChunkJsons: string[],
   exportedAt: string,
   token: string,
   repo: string,
@@ -336,13 +387,43 @@ export async function uploadSyncStagingBundle(
       SYNC_STAGING_BRANCH,
     )
   }
+
+  const staleDocumentCleanupLimit = Math.max(documentChunkJsons.length + 8, 32)
+  for (let index = documentChunkJsons.length; index < staleDocumentCleanupLimit; index++) {
+    const sha = await getRepoFileSha(token, repo, documentChunkPath(index), SYNC_STAGING_BRANCH)
+    if (!sha) break
+    await deleteRepoFileIfExists(
+      token,
+      repo,
+      documentChunkPath(index),
+      `${message} (clear stale document chunk ${index})`,
+      SYNC_STAGING_BRANCH,
+    )
+  }
+  for (let index = 0; index < documentChunkJsons.length; index++) {
+    await putRepoFile(
+      token,
+      repo,
+      documentChunkPath(index),
+      documentChunkJsons[index]!,
+      message,
+      SYNC_STAGING_BRANCH,
+    )
+  }
 }
 
-export async function triggerSyncDeployWorkflow(
-  rebuildManifest: boolean,
-  token: string,
-  repo: string,
-): Promise<void> {
+/** Remove ephemeral sync staging branch after a successful workflow run. */
+export async function deleteSyncStagingBranch(token: string, repo: string): Promise<void> {
+  try {
+    await githubFetch(`/repos/${repo}/git/refs/heads/${SYNC_STAGING_BRANCH}`, token, {
+      method: 'DELETE',
+    })
+  } catch {
+    /* branch may already be deleted */
+  }
+}
+
+export async function triggerSyncDeployWorkflow(token: string, repo: string): Promise<void> {
   await githubFetch(
     `/repos/${repo}/actions/workflows/${SYNC_DEPLOY_WORKFLOW}/dispatches`,
     token,
@@ -353,7 +434,6 @@ export async function triggerSyncDeployWorkflow(
         ref: 'main',
         inputs: {
           staging_ref: SYNC_STAGING_BRANCH,
-          rebuild_manifest: rebuildManifest ? 'true' : 'false',
         },
       }),
     },
@@ -443,35 +523,57 @@ export async function syncDeployToGitHub(
     )
   }
 
+  const documentExport = await collectDeployDocumentChunks(MAX_DOCUMENT_CHUNK_BYTES, onProgress)
+  if (documentExport.failedFileNames.length) {
+    throw new Error(
+      `${documentExport.failedFileNames.length} local document(s) could not be read for sync.`,
+    )
+  }
+
   const allPictures = pictureExport.chunks.flat()
   const pictureChunkJsons = pictureExport.chunks.map((chunk) => JSON.stringify(chunk))
-  reportProgress(onProgress, 'Preparing deploy bundle…', 18)
+  const allDocuments = documentExport.chunks.flat()
+  const documentChunkJsons = documentExport.chunks.map((chunk) => JSON.stringify(chunk))
+  reportProgress(onProgress, 'Preparing deploy bundle…', 22)
   const leanJson = JSON.stringify({
     ...leanCore,
     pictures: [] as DeployPictureEntry[],
+    documents: [] as DeployDocumentEntry[],
     pictureChunkCount: pictureChunkJsons.length,
+    documentChunkCount: documentChunkJsons.length,
   })
-  const bundle = { ...leanCore, pictures: allPictures, pictureChunkCount: pictureChunkJsons.length }
+  const bundle = {
+    ...leanCore,
+    pictures: allPictures,
+    documents: allDocuments,
+    pictureChunkCount: pictureChunkJsons.length,
+    documentChunkCount: documentChunkJsons.length,
+  }
   const picturesOmitted = pictureExport.picturesOmitted
 
+  const batchCount = pictureChunkJsons.length + documentChunkJsons.length
   reportProgress(
     onProgress,
-    pictureChunkJsons.length > 1
-      ? `Uploading bundle (${pictureChunkJsons.length} picture batches)…`
-      : 'Uploading bundle to GitHub…',
+    batchCount > 1 ? `Uploading bundle (${batchCount} file batches)…` : 'Uploading bundle to GitHub…',
     32,
   )
-  await uploadSyncStagingBundle(leanJson, pictureChunkJsons, bundle.exportedAt, token, repo)
+  await uploadSyncStagingBundle(
+    leanJson,
+    pictureChunkJsons,
+    documentChunkJsons,
+    bundle.exportedAt,
+    token,
+    repo,
+  )
 
-  // apply-deploy-bundle already merges new pictures into manifest.json. Rebuilding from R2
-  // replaces that manifest with lossy filename matching (duplicate cloud aliases, index
-  // conflicts) and can drop ~3 of 4 photos per RTU from the cloud manifest count.
-  const rebuildManifest = false
   const startedAt = Date.now()
   reportProgress(onProgress, 'Starting Cloudflare & GitHub sync…', 48)
-  await triggerSyncDeployWorkflow(rebuildManifest, token, repo)
+  await triggerSyncDeployWorkflow(token, repo)
 
   const run = await waitForSyncWorkflowRun(startedAt, token, repo, onProgress)
+  if (run?.status === 'success') {
+    await deleteSyncStagingBranch(token, repo)
+  }
 
   // Optional: user PAT can dispatch deploy.yml (CI push to main already triggers it when data commits).
   let pagesDeployTriggered = false
@@ -488,6 +590,14 @@ export async function syncDeployToGitHub(
   if (bundle.pictures.length > 0) {
     await markRtuPicturesDeployed(bundle.pictures.map((pic) => pic.fileName))
   }
+  if (allDocuments.length > 0) {
+    const { markRtuDocumentsDeployed } = await import('@/lib/rtuDocumentDeploy')
+    await markRtuDocumentsDeployed(allDocuments.map((doc) => doc.fileName))
+  }
+  if (leanCore.documentsManifest) {
+    const { clearLocalDocumentsManifest } = await import('@/lib/localDocumentsManifest')
+    clearLocalDocumentsManifest()
+  }
 
   return {
     stagingRef: SYNC_STAGING_BRANCH,
@@ -497,6 +607,9 @@ export async function syncDeployToGitHub(
     pictureCount: allPictures.length,
     pictureChunkCount: pictureChunkJsons.length,
     pictureExportFailed: pictureExport.failedFileNames,
+    documentCount: allDocuments.length,
+    documentChunkCount: documentChunkJsons.length,
+    documentExportFailed: documentExport.failedFileNames,
     pendingPictureCount: pictureExport.pendingCount,
     exportedAt: bundle.exportedAt,
     deployedFileNames: allPictures.map((pic) => pic.fileName),

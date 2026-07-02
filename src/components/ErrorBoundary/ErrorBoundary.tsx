@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 import styles from './ErrorBoundary.module.css'
 
 interface ErrorBoundaryProps {
@@ -21,8 +22,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   private handleResetStorage = (): void => {
-    localStorage.removeItem('bme-portfolio')
-    localStorage.removeItem('bme-settings')
+    localStorage.removeItem(STORAGE_KEYS.portfolio)
+    localStorage.removeItem(STORAGE_KEYS.settings)
     window.location.reload()
   }
 

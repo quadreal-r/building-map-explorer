@@ -1,10 +1,14 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   isValidStoredPortfolio,
+  isPortfolioDirtyLocally,
   loadPortfolioData,
   localPortfolioAheadOfRemote,
   type PortfolioData,
 } from '@/hooks/usePortfolioData'
+import { portfolioSyncFingerprint } from '@/lib/deploySyncSnapshot'
+import { recordLocalSyncPush } from '@/lib/remoteSyncState'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 
 const samplePortfolio = {
   buildings: [
@@ -90,5 +94,53 @@ describe('loadPortfolioData', () => {
   it('prefers embedded portfolio from saved HTML', async () => {
     window.__BME_EMBEDDED_PORTFOLIO__ = samplePortfolio
     await expect(loadPortfolioData()).resolves.toEqual(samplePortfolio)
+  })
+
+  it('prefers remote when local matches sync baseline', async () => {
+    vi.stubEnv('VITE_JSON_DATA_BASE_URL', 'https://cdn.example.com/data/')
+    const local = portfolioWithRtu('Same text')
+    const remote = portfolioWithRtu('Cloud newer text')
+    localStorage.setItem(STORAGE_KEYS.portfolio, JSON.stringify(local))
+    recordLocalSyncPush('2026-07-01T12:00:00.000Z', {
+      portfolioFingerprint: portfolioSyncFingerprint(local),
+    })
+
+    const legacyBuildings = remote.buildings.map((building) => ({
+      park: building.park,
+      address: building.address,
+      bu: building.bu,
+      lat: building.lat,
+      lng: building.lng,
+      sqft: building.sqft,
+      cluster: building.cluster,
+      manager: building.manager,
+      rtus: (building.rtus ?? []).map((rtu) => ({
+        name: rtu.name,
+        desc: rtu.description,
+        lat: rtu.lat,
+        lng: rtu.lng,
+      })),
+    }))
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        const path = url.split('/').pop()
+        const payload =
+          path === 'buildings.json'
+            ? legacyBuildings
+            : path === 'utilities.json'
+              ? remote.utilities
+              : remote.polygons
+        return { ok: true, json: async () => payload }
+      }),
+    )
+
+    const loaded = await loadPortfolioData()
+    expect(loaded.buildings[0]?.rtus?.[0]?.description).toBe('Cloud newer text')
+    expect(isPortfolioDirtyLocally()).toBe(false)
+
+    vi.unstubAllEnvs()
+    vi.unstubAllGlobals()
   })
 })

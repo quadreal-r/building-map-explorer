@@ -3,7 +3,7 @@ import {
   persistPortfolio,
   type PortfolioSnapshotSource,
 } from '@/hooks/usePortfolioData'
-import { clearDeployDataDirty, syncDeployDirtyFlag } from '@/lib/deploySyncSnapshot'
+import { syncLegacyDirtyFlags } from '@/lib/syncState'
 import { fetchRemoteJson } from '@/lib/jsonDataUrls'
 import { recordLoadedSyncBaseline } from '@/lib/recordLoadedSyncBaseline'
 import { STORAGE_KEYS } from '@/lib/storageKeys'
@@ -50,7 +50,7 @@ export async function pullRemoteScheduleAndPricing(): Promise<void> {
     )
   }
 
-  syncDeployDirtyFlag()
+  syncLegacyDirtyFlags()
 }
 
 export interface PullRemoteUpdatesResult {
@@ -66,7 +66,6 @@ export async function pullRemoteUpdatesToLocal(): Promise<PullRemoteUpdatesResul
   }
 
   persistPortfolio(portfolio, { markSynced: true })
-  clearDeployDataDirty()
 
   if (source === 'cloudflare') {
     await pullRemoteScheduleAndPricing()

@@ -1,22 +1,25 @@
 import { create } from 'zustand'
 import { applyThemeVars } from '@/lib/themes'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 
 interface SettingsState {
   themeIndex: number
   managerRenames: Record<string, string>
   githubPat: string
   githubRepo: string
+  rememberGitHubPat: boolean
   loaded: boolean
   setThemeIndex: (index: number) => void
   setManagerRename: (original: string, name: string) => void
   setGitHubPat: (pat: string) => void
+  setRememberGitHubPat: (remember: boolean) => void
   setGitHubRepo: (repo: string) => void
   applyTheme: (index: number) => void
   loadSettings: () => Promise<void>
   saveSettings: () => Promise<void>
 }
 
-const SETTINGS_KEY = 'bme-settings'
+const SETTINGS_KEY = STORAGE_KEYS.settings
 
 declare global {
   interface Window {
@@ -27,11 +30,32 @@ declare global {
   }
 }
 
+interface StoredSettings {
+  themeIndex?: number
+  managerRenames?: Record<string, string>
+  githubPat?: string
+  githubRepo?: string
+  rememberGitHubPat?: boolean
+}
+
+function resolveRememberGitHubPat(parsed: StoredSettings): boolean {
+  if (typeof parsed.rememberGitHubPat === 'boolean') return parsed.rememberGitHubPat
+  // Existing installs persisted PAT before opt-in remember existed.
+  return Boolean(parsed.githubPat?.trim())
+}
+
+function loadGitHubPatFromStorage(parsed: StoredSettings): string {
+  const remember = resolveRememberGitHubPat(parsed)
+  if (!remember) return ''
+  return parsed.githubPat ?? ''
+}
+
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   themeIndex: 0,
   managerRenames: {},
   githubPat: '',
   githubRepo: '',
+  rememberGitHubPat: false,
   loaded: false,
 
   setThemeIndex: (index) => set({ themeIndex: index }),
@@ -41,7 +65,15 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       managerRenames: { ...state.managerRenames, [original]: name },
     })),
 
-  setGitHubPat: (pat) => set({ githubPat: pat }),
+  setGitHubPat: (pat) => {
+    set({ githubPat: pat })
+    if (get().rememberGitHubPat) void get().saveSettings()
+  },
+
+  setRememberGitHubPat: (remember) => {
+    set({ rememberGitHubPat: remember })
+    void get().saveSettings()
+  },
 
   setGitHubRepo: (repo) => set({ githubRepo: repo }),
 
@@ -60,6 +92,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         managerRenames: embedded.managerRenames ?? {},
         githubPat: '',
         githubRepo: '',
+        rememberGitHubPat: false,
         loaded: true,
       })
       return
@@ -68,19 +101,17 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     const stored = localStorage.getItem(SETTINGS_KEY)
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as {
-          themeIndex?: number
-          managerRenames?: Record<string, string>
-          githubPat?: string
-          githubRepo?: string
-        }
+        const parsed = JSON.parse(stored) as StoredSettings
         const themeIndex = parsed.themeIndex ?? 0
+        const rememberGitHubPat = resolveRememberGitHubPat(parsed)
+        const githubPat = loadGitHubPatFromStorage(parsed)
         get().applyTheme(themeIndex)
         set({
           themeIndex,
           managerRenames: parsed.managerRenames ?? {},
-          githubPat: parsed.githubPat ?? '',
+          githubPat,
           githubRepo: parsed.githubRepo ?? '',
+          rememberGitHubPat,
           loaded: true,
         })
         return
@@ -94,7 +125,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   saveSettings: async () => {
-    const { themeIndex, managerRenames, githubPat, githubRepo } = get()
+    const { themeIndex, managerRenames, githubPat, githubRepo, rememberGitHubPat } = get()
     localStorage.setItem(
       SETTINGS_KEY,
       JSON.stringify({
@@ -102,7 +133,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         theme: { name: String(themeIndex) },
         managers: Object.values(managerRenames),
         managerRenames,
-        githubPat,
+        githubPat: rememberGitHubPat ? githubPat : '',
+        rememberGitHubPat,
         githubRepo,
       }),
     )

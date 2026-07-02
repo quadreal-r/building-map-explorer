@@ -4,8 +4,8 @@ import {
   setPortfolioDirtyLocally,
   type PortfolioSnapshotSource,
 } from '@/hooks/usePortfolioData'
-import { clearDeployDataDirty } from '@/lib/deploySyncSnapshot'
 import { clearLocalHiddenRtuPictures } from '@/lib/hiddenRtuPictures'
+import { clearLocalDocumentsManifest } from '@/lib/localDocumentsManifest'
 import { pullRemoteScheduleAndPricing } from '@/lib/pullRemoteUpdates'
 import { recordLoadedSyncBaseline } from '@/lib/recordLoadedSyncBaseline'
 import { STORAGE_KEYS } from '@/lib/storageKeys'
@@ -32,7 +32,6 @@ export async function discardLocalUnsyncedChanges(): Promise<DiscardLocalUnsynce
     localStorage.removeItem(STORAGE_KEYS.portfolio)
   }
   setPortfolioDirtyLocally(false)
-  clearDeployDataDirty()
   persistPortfolio(portfolio, { markSynced: true })
 
   if (source === 'cloudflare') {
@@ -44,6 +43,7 @@ export async function discardLocalUnsyncedChanges(): Promise<DiscardLocalUnsynce
   usePendingRtuPictureStore.getState().clear()
   await clearLocalRtuPictureStorage()
   clearLocalHiddenRtuPictures()
+  clearLocalDocumentsManifest()
 
   usePortfolioStore.getState().setPortfolio(portfolio, { markSaved: true })
   notifyRtuPicturesChanged()

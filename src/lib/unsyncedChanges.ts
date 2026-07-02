@@ -1,22 +1,6 @@
-import { countUnsyncedLocalHiddenRtuPictures } from '@/lib/hiddenRtuPictures'
-import {
-  isDeployPricingDirtyLocally,
-  isDeployScheduleDirtyLocally,
-} from '@/lib/deploySyncSnapshot'
-import { isPortfolioDirtyLocally } from '@/hooks/usePortfolioData'
-import { loadRemoteSyncState } from '@/lib/remoteSyncState'
-import {
-  countPendingPicturesNeedingCloudUpload,
-  reconcilePendingDeployWithCloud,
-} from '@/lib/rtuPictures'
-import { usePendingRtuPictureStore } from '@/stores/pendingRtuPictureStore'
-import { usePortfolioStore } from '@/stores/portfolioStore'
+import { collectUnsyncedLines, type UnsyncedChangeLine } from '@/lib/syncState'
 
-export interface UnsyncedChangeLine {
-  id: string
-  label: string
-  count?: number
-}
+export type { UnsyncedChangeLine } from '@/lib/syncState'
 
 export function formatUnsyncedChangesMessage(lines: UnsyncedChangeLine[]): string {
   if (!lines.length) return ''
@@ -27,58 +11,5 @@ export function formatUnsyncedChangesMessage(lines: UnsyncedChangeLine[]): strin
 
 /** Local edits not yet uploaded via Settings → Sync to Cloudflare & GitHub. */
 export async function collectUnsyncedChangesSummary(): Promise<UnsyncedChangeLine[]> {
-  await reconcilePendingDeployWithCloud()
-
-  const lines: UnsyncedChangeLine[] = []
-
-  if (usePortfolioStore.getState().unsaved || isPortfolioDirtyLocally()) {
-    lines.push({
-      id: 'portfolio',
-      label: 'Portfolio database (buildings, RTUs, polygons, utilities)',
-    })
-  }
-
-  if (isDeployScheduleDirtyLocally()) {
-    lines.push({
-      id: 'schedule',
-      label: 'RTU replacement schedule',
-    })
-  }
-
-  if (isDeployPricingDirtyLocally()) {
-    lines.push({
-      id: 'pricing',
-      label: 'RTU pricing',
-    })
-  }
-
-  const pendingGpsCount = usePendingRtuPictureStore.getState().items.length
-  if (pendingGpsCount > 0) {
-    lines.push({
-      id: 'pending-gps',
-      label: 'GPS photos on the map not yet assigned to an RTU',
-      count: pendingGpsCount,
-    })
-  }
-
-  const pendingCount = await countPendingPicturesNeedingCloudUpload()
-  if (pendingCount > 0) {
-    lines.push({
-      id: 'pending-pictures',
-      label: 'New RTU photos on this PC not yet in Cloudflare manifest',
-      count: pendingCount,
-    })
-  }
-
-  const syncState = loadRemoteSyncState()
-  const hiddenCount = countUnsyncedLocalHiddenRtuPictures(syncState.lastPushedHiddenKeys)
-  if (hiddenCount > 0) {
-    lines.push({
-      id: 'hidden-pictures',
-      label: 'Hidden RTU pictures not yet synced to Cloudflare',
-      count: hiddenCount,
-    })
-  }
-
-  return lines
+  return collectUnsyncedLines()
 }

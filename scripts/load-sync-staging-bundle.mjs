@@ -1,9 +1,8 @@
 /**
  * Read deploy bundle from the sync staging branch (used by sync-deploy CI).
  *
- * Writes lean deploy-bundle.json (no picture base64) and deploy-pictures-N.json
- * chunk files locally so apply-deploy-bundle can process photos without hitting
- * JavaScript's max string size when many chunks accumulated on staging.
+ * Writes lean deploy-bundle.json (no picture/document base64) and chunk files locally
+ * so apply-deploy-bundle can process photos without hitting JavaScript's max string size.
  *
  * Env: STAGING_REF — git ref, e.g. origin/bme-sync-staging
  * Usage: node scripts/load-sync-staging-bundle.mjs
@@ -13,7 +12,8 @@ import { readdirSync, unlinkSync, writeFileSync } from 'node:fs'
 
 const stagingRef = process.env.STAGING_REF?.trim()
 const outPath = 'deploy-bundle.json'
-const chunkFilePrefix = 'deploy-pictures-'
+const pictureChunkFilePrefix = 'deploy-pictures-'
+const documentChunkFilePrefix = 'deploy-documents-'
 
 function fail(message) {
   console.error(`::error::${message}`)
@@ -36,7 +36,7 @@ function gitShow(path) {
   }
 }
 
-function parsePictureChunk(text, label) {
+function parseChunk(text, label) {
   try {
     const chunk = JSON.parse(text)
     if (!Array.isArray(chunk)) {
@@ -49,42 +49,32 @@ function parsePictureChunk(text, label) {
   }
 }
 
-function clearLocalPictureChunks() {
+function clearLocalChunks(prefix) {
   for (const name of readdirSync('.')) {
-    if (name.startsWith(chunkFilePrefix) && name.endsWith('.json')) {
+    if (name.startsWith(prefix) && name.endsWith('.json')) {
       unlinkSync(name)
     }
   }
 }
 
-function writePictureChunksFromStaging() {
-  clearLocalPictureChunks()
-  let pictureCount = 0
-  let pictureChunkCount = 0
+function writeChunksFromStaging(stagingPrefix, localPrefix) {
+  clearLocalChunks(localPrefix)
+  let itemCount = 0
+  let chunkCount = 0
   let index = 0
 
   while (true) {
-    const stagingPath = `sync/deploy-pictures-${index}.json`
+    const stagingPath = `${stagingPrefix}${index}.json`
     const chunkText = gitShow(stagingPath)
     if (!chunkText?.trim()) break
-    const chunk = parsePictureChunk(chunkText, stagingPath)
-    writeFileSync(`${chunkFilePrefix}${index}.json`, `${JSON.stringify(chunk)}\n`)
-    pictureCount += chunk.length
-    pictureChunkCount += 1
+    const chunk = parseChunk(chunkText, stagingPath)
+    writeFileSync(`${localPrefix}${index}.json`, `${JSON.stringify(chunk)}\n`)
+    itemCount += chunk.length
+    chunkCount += 1
     index += 1
   }
 
-  if (pictureChunkCount === 0) {
-    const legacyText = gitShow('sync/deploy-pictures.json')
-    if (legacyText?.trim()) {
-      const chunk = parsePictureChunk(legacyText, 'sync/deploy-pictures.json')
-      writeFileSync(`${chunkFilePrefix}0.json`, `${JSON.stringify(chunk)}\n`)
-      pictureCount = chunk.length
-      pictureChunkCount = 1
-    }
-  }
-
-  return { pictureCount, pictureChunkCount }
+  return { itemCount, chunkCount }
 }
 
 const bundleText = gitShow('sync/deploy-bundle.json')
@@ -103,13 +93,30 @@ if (!bundle.portfolio?.buildings?.length) {
   fail('Deploy bundle is missing portfolio.buildings.')
 }
 
-const { pictureCount, pictureChunkCount } = writePictureChunksFromStaging()
+const pictures = writeChunksFromStaging('sync/deploy-pictures-', pictureChunkFilePrefix)
+if (pictures.chunkCount === 0) {
+  const legacyText = gitShow('sync/deploy-pictures.json')
+  if (legacyText?.trim()) {
+    const chunk = parseChunk(legacyText, 'sync/deploy-pictures.json')
+    writeFileSync(`${pictureChunkFilePrefix}0.json`, `${JSON.stringify(chunk)}\n`)
+    pictures.itemCount = chunk.length
+    pictures.chunkCount = 1
+  }
+}
+const documents = writeChunksFromStaging('sync/deploy-documents-', documentChunkFilePrefix)
+
 bundle.pictures = []
-if (pictureChunkCount > 0) {
-  bundle.pictureChunkCount = pictureChunkCount
+bundle.documents = []
+if (pictures.chunkCount > 0) {
+  bundle.pictureChunkCount = pictures.chunkCount
+}
+if (documents.chunkCount > 0) {
+  bundle.documentChunkCount = documents.chunkCount
 }
 
 writeFileSync(outPath, `${JSON.stringify(bundle)}\n`)
 console.log(
-  `Deploy bundle OK: ${bundle.portfolio.buildings.length} buildings, ${pictureCount} picture(s) in ${pictureChunkCount} chunk file(s) → ${outPath}`,
+  `Deploy bundle OK: ${bundle.portfolio.buildings.length} buildings, ` +
+    `${pictures.itemCount} picture(s) in ${pictures.chunkCount} chunk file(s), ` +
+    `${documents.itemCount} document(s) in ${documents.chunkCount} chunk file(s) → ${outPath}`,
 )

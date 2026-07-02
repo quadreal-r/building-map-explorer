@@ -17,7 +17,10 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   guessPictureContentType,
+  guessDocumentContentType,
   isR2Configured,
+  isR2DocumentsConfigured,
+  uploadRtuDocumentToR2,
   uploadRtuPictureToR2,
 } from './lib/r2-client.mjs'
 import { parseBulkRtuPictureFileName } from './lib/rtu-picture-filename.mjs'
@@ -33,6 +36,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
 const DATA_DIR = join(ROOT, 'supabase', 'data')
 const PICS_DIR = join(ROOT, 'public', 'database', 'rtu-pictures')
+const DOCS_DIR = join(ROOT, 'public', 'database', 'rtu-documents')
 const buildingsPath = join(DATA_DIR, 'buildings.json')
 
 function parsePictureIndex(fileName) {
@@ -63,6 +67,48 @@ function* iterateDeployPictures(bundle) {
     }
     yield* chunk
   }
+}
+
+/** Inline bundle documents, or deploy-documents-N.json from load-sync-staging-bundle.mjs */
+function* iterateDeployDocuments(bundle) {
+  if (bundle.documents?.length) {
+    yield* bundle.documents
+    return
+  }
+  const chunkFiles = readdirSync(process.cwd())
+    .filter((name) => /^deploy-documents-\d+\.json$/.test(name))
+    .sort((a, b) => {
+      const ai = Number(a.match(/(\d+)/)?.[1] ?? 0)
+      const bi = Number(b.match(/(\d+)/)?.[1] ?? 0)
+      return ai - bi
+    })
+  for (const fileName of chunkFiles) {
+    const chunk = JSON.parse(readFileSync(join(process.cwd(), fileName), 'utf8'))
+    if (!Array.isArray(chunk)) {
+      console.error(`Warning: ${fileName} is not a JSON array — skipped`)
+      continue
+    }
+    yield* chunk
+  }
+}
+
+function mergeManifestEntries(manifest, overlay) {
+  if (!overlay?.entries) return 0
+  let added = 0
+  for (const [rtuKey, files] of Object.entries(overlay.entries)) {
+    if (!Array.isArray(files) || !files.length) continue
+    const existing = new Set(manifest.entries[rtuKey] ?? [])
+    const next = [...(manifest.entries[rtuKey] ?? [])]
+    for (const fileName of files) {
+      if (typeof fileName !== 'string' || !fileName.trim() || existing.has(fileName)) continue
+      existing.add(fileName)
+      next.push(fileName)
+      added += 1
+    }
+    next.sort((a, b) => a.localeCompare(b))
+    manifest.entries[rtuKey] = next
+  }
+  return added
 }
 
 function resolveBundlePath() {
@@ -297,6 +343,61 @@ if (mergedHidden.length) {
 }
 
 writeJson(manifestPath, manifest)
+
+mkdirSync(DOCS_DIR, { recursive: true })
+const documentsManifestPath = join(DOCS_DIR, 'documents-manifest.json')
+let documentsManifest = { entries: {} }
+if (existsSync(documentsManifestPath)) {
+  try {
+    documentsManifest = JSON.parse(readFileSync(documentsManifestPath, 'utf8'))
+    if (!documentsManifest.entries) documentsManifest.entries = {}
+  } catch {
+    documentsManifest = { entries: {} }
+  }
+}
+
+let documentR2Uploads = 0
+let documentLocalWrites = 0
+let documentCount = 0
+
+for (const doc of iterateDeployDocuments(bundle)) {
+  documentCount += 1
+  if (!doc.fileName || !doc.base64) continue
+  const buffer = Buffer.from(doc.base64, 'base64')
+
+  if (isR2DocumentsConfigured()) {
+    await uploadRtuDocumentToR2(
+      doc.fileName,
+      buffer,
+      doc.mimeType ?? guessDocumentContentType(doc.fileName),
+    )
+    documentR2Uploads += 1
+  } else {
+    writeFileSync(join(DOCS_DIR, doc.fileName), buffer)
+    documentLocalWrites += 1
+  }
+
+  const key = doc.rtuKey
+  if (!key) continue
+  const files = documentsManifest.entries[key] ?? []
+  if (!files.includes(doc.fileName)) {
+    documentsManifest.entries[key] = [...files, doc.fileName].sort((a, b) => a.localeCompare(b))
+  }
+}
+
+const manifestLinksAdded = mergeManifestEntries(documentsManifest, bundle.documentsManifest)
+writeJson(documentsManifestPath, documentsManifest)
+if (documentCount || manifestLinksAdded) {
+  console.log(
+    `RTU documents: ${documentCount} file(s) in bundle` +
+      (manifestLinksAdded ? `, ${manifestLinksAdded} manifest link(s) added` : ''),
+  )
+}
+if (isR2DocumentsConfigured() && documentR2Uploads) {
+  console.log(`RTU documents: uploaded ${documentR2Uploads} file(s) to Cloudflare R2`)
+} else if (documentLocalWrites) {
+  console.log(`RTU documents: wrote ${documentLocalWrites} file(s) to ${DOCS_DIR}`)
+}
 
 const { added: picturesAdded, removed: picturesRemoved } = diffManifestKeys(manifestBefore, manifest)
 const buildVersionLabel = readBuildVersionLabel(ROOT)

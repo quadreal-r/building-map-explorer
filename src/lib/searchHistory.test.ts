@@ -5,8 +5,9 @@ import {
   pushSearchHistory,
   saveSearchHistory,
 } from '@/lib/searchHistory'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 
-const STORAGE_KEY = 'bme-search-history'
+const STORAGE_KEY = STORAGE_KEYS.searchHistory
 
 describe('searchHistory', () => {
   afterEach(() => {

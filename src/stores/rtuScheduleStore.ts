@@ -1,10 +1,9 @@
 import { create } from 'zustand'
 import { rcbReplacementYearKey } from '@/lib/costEstimator'
 import {
-  isDeployDataDirtyLocally,
   scheduleSyncFingerprint,
-  syncDeployDirtyFlag,
 } from '@/lib/deploySyncSnapshot'
+import { isDeployDataDirty, markScheduleDirtyIfNoBaseline, syncLegacyDirtyFlags } from '@/lib/syncState'
 import { fetchRemoteJson, usesRemoteJsonData } from '@/lib/jsonDataUrls'
 import { STORAGE_KEYS } from '@/lib/storageKeys'
 import { importEquipmentSchedule, type EquipmentImportResult } from '@/lib/equipmentSheet'
@@ -82,7 +81,7 @@ export const useRtuScheduleStore = create<RtuScheduleState>((set, get) => ({
 
     if (stored && remote) {
       const preferLocal =
-        isDeployDataDirtyLocally() ||
+        isDeployDataDirty() ||
         scheduleSyncFingerprint({
           replacementYears: stored.replacementYears ?? {},
           notes: stored.notes ?? {},
@@ -173,7 +172,8 @@ export const useRtuScheduleStore = create<RtuScheduleState>((set, get) => ({
     const { replacementYears, notes, sourceFile } = get()
     const payload: StoredRtuSchedule = { replacementYears, notes, sourceFile }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-    syncDeployDirtyFlag()
+    markScheduleDirtyIfNoBaseline()
+    syncLegacyDirtyFlags()
   },
 }))
 
