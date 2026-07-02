@@ -13,6 +13,7 @@ import {
 } from '@/lib/deploySyncSnapshot'
 import { recordLocalSyncPush } from '@/lib/remoteSyncState'
 import type { PortfolioData } from '@/types/domain'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 
 const basePortfolio = (): PortfolioData => ({
   buildings: [
@@ -92,8 +93,8 @@ describe('scheduleSyncFingerprint', () => {
 })
 
 describe('deploy dirty detection', () => {
-  const scheduleKey = 'bme-rtu-schedule'
-  const pricingKey = 'bme-rtu-pricing'
+  const scheduleKey = STORAGE_KEYS.rtuSchedule
+  const pricingKey = STORAGE_KEYS.rtuPricing
 
   const schedule = {
     replacementYears: { '1 Main St|RTU-01': '2030' },
@@ -141,7 +142,7 @@ describe('deploy dirty detection', () => {
     expect(isDeployPricingDirtyLocally()).toBe(false)
     expect(isDeployDataDirtyLocally()).toBe(false)
     syncDeployDirtyFlag()
-    expect(localStorage.getItem('bme-deploy-unsaved')).toBeNull()
+    expect(localStorage.getItem(STORAGE_KEYS.deployUnsaved)).toBeNull()
   })
 
   it('detects real pricing edits after sync', () => {

@@ -9,6 +9,7 @@ import {
   DEFAULT_RTU_PRICING_VERSION,
 } from '@/lib/rtuPricing.defaults'
 import { fetchRemoteJson, usesRemoteJsonData } from '@/lib/jsonDataUrls'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 import bundledPricing from '../../supabase/data/rtu-pricing-rows.json'
 import {
   DEFAULT_RCB_PRICING,
@@ -22,7 +23,7 @@ import {
   type RtuPricingComponentField,
 } from '@/lib/rtuPricingSheet'
 
-const STORAGE_KEY = 'bme-rtu-pricing'
+const STORAGE_KEY = STORAGE_KEYS.rtuPricing
 
 interface StoredRtuPricing {
   version?: string | null

@@ -5,13 +5,15 @@ import {
 } from '@/hooks/usePortfolioData'
 import { clearDeployDataDirty, syncDeployDirtyFlag } from '@/lib/deploySyncSnapshot'
 import { fetchRemoteJson } from '@/lib/jsonDataUrls'
+import { recordLoadedSyncBaseline } from '@/lib/recordLoadedSyncBaseline'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 import { useRtuPricingStore } from '@/stores/rtuPricingStore'
 import { useRtuScheduleStore } from '@/stores/rtuScheduleStore'
 import type { PortfolioData } from '@/types/domain'
 import type { RtuPricingRow } from '@/lib/rtuPricingSheet'
 
-const SCHEDULE_KEY = 'bme-rtu-schedule'
-const PRICING_KEY = 'bme-rtu-pricing'
+const SCHEDULE_KEY = STORAGE_KEYS.rtuSchedule
+const PRICING_KEY = STORAGE_KEYS.rtuPricing
 
 interface StoredRtuSchedule {
   replacementYears?: Record<string, string>
@@ -68,6 +70,7 @@ export async function pullRemoteUpdatesToLocal(): Promise<PullRemoteUpdatesResul
 
   if (source === 'cloudflare') {
     await pullRemoteScheduleAndPricing()
+    await recordLoadedSyncBaseline(portfolio)
   }
 
   const { clearRtuPictureManifestCache } = await import('@/lib/rtuPictures')

@@ -18,6 +18,7 @@ import { repairPortfolioRtuNames } from '@/lib/rtuNameRepair'
 import { migrateIndexedDbRtuKeys, migrateLegacyPictureFileNames } from '@/lib/rtuPictures'
 import { getJsonDataBaseUrl, usesRemoteJsonData } from '@/lib/jsonDataUrls'
 import { localPortfolioDiffersFromRemote } from '@/lib/deploySyncSnapshot'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 
 import staticBuildings from '../../supabase/data/buildings.json'
 import staticUtilities from '../../supabase/data/utilities.json'
@@ -25,8 +26,8 @@ import staticPolygons from '../../supabase/data/polygons.json'
 
 export type { PortfolioData } from '@/types/domain'
 
-const STORAGE_KEY = 'bme-portfolio'
-const UNSAVED_KEY = 'bme-portfolio-unsaved'
+const STORAGE_KEY = STORAGE_KEYS.portfolio
+const UNSAVED_KEY = STORAGE_KEYS.portfolioUnsaved
 
 export function isPortfolioDirtyLocally(): boolean {
   if (typeof localStorage === 'undefined') return false

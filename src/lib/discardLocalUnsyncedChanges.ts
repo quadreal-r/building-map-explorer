@@ -7,6 +7,8 @@ import {
 import { clearDeployDataDirty } from '@/lib/deploySyncSnapshot'
 import { clearLocalHiddenRtuPictures } from '@/lib/hiddenRtuPictures'
 import { pullRemoteScheduleAndPricing } from '@/lib/pullRemoteUpdates'
+import { recordLoadedSyncBaseline } from '@/lib/recordLoadedSyncBaseline'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 import {
   clearLocalRtuPictureStorage,
   clearRtuPictureManifestCache,
@@ -16,8 +18,6 @@ import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
 import { usePendingRtuPictureStore } from '@/stores/pendingRtuPictureStore'
 import { usePortfolioStore } from '@/stores/portfolioStore'
 import type { PortfolioData } from '@/types/domain'
-
-const STORAGE_KEY = 'bme-portfolio'
 
 export interface DiscardLocalUnsyncedResult {
   portfolio: PortfolioData
@@ -29,7 +29,7 @@ export async function discardLocalUnsyncedChanges(): Promise<DiscardLocalUnsynce
   const { portfolio, source } = await loadFreshPortfolioSnapshot()
 
   if (typeof localStorage !== 'undefined') {
-    localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(STORAGE_KEYS.portfolio)
   }
   setPortfolioDirtyLocally(false)
   clearDeployDataDirty()
@@ -38,6 +38,7 @@ export async function discardLocalUnsyncedChanges(): Promise<DiscardLocalUnsynce
   if (source === 'cloudflare') {
     await pullRemoteScheduleAndPricing()
     clearRtuPictureManifestCache()
+    await recordLoadedSyncBaseline(portfolio, { hiddenKeys: [] })
   }
 
   usePendingRtuPictureStore.getState().clear()

@@ -6,11 +6,12 @@ import {
   syncDeployDirtyFlag,
 } from '@/lib/deploySyncSnapshot'
 import { fetchRemoteJson, usesRemoteJsonData } from '@/lib/jsonDataUrls'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 import { importEquipmentSchedule, type EquipmentImportResult } from '@/lib/equipmentSheet'
 import type { Building } from '@/types/domain'
 import bundledSchedule from '../../supabase/data/rtu-schedule.json'
 
-const STORAGE_KEY = 'bme-rtu-schedule'
+const STORAGE_KEY = STORAGE_KEYS.rtuSchedule
 
 interface StoredRtuSchedule {
   replacementYears?: Record<string, string>

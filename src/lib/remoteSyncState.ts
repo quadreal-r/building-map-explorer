@@ -1,4 +1,6 @@
-const STORAGE_KEY = 'bme-remote-sync-state'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
+
+const STORAGE_KEY = STORAGE_KEYS.remoteSyncState
 
 export interface RemoteSyncState {
   /** Last remote exportedAt the user dismissed or loaded. */

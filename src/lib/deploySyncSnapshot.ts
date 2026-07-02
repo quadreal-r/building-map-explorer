@@ -1,11 +1,12 @@
 /** Fingerprints for portfolio / schedule / pricing included in Settings sync. */
 
 import { loadRemoteSyncState } from '@/lib/remoteSyncState'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 import type { RtuPricingRow } from '@/lib/rtuPricingSheet'
 import type { PortfolioData, Utility } from '@/types/domain'
 import { normalizePortfolioData } from '@/types/domain'
 
-export const DEPLOY_UNSAVED_KEY = 'bme-deploy-unsaved'
+export const DEPLOY_UNSAVED_KEY = STORAGE_KEYS.deployUnsaved
 
 export function markDeployDataDirty(): void {
   if (typeof localStorage === 'undefined') return
@@ -69,12 +70,9 @@ export interface DeployPricingSnapshot {
   rows: RtuPricingRow[]
 }
 
-const SCHEDULE_KEY = 'bme-rtu-schedule'
-const PRICING_KEY = 'bme-rtu-pricing'
-
 export function readScheduleSnapshotFromStorage(): DeployScheduleSnapshot | null {
   if (typeof localStorage === 'undefined') return null
-  const raw = localStorage.getItem(SCHEDULE_KEY)
+  const raw = localStorage.getItem(STORAGE_KEYS.rtuSchedule)
   if (!raw) return null
   try {
     const parsed = JSON.parse(raw) as DeployScheduleSnapshot
@@ -90,7 +88,7 @@ export function readScheduleSnapshotFromStorage(): DeployScheduleSnapshot | null
 
 export function readPricingSnapshotFromStorage(): DeployPricingSnapshot | null {
   if (typeof localStorage === 'undefined') return null
-  const raw = localStorage.getItem(PRICING_KEY)
+  const raw = localStorage.getItem(STORAGE_KEYS.rtuPricing)
   if (!raw) return null
   try {
     const parsed = JSON.parse(raw) as DeployPricingSnapshot & { sourceFile?: string | null }

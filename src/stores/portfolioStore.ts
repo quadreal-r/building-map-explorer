@@ -1,8 +1,9 @@
 import { create } from 'zustand'
 import type { PortfolioData } from '@/types/domain'
 import { setPortfolioDirtyLocally } from '@/hooks/usePortfolioData'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 
-const STORAGE_KEY = 'bme-portfolio'
+const STORAGE_KEY = STORAGE_KEYS.portfolio
 
 interface PortfolioStoreState {
   portfolio: PortfolioData | null

@@ -11,10 +11,11 @@ import { exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
 import { isValidStoredPortfolio } from '@/hooks/usePortfolioData'
 import { useRtuPricingStore } from '@/stores/rtuPricingStore'
 import { useRtuScheduleStore } from '@/stores/rtuScheduleStore'
+import { STORAGE_KEYS } from '@/lib/storageKeys'
 
-const SCHEDULE_KEY = 'bme-rtu-schedule'
-const PRICING_KEY = 'bme-rtu-pricing'
-const PORTFOLIO_KEY = 'bme-portfolio'
+const SCHEDULE_KEY = STORAGE_KEYS.rtuSchedule
+const PRICING_KEY = STORAGE_KEYS.rtuPricing
+const PORTFOLIO_KEY = STORAGE_KEYS.portfolio
 
 export interface DeployBundleExportResult {
   bundle: DeployBundle
