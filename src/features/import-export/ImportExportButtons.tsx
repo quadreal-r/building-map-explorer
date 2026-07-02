@@ -124,9 +124,16 @@ export function ImportExportButtons({
         <SettingsToolButton
           tooltip={
             <>
-              Import Database from Excel: portfolio export (Buildings, RTUs, Tenant Polygons, Utilities) updates
-              map positions and equipment, or Capital RTU Replacement workbook (Equipment + RTU Pricing)
-              updates replacement years, notes, and tonnage pricing.
+              Import Database from Excel: portfolio export (Buildings, RTUs, Tenant Polygons, Utilities)
+              updates map positions and equipment, or Capital RTU Replacement workbook (Equipment + RTU
+              Pricing) updates replacement years, notes, and tonnage pricing.
+              {sourceFile ? (
+                <>
+                  {' '}
+                  Last workbook: {sourceFile}
+                  {pricingTiers ? ` · ${pricingTiers} tonnage tiers` : ''}
+                </>
+              ) : null}
             </>
           }
           onClick={() => inputRef.current?.click()}
@@ -146,12 +153,6 @@ export function ImportExportButtons({
             if (file) void handleFile(file)
           }}
         />
-      ) : null}
-      {showImport && sourceFile ? (
-        <p className={styles.bulkImportFile}>
-          Last workbook: {sourceFile}
-          {pricingTiers ? ` · ${pricingTiers} tonnage tiers` : ''}
-        </p>
       ) : null}
     </>
   )

@@ -8,6 +8,7 @@ import {
 import { useGitHubDeploySync } from '@/features/settings/useGitHubDeploySync'
 import { RtuPricingSettings } from '@/features/settings/RtuPricingSettings'
 import { RtuEditorSettings } from '@/features/settings/RtuEditorSettings'
+import { SettingsSectionLabel } from '@/features/settings/SettingsSectionLabel'
 import { SettingsToolButton } from '@/features/settings/SettingsToolButton'
 import { Modal } from '@/components/Modal/Modal'
 import { APP_THEMES } from '@/lib/themes'
@@ -143,9 +144,6 @@ function PropertyManagerNamesEditor({
         placeholder={managerSlotLabel(selectedIndex)}
         aria-label={`Display name for ${managerSlotLabel(selectedIndex)}`}
       />
-      <p className={styles.hint}>
-        Buildings stay on Manager 1–4. Edit the display name, then apply.
-      </p>
       <button type="button" className={styles.mgrApplyBtn} onClick={handleApply}>
         Apply manager names
       </button>
@@ -380,7 +378,11 @@ function SettingsForm({
         </section>
 
         <section>
-          <div className={styles.sectionLabel}>Property managers</div>
+          <SettingsSectionLabel
+            help="Buildings stay on Manager 1–4. Pick a slot, edit the display name, then apply."
+          >
+            Property managers
+          </SettingsSectionLabel>
           <PropertyManagerNamesEditor
             key={managerEditorKey}
             portfolio={portfolio}
@@ -389,7 +391,7 @@ function SettingsForm({
         </section>
 
         <section>
-          <div className={styles.sectionLabel}>Edits</div>
+          <SettingsSectionLabel>Edits</SettingsSectionLabel>
           <div className={styles.tools}>
             <SettingsToolButton
               tooltip="Pick an RTU to show on the map, move its pin, or delete it."
@@ -459,7 +461,26 @@ function SettingsForm({
         </section>
 
         <section>
-          <div className={styles.sectionLabel}>Cloudflare &amp; GitHub sync</div>
+          <SettingsSectionLabel
+            help={
+              <>
+                <p>
+                  By default the GitHub token stays in this browser tab only and is cleared when you
+                  close it. Only enable remember on a private computer. The token is stored in this
+                  browser&apos;s localStorage, not on Cloudflare or GitHub.
+                </p>
+                <p>
+                  Sync uploads map data and pictures to Cloudflare, commits portfolio JSON to GitHub,
+                  and triggers a GitHub Pages rebuild. <b>App UI changes</b> (e.g. removed buttons)
+                  must be on <code>main</code> first — run <code>npm run push-live</code> from the
+                  project folder, then sync. Token needs <b>repo</b> and <b>workflow</b> scopes. Add
+                  the same token as repo secret <code>BME_SYNC_PAT</code>.
+                </p>
+              </>
+            }
+          >
+            Cloudflare &amp; GitHub sync
+          </SettingsSectionLabel>
           <GitHubDeploySyncFields sync={githubSync} disabled={uploadBusy} />
           <div className={styles.tools} style={{ marginTop: 8 }}>
             {usesRemoteJsonData() ? (
@@ -491,7 +512,7 @@ function SettingsForm({
         </section>
 
         <section>
-          <div className={styles.sectionLabel}>Save &amp; deploy</div>
+          <SettingsSectionLabel>Save &amp; deploy</SettingsSectionLabel>
           <div className={styles.tools}>
             <GitHubDeploySyncButton sync={githubSync} disabled={uploadBusy} />
             <SettingsToolButton

@@ -1,4 +1,5 @@
 import { DEFAULT_GITHUB_REPO } from '@/lib/githubDeploySync'
+import { SettingsHoverHelp } from '@/features/settings/SettingsHoverHelp'
 import styles from './SettingsModal.module.css'
 import {
   useGitHubDeploySync,
@@ -56,21 +57,9 @@ export function GitHubDeploySyncFields({
             onChange={(e) => sync.handleRememberPatChange(e.target.checked)}
             disabled={sync.syncing || disabled}
           />{' '}
-          Remember token on this computer
+          Remember token
         </label>
       </div>
-      <p className={styles.hint}>
-        By default the token stays in this browser tab only and is cleared when you close it.
-        Only enable remember on a private computer. The token is stored in this browser&apos;s
-        localStorage, not on Cloudflare or GitHub.
-      </p>
-      <p className={styles.hint}>
-        Sync uploads map data and pictures to Cloudflare, commits portfolio JSON to GitHub, and
-        triggers a GitHub Pages rebuild. <b>App UI changes</b> (e.g. removed buttons) must be on{' '}
-        <code>main</code> first — run <code>npm run push-live</code> from the project folder, then
-        sync. Token needs <b>repo</b> and <b>workflow</b> scopes. Add the same token as repo secret{' '}
-        <code>BME_SYNC_PAT</code>.
-      </p>
     </div>
   )
 }
@@ -82,8 +71,24 @@ export function GitHubDeploySyncButton({
   sync: ReturnType<typeof useGitHubDeploySync>
   disabled?: boolean
 }) {
-  return (
+  const syncHelp = (
     <>
+      Upload portfolio JSON, RTU schedule, pricing, and new pictures to Cloudflare, commit to GitHub,
+      and trigger a Pages rebuild. Requires a GitHub token with <b>repo</b> and <b>workflow</b>{' '}
+      scopes.
+      {sync.completed && sync.cooldownSec > 0 ? (
+        <>
+          {' '}
+          Live site updates may take 5–10 minutes (data ~2 min, app rebuild longer). Hard-refresh when
+          the timer ends. Download the sync status report for CDN picture status, pictures
+          added/removed, and build version.
+        </>
+      ) : null}
+    </>
+  )
+
+  return (
+    <SettingsHoverHelp content={syncHelp}>
       <button
         type="button"
         className={`${styles.syncDeployBtn} ${sync.syncing || sync.completed ? styles.syncDeployBtnWithProgress : ''}`}
@@ -99,14 +104,7 @@ export function GitHubDeploySyncButton({
         ) : null}
         <span className={styles.syncDeployBtnText}>{sync.buttonLabel}</span>
       </button>
-      {sync.completed && sync.cooldownSec > 0 ? (
-        <p className={styles.hint}>
-          Live site updates may take 5–10 minutes (data ~2 min, app rebuild longer). Hard-refresh when
-          the timer ends. Download the sync status report for CDN picture status (missing from
-          cloud), pictures added/removed, and build version.
-        </p>
-      ) : null}
-    </>
+    </SettingsHoverHelp>
   )
 }
 

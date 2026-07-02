@@ -91,12 +91,6 @@ export function RtuPictureGpsAssign({ onBusyChange }: RtuPictureGpsAssignProps) 
           Clear photo markers ({pendingCount})
         </SettingsToolButton>
       ) : null}
-      {pendingCount > 0 ? (
-        <p className={styles.hint}>
-          {pendingCount} photo marker{pendingCount === 1 ? '' : 's'} on the map. Use Clear photo markers or the map
-          banner to start over.
-        </p>
-      ) : null}
       <input
         ref={inputRef}
         type="file"
