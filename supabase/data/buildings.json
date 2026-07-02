@@ -2117,18 +2117,6 @@
         "desc": "Building: 55 Interchange Way\r\nSystem: Roof Top Units\r\nDescription: RTU-01\r\nModel: TGA090S2BM1J\r\nSerial: 5607L18805\r\nMake: LENNOX\r\nDate Installed: Nov 04, 2007\r\nHeating Capacity: 180,000 BTU's\r\nCooling Capacity: 90,000 BTU (7.5 Ton)\r\nHeating Capacity 180,000 BTU's\r\n-updated by Marcus Ganhao August 14, 2023",
         "lat": 43.7895969,
         "lng": -79.5281034
-      },
-      {
-        "name": "RTU-06",
-        "desc": "",
-        "lat": 43.789826201524846,
-        "lng": -79.52665061356427
-      },
-      {
-        "name": "RTU-07",
-        "desc": "",
-        "lat": 43.789841249997686,
-        "lng": -79.52655204241842
       }
     ]
   },
@@ -2730,6 +2718,12 @@
         "desc": "Building: 50 Leek Crescent\r\nSystem: Roof Top Units\r\nDescription: RTU- 09\r\nModel: 48TCEM12A2A1A0B0A0\r\nSerial: 3222P35767\r\nMake: CARRIER\r\nDate Installed: Mar 02, 2022\r\nHeating Capacity: 224,000 BTU's\r\nCooling Capacity: 120,000 BTU (10 Ton)\r\nHeating Capacity 224,000 BTU's\r\nInstalled by: Applied Systems Technologies Inc.",
         "lat": 43.862788,
         "lng": -79.3762897
+      },
+      {
+        "name": "RTU-11",
+        "desc": "Model #TSA120S4SN1Y\nSerial # 5617C12433",
+        "lat": 43.86246689910946,
+        "lng": -79.37621345580995
       }
     ]
   },
