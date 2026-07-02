@@ -57,7 +57,7 @@ export interface DetailMarkerEntry {
   dragKey: string
 }
 
-export type ActiveDetailView = 'info' | 'pictures' | 'edit'
+export type ActiveDetailView = 'info' | 'pictures' | 'documents' | 'edit'
 
 export interface ActiveDetailInfo {
   entry: DetailMarkerEntry

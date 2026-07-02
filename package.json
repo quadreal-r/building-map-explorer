@@ -38,6 +38,7 @@
     "delete-rtu-pictures-from-list": "node scripts/delete-rtu-pictures-from-list.mjs",
     "upload-rtu-pictures-from-folder": "node scripts/upload-rtu-pictures-from-folder.mjs",
     "report-sync-status": "node scripts/report-sync-status.mjs",
+    "compare-local-pictures-cloudflare": "node scripts/compare-local-pictures-with-cloudflare.mjs",
     "push-live": "node scripts/push-live.mjs",
     "restore-point": "node scripts/restore-point.mjs"
   },
@@ -46,6 +47,7 @@
     "@supabase/supabase-js": "^2.49.8",
     "@tanstack/react-query": "^5.80.7",
     "exifr": "^7.1.3",
+    "fflate": "^0.8.3",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "xlsx": "^0.18.5",

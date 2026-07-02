@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 import {
   buildBuildingInfoHtml,
   buildBuildingInfoPlainText,
+  buildDetailEditHtml,
   buildDetailInfoHtml,
   buildDetailInfoPlainText,
+  buildRtuDocumentsPageHtml,
 } from '@/lib/mapInfoWindow'
 import type { Building, Polygon, Rtu } from '@/types/domain'
 
@@ -110,14 +112,43 @@ describe('mapInfoWindow', () => {
     expect(text).toContain('Unit 1  Acme Corp')
   })
 
-  it('includes Copy and Edit text in RTU popup footer', () => {
+  it('includes Picture, Documents, and Edit in RTU popup footer', () => {
     const html = buildDetailInfoHtml('rtu', rtu, { buildingAddress: building.address })
     expect(html).toContain('class="iw-foot"')
-    expect(html).toContain('📋 Copy')
+    expect(html).not.toContain('📋 Copy')
+    expect(html).toContain('data-iw-action="pictures"')
+    expect(html).toContain('data-iw-action="documents"')
     expect(html).toContain('data-iw-action="edit-text"')
+    expect(html).not.toContain('data-iw-documents-root')
     expect(html).not.toContain('↔ Move')
     expect(html).not.toContain('🗑 Delete')
     expect(html.indexOf('class="iw-body"')).toBeLessThan(html.indexOf('class="iw-foot"'))
+  })
+
+  it('includes Copy in RTU edit popup footer', () => {
+    const html = buildDetailEditHtml(rtu, { buildingAddress: building.address })
+    expect(html).toContain('data-iw-action="copy-all"')
+    expect(html).toContain('class="iw-copy-source"')
+    expect(html).toContain('data-iw-action="edit-save"')
+  })
+
+  it('builds RTU documents page with back and download actions', () => {
+    const html = buildRtuDocumentsPageHtml(rtu, building.address, [
+      {
+        fileName: '100-RTU-01-manual.pdf',
+        url: 'https://docs.example.com/100-RTU-01-manual.pdf',
+        label: '100-RTU-01-manual.pdf',
+      },
+    ])
+    expect(html).toContain('data-iw-action="documents-back"')
+    expect(html).toContain('data-iw-action="documents-download"')
+    expect(html).toContain('data-iw-documents-root')
+  })
+
+  it('omits download button when there are no documents', () => {
+    const html = buildRtuDocumentsPageHtml(rtu, building.address, [])
+    expect(html).not.toContain('data-iw-action="documents-download"')
+    expect(html).toContain('No documents on Cloudflare')
   })
 
   it('includes Copy, Move, and Delete in utility detail popup footer', () => {

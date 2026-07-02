@@ -374,6 +374,7 @@ export function addAppMarkerListener(
   const eventName = LISTENER_EVENT[event]
   const wrapped = (e: google.maps.MapMouseEvent) => {
     if (event === 'click') {
+      e.stop?.()
       e.domEvent?.stopPropagation()
     }
     handler(e)

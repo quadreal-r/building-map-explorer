@@ -3,7 +3,7 @@ import {
   persistPortfolio,
   type PortfolioSnapshotSource,
 } from '@/hooks/usePortfolioData'
-import { clearDeployDataDirty } from '@/lib/deploySyncSnapshot'
+import { clearDeployDataDirty, syncDeployDirtyFlag } from '@/lib/deploySyncSnapshot'
 import { fetchRemoteJson } from '@/lib/jsonDataUrls'
 import { useRtuPricingStore } from '@/stores/rtuPricingStore'
 import { useRtuScheduleStore } from '@/stores/rtuScheduleStore'
@@ -36,7 +36,6 @@ export async function pullRemoteScheduleAndPricing(): Promise<void> {
       sourceFile: schedule.sourceFile ?? null,
       loaded: true,
     })
-    useRtuScheduleStore.getState().persist()
   }
 
   const pricing = await fetchRemoteJson<StoredRtuPricing>('rtu-pricing-rows.json')
@@ -48,6 +47,8 @@ export async function pullRemoteScheduleAndPricing(): Promise<void> {
       pricing.sourceFile ?? 'remote',
     )
   }
+
+  syncDeployDirtyFlag()
 }
 
 export interface PullRemoteUpdatesResult {

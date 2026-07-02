@@ -14,12 +14,13 @@ import {
   buildBuildingInfoHtml,
   buildDetailEditHtml,
   buildDetailInfoHtml,
-  buildRtuDocumentsContainerHtml,
+  buildRtuDocumentsPageHtml,
   copyPopupText,
 } from '@/lib/mapInfoWindow'
 import { suppressMapClickClearOnce } from '@/lib/mapMarqueeSelect'
 import { closeAllMapPopups, ensureInfoWindowVisible } from '@/lib/mapPopups'
-import { afterMapViewChange } from '@/lib/mapRotation'
+import { MAP_DETAIL_ZOOM } from '@/lib/constants'
+import { afterMapViewChange, panToPreserveRotation } from '@/lib/mapRotation'
 import {
   addRtuPicturesFromFiles,
   deleteRtuPicture,
@@ -30,6 +31,11 @@ import {
   type RtuPicture,
 } from '@/lib/rtuPictures'
 import { listRtuDocuments } from '@/lib/rtuDocuments'
+import {
+  downloadRtuDocumentFiles,
+  rtuDocumentArchiveName,
+  rtuDocumentBaseName,
+} from '@/lib/rtuDocumentDownload'
 import {
   countPendingPicturesNearRtu,
   findNearestPendingPictureToRtu,
@@ -142,6 +148,14 @@ export function useInfoWindowActions(
       closeAllMapPopups()
       activeDetailInfoRef.current = null
       clearActiveRtuPictures()
+      if ((map.getZoom() ?? 0) < MAP_DETAIL_ZOOM) {
+        panToPreserveRotation(
+          map,
+          { lat: building.lat, lng: building.lng },
+          MAP_DETAIL_ZOOM,
+          { onlyZoomIn: true },
+        )
+      }
       const tenantPolygons = polygonsForBuilding(polygonIndexRef.current, building.address)
       const managerRenames = useSettingsStore.getState().managerRenames
       infoWindowRef.current.setContent(
@@ -163,32 +177,42 @@ export function useInfoWindowActions(
     [],
   )
 
-  const refreshRtuDocumentsInPopup = useCallback(async () => {
+  const refreshRtuDocumentsView = useCallback(async () => {
     const ctx = activeDetailInfoRef.current
-    if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'info') return
-    const buildingAddress = ctx.entry.building?.address
-    const rtuName = ctx.entry.data.name ?? ''
-    if (!buildingAddress || !rtuName) return
+    const iw = infoWindowRef.current
+    if (!ctx || !iw || ctx.entry.type !== 'rtu' || ctx.view !== 'documents') return
 
-    const root = document.querySelector('[data-iw-documents-root]')
-    if (!root) return
+    const buildingAddress = ctx.entry.building?.address ?? ''
+    const rtu = ctx.entry.data as Rtu
+    if (!buildingAddress) return
+
+    iw.setContent(buildRtuDocumentsPageHtml(rtu, buildingAddress, 'loading'))
 
     try {
-      const documents = await listRtuDocuments(buildingAddress, rtuName)
+      const documents = await listRtuDocuments(buildingAddress, rtu.name ?? '')
       const stillOpen = activeDetailInfoRef.current
       if (
         !stillOpen ||
-        stillOpen.view !== 'info' ||
+        stillOpen.view !== 'documents' ||
         stillOpen.entry.type !== 'rtu' ||
-        stillOpen.entry.data.name !== rtuName
+        stillOpen.entry.data.name !== rtu.name
       ) {
         return
       }
-      root.outerHTML = buildRtuDocumentsContainerHtml(documents)
+      iw.setContent(buildRtuDocumentsPageHtml(rtu, buildingAddress, documents))
     } catch {
-      root.outerHTML = buildRtuDocumentsContainerHtml([])
+      const stillOpen = activeDetailInfoRef.current
+      if (
+        !stillOpen ||
+        stillOpen.view !== 'documents' ||
+        stillOpen.entry.type !== 'rtu' ||
+        stillOpen.entry.data.name !== rtu.name
+      ) {
+        return
+      }
+      iw.setContent(buildRtuDocumentsPageHtml(rtu, buildingAddress, []))
     }
-  }, [activeDetailInfoRef])
+  }, [activeDetailInfoRef, infoWindowRef])
 
   const openDetailInfo = useCallback(
     (entry: DetailMarkerEntry) => {
@@ -239,11 +263,6 @@ export function useInfoWindowActions(
       }
       container.addEventListener('click', keepPopupOpenOnMapClick, { signal })
       container.addEventListener('mousedown', keepPopupOpenOnMapClick, { signal })
-
-      const ctx = activeDetailInfoRef.current
-      if (ctx?.entry.type === 'rtu' && ctx.view === 'info') {
-        void refreshRtuDocumentsInPopup()
-      }
 
       container.querySelector('[data-iw-action="close"]')?.addEventListener(
         'click',
@@ -402,6 +421,17 @@ export function useInfoWindowActions(
         { signal },
       )
 
+      container.querySelector('[data-iw-action="documents"]')?.addEventListener(
+        'click',
+        () => {
+          const ctx = activeDetailInfoRef.current
+          if (!ctx || ctx.entry.type !== 'rtu') return
+          ctx.view = 'documents'
+          void refreshRtuDocumentsView()
+        },
+        { signal },
+      )
+
       container
         .querySelector('[data-iw-action="picture-assign-pending"]')
         ?.addEventListener(
@@ -459,6 +489,85 @@ export function useInfoWindowActions(
           },
           { signal },
         )
+
+      container
+        .querySelector('[data-iw-action="documents-back"]')
+        ?.addEventListener(
+          'click',
+          () => {
+            const ctx = activeDetailInfoRef.current
+            if (!ctx) return
+            ctx.view = 'info'
+            const { type, data } = ctx.entry
+            iw.setContent(buildDetailInfoHtml(type, data, detailHtmlOptions(ctx.entry)))
+          },
+          { signal },
+        )
+
+      container.querySelector('[data-iw-action="documents-select-all"]')?.addEventListener(
+        'change',
+        (e) => {
+          const checked = (e.currentTarget as HTMLInputElement).checked
+          container.querySelectorAll<HTMLInputElement>('.iw-documents-check').forEach((input) => {
+            input.checked = checked
+          })
+        },
+        { signal },
+      )
+
+      container.querySelector('[data-iw-action="documents-download"]')?.addEventListener(
+        'click',
+        () => {
+          void (async () => {
+            const ctx = activeDetailInfoRef.current
+            if (!ctx || ctx.entry.type !== 'rtu' || ctx.view !== 'documents') return
+
+            const root = container.querySelector('[data-iw-documents-root]')
+            const downloadBtn = container.querySelector(
+              '[data-iw-action="documents-download"]',
+            ) as HTMLButtonElement | null
+            if (!root || !downloadBtn) return
+
+            if (!root.classList.contains('iw-documents--select-mode')) {
+              root.classList.add('iw-documents--select-mode')
+              downloadBtn.textContent = '⬇ Download selected'
+              downloadBtn.title = 'Download checked documents'
+              return
+            }
+
+            const selected = [...container.querySelectorAll<HTMLInputElement>('.iw-documents-check:checked')]
+              .map((input) => ({
+                url: input.getAttribute('data-iw-document-url') ?? '',
+                fileName: input.getAttribute('data-iw-document-file') ?? '',
+              }))
+              .filter((file) => file.url && file.fileName)
+
+            if (!selected.length) {
+              showToastError('Select at least one document to download.')
+              return
+            }
+
+            downloadBtn.disabled = true
+            try {
+              const rtuName = ctx.entry.data.name ?? 'RTU-documents'
+              const result = await downloadRtuDocumentFiles(selected, { archiveBaseName: rtuName })
+              if (result.count === 0) return
+              showToastSuccess(
+                result.zipped
+                  ? `⬇ Downloaded ${result.count} documents as ${rtuDocumentArchiveName(rtuName)}`
+                  : `⬇ Downloaded ${rtuDocumentBaseName(selected[0]!.fileName)}`,
+              )
+            } catch (error) {
+              showToastError(
+                error instanceof Error ? error.message : 'Failed to download documents',
+              )
+            } finally {
+              downloadBtn.disabled = false
+            }
+          })()
+        },
+        { signal },
+      )
 
       const stepPicture = (delta: number) => {
         const ctx = activeDetailInfoRef.current
@@ -614,7 +723,7 @@ export function useInfoWindowActions(
     startSoloMove,
     clearActiveRtuPictures,
     refreshRtuPicturesView,
-    refreshRtuDocumentsInPopup,
+    refreshRtuDocumentsView,
     detailHtmlOptions,
   ])
 

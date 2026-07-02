@@ -1,5 +1,8 @@
 import { countUnsyncedLocalHiddenRtuPictures } from '@/lib/hiddenRtuPictures'
-import { isDeployDataDirtyLocally } from '@/lib/deploySyncSnapshot'
+import {
+  isDeployPricingDirtyLocally,
+  isDeployScheduleDirtyLocally,
+} from '@/lib/deploySyncSnapshot'
 import { isPortfolioDirtyLocally } from '@/hooks/usePortfolioData'
 import { loadRemoteSyncState } from '@/lib/remoteSyncState'
 import {
@@ -35,10 +38,17 @@ export async function collectUnsyncedChangesSummary(): Promise<UnsyncedChangeLin
     })
   }
 
-  if (isDeployDataDirtyLocally()) {
+  if (isDeployScheduleDirtyLocally()) {
     lines.push({
-      id: 'schedule-pricing',
-      label: 'RTU schedule and pricing from Excel import',
+      id: 'schedule',
+      label: 'RTU replacement schedule',
+    })
+  }
+
+  if (isDeployPricingDirtyLocally()) {
+    lines.push({
+      id: 'pricing',
+      label: 'RTU pricing',
     })
   }
 

@@ -28,6 +28,7 @@ import {
 import { buildPolygonBuildingIndex } from '@/lib/polygonBuildings'
 import {
   consumeMapClickClearSuppression,
+  isSelectionAdditiveClick,
   registerMarqueeTarget,
   suppressMapClickClearOnce,
   unregisterMarqueeTarget,
@@ -128,6 +129,9 @@ export function useMapMarkers({
 }: UseMapMarkersOptions) {
   const layers = useLayerStore((s) => s.layers)
   const search = useFilterStore((s) => s.search)
+  const park = useFilterStore((s) => s.park)
+  const cluster = useFilterStore((s) => s.cluster)
+  const manager = useFilterStore((s) => s.manager)
   const currentBuilding = useSelectionStore((s) => s.currentBuilding)
   const dragMode = useSelectionStore((s) => s.dragMode)
   const dragSelectedKeys = useSelectionStore((s) => s.dragSelectedKeys)
@@ -332,8 +336,7 @@ export function useMapMarkers({
         if (shouldSuppressMarkerClick()) return
         if (useUiStore.getState().addMarkerPickMode || useUiStore.getState().polygonDrawMode) return
         if (useSelectionStore.getState().dragMode) {
-          const domEvent = e.domEvent as MouseEvent | undefined
-          const additive = Boolean(domEvent?.ctrlKey || domEvent?.metaKey || domEvent?.shiftKey)
+          const additive = isSelectionAdditiveClick(e)
           useSelectionStore.getState().toggleDragSelect(buildingDragKey(b.address), additive)
           refreshDragSelectionStyles()
           return
@@ -474,8 +477,7 @@ export function useMapMarkers({
         if (shouldSuppressMarkerClick()) return
         if (useUiStore.getState().addMarkerPickMode || useUiStore.getState().polygonDrawMode) return
         if (useSelectionStore.getState().dragMode) {
-          const domEvent = e.domEvent as MouseEvent | undefined
-          const additive = Boolean(domEvent?.ctrlKey || domEvent?.metaKey || domEvent?.shiftKey)
+          const additive = isSelectionAdditiveClick(e)
           useSelectionStore.getState().toggleDragSelect(dragKey, additive)
           refreshDragSelectionStyles()
           return
@@ -724,9 +726,15 @@ export function useMapMarkers({
 
   useEffect(() => {
     if (!map) return
-    if (hasPendingHardRefreshView() || wasHardRefreshViewApplied()) return
+    if (hasPendingHardRefreshView()) return
+
     const q = search.trim()
-    if (q && collectSearchHits(buildings, polygons, q).length > 0) {
+    const hasDropdownFilter = Boolean(park || cluster || manager)
+    if (
+      q &&
+      !hasDropdownFilter &&
+      collectSearchHits(buildings, polygons, q).length > 0
+    ) {
       return
     }
 
@@ -734,13 +742,13 @@ export function useMapMarkers({
       .map((b) => b.address)
       .sort()
       .join('\n')
-    const fitKey = `map:${addressKey}`
+    const fitKey = `${park}|${cluster}|${manager}|${addressKey}`
     if (fitKey === visibleAddressesRef.current) {
       return
     }
     visibleAddressesRef.current = fitKey
     fitAllMarkers()
-  }, [map, mapBuildings, fitAllMarkers, buildings, polygons, search])
+  }, [map, mapBuildings, fitAllMarkers, buildings, polygons, search, park, cluster, manager])
 
   useEffect(() => {
     if (

@@ -1,12 +1,15 @@
 import { describe, expect, it, beforeEach } from 'vitest'
 import {
   clearMarqueeTargets,
+  consumeMapClickClearSuppression,
   findMarqueeKeysInScreenRect,
+  isSelectionAdditiveClick,
   marqueePointFromLatLng,
   marqueePolygonFromPaths,
   pointInScreenRect,
   polygonIntersectsScreenRect,
   registerMarqueeTarget,
+  suppressMapClickClearOnce,
 } from '@/lib/mapMarqueeSelect'
 
 function mockProjection(
@@ -123,5 +126,30 @@ describe('mapMarqueeSelect', () => {
         rect,
       ),
     ).toBe(false)
+  })
+
+  it('keeps map-click clear suppressed for multiple listeners in one turn', () => {
+    suppressMapClickClearOnce()
+    expect(consumeMapClickClearSuppression()).toBe(true)
+    expect(consumeMapClickClearSuppression()).toBe(true)
+  })
+
+  it('resets map-click clear suppression after the current turn', async () => {
+    suppressMapClickClearOnce()
+    expect(consumeMapClickClearSuppression()).toBe(true)
+    await Promise.resolve()
+    expect(consumeMapClickClearSuppression()).toBe(false)
+  })
+
+  it('detects additive selection from the native mouse event', () => {
+    window.dispatchEvent(
+      new MouseEvent('mousedown', { ctrlKey: true, bubbles: true, cancelable: true }),
+    )
+    expect(isSelectionAdditiveClick()).toBe(true)
+    expect(
+      isSelectionAdditiveClick({
+        domEvent: new MouseEvent('click'),
+      } as google.maps.MapMouseEvent),
+    ).toBe(true)
   })
 })

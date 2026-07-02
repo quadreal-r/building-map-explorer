@@ -48,31 +48,76 @@ function pictureButton(): string {
   return `<button class="iw-pic-btn" data-iw-action="pictures" title="View RTU pictures">🖼 Picture</button>`
 }
 
+function documentsButton(): string {
+  return `<button class="iw-doc-btn" data-iw-action="documents" title="View RTU documents">📄 Documents</button>`
+}
+
 function editTextButton(): string {
-  return `<button class="iw-edit-btn" data-iw-action="edit-text" title="Edit RTU name and description">✎ Edit text</button>`
+  return `<button class="iw-edit-btn" data-iw-action="edit-text" title="Edit RTU name and description">✎ Edit</button>`
 }
 
 function assignPendingPictureButton(count: number): string {
   return `<button type="button" class="iw-pic-btn" data-iw-action="picture-assign-pending" title="Assign the closest pending photo within range">📎 Assign pending photo${count > 1 ? ` (${count} nearby)` : ''}</button>`
 }
 
-/** Cloudflare R2 rtu-documents bucket — list rendered in the RTU popup. */
-export function buildRtuDocumentsContainerHtml(documents: RtuDocument[] | 'loading'): string {
-  const body =
-    documents === 'loading'
-      ? '<div class="iw-documents-empty">Loading…</div>'
-      : documents.length === 0
-        ? '<div class="iw-documents-empty">No documents on Cloudflare for this RTU.</div>'
-        : `<ul class="iw-documents-list">${documents
-            .map(
-              (doc) =>
-                `<li><a class="iw-documents-link" href="${escapeHtml(doc.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(doc.fileName)}">${escapeHtml(doc.label)}</a></li>`,
-            )
-            .join('')}</ul>`
+function buildRtuDocumentsBodyHtml(documents: RtuDocument[] | 'loading'): string {
+  if (documents === 'loading') {
+    return '<div class="iw-documents-empty">Loading…</div>'
+  }
+  if (documents.length === 0) {
+    return '<div class="iw-documents-empty">No documents on Cloudflare for this RTU.</div>'
+  }
+  return `<label class="iw-documents-select-all-wrap">
+      <input type="checkbox" class="iw-documents-select-all" data-iw-action="documents-select-all" checked />
+      <span>Select all</span>
+    </label>
+    <ul class="iw-documents-list">${documents
+    .map(
+      (doc) =>
+        `<li class="iw-documents-item">
+          <label class="iw-documents-check-wrap" title="Select for download">
+            <input type="checkbox" class="iw-documents-check" data-iw-document-url="${escapeHtml(doc.url)}" data-iw-document-file="${escapeHtml(doc.fileName)}" checked />
+          </label>
+          <a class="iw-documents-link" href="${escapeHtml(doc.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(doc.fileName)}">${escapeHtml(doc.label)}</a>
+        </li>`,
+    )
+    .join('')}</ul>`
+}
 
+/** Cloudflare R2 rtu-documents bucket — document list body. */
+export function buildRtuDocumentsContainerHtml(documents: RtuDocument[] | 'loading'): string {
   return `<div class="iw-documents" data-iw-documents-root>
     <div class="iw-documents-head">Documents <span class="iw-documents-sub">Cloudflare R2</span></div>
-    ${body}
+    ${buildRtuDocumentsBodyHtml(documents)}
+  </div>`
+}
+
+export function buildRtuDocumentsPageHtml(
+  rtu: Rtu,
+  buildingAddress: string,
+  documents: RtuDocument[] | 'loading',
+): string {
+  const name = rtu.name ?? ''
+  const age = getRtuAge(rtu)
+  let ageLine = ''
+  if (age != null) {
+    if (age >= RTU_AGE_CRITICAL) {
+      ageLine = `<span class="iw-rtu-age critical" style="margin-left:6px">${age} yrs old</span>`
+    } else if (age >= RTU_AGE_WARN) {
+      ageLine = `<span class="iw-rtu-age warn" style="margin-left:6px">${age} yrs old</span>`
+    }
+  }
+
+  const backBtn = `<button type="button" class="iw-back-btn" data-iw-action="documents-back" title="Back to RTU details">← Details</button>`
+  const hasDocs = documents !== 'loading' && documents.length > 0
+  const downloadBtn = hasDocs
+    ? `<button type="button" class="iw-doc-btn" data-iw-action="documents-download" title="Select documents and download">⬇ Download</button>`
+    : ''
+
+  return `<div class="iw iw-documents-page" data-iw-building="${escapeHtml(buildingAddress)}" data-iw-rtu="${escapeHtml(name)}">
+    <div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${closeButton()}</div>
+    <div class="iw-body iw-documents-page-body">${buildRtuDocumentsContainerHtml(documents)}</div>
+    ${actionFooter(`${backBtn}${downloadBtn}`)}
   </div>`
 }
 
@@ -344,15 +389,15 @@ export function buildDetailInfoHtml(
   const plainText = buildDetailInfoPlainText(layerKey, data, options)
 
   const pictureBtn = layerKey === 'rtu' ? pictureButton() : ''
+  const documentsBtn = layerKey === 'rtu' ? documentsButton() : ''
   const editTextBtn = layerKey === 'rtu' ? editTextButton() : ''
   const assignPendingBtn =
     layerKey === 'rtu' && (options?.pendingPictureAssignCount ?? 0) > 0
       ? assignPendingPictureButton(options!.pendingPictureAssignCount!)
       : ''
+  const copyBtn = layerKey === 'rtu' ? '' : copyButton()
 
-  const documentsHtml = layerKey === 'rtu' ? buildRtuDocumentsContainerHtml('loading') : ''
-
-  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${badgeHtml}${closeButton()}</div><div class="iw-body">${rows}${documentsHtml}</div>${actionFooter(`${copyButton()}${assignPendingBtn}${pictureBtn}${editTextBtn}${moveBtn}${deleteBtn}`)}</div>`
+  return `<div class="iw">${copySource(plainText)}<div class="iw-head"><div class="iw-name">${escapeHtml(name)}${ageLine}</div>${badgeHtml}${closeButton()}</div><div class="iw-body">${rows}</div>${actionFooter(`${copyBtn}${assignPendingBtn}${pictureBtn}${documentsBtn}${editTextBtn}${moveBtn}${deleteBtn}`)}</div>`
 }
 
 export function buildPolygonInfoHtml(
@@ -391,8 +436,10 @@ export function buildDetailEditHtml(
   const buildingAttr = options?.buildingAddress
     ? ` data-iw-building="${escapeHtml(options.buildingAddress)}"`
     : ''
+  const plainText = buildDetailInfoPlainText('rtu', data, options)
 
   return `<div class="iw iw-edit"${buildingAttr} data-iw-rtu-name="${escapeHtml(name)}">
+    ${copySource(plainText)}
     <div class="iw-head"><div class="iw-name">Edit RTU</div>${closeButton()}</div>
     <div class="iw-body iw-edit-body">
       <label class="iw-edit-label">Name
@@ -402,7 +449,7 @@ export function buildDetailEditHtml(
         <textarea class="iw-edit-textarea" data-iw-field="description" rows="6">${escapeHtml(desc)}</textarea>
       </label>
     </div>
-    ${actionFooter(`<button type="button" class="iw-edit-btn" data-iw-action="edit-save">Save</button><button type="button" class="iw-back-btn" data-iw-action="edit-cancel">Cancel</button>`)}
+    ${actionFooter(`${copyButton()}<button type="button" class="iw-edit-btn" data-iw-action="edit-save">Save</button><button type="button" class="iw-back-btn" data-iw-action="edit-cancel">Cancel</button>`)}
   </div>`
 }
 

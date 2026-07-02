@@ -10,7 +10,7 @@ import {
 } from '@/lib/mapGroupDragSession'
 import { MAP_DETAIL_ZOOM } from '@/lib/constants'
 import { afterMapViewChange, panToPreserveRotation } from '@/lib/mapRotation'
-import { consumeMapClickClearSuppression, registerMarqueeTarget, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
+import { consumeMapClickClearSuppression, isSelectionAdditiveClick, registerMarqueeTarget, suppressMapClickClearOnce, unregisterMarqueeTarget } from '@/lib/mapMarqueeSelect'
 import { tryConsumeMapAddMarkerPick } from '@/lib/mapAddMarkerPick'
 import { closeAllMapPopups, ensureInfoWindowVisible, MAP_CLOSE_POPUPS_EVENT } from '@/lib/mapPopups'
 import { buildPolygonInfoHtml } from '@/lib/mapInfoWindow'
@@ -363,8 +363,8 @@ export function usePolygons({
         if (tryConsumeMapAddMarkerPick(e.latLng)) return
         if (useSelectionStore.getState().dragMode) {
           e.stop()
-          const domEvent = e.domEvent as MouseEvent | undefined
-          const additive = Boolean(domEvent?.ctrlKey || domEvent?.metaKey || domEvent?.shiftKey)
+          suppressMapClickClearOnce()
+          const additive = isSelectionAdditiveClick(e)
           useSelectionStore.getState().toggleDragSelect(key, additive)
           refreshPolygonSelectionStyles()
           return

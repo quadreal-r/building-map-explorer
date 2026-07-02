@@ -2,8 +2,8 @@ import { create } from 'zustand'
 import { rcbReplacementYearKey } from '@/lib/costEstimator'
 import {
   isDeployDataDirtyLocally,
-  markDeployDataDirty,
   scheduleSyncFingerprint,
+  syncDeployDirtyFlag,
 } from '@/lib/deploySyncSnapshot'
 import { fetchRemoteJson, usesRemoteJsonData } from '@/lib/jsonDataUrls'
 import { importEquipmentSchedule, type EquipmentImportResult } from '@/lib/equipmentSheet'
@@ -135,6 +135,12 @@ export const useRtuScheduleStore = create<RtuScheduleState>((set, get) => ({
 
   setReplacementYear: (address, rtu, year, defaultYear) => {
     const key = rcbReplacementYearKey(address, rtu)
+    const current = get().replacementYears[key]
+    if (year === defaultYear) {
+      if (current === undefined) return
+    } else if (current === year) {
+      return
+    }
     set((state) => {
       const next = { ...state.replacementYears }
       if (year === defaultYear) delete next[key]
@@ -146,9 +152,11 @@ export const useRtuScheduleStore = create<RtuScheduleState>((set, get) => ({
 
   setNotes: (address, rtu, notes) => {
     const key = scheduleStorageKey(address, rtu)
+    const trimmed = notes.trim()
+    const current = get().notes[key] ?? ''
+    if (current === trimmed) return
     set((state) => {
       const next = { ...state.notes }
-      const trimmed = notes.trim()
       if (trimmed) next[key] = trimmed
       else delete next[key]
       return { notes: next }
@@ -164,7 +172,7 @@ export const useRtuScheduleStore = create<RtuScheduleState>((set, get) => ({
     const { replacementYears, notes, sourceFile } = get()
     const payload: StoredRtuSchedule = { replacementYears, notes, sourceFile }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-    markDeployDataDirty()
+    syncDeployDirtyFlag()
   },
 }))
 

@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 import {
   isDeployDataDirtyLocally,
-  markDeployDataDirty,
   pricingSyncFingerprint,
+  syncDeployDirtyFlag,
 } from '@/lib/deploySyncSnapshot'
 import {
   DEFAULT_RTU_PRICING_ROWS,
@@ -196,6 +196,8 @@ export const useRtuPricingStore = create<RtuPricingState>((set, get) => ({
 
   updateRowField: (tonnageKey, field, value) => {
     const safe = Number.isFinite(value) ? value : 0
+    const current = get().rows.find((row) => row.tonnageKey === tonnageKey)
+    if (!current || current[field] === safe) return
     const rows = get().rows.map((row) =>
       row.tonnageKey === tonnageKey ? { ...row, [field]: safe } : row,
     )
@@ -211,7 +213,7 @@ export const useRtuPricingStore = create<RtuPricingState>((set, get) => ({
     const { rows, version, sourceFile } = get()
     const payload: StoredRtuPricing = { rows, version, sourceFile }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-    markDeployDataDirty()
+    syncDeployDirtyFlag()
   },
 }))
 

@@ -30,18 +30,14 @@ export function useMarkerVisibility(
 ) {
   const refreshBuildingMarkerVisibility = useCallback(() => {
     const { layers } = useLayerStore.getState()
-    const editMode = useSelectionStore.getState().dragMode
     const anyLayerOn = !areAllLayersHidden(layers)
-    const visibleSet = new Set(mapBuildings.map((b) => b.address))
+    const showBuildings = anyLayerOn
 
     for (const entry of buildingMarkersRef.current) {
-      const show =
-        anyLayerOn &&
-        (editMode || visibleSet.has(entry.building.address))
-      setAppMarkerVisible(entry.marker, show)
-      setAppMarkerVisible(entry.label, show)
+      setAppMarkerVisible(entry.marker, showBuildings)
+      setAppMarkerVisible(entry.label, showBuildings)
     }
-  }, [mapBuildings, buildingMarkersRef])
+  }, [buildingMarkersRef])
 
   const refreshDetailVisibility = useCallback(() => {
     if (!map) return
@@ -119,13 +115,7 @@ export function useMarkerVisibility(
     const bounds = new google.maps.LatLngBounds()
     const visibleSet = new Set(mapBuildings.map((b) => b.address))
     for (const entry of buildingMarkersRef.current) {
-      if (!editMode && !visibleSet.has(entry.building.address)) {
-        setAppMarkerVisible(entry.marker, false)
-        setAppMarkerVisible(entry.label, false)
-        continue
-      }
-      setAppMarkerVisible(entry.marker, true)
-      setAppMarkerVisible(entry.label, true)
+      if (!editMode && !visibleSet.has(entry.building.address)) continue
       const pos = getAppMarkerPosition(entry.marker)
       if (pos) bounds.extend(pos)
     }

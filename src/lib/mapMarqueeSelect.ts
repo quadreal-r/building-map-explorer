@@ -6,7 +6,26 @@ export const MARQUEE_HIT_PADDING_PX = 16
 
 const targets = new Map<string, MarqueeTarget>()
 
-let suppressNextMapClickClear = false
+let suppressMapClickClear = false
+let suppressMapClickClearResetScheduled = false
+
+const lastPointerModifiers = {
+  ctrlKey: false,
+  metaKey: false,
+  shiftKey: false,
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener(
+    'mousedown',
+    (e) => {
+      lastPointerModifiers.ctrlKey = e.ctrlKey
+      lastPointerModifiers.metaKey = e.metaKey
+      lastPointerModifiers.shiftKey = e.shiftKey
+    },
+    true,
+  )
+}
 
 export function registerMarqueeTarget(key: string, target: MarqueeTarget): void {
   targets.set(key, target)
@@ -20,14 +39,32 @@ export function clearMarqueeTargets(): void {
   targets.clear()
 }
 
+/** Keep drag selection when marker/polygon clicks bubble to multiple map listeners. */
 export function suppressMapClickClearOnce(): void {
-  suppressNextMapClickClear = true
+  suppressMapClickClear = true
+  if (suppressMapClickClearResetScheduled) return
+  suppressMapClickClearResetScheduled = true
+  queueMicrotask(() => {
+    suppressMapClickClear = false
+    suppressMapClickClearResetScheduled = false
+  })
 }
 
 export function consumeMapClickClearSuppression(): boolean {
-  if (!suppressNextMapClickClear) return false
-  suppressNextMapClickClear = false
-  return true
+  return suppressMapClickClear
+}
+
+/** Ctrl/Shift+click additive select — gmp-click domEvent may omit modifier keys. */
+export function isSelectionAdditiveClick(e?: google.maps.MapMouseEvent): boolean {
+  const domEvent = e?.domEvent
+  if (domEvent instanceof MouseEvent) {
+    if (domEvent.ctrlKey || domEvent.metaKey || domEvent.shiftKey) return true
+  }
+  return Boolean(
+    lastPointerModifiers.ctrlKey ||
+      lastPointerModifiers.metaKey ||
+      lastPointerModifiers.shiftKey,
+  )
 }
 
 export function marqueePointFromLatLng(lat: number, lng: number): MarqueeTarget {

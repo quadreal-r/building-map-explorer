@@ -18,12 +18,12 @@ import {
 import { showToastError, showToastSuccess } from '@/lib/toast'
 import { loadStoredPortfolio, persistPortfolio } from '@/hooks/usePortfolioData'
 import {
-  clearDeployDataDirty,
   portfolioSyncFingerprint,
   readPricingSnapshotFromStorage,
   readScheduleSnapshotFromStorage,
   scheduleSyncFingerprint,
   pricingSyncFingerprint,
+  syncDeployDirtyFlag,
 } from '@/lib/deploySyncSnapshot'
 import { usePortfolioStore } from '@/stores/portfolioStore'
 import { useSettingsStore } from '@/stores/settingsStore'
@@ -172,7 +172,6 @@ export function useGitHubDeploySync({
         const scheduleSnapshot = readScheduleSnapshotFromStorage()
         const pricingSnapshot = readPricingSnapshotFromStorage()
         persistPortfolio(syncedPortfolio, { markSynced: true })
-        clearDeployDataDirty()
         usePortfolioStore.getState().setPortfolio(syncedPortfolio, { markSaved: true })
         recordLocalSyncPush(result.exportedAt, {
           hiddenKeys: exportHiddenRtuPicturesForDeploy(),
@@ -184,6 +183,7 @@ export function useGitHubDeploySync({
             ? pricingSyncFingerprint(pricingSnapshot)
             : undefined,
         })
+        syncDeployDirtyFlag()
         const manifest = await loadRtuPictureManifest()
         recordLocalSyncHistoryEntry({
           exportedAt: result.exportedAt,

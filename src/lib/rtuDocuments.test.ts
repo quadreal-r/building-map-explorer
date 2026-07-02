@@ -12,7 +12,7 @@ describe('rtuDocumentUrls', () => {
 })
 
 describe('buildRtuDocumentsContainerHtml', () => {
-  it('renders document links', () => {
+  it('renders document links with download checkboxes', () => {
     const html = buildRtuDocumentsContainerHtml([
       {
         fileName: '100-RTU-01-manual.pdf',
@@ -23,6 +23,8 @@ describe('buildRtuDocumentsContainerHtml', () => {
     expect(html).toContain('data-iw-documents-root')
     expect(html).toContain('100-RTU-01-manual.pdf')
     expect(html).toContain('target="_blank"')
+    expect(html).toContain('iw-documents-check')
+    expect(html).toContain('data-iw-action="documents-select-all"')
   })
 
   it('shows empty state', () => {
