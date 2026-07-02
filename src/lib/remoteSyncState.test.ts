@@ -40,6 +40,12 @@ describe('remoteSyncState', () => {
     expect(shouldPromptForRemoteSync('2026-06-25T12:00:00.000Z')).toBe(false)
   })
 
+  it('compares remote and acknowledged timestamps numerically', () => {
+    acknowledgeRemoteSync('2026-06-25T10:00:00.000Z')
+    expect(shouldPromptForRemoteSync('2026-06-25T09:00:00.000Z')).toBe(false)
+    expect(shouldPromptForRemoteSync('2026-06-25T11:00:00.000Z')).toBe(true)
+  })
+
   it('persists push and acknowledge timestamps', () => {
     recordLocalSyncPush('2026-06-25T12:00:00.000Z', {
       hiddenKeys: ['1590 Main|RTU-01|pic.jpg'],

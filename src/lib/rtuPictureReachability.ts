@@ -1,5 +1,13 @@
 import { rtuPictureFileUrl } from '@/lib/rtuPictureUrls'
 
+const CDN_REACHABILITY_RETRY_DELAYS_MS = [500, 1500, 4000]
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
 /** True when an RTU picture URL responds (HEAD or image load — browsers block cross-origin HEAD on R2). */
 export async function isRtuPictureReachableOnCdn(fileName: string): Promise<boolean> {
   const url = rtuPictureFileUrl(fileName)
@@ -28,4 +36,17 @@ export async function isRtuPictureReachableOnCdn(fileName: string): Promise<bool
     img.onerror = () => finish(false)
     img.src = `${url}${url.includes('?') ? '&' : '?'}reach=${Date.now()}`
   })
+}
+
+/** Retry CDN reachability checks — helps right after sync when edge cache may lag. */
+export async function isRtuPictureReachableOnCdnWithRetry(
+  fileName: string,
+  delaysMs: number[] = CDN_REACHABILITY_RETRY_DELAYS_MS,
+): Promise<boolean> {
+  if (await isRtuPictureReachableOnCdn(fileName)) return true
+  for (const delayMs of delaysMs) {
+    await sleep(delayMs)
+    if (await isRtuPictureReachableOnCdn(fileName)) return true
+  }
+  return false
 }

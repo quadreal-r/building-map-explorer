@@ -8,6 +8,8 @@ import { buildLocalSyncSummary } from '@/lib/portfolioStats'
 import { BUILD_VERSION_LABEL } from '@/generated/buildVersion'
 import { recordLocalSyncHistoryEntry } from '@/lib/syncHistory'
 import { recordLocalSyncPush } from '@/lib/remoteSyncState'
+import { buildSyncConflictMessage, getSyncConflictWarning } from '@/lib/syncConflictCheck'
+import { confirm } from '@/stores/confirmStore'
 import { exportHiddenRtuPicturesForDeploy } from '@/lib/hiddenRtuPictures'
 import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
 import {
@@ -135,6 +137,11 @@ export function useGitHubDeploySync({
       setProgress({ message: 'Starting...', percent: 0 })
 
       try {
+        const conflict = await getSyncConflictWarning()
+        if (conflict && !(await confirm(buildSyncConflictMessage(conflict)))) {
+          return
+        }
+
         const result = await syncDeployToGitHub(portfolio, {
           token: githubPat,
           repo: githubRepo,

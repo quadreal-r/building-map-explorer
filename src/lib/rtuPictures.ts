@@ -12,7 +12,7 @@ import {
   getRtuPictureManifestUrl,
   rtuPictureFileUrl,
 } from '@/lib/rtuPictureUrls'
-import { isRtuPictureReachableOnCdn } from '@/lib/rtuPictureReachability'
+import { isRtuPictureReachableOnCdnWithRetry } from '@/lib/rtuPictureReachability'
 import type { DeployPictureEntry } from '@/types/deployBundle'
 
 export interface RtuPictureManifest {
@@ -454,7 +454,7 @@ async function cloudFilenameBlockedForNewUpload(
 }
 
 async function cloudRtuPictureReachable(fileName: string): Promise<boolean> {
-  return isRtuPictureReachableOnCdn(fileName)
+  return isRtuPictureReachableOnCdnWithRetry(fileName)
 }
 
 function splitRtuPictureKey(rtuKey: string): { buildingAddress: string; rtuName: string } {

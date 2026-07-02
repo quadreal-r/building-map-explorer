@@ -112,5 +112,10 @@ export function shouldPromptForRemoteSync(
   if (!state.initialized) return false
   if (remoteExportedAt === state.lastPushedExportedAt) return false
   if (!state.acknowledgedExportedAt) return true
-  return remoteExportedAt > state.acknowledgedExportedAt
+  const remoteTime = Date.parse(remoteExportedAt)
+  const acknowledgedTime = Date.parse(state.acknowledgedExportedAt)
+  if (!Number.isFinite(remoteTime) || !Number.isFinite(acknowledgedTime)) {
+    return remoteExportedAt > state.acknowledgedExportedAt
+  }
+  return remoteTime > acknowledgedTime
 }

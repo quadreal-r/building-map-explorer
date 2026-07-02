@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { usesRemoteJsonData } from '@/lib/jsonDataUrls'
 import { buildLocalSyncSummary } from '@/lib/portfolioStats'
 import { pullRemoteUpdatesToLocal } from '@/lib/pullRemoteUpdates'
+import { invalidateUnsyncedChanges } from '@/lib/unsyncedChangesEvents'
 import {
   acknowledgeRemoteSync,
   initializeRemoteSyncBaseline,
@@ -97,6 +98,10 @@ export function useRemoteSyncUpdateCheck(
       const { portfolio: next } = await pullRemoteUpdatesToLocal()
       onPortfolioLoaded(next)
       acknowledgeRemoteSync(meta.exportedAt)
+      const { reconcilePendingDeployWithCloud } = await import('@/lib/rtuPictures')
+      void reconcilePendingDeployWithCloud().finally(() => {
+        invalidateUnsyncedChanges()
+      })
       setOpen(false)
       return next
     } finally {
