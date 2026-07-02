@@ -325,15 +325,15 @@
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1495 Bonhill Rd",
-    "lat": 43.6622499,
-    "lng": -79.6542589
+    "lat": 43.66222782228189,
+    "lng": -79.65427459333532
   },
   {
     "type": "Sprinkler Rooms",
     "name": "Sprinkler Room",
     "desc": "1535 Meyerside Dr",
-    "lat": 43.6617694,
-    "lng": -79.6535131
+    "lat": 43.66174732228189,
+    "lng": -79.65352879333531
   },
   {
     "type": "Sprinkler Rooms",
@@ -1095,15 +1095,15 @@
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1535 Meyerside Dr",
-    "lat": 43.6613473,
-    "lng": -79.6540447
+    "lat": 43.661325222281896,
+    "lng": -79.65406039333531
   },
   {
     "type": "Electrical Rooms",
     "name": "Electrical Room",
     "desc": "1495 Bonhill Rd",
-    "lat": 43.6615412,
-    "lng": -79.6544409
+    "lat": 43.661519122281895,
+    "lng": -79.65445659333531
   },
   {
     "type": "Electrical Rooms",

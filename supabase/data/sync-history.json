@@ -925,6 +925,28 @@
         "clientBuildVersionLabel": "v2026.07.02 (8)"
       },
       "changes": []
+    },
+    {
+      "syncedAt": "2026-07-02T02:58:10.307Z",
+      "exportedAt": "2026-07-02T02:57:49.971Z",
+      "source": "settings-sync",
+      "summary": {
+        "buildingCount": 102,
+        "rtuCount": 1073,
+        "utilityCount": 257,
+        "polygonCount": 447,
+        "scheduleYearCount": 463,
+        "scheduleNoteCount": 348,
+        "pricingRowCount": 25,
+        "manifestPictureCount": 1563,
+        "picturesUploaded": 0,
+        "picturesAdded": 0,
+        "picturesRemoved": 0,
+        "picturesHidden": 0,
+        "buildVersionLabel": "v2026.07.02 (10)",
+        "clientBuildVersionLabel": "v2026.07.02 (8)"
+      },
+      "changes": []
     }
   ]
 }
